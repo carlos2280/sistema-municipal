@@ -8,45 +8,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 80;
 
-// Configuración CORS segura
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(",") || [
-	"https://mfshell-production.up.railway.app",
-	"https://mfstore-production.up.railway.app",
-	"https://mfui-production.up.railway.app",
-	"https://mfcontabilidad-production.up.railway.app",
-	"http://localhost:5011/assets/remoteEntry.js",
-	"http://localhost:5010/assets/remoteEntry.js",
-	"http://localhost:5000",
-	"http://localhost:5020/assets/remoteEntry.js",
-];
+// CORS abierto para Module Federation
+app.use(cors());
 
-app.use(
-	cors({
-		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error("Not allowed by CORS"));
-			}
-		},
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
-	}),
-);
-
-// Middleware para headers adicionales
+// Headers para módulos ES
 app.use((req, res, next) => {
-	const origin = req.headers.origin;
-	if (origin && allowedOrigins.includes(origin)) {
-		res.setHeader("Access-Control-Allow-Origin", origin);
-	}
-	res.setHeader(
-		"Access-Control-Allow-Methods",
-		"GET, POST, PUT, DELETE, OPTIONS",
-	);
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-	res.setHeader("Access-Control-Allow-Credentials", "true");
 	next();
 });
 
@@ -71,7 +40,6 @@ app.get("*", (req, res) => {
 const server = createServer(app);
 server.listen(port, '0.0.0.0', () => {
 	console.log(`Server running on port ${port}`);
-	console.log("Allowed origins:", allowedOrigins);
 });
 
 // Manejo de errores
