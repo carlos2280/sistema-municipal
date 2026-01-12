@@ -20,7 +20,6 @@
   "keywords": [],
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
-  "packageManager": "pnpm@10.10.0",
   "dependencies": {
     "compression": "^1.8.0",
     "cors": "^2.8.5",
