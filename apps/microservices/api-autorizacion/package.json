@@ -6,6 +6,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "tsx --require tsconfig-paths/register src/index.ts",
     "build": "tsup src/index.ts --format esm,cjs --dts --no-splitting --clean --minify",
@@ -14,7 +17,6 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check .",
-    "prepare": "husky",
     "commit": "cz"
   },
   "keywords": [],

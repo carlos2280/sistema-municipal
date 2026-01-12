@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite --mode development",
     "dev:debug": "vite --mode development --debug",
@@ -21,7 +24,6 @@
     "lint": "biome lint --write ./src",
     "format": "biome format --write ./src",
     "check": "biome check --write ./src",
-    "prepare": "husky install",
     "commit": "cz",
     "clean": "rimraf dist node_modules/.vite",
     "clean:cache": "rimraf node_modules/.cache",

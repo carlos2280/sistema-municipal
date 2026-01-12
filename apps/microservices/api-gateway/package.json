@@ -5,6 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
     "build": "tsup src/index.ts --format esm --dts --no-splitting --clean --minify",
@@ -12,8 +15,7 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check .",
-    "commit": "cz",
-    "prepare": "husky"
+    "commit": "cz"
   },
   "keywords": [],
   "author": "Carlos Roberto Fuentes Fuentes",
