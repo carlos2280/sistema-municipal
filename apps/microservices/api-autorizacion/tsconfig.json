@@ -1,0 +1,54 @@
+{
+	"compilerOptions": {
+		"typeRoots": [
+			"./node_modules/@types",
+			"./src/types"
+		],
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": [
+				"./src/*"
+			],
+			"@schema/*": [
+				"./src/db/schema/*"
+			],
+			"@services/*": [
+				"./src/services/*"
+			],
+			"@controllers/*": [
+				"./src/controllers/*"
+			],
+			"@routes/*": [
+				"./src/routes/*"
+			],
+			"@decorators/*": [
+				"./src/decorators/*"
+			]
+		},
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"strictPropertyInitialization": true,
+		"types": [
+			"node"
+		],
+		"noEmit": false,
+		"allowImportingTsExtensions": false,
+		"declaration": true,
+		"emitDeclarationOnly": false
+	},
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

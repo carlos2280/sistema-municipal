@@ -1,0 +1,93 @@
+{
+  "name": "mf-contabilidad",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "dev:debug": "vite --mode development --debug",
+    "dev:force": "vite --mode development --force",
+    "build": "vite build --mode production",
+    "build:dev": "vite build --mode development",
+    "build:watch": "vite build --watch --mode development",
+    "start": "node server.js",
+    "start:dev": "cross-env NODE_ENV=development node -r dotenv/config server.js dotenv_config_path=.env.development",
+    "preview": "vite preview --port 5020 --strictPort --mode development",
+    "serve-local": "pnpm build && pnpm start",
+    "serve-dev": "pnpm build:dev && cross-env NODE_ENV=development node -r dotenv/config server.js dotenv_config_path=.env.development",
+    "test:health": "node scripts/test-health.js",
+    "test:remote": "node scripts/test-remote.js",
+    "test:all": "pnpm test:health && pnpm test:remote",
+    "lint": "biome lint --write ./src",
+    "format": "biome format --write ./src",
+    "check": "biome check --write ./src",
+    "prepare": "husky install",
+    "commit": "cz",
+    "clean": "rimraf dist node_modules/.vite",
+    "clean:cache": "rimraf node_modules/.cache",
+    "clean:all": "rimraf dist node_modules/.vite node_modules/.cache",
+    "reset": "pnpm clean:all && pnpm install",
+    "postinstall": "node scripts/setup-check.js"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^5.1.1",
+    "@mui/icons-material": "^7.1.2",
+    "@mui/material": "^7.1.2",
+    "@mui/x-tree-view": "^7.29.1",
+    "@reduxjs/toolkit": "2.8.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "install": "^0.13.0",
+    "lucide-react": "^0.525.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.59.0",
+    "react-imask": "^7.6.1",
+    "react-input-mask": "^2.0.4",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.6.1",
+    "serve": "^14.2.4",
+    "sonner": "^2.0.6",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.25.0",
+    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/react-input-mask": "^3.0.6",
+    "@vitejs/plugin-react": "^4.4.1",
+    "commitizen": "^4.3.1",
+    "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
+    "cz-customizable": "^7.4.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-customizable"
+    },
+    "cz-customizable": {
+      "config": ".cz-config.cjs"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "biome check --apply"
+  }
+}

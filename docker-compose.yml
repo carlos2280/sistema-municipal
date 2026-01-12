@@ -1,0 +1,142 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # DATABASES
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: municipal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-municipal}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # MICROSERVICES (Backend)
+  # ============================================
+  api-gateway:
+    build:
+      context: ./apps/microservices/api-gateway
+      dockerfile: Dockerfile
+    container_name: municipal-api-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    depends_on:
+      - postgres
+
+  api-identidad:
+    build:
+      context: ./apps/microservices/api-identidad
+      dockerfile: Dockerfile
+    container_name: municipal-api-identidad
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-municipal}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-contabilidad:
+    build:
+      context: ./apps/microservices/api-contabilidad
+      dockerfile: Dockerfile
+    container_name: municipal-api-contabilidad
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-municipal}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-autorizacion:
+    build:
+      context: ./apps/microservices/api-autorizacion
+      dockerfile: Dockerfile
+    container_name: municipal-api-autorizacion
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-municipal}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ============================================
+  # MICROFRONTENDS
+  # ============================================
+  mf-shell:
+    build:
+      context: ./apps/microfrontends/mf_shell
+      dockerfile: Dockerfile
+    container_name: municipal-mf-shell
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+
+  mf-ui:
+    build:
+      context: ./apps/microfrontends/mf_ui
+      dockerfile: Dockerfile
+    container_name: municipal-mf-ui
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+
+  mf-contabilidad:
+    build:
+      context: ./apps/microfrontends/mf_contabilidad
+      dockerfile: Dockerfile
+    container_name: municipal-mf-contabilidad
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    environment:
+      - NODE_ENV=development
+
+  mf-store:
+    build:
+      context: ./apps/microfrontends/mf_store
+      dockerfile: Dockerfile
+    container_name: municipal-mf-store
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: municipal-network

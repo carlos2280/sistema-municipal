@@ -1,0 +1,44 @@
+{
+  "name": "sistema-municipal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema Municipal - Monorepo con Microfrontends y Microservicios",
+  "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=gateway --filter=api-identidad --filter=api-autorizacion --filter=api-contabilidad",
+    "dev:shell": "turbo run dev --filter=mf-shell",
+    "build": "turbo run build",
+    "build:frontend": "turbo run build --filter='./apps/microfrontends/*'",
+    "build:backend": "turbo run build --filter=gateway --filter=api-identidad --filter=api-autorizacion --filter=api-contabilidad",
+    "build:remotes": "turbo run build:dev --filter=mf-store --filter=mf-ui --filter=mf-contabilidad",
+    "preview:remotes": "turbo run preview --filter=mf-store --filter=mf-ui --filter=mf-contabilidad --parallel",
+    "dev:mf": "pnpm build:remotes && concurrently \"pnpm preview:remotes\" \"pnpm dev:shell\"",
+    "dev:all": "pnpm build:remotes && concurrently \"pnpm preview:remotes\" \"pnpm dev:shell\" \"pnpm dev:backend\"",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "check": "turbo run check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "clean:all": "pnpm -r exec rm -rf node_modules dist .turbo && rm -rf node_modules .turbo",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.3.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "biome check --apply"
+  }
+}

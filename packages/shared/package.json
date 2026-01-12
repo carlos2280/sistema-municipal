@@ -1,0 +1,51 @@
+{
+  "name": "@municipal/shared",
+  "version": "1.0.0",
+  "description": "Libreria compartida - Schemas DB, tipos, utilidades",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./database": {
+      "types": "./dist/database/index.d.ts",
+      "import": "./dist/database/index.js"
+    },
+    "./database/identidad": {
+      "types": "./dist/database/identidad/index.d.ts",
+      "import": "./dist/database/identidad/index.js"
+    },
+    "./database/contabilidad": {
+      "types": "./dist/database/contabilidad/schemas/index.d.ts",
+      "import": "./dist/database/contabilidad/schemas/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/database/index.ts src/database/identidad/index.ts src/database/contabilidad/schemas/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts src/database/index.ts --format esm --dts --watch",
+    "seed": "tsx src/seeders/index.ts",
+    "migrate": "drizzle-kit migrate",
+    "generate": "drizzle-kit generate"
+  },
+  "keywords": ["municipal", "shared", "drizzle", "schemas"],
+  "author": "Carlos Fuentes",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.43.1",
+    "pg": "^8.16.0",
+    "zod": "^3.25.20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/pg": "^8.15.2",
+    "drizzle-kit": "^0.31.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

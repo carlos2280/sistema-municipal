@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "github-municipal": {
+      "command": "C:/Users/TU_USUARIO/.bun/bin/bun.exe",
+      "args": [
+        "run",
+        "C:/ruta/al/proyecto/mcp-servers/github/src/index.ts"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "TU_GITHUB_TOKEN"
+      }
+    },
+    "railway-municipal": {
+      "command": "C:/Users/TU_USUARIO/.bun/bin/bun.exe",
+      "args": [
+        "run",
+        "C:/ruta/al/proyecto/mcp-servers/railway/src/index.ts"
+      ],
+      "env": {
+        "RAILWAY_TOKEN": "TU_RAILWAY_TOKEN"
+      }
+    },
+    "pg-municipal": {
+      "type": "stdio",
+      "command": "C:/Users/TU_USUARIO/.bun/bin/bun.exe",
+      "args": [
+        "run",
+        "C:/ruta/al/proyecto/mcp-servers/postgres/src/index.ts"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://usuario:password@localhost:5432/database",
+        "DATABASE_SSL": "false"
+      }
+    }
+  }
+}
