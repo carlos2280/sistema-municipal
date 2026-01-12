@@ -2,10 +2,10 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
+    "buildCommand": "npm i -g bun && bun install && bun run build"
   },
   "deploy": {
-    "startCommand": "~/.bun/bin/bun run server.js",
+    "startCommand": "bun run server.js",
     "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
