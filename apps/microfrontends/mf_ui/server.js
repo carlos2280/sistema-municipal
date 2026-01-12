@@ -51,9 +51,9 @@ app.get("/health", (req, res) => {
 		.json({ status: "healthy", version: process.env.npm_package_version });
 });
 
-// Manejar rutas SPA (solo para el shell)
-app.get("*", (req, res) => {
-	res.sendFile(path.join(__dirname, "dist", "index.html"));
+// 404 para rutas no encontradas (este es un remote, no SPA)
+app.use((req, res) => {
+	res.status(404).json({ error: "Not found" });
 });
 
 // Iniciar servidor
