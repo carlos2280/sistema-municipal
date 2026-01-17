@@ -15,6 +15,9 @@ export const createApp = (): Express => {
     }),
   );
 
+  // Manejar preflight OPTIONS antes del proxy
+  app.options("*", cors());
+
   applySecurityMiddleware(app);
   configureProxies(app);
 

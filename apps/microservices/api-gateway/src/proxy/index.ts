@@ -113,7 +113,13 @@ export const configureProxies = (app: Express) => {
             }
           },
           proxyRes: (proxyRes, req, res) => {
-            // Puedes modificar la respuesta aquí si es necesario
+            // Agregar headers CORS a la respuesta del proxy
+            const origin = req.headers.origin;
+            if (origin) {
+              res.setHeader("Access-Control-Allow-Origin", origin);
+              res.setHeader("Access-Control-Allow-Credentials", "true");
+            }
+
             logger.info({
               event: "proxy_response",
               service: name,
