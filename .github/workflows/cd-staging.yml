@@ -2,6 +2,7 @@
 # Sistema Municipal - CD Staging Pipeline
 # ============================================
 # Deploy automático a staging en push a develop
+# Solo despliega servicios que cambiaron
 # ============================================
 
 name: CD Staging
@@ -9,75 +10,225 @@ name: CD Staging
 on:
   push:
     branches: [develop]
-  workflow_dispatch:  # Permite ejecutar manualmente
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '22'
   PNPM_VERSION: '10'
 
 jobs:
-  deploy:
-    name: Deploy to Staging
+  # ============================================
+  # Detectar cambios por servicio
+  # ============================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      api-gateway: ${{ steps.changes.outputs.api-gateway }}
+      api-identidad: ${{ steps.changes.outputs.api-identidad }}
+      api-autorizacion: ${{ steps.changes.outputs.api-autorizacion }}
+      api-contabilidad: ${{ steps.changes.outputs.api-contabilidad }}
+      mf-shell: ${{ steps.changes.outputs.mf-shell }}
+      mf-store: ${{ steps.changes.outputs.mf-store }}
+      mf-ui: ${{ steps.changes.outputs.mf-ui }}
+      mf-contabilidad: ${{ steps.changes.outputs.mf-contabilidad }}
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api-gateway:
+              - 'apps/microservices/api-gateway/**'
+            api-identidad:
+              - 'apps/microservices/api-identidad/**'
+            api-autorizacion:
+              - 'apps/microservices/api-autorizacion/**'
+            api-contabilidad:
+              - 'apps/microservices/api-contabilidad/**'
+            mf-shell:
+              - 'apps/microfrontends/mf_shell/**'
+            mf-store:
+              - 'apps/microfrontends/mf_store/**'
+            mf-ui:
+              - 'apps/microfrontends/mf_ui/**'
+            mf-contabilidad:
+              - 'apps/microfrontends/mf_contabilidad/**'
+            packages:
+              - 'packages/**'
+
+  # ============================================
+  # Deploy Microservices (en paralelo)
+  # ============================================
+  deploy-api-gateway:
+    name: Deploy API Gateway
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-gateway == 'true' || needs.detect-changes.outputs.packages == 'true'
     runs-on: ubuntu-latest
     environment: staging
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-        env:
-          NODE_ENV: production
-          VITE_API_URL: ${{ vars.STAGING_API_URL }}
-          VITE_MF_STORE_URL: ${{ vars.STAGING_MF_STORE_URL }}
-          VITE_MF_UI_URL: ${{ vars.STAGING_MF_UI_URL }}
-          VITE_MF_CONTABILIDAD_URL: ${{ vars.STAGING_MF_CONTABILIDAD_URL }}
-
-      # ============================================
-      # Railway Deploy
-      # ============================================
-      # Opción 1: Si usas Railway CLI
+      - uses: actions/checkout@v4
       - name: Install Railway CLI
         run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: |
-          echo "Para configurar Railway:"
-          echo "1. Instala Railway CLI: npm i -g @railway/cli"
-          echo "2. Login: railway login"
-          echo "3. Link project: railway link"
-          echo "4. Deploy: railway up"
-          echo ""
-          echo "Alternativamente, Railway despliega automáticamente"
-          echo "cuando conectas tu repositorio de GitHub."
+        run: railway up --service api-gateway --environment staging
+        working-directory: apps/microservices/api-gateway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-      # ============================================
-      # Notificación
-      # ============================================
-      - name: Notify success
-        if: success()
-        run: |
-          echo "✅ Deploy a staging completado"
-          echo "URL: ${{ vars.STAGING_URL }}"
+  deploy-api-identidad:
+    name: Deploy API Identidad
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-identidad == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-identidad --environment staging
+        working-directory: apps/microservices/api-identidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-      - name: Notify failure
-        if: failure()
+  deploy-api-autorizacion:
+    name: Deploy API Autorizacion
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-autorizacion == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-autorizacion --environment staging
+        working-directory: apps/microservices/api-autorizacion
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-contabilidad:
+    name: Deploy API Contabilidad
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-contabilidad == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-contabilidad --environment staging
+        working-directory: apps/microservices/api-contabilidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ============================================
+  # Deploy Microfrontends (en paralelo)
+  # ============================================
+  deploy-mf-shell:
+    name: Deploy MF Shell
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mf-shell == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-shell --environment staging
+        working-directory: apps/microfrontends/mf_shell
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-store:
+    name: Deploy MF Store
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mf-store == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-store --environment staging
+        working-directory: apps/microfrontends/mf_store
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-ui:
+    name: Deploy MF UI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mf-ui == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-ui --environment staging
+        working-directory: apps/microfrontends/mf_ui
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-contabilidad:
+    name: Deploy MF Contabilidad
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mf-contabilidad == 'true' || needs.detect-changes.outputs.packages == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-contabilidad --environment staging
+        working-directory: apps/microfrontends/mf_contabilidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ============================================
+  # Deployment Summary
+  # ============================================
+  summary:
+    name: Deployment Summary
+    needs: 
+      - detect-changes
+      - deploy-api-gateway
+      - deploy-api-identidad
+      - deploy-api-autorizacion
+      - deploy-api-contabilidad
+      - deploy-mf-shell
+      - deploy-mf-store
+      - deploy-mf-ui
+      - deploy-mf-contabilidad
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
         run: |
-          echo "❌ Deploy a staging falló"
+          echo "## 🚀 Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microservices" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Changed | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| api-gateway | ${{ needs.detect-changes.outputs.api-gateway }} | ${{ needs.deploy-api-gateway.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-identidad | ${{ needs.detect-changes.outputs.api-identidad }} | ${{ needs.deploy-api-identidad.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-autorizacion | ${{ needs.detect-changes.outputs.api-autorizacion }} | ${{ needs.deploy-api-autorizacion.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-contabilidad | ${{ needs.detect-changes.outputs.api-contabilidad }} | ${{ needs.deploy-api-contabilidad.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microfrontends" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Changed | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-shell | ${{ needs.detect-changes.outputs.mf-shell }} | ${{ needs.deploy-mf-shell.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-store | ${{ needs.detect-changes.outputs.mf-store }} | ${{ needs.deploy-mf-store.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-ui | ${{ needs.detect-changes.outputs.mf-ui }} | ${{ needs.deploy-mf-ui.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-contabilidad | ${{ needs.detect-changes.outputs.mf-contabilidad }} | ${{ needs.deploy-mf-contabilidad.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Shared Packages" >> $GITHUB_STEP_SUMMARY
+          echo "Packages changed: ${{ needs.detect-changes.outputs.packages }}" >> $GITHUB_STEP_SUMMARY
