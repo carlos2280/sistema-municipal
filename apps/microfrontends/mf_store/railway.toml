@@ -1,0 +1,14 @@
+# ============================================
+# Railway Configuration - MF Store (Remote)
+# ============================================
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["apps/microfrontends/mf_store/**", "packages/**"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
