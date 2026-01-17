@@ -18,8 +18,13 @@ export const createApp = (): Express => {
   app.use(cors(corsOptions));
 
   // Responder inmediatamente a OPTIONS (preflight) - antes del proxy
-  app.options("*", (_req, res) => {
-    res.sendStatus(204);
+  // En Express 5, usar middleware en lugar de app.options("*") por compatibilidad con path-to-regexp v8
+  app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+    next();
   });
 
   app.use(express.json({ limit: "5mb" }));
