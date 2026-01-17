@@ -1,0 +1,16 @@
+# ============================================
+# Railway Configuration - API Gateway
+# ============================================
+# Docs: https://docs.railway.app/reference/config-as-code
+# ============================================
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["apps/microservices/api-gateway/**", "packages/**"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
