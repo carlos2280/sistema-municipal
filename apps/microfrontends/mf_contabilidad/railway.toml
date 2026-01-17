@@ -1,0 +1,14 @@
+# ============================================
+# Railway Configuration - MF Contabilidad (Remote)
+# ============================================
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["apps/microfrontends/mf_contabilidad/**", "packages/**"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
