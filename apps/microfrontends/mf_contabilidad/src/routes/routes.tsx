@@ -14,7 +14,7 @@ import PresupuestoInformes from "../page/presupuesto/PresupuestoInformes";
 import PresupuestoInicial from "../page/presupuesto/PresupuestoInicial";
 
 const contabilidadRoutes = {
-	sistemaId: 2,
+	sistemaId: 1,
 	components: {
 		plan_de_cuentas: <PlanDeCuentas />,
 		presupuesto_inicial: <PresupuestoInicial />,
