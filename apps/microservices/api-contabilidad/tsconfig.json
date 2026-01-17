@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "5.0",
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "target": "ES2022",
     "module": "ESNext",

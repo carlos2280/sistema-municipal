@@ -1,4 +1,4 @@
-import { customSchemaContabilidad } from "@municipalidad/shared/config/schemaPG";
+import { contabilidadSchema } from "../../schemas";
 import {
   type AnyPgColumn,
   integer,
@@ -9,7 +9,7 @@ import {
 import { cuentasSubgrupos } from "./cuentasSubgrupos.schema";
 import { tiposCuentas } from "./tiposCuentas.schema";
 
-export const planesCuentas = customSchemaContabilidad
+export const planesCuentas = contabilidadSchema
   .table("planes_cuentas", {
     id: serial("id").primaryKey(),
     anoContable: integer("ano_contable").notNull(),

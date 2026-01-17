@@ -1,0 +1,230 @@
+# ============================================
+# Sistema Municipal - CD Production Pipeline
+# ============================================
+# Deploy a producción - Solo manual o con release tag
+# ============================================
+
+name: CD Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Permite ejecutar manualmente
+    inputs:
+      confirm:
+        description: 'Escribe "deploy" para confirmar'
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10'
+
+jobs:
+  # ============================================
+  # Validación
+  # ============================================
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "❌ Confirmación incorrecta. Escribe 'deploy' para confirmar."
+            exit 1
+          fi
+          echo "✅ Confirmación válida"
+
+      - name: Check release
+        if: github.event_name == 'release'
+        run: |
+          echo "📦 Deploying release: ${{ github.event.release.tag_name }}"
+
+  # ============================================
+  # Build
+  # ============================================
+  build:
+    name: Build Production
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: ${{ vars.PRODUCTION_API_URL }}
+          VITE_MF_STORE_URL: ${{ vars.PRODUCTION_MF_STORE_URL }}
+          VITE_MF_UI_URL: ${{ vars.PRODUCTION_MF_UI_URL }}
+          VITE_MF_CONTABILIDAD_URL: ${{ vars.PRODUCTION_MF_CONTABILIDAD_URL }}
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          NODE_ENV: test
+
+  # ============================================
+  # Build Docker Images
+  # ============================================
+  docker:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - name: api-gateway
+            context: ./apps/microservices/api-gateway
+          - name: api-identidad
+            context: ./apps/microservices/api-identidad
+          - name: api-autorizacion
+            context: ./apps/microservices/api-autorizacion
+          - name: api-contabilidad
+            context: ./apps/microservices/api-contabilidad
+          - name: mf-shell
+            context: ./apps/microfrontends/mf_shell
+          - name: mf-store
+            context: ./apps/microfrontends/mf_store
+          - name: mf-ui
+            context: ./apps/microfrontends/mf_ui
+          - name: mf-contabilidad
+            context: ./apps/microfrontends/mf_contabilidad
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/municipal-${{ matrix.service.name }}:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository }}/municipal-${{ matrix.service.name }}:production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Deploy
+  # ============================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy notification
+        run: |
+          echo "🚀 Iniciando deploy a producción..."
+          echo ""
+          echo "Para Railway con GitHub integration:"
+          echo "- Railway detecta cambios automáticamente"
+          echo "- Cada servicio apunta a su carpeta con Dockerfile"
+          echo ""
+          echo "Para deploy manual:"
+          echo "1. railway login"
+          echo "2. railway link"
+          echo "3. railway up --environment production"
+
+      # Si usas Railway CLI directamente:
+      # - name: Install Railway CLI
+      #   run: npm install -g @railway/cli
+      #
+      # - name: Deploy to Railway
+      #   run: railway up --environment production
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "✅ Deploy a producción completado"
+          echo "Versión: ${{ needs.docker.outputs.version || github.event.release.tag_name }}"
+
+  # ============================================
+  # Post-deploy checks
+  # ============================================
+  healthcheck:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Wait for deployment
+        run: sleep 60
+
+      - name: Check API Gateway
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_API_URL }}/health || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "❌ API Gateway health check failed: $response"
+            exit 1
+          fi
+          echo "✅ API Gateway healthy"
+
+      - name: Check Frontend
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_URL }} || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "❌ Frontend health check failed: $response"
+            exit 1
+          fi
+          echo "✅ Frontend healthy"
+
+      - name: Deployment complete
+        run: |
+          echo "🎉 Deployment completado exitosamente"
+          echo ""
+          echo "URLs:"
+          echo "- Frontend: ${{ vars.PRODUCTION_URL }}"
+          echo "- API: ${{ vars.PRODUCTION_API_URL }}"

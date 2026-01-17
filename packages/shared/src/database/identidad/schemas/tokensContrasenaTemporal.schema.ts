@@ -1,18 +1,14 @@
-import {
-    customSchemaItentidad,
-} from "@municipalidad/shared/config/schemaPG";
+import { identidadSchema } from "../../schemas";
 import {
     serial,
     text,
     integer,
     timestamp,
     boolean,
-    foreignKey,
 } from "drizzle-orm/pg-core";
 import { usuarios } from "./usuarios.schema";
-// asegúrate de importar correctamente
 
-export const tokensContrasenaTemporal = customSchemaItentidad.table("tokens_contrasena_temporal", {
+export const tokensContrasenaTemporal = identidadSchema.table("tokens_contrasena_temporal", {
     id: serial("id").primaryKey(),
     token: text("token").notNull().unique(),
     usuarioId: integer("usuario_id").notNull().references(() => usuarios.id, {

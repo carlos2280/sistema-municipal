@@ -1,5 +1,4 @@
-import { customSchemaItentidad } from "@municipalidad/shared/config/schemaPG";
-
+import { identidadSchema } from "../../schemas";
 import {
   boolean,
   integer,
@@ -9,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { oficinas } from "./oficinas.schema";
 
-export const usuarios = customSchemaItentidad.table("usuarios", {
+export const usuarios = identidadSchema.table("usuarios", {
   id: serial("id").primaryKey(),
   nombreCompleto: text("nombre_completo").notNull(),
   email: text("email").notNull().unique(),

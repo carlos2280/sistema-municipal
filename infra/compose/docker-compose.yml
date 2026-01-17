@@ -1,0 +1,79 @@
+# ============================================
+# Sistema Municipal - Docker Compose Base
+# ============================================
+# Este archivo contiene SOLO infraestructura
+# Se combina con docker-compose.dev.yml o docker-compose.prod.yml
+#
+# Uso desarrollo: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# Uso producción: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ============================================
+
+name: infra-sistema-municipal
+
+services:
+  # ============================================
+  # PostgreSQL - Base de datos principal
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: municipal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-municipal}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - municipal-network
+
+  # ============================================
+  # Redis - Cache y sesiones
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: municipal-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - municipal-network
+
+  # ============================================
+  # Mailhog - Testing de emails (solo dev)
+  # ============================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: municipal-mailhog
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"   # SMTP
+      - "${MAILHOG_UI_PORT:-8025}:8025"     # Web UI
+    networks:
+      - municipal-network
+
+volumes:
+  postgres_data:
+    name: municipal-postgres-data
+  redis_data:
+    name: municipal-redis-data
+
+networks:
+  municipal-network:
+    name: municipal-network
+    driver: bridge

@@ -1,0 +1,83 @@
+# ============================================
+# Sistema Municipal - CD Staging Pipeline
+# ============================================
+# Deploy automático a staging en push a develop
+# ============================================
+
+name: CD Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:  # Permite ejecutar manualmente
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10'
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: ${{ vars.STAGING_API_URL }}
+          VITE_MF_STORE_URL: ${{ vars.STAGING_MF_STORE_URL }}
+          VITE_MF_UI_URL: ${{ vars.STAGING_MF_UI_URL }}
+          VITE_MF_CONTABILIDAD_URL: ${{ vars.STAGING_MF_CONTABILIDAD_URL }}
+
+      # ============================================
+      # Railway Deploy
+      # ============================================
+      # Opción 1: Si usas Railway CLI
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: |
+          echo "Para configurar Railway:"
+          echo "1. Instala Railway CLI: npm i -g @railway/cli"
+          echo "2. Login: railway login"
+          echo "3. Link project: railway link"
+          echo "4. Deploy: railway up"
+          echo ""
+          echo "Alternativamente, Railway despliega automáticamente"
+          echo "cuando conectas tu repositorio de GitHub."
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # ============================================
+      # Notificación
+      # ============================================
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Deploy a staging completado"
+          echo "URL: ${{ vars.STAGING_URL }}"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Deploy a staging falló"

@@ -11,10 +11,16 @@ out/
 # Turbo
 .turbo/
 
-# Environment
+# Environment - Variables locales (NO commitear)
+# Cada servicio tiene su propio .env
 .env
 .env.local
 .env.*.local
+
+# Excepciones - Templates y configs compartidas (SÍ commitear)
+!.env.example
+!.env.infra
+!**/.env.example
 
 # IDE
 .idea/

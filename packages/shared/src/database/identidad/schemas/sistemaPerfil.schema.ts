@@ -1,9 +1,9 @@
-import { customSchemaItentidad } from "@municipalidad/shared/config/schemaPG";
+import { identidadSchema } from "../../schemas";
 import { integer, serial, timestamp } from "drizzle-orm/pg-core";
 import { perfiles } from "./perfiles.schema";
 import { sistemas } from "./sistemas.schema";
 
-export const sistemaPerfil = customSchemaItentidad.table("sistema_perfil", {
+export const sistemaPerfil = identidadSchema.table("sistema_perfil", {
     id: serial("id").primaryKey(),
     sistemaId: integer("sistema_id").references(() => sistemas.id),
     perfilId: integer("perfil_id").references(() => perfiles.id),

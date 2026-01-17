@@ -1,7 +1,7 @@
-import { customSchemaContabilidad } from "@municipalidad/shared/config/schemaPG";
+import { contabilidadSchema } from "../../schemas";
 import { serial, text, timestamp } from "drizzle-orm/pg-core";
 
-export const titulosCuentas = customSchemaContabilidad.table("titulos_cuentas", {
+export const titulosCuentas = contabilidadSchema.table("titulos_cuentas", {
   id: serial("id").primaryKey(),
   codigo: text("codigo").notNull(),
   nombre: text("nombre").notNull(),

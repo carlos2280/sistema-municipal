@@ -1,6 +1,4 @@
 import { pgSchema } from "drizzle-orm/pg-core";
-import { loadEnv } from "./env";
 
-const { DB_SCHEMA_IDENTIDAD } = loadEnv();
-
-export const customSchemaItentidad = pgSchema(DB_SCHEMA_IDENTIDAD);
+// Schema fijo - ya no usamos variables de entorno para esto
+export const customSchemaItentidad = pgSchema("identidad");

@@ -14,9 +14,10 @@ export const envSchema = z.object({
   DB_HOST: z.string().min(1),
   DB_PORT: z.coerce.number().int().positive().default(5432),
   DB_NAME: z.string().min(1),
-  DB_SSL: z.coerce.boolean().default(false),
-  DB_SCHEMA_IDENTIDAD: z.string().min(1),
-  DB_SCHEMA_CONTABILIDAD: z.string().min(1),
+  DB_SSL: z
+    .string()
+    .transform((val) => val === "true")
+    .default("false"),
   // Connection pool settings
   DB_POOL_MIN: z.coerce.number().int().positive().default(1),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),

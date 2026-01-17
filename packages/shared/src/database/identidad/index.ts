@@ -1,4 +1,2 @@
-export * from "@municipalidad/shared/database/identidad/schemas";
-export * from "@municipalidad/shared/database/identidad/relations";
-
-export * from "@municipalidad/shared/database/contabilidad/schemas";
+export * from "./schemas";
+export * from "./relations";
