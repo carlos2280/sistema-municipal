@@ -1,18 +1,16 @@
 import compression from "compression";
-import cors from "cors";
 import type { Express } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 
 export const applySecurityMiddleware = (app: Express) => {
-  app.use(helmet());
+  // Helmet con configuración que no interfiera con CORS
   app.use(
-    cors({
-      origin: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    }),
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
   );
+  // CORS ya está configurado en app.ts - no duplicar aquí
   app.use(compression());
 
   app.use(

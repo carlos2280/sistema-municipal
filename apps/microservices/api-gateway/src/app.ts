@@ -3,20 +3,26 @@ import express, { type Express } from "express";
 import { logger } from "./logger";
 import { applySecurityMiddleware } from "./middleware/security";
 import { configureProxies } from "./proxy";
+
+const corsOptions = {
+  origin: true,
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+};
+
 export const createApp = (): Express => {
   const app = express();
-  app.use(express.json({ limit: "5mb" }));
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-      allowedHeaders: ["Content-Type", "Authorization"],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    }),
-  );
 
-  // Manejar preflight OPTIONS antes del proxy
-  app.options("*", cors());
+  // CORS primero - antes de cualquier otro middleware
+  app.use(cors(corsOptions));
+
+  // Responder inmediatamente a OPTIONS (preflight) - antes del proxy
+  app.options("*", (_req, res) => {
+    res.sendStatus(204);
+  });
+
+  app.use(express.json({ limit: "5mb" }));
 
   applySecurityMiddleware(app);
   configureProxies(app);
