@@ -3,8 +3,7 @@
 # ============================================
 
 [build]
-builder = "dockerfile"
-dockerfilePath = "Dockerfile"
+builder = "nixpacks"
 watchPatterns = ["apps/microfrontends/mf_shell/**", "packages/**"]
 
 [deploy]

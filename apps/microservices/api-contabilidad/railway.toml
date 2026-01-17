@@ -3,8 +3,7 @@
 # ============================================
 
 [build]
-builder = "dockerfile"
-dockerfilePath = "Dockerfile"
+builder = "nixpacks"
 watchPatterns = ["apps/microservices/api-contabilidad/**", "packages/**"]
 
 [deploy]
