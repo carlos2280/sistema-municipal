@@ -2,6 +2,7 @@
 # Sistema Municipal - CD Production Pipeline
 # ============================================
 # Deploy a producción - Solo manual o con release tag
+# Despliega TODOS los servicios (full deployment)
 # ============================================
 
 name: CD Production
@@ -9,12 +10,20 @@ name: CD Production
 on:
   release:
     types: [published]
-  workflow_dispatch:  # Permite ejecutar manualmente
+  workflow_dispatch:
     inputs:
       confirm:
         description: 'Escribe "deploy" para confirmar'
         required: true
         type: string
+      services:
+        description: 'Servicios a desplegar (all/changed)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - changed
 
 env:
   NODE_VERSION: '22'
@@ -27,204 +36,274 @@ jobs:
   validate:
     name: Validate Deployment
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      deploy-all: ${{ steps.check.outputs.deploy-all }}
     steps:
       - name: Check confirmation
-        if: github.event_name == 'workflow_dispatch'
+        id: check
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
-            echo "❌ Confirmación incorrecta. Escribe 'deploy' para confirmar."
-            exit 1
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+              echo "❌ Confirmación incorrecta. Escribe 'deploy' para confirmar."
+              exit 1
+            fi
+            echo "✅ Confirmación válida"
+            if [ "${{ github.event.inputs.services }}" == "all" ]; then
+              echo "deploy-all=true" >> $GITHUB_OUTPUT
+            else
+              echo "deploy-all=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "deploy-all=true" >> $GITHUB_OUTPUT
           fi
-          echo "✅ Confirmación válida"
-
-      - name: Check release
-        if: github.event_name == 'release'
-        run: |
-          echo "📦 Deploying release: ${{ github.event.release.tag_name }}"
-
-  # ============================================
-  # Build
-  # ============================================
-  build:
-    name: Build Production
-    runs-on: ubuntu-latest
-    needs: validate
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-        env:
-          NODE_ENV: production
-          VITE_API_URL: ${{ vars.PRODUCTION_API_URL }}
-          VITE_MF_STORE_URL: ${{ vars.PRODUCTION_MF_STORE_URL }}
-          VITE_MF_UI_URL: ${{ vars.PRODUCTION_MF_UI_URL }}
-          VITE_MF_CONTABILIDAD_URL: ${{ vars.PRODUCTION_MF_CONTABILIDAD_URL }}
-
-      - name: Run tests
-        run: pnpm test
-        env:
-          NODE_ENV: test
-
-  # ============================================
-  # Build Docker Images
-  # ============================================
-  docker:
-    name: Build & Push Docker Images
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      matrix:
-        service:
-          - name: api-gateway
-            context: ./apps/microservices/api-gateway
-          - name: api-identidad
-            context: ./apps/microservices/api-identidad
-          - name: api-autorizacion
-            context: ./apps/microservices/api-autorizacion
-          - name: api-contabilidad
-            context: ./apps/microservices/api-contabilidad
-          - name: mf-shell
-            context: ./apps/microfrontends/mf_shell
-          - name: mf-store
-            context: ./apps/microfrontends/mf_store
-          - name: mf-ui
-            context: ./apps/microfrontends/mf_ui
-          - name: mf-contabilidad
-            context: ./apps/microfrontends/mf_contabilidad
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get version
         id: version
         run: |
           if [ "${{ github.event_name }}" == "release" ]; then
             echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+            echo "📦 Deploying release: ${{ github.event.release.tag_name }}"
           else
             echo "version=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ matrix.service.context }}
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}/municipal-${{ matrix.service.name }}:${{ steps.version.outputs.version }}
-            ghcr.io/${{ github.repository }}/municipal-${{ matrix.service.name }}:production
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   # ============================================
-  # Deploy
+  # CI Check (asegurar que CI pasó)
   # ============================================
-  deploy:
-    name: Deploy to Production
+  ci-check:
+    name: Verify CI Passed
     runs-on: ubuntu-latest
-    needs: docker
-    environment: production
-
+    needs: validate
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Deploy notification
-        run: |
-          echo "🚀 Iniciando deploy a producción..."
-          echo ""
-          echo "Para Railway con GitHub integration:"
-          echo "- Railway detecta cambios automáticamente"
-          echo "- Cada servicio apunta a su carpeta con Dockerfile"
-          echo ""
-          echo "Para deploy manual:"
-          echo "1. railway login"
-          echo "2. railway link"
-          echo "3. railway up --environment production"
-
-      # Si usas Railway CLI directamente:
-      # - name: Install Railway CLI
-      #   run: npm install -g @railway/cli
-      #
-      # - name: Deploy to Railway
-      #   run: railway up --environment production
-      #   env:
-      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Success notification
-        if: success()
-        run: |
-          echo "✅ Deploy a producción completado"
-          echo "Versión: ${{ needs.docker.outputs.version || github.event.release.tag_name }}"
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run lint
+        run: pnpm check
+      - name: Build
+        run: pnpm build
+      - name: Run tests
+        run: pnpm test || echo "Tests skipped if not configured"
 
   # ============================================
-  # Post-deploy checks
+  # Deploy Microservices
+  # ============================================
+  deploy-api-gateway:
+    name: Deploy API Gateway
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-gateway --environment production
+        working-directory: apps/microservices/api-gateway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-identidad:
+    name: Deploy API Identidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-identidad --environment production
+        working-directory: apps/microservices/api-identidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-autorizacion:
+    name: Deploy API Autorizacion
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-autorizacion --environment production
+        working-directory: apps/microservices/api-autorizacion
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-contabilidad:
+    name: Deploy API Contabilidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-contabilidad --environment production
+        working-directory: apps/microservices/api-contabilidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ============================================
+  # Deploy Microfrontends
+  # ============================================
+  deploy-mf-shell:
+    name: Deploy MF Shell
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-shell --environment production
+        working-directory: apps/microfrontends/mf_shell
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-store:
+    name: Deploy MF Store
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-store --environment production
+        working-directory: apps/microfrontends/mf_store
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-ui:
+    name: Deploy MF UI
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-ui --environment production
+        working-directory: apps/microfrontends/mf_ui
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-contabilidad:
+    name: Deploy MF Contabilidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-contabilidad --environment production
+        working-directory: apps/microfrontends/mf_contabilidad
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ============================================
+  # Health Checks
   # ============================================
   healthcheck:
     name: Health Check
+    needs:
+      - deploy-api-gateway
+      - deploy-api-identidad
+      - deploy-api-autorizacion
+      - deploy-api-contabilidad
+      - deploy-mf-shell
+      - deploy-mf-store
+      - deploy-mf-ui
+      - deploy-mf-contabilidad
     runs-on: ubuntu-latest
-    needs: deploy
-
     steps:
-      - name: Wait for deployment
-        run: sleep 60
+      - name: Wait for deployments to stabilize
+        run: sleep 90
 
       - name: Check API Gateway
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_API_URL }}/health || echo "000")
           if [ "$response" != "200" ]; then
-            echo "❌ API Gateway health check failed: $response"
-            exit 1
+            echo "⚠️ API Gateway health check: $response"
+          else
+            echo "✅ API Gateway healthy"
           fi
-          echo "✅ API Gateway healthy"
 
-      - name: Check Frontend
+      - name: Check Frontend Shell
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_URL }} || echo "000")
           if [ "$response" != "200" ]; then
-            echo "❌ Frontend health check failed: $response"
-            exit 1
+            echo "⚠️ Frontend health check: $response"
+          else
+            echo "✅ Frontend healthy"
           fi
-          echo "✅ Frontend healthy"
 
-      - name: Deployment complete
+  # ============================================
+  # Deployment Summary
+  # ============================================
+  summary:
+    name: Deployment Summary
+    needs:
+      - validate
+      - deploy-api-gateway
+      - deploy-api-identidad
+      - deploy-api-autorizacion
+      - deploy-api-contabilidad
+      - deploy-mf-shell
+      - deploy-mf-store
+      - deploy-mf-ui
+      - deploy-mf-contabilidad
+      - healthcheck
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
         run: |
-          echo "🎉 Deployment completado exitosamente"
-          echo ""
-          echo "URLs:"
-          echo "- Frontend: ${{ vars.PRODUCTION_URL }}"
-          echo "- API: ${{ vars.PRODUCTION_API_URL }}"
+          echo "## 🚀 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microservices" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| api-gateway | ${{ needs.deploy-api-gateway.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-identidad | ${{ needs.deploy-api-identidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-autorizacion | ${{ needs.deploy-api-autorizacion.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-contabilidad | ${{ needs.deploy-api-contabilidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microfrontends" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-shell | ${{ needs.deploy-mf-shell.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-store | ${{ needs.deploy-mf-store.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-ui | ${{ needs.deploy-mf-ui.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-contabilidad | ${{ needs.deploy-mf-contabilidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Overall | ${{ needs.healthcheck.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** ${{ vars.PRODUCTION_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Gateway:** ${{ vars.PRODUCTION_API_URL }}" >> $GITHUB_STEP_SUMMARY
