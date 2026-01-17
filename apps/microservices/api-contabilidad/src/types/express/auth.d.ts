@@ -1,4 +1,6 @@
-export interface CustomJwtPayload extends jwt.JwtPayload {
+import type { JwtPayload } from "jsonwebtoken";
+
+export interface CustomJwtPayload extends JwtPayload {
     sistemaId: number;
     userId: number;
     email: string;

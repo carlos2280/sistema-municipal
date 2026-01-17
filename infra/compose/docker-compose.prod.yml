@@ -1,0 +1,239 @@
+# ============================================
+# Sistema Municipal - Docker Compose PRODUCCIÓN
+# ============================================
+# Override para producción local o staging
+# Incluye todas las aplicaciones dockerizadas
+#
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# O simplemente: make prod
+#
+# NOTA: Para Railway/Render, cada servicio se deploya individualmente
+# Este archivo es útil para testing local del stack completo
+# ============================================
+
+services:
+  # ============================================
+  # PostgreSQL - Producción
+  # ============================================
+  postgres:
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # En producción no exponemos el puerto externamente
+    ports: []
+    # Limites de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ============================================
+  # Redis - Producción
+  # ============================================
+  redis:
+    ports: []
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # Nginx - Proxy Reverso
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: municipal-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - api-gateway
+      - mf-shell
+    networks:
+      - municipal-network
+
+  # ============================================
+  # API Gateway
+  # ============================================
+  api-gateway:
+    build:
+      context: ../../apps/microservices/api-gateway
+      dockerfile: Dockerfile
+    container_name: municipal-api-gateway
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # API Identidad
+  # ============================================
+  api-identidad:
+    build:
+      context: ../../apps/microservices/api-identidad
+      dockerfile: Dockerfile
+    container_name: municipal-api-identidad
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # API Autorizacion
+  # ============================================
+  api-autorizacion:
+    build:
+      context: ../../apps/microservices/api-autorizacion
+      dockerfile: Dockerfile
+    container_name: municipal-api-autorizacion
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # API Contabilidad
+  # ============================================
+  api-contabilidad:
+    build:
+      context: ../../apps/microservices/api-contabilidad
+      dockerfile: Dockerfile
+    container_name: municipal-api-contabilidad
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # MF Shell (Host Application)
+  # ============================================
+  mf-shell:
+    build:
+      context: ../../apps/microfrontends/mf_shell
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_MF_STORE_URL=${VITE_MF_STORE_URL}
+        - VITE_MF_UI_URL=${VITE_MF_UI_URL}
+        - VITE_MF_CONTABILIDAD_URL=${VITE_MF_CONTABILIDAD_URL}
+    container_name: municipal-mf-shell
+    restart: unless-stopped
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ============================================
+  # MF Store (Remote)
+  # ============================================
+  mf-store:
+    build:
+      context: ../../apps/microfrontends/mf_store
+      dockerfile: Dockerfile
+    container_name: municipal-mf-store
+    restart: unless-stopped
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ============================================
+  # MF UI (Remote)
+  # ============================================
+  mf-ui:
+    build:
+      context: ../../apps/microfrontends/mf_ui
+      dockerfile: Dockerfile
+    container_name: municipal-mf-ui
+    restart: unless-stopped
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ============================================
+  # MF Contabilidad (Remote)
+  # ============================================
+  mf-contabilidad:
+    build:
+      context: ../../apps/microfrontends/mf_contabilidad
+      dockerfile: Dockerfile
+    container_name: municipal-mf-contabilidad
+    restart: unless-stopped
+    networks:
+      - municipal-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+volumes:
+  nginx_logs:
+    name: municipal-nginx-logs
+
+# Mailhog no se incluye en producción

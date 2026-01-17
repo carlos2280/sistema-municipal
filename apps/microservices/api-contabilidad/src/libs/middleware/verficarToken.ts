@@ -1,7 +1,7 @@
 import { loadEnv } from "@/config/env";
 import type { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import type { CustomJwtPayload } from "../../types/express/auth";
+import jwt from "jsonwebtoken";
+import type { CustomJwtPayload } from "@/types/global";
 const { JWT_SECRET } = loadEnv();
 const JWT_CONFIG = {
 	secret: JWT_SECRET as jwt.Secret,

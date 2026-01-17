@@ -1,0 +1,33 @@
+# ============================================
+# Sistema Municipal - Docker Compose TEST/CI
+# ============================================
+# Override para CI/CD pipelines
+# Base de datos efímera, sin volúmenes persistentes
+#
+# Uso: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+# ============================================
+
+services:
+  # ============================================
+  # PostgreSQL - Testing (efímero)
+  # ============================================
+  postgres:
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: municipal_test
+    # Sin volúmenes persistentes para CI
+    volumes: []
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # ============================================
+  # Redis - Testing (efímero)
+  # ============================================
+  redis:
+    volumes: []
+    tmpfs:
+      - /data
+
+# Sin volúmenes persistentes
+volumes: {}

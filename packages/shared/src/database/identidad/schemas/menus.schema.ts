@@ -1,4 +1,4 @@
-import { customSchemaItentidad } from "@municipalidad/shared/config/schemaPG";
+import { identidadSchema } from "../../schemas";
 import { sistemas } from "@municipalidad/shared/database/identidad/schemas/sistemas.schema";
 import {
 	type AnyPgColumn,
@@ -9,7 +9,7 @@ import {
 	timestamp,
 } from "drizzle-orm/pg-core";
 
-export const menus = customSchemaItentidad.table("menu", {
+export const menus = identidadSchema.table("menu", {
 	id: serial("id").primaryKey(),
 	idSistema: integer("id_sistema").references(() => sistemas.id),
 	idPadre: integer("id_padre").references((): AnyPgColumn => menus.id),

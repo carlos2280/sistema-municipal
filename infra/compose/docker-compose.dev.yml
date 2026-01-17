@@ -1,0 +1,43 @@
+# ============================================
+# Sistema Municipal - Docker Compose DESARROLLO
+# ============================================
+# Override para desarrollo local
+# Las aplicaciones corren con pnpm dev (NO dockerizadas)
+# Solo se dockeriza la infraestructura
+#
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# O simplemente: make dev-infra
+# ============================================
+
+services:
+  # ============================================
+  # PostgreSQL - Configuración de desarrollo
+  # ============================================
+  postgres:
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: municipal
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    # En desarrollo exponemos el puerto para herramientas como DBeaver
+    # Usando 5434 externamente para evitar conflictos con otros proyectos
+    ports:
+      - "5434:5432"
+
+  # ============================================
+  # Redis - Configuración de desarrollo
+  # ============================================
+  redis:
+    ports:
+      - "6379:6379"
+
+  # ============================================
+  # Mailhog - Solo en desarrollo
+  # ============================================
+  mailhog:
+    profiles:
+      - dev
+    ports:
+      - "1025:1025"
+      - "8025:8025"

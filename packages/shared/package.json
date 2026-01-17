@@ -28,8 +28,10 @@
     "build": "tsup src/index.ts src/database/index.ts src/database/identidad/index.ts src/database/contabilidad/schemas/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts src/database/index.ts --format esm --dts --watch",
     "seed": "tsx src/seeders/index.ts",
-    "migrate": "drizzle-kit migrate",
-    "generate": "drizzle-kit generate"
+    "migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",
+    "generate": "tsx node_modules/drizzle-kit/bin.cjs generate",
+    "db:push": "tsx node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "tsx node_modules/drizzle-kit/bin.cjs studio"
   },
   "keywords": ["municipal", "shared", "drizzle", "schemas"],
   "author": "Carlos Fuentes",

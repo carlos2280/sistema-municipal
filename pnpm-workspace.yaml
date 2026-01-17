@@ -1,4 +1,10 @@
 packages:
-  - "apps/microfrontends/*"
-  - "apps/microservices/*"
-  - "packages/*"
+  - apps/microfrontends/*
+  - apps/microservices/*
+  - packages/*
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@scarf/scarf'
+  - bcrypt
+  - core-js-pure
+  - esbuild

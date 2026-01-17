@@ -1,0 +1,79 @@
+# ============================================
+# Sistema Municipal - CODEOWNERS
+# ============================================
+# Define quién puede aprobar cambios en cada parte del código
+# Documentación: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Formato: <pattern> <@owner1> <@owner2> ...
+# ============================================
+
+# ============================================
+# Default: Core team aprueba todo
+# ============================================
+* @carca
+
+# ============================================
+# Infraestructura: Solo Core/DevOps
+# ============================================
+/infra/ @carca
+/.github/ @carca
+/docker-compose.yml @carca
+/Makefile @carca
+
+# ============================================
+# Código Compartido: Requiere Core
+# ============================================
+/packages/shared/ @carca
+
+# ============================================
+# Shell y Gateway: Core team
+# ============================================
+/apps/microfrontends/mf_shell/ @carca
+/apps/microservices/api-gateway/ @carca
+
+# ============================================
+# Módulo Store (State Management): Core team
+# ============================================
+/apps/microfrontends/mf_store/ @carca
+
+# ============================================
+# Módulo UI (Componentes): Core team
+# ============================================
+/apps/microfrontends/mf_ui/ @carca
+
+# ============================================
+# Módulo Contabilidad: Dev asignado + Core
+# Cuando agregues un desarrollador, descomenta y modifica:
+# ============================================
+# /apps/microfrontends/mf_contabilidad/ @dev-contabilidad @carca
+# /apps/microservices/api-contabilidad/ @dev-contabilidad @carca
+/apps/microfrontends/mf_contabilidad/ @carca
+/apps/microservices/api-contabilidad/ @carca
+
+# ============================================
+# Módulo Identidad: Core team
+# ============================================
+/apps/microservices/api-identidad/ @carca
+
+# ============================================
+# Módulo Autorizacion: Core team
+# ============================================
+/apps/microservices/api-autorizacion/ @carca
+
+# ============================================
+# Documentación: Cualquiera puede contribuir
+# pero Core debe aprobar
+# ============================================
+/docs/ @carca
+
+# ============================================
+# Futuros Módulos (descomenta cuando existan)
+# ============================================
+# /apps/microfrontends/mf_rrhh/ @dev-rrhh @carca
+# /apps/microservices/api-rrhh/ @dev-rrhh @carca
+
+# /apps/microfrontends/mf_inventario/ @dev-inventario @carca
+# /apps/microservices/api-inventario/ @dev-inventario @carca
+
+# /apps/microfrontends/mf_tesoreria/ @dev-tesoreria @carca
+# /apps/microservices/api-tesoreria/ @dev-tesoreria @carca

@@ -1,4 +1,4 @@
-import { customSchemaContabilidad } from "@municipalidad/shared/config/schemaPG";
+import { contabilidadSchema } from "../../schemas";
 import {
     type AnyPgColumn,
     integer,
@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { tiposCuentas } from "./tiposCuentas.schema";
 
-export const cuentasSubgrupos = customSchemaContabilidad
+export const cuentasSubgrupos = contabilidadSchema
     .table("cuentas_subgrupos", {
         id: serial("id").primaryKey(),
         codigo: text("codigo").notNull(),

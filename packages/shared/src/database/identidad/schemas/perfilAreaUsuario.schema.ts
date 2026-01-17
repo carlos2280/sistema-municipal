@@ -1,10 +1,10 @@
-import { customSchemaItentidad } from "@municipalidad/shared/config/schemaPG";
+import { identidadSchema } from "../../schemas";
 import { areas } from "@municipalidad/shared/database/identidad/schemas/areas.schema";
 import { perfiles } from "@municipalidad/shared/database/identidad/schemas/perfiles.schema";
 import { usuarios } from "@municipalidad/shared/database/identidad/schemas/usuarios.schema";
 import { integer, serial, timestamp, unique } from "drizzle-orm/pg-core";
 
-export const perfilAreaUsuario = customSchemaItentidad.table(
+export const perfilAreaUsuario = identidadSchema.table(
   "perfil_area_usuario", // Cambiado el nombre de la tabla
   {
     id: serial("id").primaryKey(),

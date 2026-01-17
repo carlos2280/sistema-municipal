@@ -1,6 +1,4 @@
 import { pgSchema } from "drizzle-orm/pg-core";
-import { loadEnv } from "./env";
 
-const { DB_SCHEMA_CONTABILIDAD } = loadEnv();
-
-export const customSchemaContabilidad = pgSchema(DB_SCHEMA_CONTABILIDAD);
+// Schema fijo - ya no usamos variables de entorno para esto
+export const customSchemaContabilidad = pgSchema("contabilidad");

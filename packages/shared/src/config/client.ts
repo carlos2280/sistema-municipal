@@ -22,7 +22,8 @@ export function createDbClient(config: EnvConfig) {
     process.exit(-1);
   });
 
-  return drizzle(pool, { schema, logger: true });
+  const isDev = config.NODE_ENV === "development";
+  return drizzle(pool, { schema, logger: isDev });
 }
 
 // Función para inicializar y obtener la instancia de DB

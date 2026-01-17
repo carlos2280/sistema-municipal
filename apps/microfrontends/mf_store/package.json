@@ -7,7 +7,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "vite --port 5010 --strictPort --mode development",
+    "dev": "vite build --mode development && vite preview --port 5010 --strictPort",
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
     "build:watch": "vite build --watch --mode development",

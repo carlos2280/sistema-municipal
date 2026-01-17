@@ -1,15 +1,11 @@
-export * from "@municipalidad/shared/database/identidad/schemas/usuarios.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/perfiles.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/areas.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/perfilAreaUsuario.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/sistemas.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/menus.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/tokensContrasenaTemporal.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/direcciones.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/departamentos.schema";
-export * from "@municipalidad/shared/database/identidad/schemas/oficinas.schema";
-
-
-export * from "@municipalidad/shared/database/identidad/schemas/sistemaPerfil.schema";
-
-export * from "@municipalidad/shared/database/identidad/relations";
+export * from "./usuarios.schema";
+export * from "./perfiles.schema";
+export * from "./areas.schema";
+export * from "./perfilAreaUsuario.schema";
+export * from "./sistemas.schema";
+export * from "./menus.schema";
+export * from "./tokensContrasenaTemporal.schema";
+export * from "./direcciones.schema";
+export * from "./departamentos.schema";
+export * from "./oficinas.schema";
+export * from "./sistemaPerfil.schema";
