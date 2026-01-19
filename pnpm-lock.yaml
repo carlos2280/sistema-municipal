@@ -4,138 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    '@biomejs/biome':
-      specifier: ^1.9.4
-      version: 1.9.4
-    '@emotion/react':
-      specifier: ^11.14.0
-      version: 11.14.0
-    '@emotion/styled':
-      specifier: ^11.14.0
-      version: 11.14.1
-    '@hookform/resolvers':
-      specifier: ^5.1.1
-      version: 5.2.2
-    '@mui/icons-material':
-      specifier: ^7.1.2
-      version: 7.3.7
-    '@mui/material':
-      specifier: ^7.1.2
-      version: 7.3.7
-    '@mui/x-tree-view':
-      specifier: ^8.5.1
-      version: 8.24.0
-    '@originjs/vite-plugin-federation':
-      specifier: ^1.4.1
-      version: 1.4.1
-    '@reduxjs/toolkit':
-      specifier: ^2.8.2
-      version: 2.8.2
-    '@types/cors':
-      specifier: ^2.8.18
-      version: 2.8.19
-    '@types/express':
-      specifier: ^5.0.2
-      version: 5.0.6
-    '@types/express-serve-static-core':
-      specifier: ^5.1.1
-      version: 5.1.1
-    '@types/jsonwebtoken':
-      specifier: ^9.0.9
-      version: 9.0.10
-    '@types/node':
-      specifier: ^22.18.12
-      version: 22.19.5
-    '@types/pg':
-      specifier: ^8.15.2
-      version: 8.16.0
-    '@types/react':
-      specifier: ^19.1.2
-      version: 19.2.8
-    '@types/react-dom':
-      specifier: ^19.1.2
-      version: 19.2.3
-    '@vitejs/plugin-react':
-      specifier: ^4.4.1
-      version: 4.7.0
-    bcryptjs:
-      specifier: ^3.0.2
-      version: 3.0.3
-    cors:
-      specifier: ^2.8.5
-      version: 2.8.5
-    cross-env:
-      specifier: ^7.0.3
-      version: 7.0.3
-    dotenv:
-      specifier: ^16.5.0
-      version: 16.6.1
-    drizzle-kit:
-      specifier: ^0.31.1
-      version: 0.31.8
-    drizzle-orm:
-      specifier: ^0.43.1
-      version: 0.43.1
-    express:
-      specifier: ^5.1.0
-      version: 5.2.1
-    globals:
-      specifier: ^16.0.0
-      version: 16.5.0
-    jsonwebtoken:
-      specifier: ^9.0.2
-      version: 9.0.3
-    lucide-react:
-      specifier: ^0.525.0
-      version: 0.525.0
-    nodemon:
-      specifier: ^3.1.10
-      version: 3.1.11
-    pg:
-      specifier: ^8.16.0
-      version: 8.16.3
-    react:
-      specifier: ^19.1.0
-      version: 19.2.3
-    react-dom:
-      specifier: ^19.1.0
-      version: 19.2.3
-    react-hook-form:
-      specifier: ^7.59.0
-      version: 7.71.0
-    react-redux:
-      specifier: ^9.2.0
-      version: 9.2.0
-    react-router-dom:
-      specifier: ^7.6.1
-      version: 7.12.0
-    redux-persist:
-      specifier: ^6.0.0
-      version: 6.0.0
-    serve:
-      specifier: ^14.2.4
-      version: 14.2.5
-    sonner:
-      specifier: ^2.0.6
-      version: 2.0.7
-    tsup:
-      specifier: ^8.5.0
-      version: 8.5.1
-    tsx:
-      specifier: ^4.19.4
-      version: 4.21.0
-    typescript:
-      specifier: ^5.8.3
-      version: 5.8.3
-    vite:
-      specifier: ^6.3.5
-      version: 6.4.1
-    zod:
-      specifier: ^3.25.67
-      version: 3.25.76
-
 importers:
 
   .:
@@ -165,46 +33,46 @@ importers:
   apps/microfrontends/mf_contabilidad:
     dependencies:
       '@emotion/react':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.8)(react@19.2.3)
       '@emotion/styled':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@hookform/resolvers':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.2.2(react-hook-form@7.71.0(react@19.2.3))
       '@mui/icons-material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@mui/material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@mui/x-tree-view':
         specifier: ^7.29.1
         version: 7.29.10(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mui/system@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@reduxjs/toolkit':
-        specifier: 'catalog:'
+        specifier: ^2.8.2
         version: 2.8.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       express:
         specifier: ^4.21.2
         version: 4.22.1
       lucide-react:
-        specifier: 'catalog:'
+        specifier: ^0.525.0
         version: 0.525.0(react@19.2.3)
       react:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3
       react-dom:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3(react@19.2.3)
       react-hook-form:
-        specifier: 'catalog:'
+        specifier: ^7.59.0
         version: 7.71.0(react@19.2.3)
       react-imask:
         specifier: ^7.6.1
@@ -213,80 +81,80 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-redux:
-        specifier: 'catalog:'
+        specifier: ^9.2.0
         version: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
       react-router-dom:
-        specifier: 'catalog:'
+        specifier: ^7.6.1
         version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       serve:
-        specifier: 'catalog:'
+        specifier: ^14.2.4
         version: 14.2.5
       sonner:
-        specifier: 'catalog:'
+        specifier: ^2.0.6
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@originjs/vite-plugin-federation':
-        specifier: 'catalog:'
+        specifier: ^1.4.1
         version: 1.4.1
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.8
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.3(@types/react@19.2.8)
       '@types/react-input-mask':
         specifier: ^3.0.6
         version: 3.0.6
       '@vitejs/plugin-react':
-        specifier: 'catalog:'
+        specifier: ^4.4.1
         version: 4.7.0(vite@6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       cross-env:
-        specifier: 'catalog:'
+        specifier: ^7.0.3
         version: 7.0.3
       globals:
-        specifier: 'catalog:'
+        specifier: ^16.0.0
         version: 16.5.0
       rimraf:
         specifier: ^6.0.1
         version: 6.1.2
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
       vite:
-        specifier: 'catalog:'
+        specifier: ^6.3.5
         version: 6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/microfrontends/mf_shell:
     dependencies:
       '@emotion/react':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.8)(react@19.2.3)
       '@emotion/styled':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@hookform/resolvers':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.2.2(react-hook-form@7.71.0(react@19.2.3))
       '@mui/icons-material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@mui/material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@mui/x-tree-view':
-        specifier: 'catalog:'
+        specifier: ^8.5.1
         version: 8.24.0(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mui/system@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@reduxjs/toolkit':
-        specifier: 'catalog:'
+        specifier: ^2.8.2
         version: 2.8.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
       '@toolpad/core':
         specifier: ^0.15.0
@@ -295,138 +163,138 @@ importers:
         specifier: ^12.7.0
         version: 12.10.0(@types/react@19.2.8)(immer@10.2.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       express:
         specifier: ^4.21.2
         version: 4.22.1
       lucide-react:
-        specifier: 'catalog:'
+        specifier: ^0.525.0
         version: 0.525.0(react@19.2.3)
       react:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3
       react-dom:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3(react@19.2.3)
       react-hook-form:
-        specifier: 'catalog:'
+        specifier: ^7.59.0
         version: 7.71.0(react@19.2.3)
       react-icons:
         specifier: ^5.5.0
         version: 5.5.0(react@19.2.3)
       react-redux:
-        specifier: 'catalog:'
+        specifier: ^9.2.0
         version: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
       react-router-dom:
-        specifier: 'catalog:'
+        specifier: ^7.6.1
         version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       redux-persist:
-        specifier: 'catalog:'
+        specifier: ^6.0.0
         version: 6.0.0(react@19.2.3)(redux@5.0.1)
       serve:
-        specifier: 'catalog:'
+        specifier: ^14.2.4
         version: 14.2.5
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
       sonner:
-        specifier: 'catalog:'
+        specifier: ^2.0.6
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@originjs/vite-plugin-federation':
-        specifier: 'catalog:'
+        specifier: ^1.4.1
         version: 1.4.1
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.8
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.3(@types/react@19.2.8)
       '@vitejs/plugin-react':
-        specifier: 'catalog:'
+        specifier: ^4.4.1
         version: 4.7.0(vite@6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       globals:
-        specifier: 'catalog:'
+        specifier: ^16.0.0
         version: 16.5.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
       vite:
-        specifier: 'catalog:'
+        specifier: ^6.3.5
         version: 6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/microfrontends/mf_store:
     dependencies:
       '@reduxjs/toolkit':
-        specifier: 'catalog:'
+        specifier: ^2.8.2
         version: 2.8.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
       async-mutex:
         specifier: ^0.5.0
         version: 0.5.0
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       express:
         specifier: ^4.21.2
         version: 4.22.1
       lucide-react:
-        specifier: 'catalog:'
+        specifier: ^0.525.0
         version: 0.525.0(react@19.2.3)
       react:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3
       react-dom:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3(react@19.2.3)
       react-redux:
-        specifier: 'catalog:'
+        specifier: ^9.2.0
         version: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
       redux-persist:
-        specifier: 'catalog:'
+        specifier: ^6.0.0
         version: 6.0.0(react@19.2.3)(redux@5.0.1)
       serve:
-        specifier: 'catalog:'
+        specifier: ^14.2.4
         version: 14.2.5
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@module-federation/typescript':
         specifier: ^3.1.3
         version: 3.1.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.8.3)(webpack@5.104.1)
       '@originjs/vite-plugin-federation':
-        specifier: 'catalog:'
+        specifier: ^1.4.1
         version: 1.4.1
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.8
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.3(@types/react@19.2.8)
       '@vitejs/plugin-react':
-        specifier: 'catalog:'
+        specifier: ^4.4.1
         version: 4.7.0(vite@6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       globals:
-        specifier: 'catalog:'
+        specifier: ^16.0.0
         version: 16.5.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
       vite:
-        specifier: 'catalog:'
+        specifier: ^6.3.5
         version: 6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vite-plugin-dts:
         specifier: ^4.5.4
@@ -435,162 +303,162 @@ importers:
   apps/microfrontends/mf_ui:
     dependencies:
       '@emotion/react':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.8)(react@19.2.3)
       '@emotion/styled':
-        specifier: 'catalog:'
+        specifier: ^11.14.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@mui/icons-material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@mui/material':
-        specifier: 'catalog:'
+        specifier: ^7.1.2
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       express:
         specifier: ^4.21.2
         version: 4.22.1
       react:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3
       react-dom:
-        specifier: 'catalog:'
+        specifier: ^19.1.0
         version: 19.2.3(react@19.2.3)
       serve:
-        specifier: 'catalog:'
+        specifier: ^14.2.4
         version: 14.2.5
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@originjs/vite-plugin-federation':
-        specifier: 'catalog:'
+        specifier: ^1.4.1
         version: 1.4.1
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.8
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: ^19.1.2
         version: 19.2.3(@types/react@19.2.8)
       '@vitejs/plugin-react':
-        specifier: 'catalog:'
+        specifier: ^4.4.1
         version: 4.7.0(vite@6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       globals:
-        specifier: 'catalog:'
+        specifier: ^16.0.0
         version: 16.5.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
       vite:
-        specifier: 'catalog:'
+        specifier: ^6.3.5
         version: 6.4.1(@types/node@22.19.5)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/microservices/api-autorizacion:
     dependencies:
       bcryptjs:
-        specifier: 'catalog:'
+        specifier: ^3.0.2
         version: 3.0.3
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       drizzle-orm:
-        specifier: 'catalog:'
+        specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
       express:
-        specifier: 'catalog:'
+        specifier: ^5.1.0
         version: 5.2.1
       express-list-endpoints:
         specifier: ^7.1.1
         version: 7.1.1
       jsonwebtoken:
-        specifier: 'catalog:'
+        specifier: ^9.0.2
         version: 9.0.3
       pg:
-        specifier: 'catalog:'
+        specifier: ^8.16.0
         version: 8.16.3
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@types/cookie-parser':
         specifier: ^1.4.8
         version: 1.4.10(@types/express@5.0.6)
       '@types/cors':
-        specifier: 'catalog:'
+        specifier: ^2.8.18
         version: 2.8.19
       '@types/express':
-        specifier: 'catalog:'
+        specifier: ^5.0.2
         version: 5.0.6
       '@types/express-serve-static-core':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.1.1
       '@types/jsonwebtoken':
-        specifier: 'catalog:'
+        specifier: ^9.0.9
         version: 9.0.10
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: ^8.15.2
         version: 8.16.0
       cross-env:
-        specifier: 'catalog:'
+        specifier: ^7.0.3
         version: 7.0.3
       nodemon:
-        specifier: 'catalog:'
+        specifier: ^3.1.10
         version: 3.1.11
       tsup:
-        specifier: 'catalog:'
+        specifier: ^8.5.0
         version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
-        specifier: 'catalog:'
+        specifier: ^4.19.4
         version: 4.21.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
 
   apps/microservices/api-contabilidad:
     dependencies:
       bcryptjs:
-        specifier: 'catalog:'
+        specifier: ^3.0.2
         version: 3.0.3
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       drizzle-orm:
-        specifier: 'catalog:'
+        specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
       express:
-        specifier: 'catalog:'
+        specifier: ^5.1.0
         version: 5.2.1
       jsonwebtoken:
-        specifier: 'catalog:'
+        specifier: ^9.0.2
         version: 9.0.3
       nodemailer:
         specifier: ^7.0.3
         version: 7.0.12
       pg:
-        specifier: 'catalog:'
+        specifier: ^8.16.0
         version: 8.16.3
       swagger-jsdoc:
         specifier: ^6.2.8
@@ -599,11 +467,11 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(express@5.2.1)
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -612,25 +480,25 @@ importers:
         specifier: ^1.4.9
         version: 1.4.10(@types/express@5.0.6)
       '@types/cors':
-        specifier: 'catalog:'
+        specifier: ^2.8.18
         version: 2.8.19
       '@types/express':
-        specifier: 'catalog:'
+        specifier: ^5.0.2
         version: 5.0.6
       '@types/express-serve-static-core':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.1.1
       '@types/jsonwebtoken':
-        specifier: 'catalog:'
+        specifier: ^9.0.9
         version: 9.0.10
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.21
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: ^8.15.2
         version: 8.16.0
       '@types/swagger-jsdoc':
         specifier: ^6.0.4
@@ -639,22 +507,22 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8
       cross-env:
-        specifier: 'catalog:'
+        specifier: ^7.0.3
         version: 7.0.3
       drizzle-kit:
-        specifier: 'catalog:'
+        specifier: ^0.31.1
         version: 0.31.8
       nodemon:
-        specifier: 'catalog:'
+        specifier: ^3.1.10
         version: 3.1.11
       tsup:
-        specifier: 'catalog:'
+        specifier: ^8.5.0
         version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
-        specifier: 'catalog:'
+        specifier: ^4.19.4
         version: 4.21.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
 
   apps/microservices/api-gateway:
@@ -663,13 +531,13 @@ importers:
         specifier: ^1.8.0
         version: 1.8.1
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       express:
-        specifier: 'catalog:'
+        specifier: ^5.1.0
         version: 5.2.1
       express-rate-limit:
         specifier: ^7.5.0
@@ -681,77 +549,77 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5
       jsonwebtoken:
-        specifier: 'catalog:'
+        specifier: ^9.0.2
         version: 9.0.3
       pino:
         specifier: ^9.7.0
         version: 9.14.0
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@types/compression':
         specifier: ^1.8.0
         version: 1.8.1
       '@types/cors':
-        specifier: 'catalog:'
+        specifier: ^2.8.18
         version: 2.8.19
       '@types/express':
-        specifier: 'catalog:'
+        specifier: ^5.0.2
         version: 5.0.6
       '@types/express-serve-static-core':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.1.1
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       cross-env:
-        specifier: 'catalog:'
+        specifier: ^7.0.3
         version: 7.0.3
       nodemon:
-        specifier: 'catalog:'
+        specifier: ^3.1.10
         version: 3.1.11
       pino-pretty:
         specifier: ^13.0.0
         version: 13.1.3
       tsup:
-        specifier: 'catalog:'
+        specifier: ^8.5.0
         version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
-        specifier: 'catalog:'
+        specifier: ^4.19.4
         version: 4.21.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
 
   apps/microservices/api-identidad:
     dependencies:
       bcryptjs:
-        specifier: 'catalog:'
+        specifier: ^3.0.2
         version: 3.0.3
       cors:
-        specifier: 'catalog:'
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       drizzle-orm:
-        specifier: 'catalog:'
+        specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
       express:
-        specifier: 'catalog:'
+        specifier: ^5.1.0
         version: 5.2.1
       jsonwebtoken:
-        specifier: 'catalog:'
+        specifier: ^9.0.2
         version: 9.0.3
       nodemailer:
         specifier: ^7.0.3
         version: 7.0.12
       pg:
-        specifier: 'catalog:'
+        specifier: ^8.16.0
         version: 8.16.3
       swagger-jsdoc:
         specifier: ^6.2.8
@@ -760,35 +628,35 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(express@5.2.1)
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: ^1.9.4
         version: 1.9.4
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
       '@types/cors':
-        specifier: 'catalog:'
+        specifier: ^2.8.18
         version: 2.8.19
       '@types/express':
-        specifier: 'catalog:'
+        specifier: ^5.0.2
         version: 5.0.6
       '@types/express-serve-static-core':
-        specifier: 'catalog:'
+        specifier: ^5.1.1
         version: 5.1.1
       '@types/jsonwebtoken':
-        specifier: 'catalog:'
+        specifier: ^9.0.9
         version: 9.0.10
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.21
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: ^8.15.2
         version: 8.16.0
       '@types/swagger-jsdoc':
         specifier: ^6.0.4
@@ -797,56 +665,56 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8
       cross-env:
-        specifier: 'catalog:'
+        specifier: ^7.0.3
         version: 7.0.3
       drizzle-kit:
-        specifier: 'catalog:'
+        specifier: ^0.31.1
         version: 0.31.8
       nodemon:
-        specifier: 'catalog:'
+        specifier: ^3.1.10
         version: 3.1.11
       tsup:
-        specifier: 'catalog:'
+        specifier: ^8.5.0
         version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
-        specifier: 'catalog:'
+        specifier: ^4.19.4
         version: 4.21.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/shared:
     dependencies:
       dotenv:
-        specifier: 'catalog:'
+        specifier: ^16.5.0
         version: 16.6.1
       drizzle-orm:
-        specifier: 'catalog:'
+        specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
       pg:
-        specifier: 'catalog:'
+        specifier: ^8.16.0
         version: 8.16.3
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^22.18.12
         version: 22.19.5
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: ^8.15.2
         version: 8.16.0
       drizzle-kit:
-        specifier: 'catalog:'
+        specifier: ^0.31.1
         version: 0.31.8
       tsup:
-        specifier: 'catalog:'
+        specifier: ^8.5.0
         version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
-        specifier: 'catalog:'
+        specifier: ^4.19.4
         version: 4.21.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.8.3
         version: 5.8.3
 
 packages:
@@ -6960,25 +6828,25 @@ snapshots:
 
   '@types/bcrypt@5.0.2':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/compression@1.8.1':
     dependencies:
       '@types/express': 5.0.6
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/conventional-commits-parser@5.0.2':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/cookie-parser@1.4.10(@types/express@5.0.6)':
     dependencies:
@@ -6986,7 +6854,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/d3-color@3.1.3': {}
 
@@ -7023,7 +6891,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -7038,14 +6906,14 @@ snapshots:
 
   '@types/http-proxy@1.17.17':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/json-schema@7.0.15': {}
 
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/ms@2.1.0': {}
 
@@ -7060,7 +6928,7 @@ snapshots:
   '@types/nodemailer@6.4.21':
     dependencies:
       '@aws-sdk/client-ses': 3.966.0
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
     transitivePeerDependencies:
       - aws-crt
 
@@ -7068,7 +6936,7 @@ snapshots:
 
   '@types/pg@8.16.0':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
@@ -7096,12 +6964,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
 
   '@types/swagger-jsdoc@6.0.4': {}
 
@@ -8395,7 +8263,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.10.7
+      '@types/node': 22.19.5
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
