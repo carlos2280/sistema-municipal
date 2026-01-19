@@ -14,54 +14,33 @@
     "start": "node server.js",
     "preview": "vite preview --port 5010 --strictPort --mode development",
     "serve-local": "pnpm build && pnpm start",
-    "dev:watch": "pnpm build && pnpm build:watch",
     "lint": "biome lint --write ./src",
     "format": "biome format --write ./src",
-    "check": "biome check --write ./src",
-    "dev:micro": "vite --port 5010 --strictPort --mode development --force",
-    "commit": "cz"
+    "check": "biome check --write ./src"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.8.2",
+    "@reduxjs/toolkit": "catalog:",
     "async-mutex": "^0.5.0",
-    "cors": "^2.8.5",
+    "cors": "catalog:",
     "express": "^4.21.2",
-    "lucide-react": "^0.518.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-redux": "^9.2.0",
-    "redux-persist": "^6.0.0",
-    "serve": "^14.2.4"
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-redux": "catalog:",
+    "redux-persist": "catalog:",
+    "serve": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.0",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@biomejs/biome": "catalog:",
     "@module-federation/typescript": "^3.1.3",
-    "@originjs/vite-plugin-federation": "^1.4.1",
-    "@types/node": "^24.0.3",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "commitizen": "^4.3.1",
-    "cz-customizable": "^7.4.0",
-    "fs": "0.0.1-security",
-    "globals": "^16.0.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5",
+    "@originjs/vite-plugin-federation": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "globals": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
     "vite-plugin-dts": "^4.5.4"
-  },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-customizable"
-    },
-    "cz-customizable": {
-      "config": ".cz-config.cjs"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": "biome check --apply"
   }
 }

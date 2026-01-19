@@ -1,7 +1,7 @@
 {
   "name": "gateway",
   "version": "1.0.0",
-  "description": "",
+  "description": "API Gateway - Sistema Municipal",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,57 +14,34 @@
     "start": "node dist/index.js",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check .",
-    "commit": "cz"
+    "check": "biome check ."
   },
-  "keywords": [],
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
   "dependencies": {
     "compression": "^1.8.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "cors": "catalog:",
+    "dotenv": "catalog:",
+    "express": "catalog:",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "http-proxy-middleware": "^3.0.5",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "catalog:",
     "pino": "^9.7.0",
-    "zod": "^3.24.4"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@biomejs/biome": "catalog:",
     "@types/compression": "^1.8.0",
-    "@types/cors": "^2.8.18",
-    "@types/eslint": "^9.6.1",
-    "@types/express": "^5.0.1",
-    "@types/helmet": "^4.0.0",
-    "@types/node": "^22.18.12",
-    "@types/prettier": "^3.0.0",
-    "commitizen": "^4.3.1",
-    "cross-env": "^7.0.3",
-    "cz-customizable": "^7.4.0",
-    "eslint": "^9.26.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "nodemon": "^3.1.10",
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "@types/express-serve-static-core": "catalog:",
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "nodemon": "catalog:",
     "pino-pretty": "^13.0.0",
-    "prettier": "^3.5.3",
-    "tsc-alias": "^1.8.8",
-    "tsup": "^8.5.0",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-customizable"
-    },
-    "cz-customizable": {
-      "config": ".cz-config.cjs"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": "biome check --apply"
+    "tsup": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

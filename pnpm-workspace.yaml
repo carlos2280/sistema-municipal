@@ -2,9 +2,91 @@ packages:
   - apps/microfrontends/*
   - apps/microservices/*
   - packages/*
+
 onlyBuiltDependencies:
   - '@biomejs/biome'
   - '@scarf/scarf'
   - bcrypt
   - core-js-pure
   - esbuild
+
+# Catalog: versiones centralizadas para evitar duplicación
+catalog:
+  # === Core Runtime ===
+  react: ^19.1.0
+  react-dom: ^19.1.0
+  typescript: ^5.8.3
+
+  # === Backend Framework ===
+  express: ^5.1.0
+  cors: ^2.8.5
+  dotenv: ^16.5.0
+
+  # === Database ===
+  drizzle-orm: ^0.43.1
+  pg: ^8.16.0
+
+  # === Validation ===
+  zod: ^3.25.67
+
+  # === Auth ===
+  jsonwebtoken: ^9.0.2
+  bcryptjs: ^3.0.2
+
+  # === UI Framework (MUI) ===
+  "@emotion/react": ^11.14.0
+  "@emotion/styled": ^11.14.0
+  "@mui/material": ^7.1.2
+  "@mui/icons-material": ^7.1.2
+  "@mui/x-tree-view": ^8.5.1
+
+  # === State Management ===
+  "@reduxjs/toolkit": ^2.8.2
+  react-redux: ^9.2.0
+  redux-persist: ^6.0.0
+
+  # === Forms ===
+  react-hook-form: ^7.59.0
+  "@hookform/resolvers": ^5.1.1
+
+  # === Router ===
+  react-router-dom: ^7.6.1
+
+  # === UI Components ===
+  lucide-react: ^0.525.0
+  sonner: ^2.0.6
+
+  # === Build Tools ===
+  vite: ^6.3.5
+  tsup: ^8.5.0
+  tsx: ^4.19.4
+  "@vitejs/plugin-react": ^4.4.1
+  "@originjs/vite-plugin-federation": ^1.4.1
+
+  # === Types ===
+  "@types/node": ^22.18.12
+  "@types/react": ^19.1.2
+  "@types/react-dom": ^19.1.2
+  "@types/express": ^5.0.2
+  "@types/express-serve-static-core": ^5.1.1
+  "@types/cors": ^2.8.18
+  "@types/pg": ^8.15.2
+  "@types/jsonwebtoken": ^9.0.9
+
+  # === Linting/Formatting ===
+  "@biomejs/biome": ^1.9.4
+
+  # === Git Hooks (moved to root only) ===
+  "@commitlint/cli": ^19.8.1
+  "@commitlint/config-conventional": ^19.8.1
+  husky: ^9.1.7
+  lint-staged: ^16.1.2
+  commitizen: ^4.3.1
+  cz-customizable: ^7.4.0
+
+  # === Dev Utilities ===
+  cross-env: ^7.0.3
+  nodemon: ^3.1.10
+  drizzle-kit: ^0.31.1
+  globals: ^16.0.0
+  serve: ^14.2.4
