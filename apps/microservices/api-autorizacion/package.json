@@ -1,71 +1,48 @@
 {
   "name": "api-autorizacion",
   "version": "1.0.0",
-  "description": "",
+  "description": "API Autorizacion - Sistema Municipal",
   "type": "module",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "tsx --require tsconfig-paths/register src/index.ts",
-    "build": "tsup src/index.ts --format esm,cjs --dts --no-splitting --clean --minify",
-    "start": "node --experimental-specifier-resolution=node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts --no-splitting --clean --minify",
+    "start": "node dist/index.js",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check .",
-    "commit": "cz"
+    "check": "biome check ."
   },
-  "keywords": [],
-  "author": "",
+  "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "catalog:",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.43.1",
-    "express": "^5.1.0",
+    "cors": "catalog:",
+    "dotenv": "catalog:",
+    "drizzle-orm": "catalog:",
+    "express": "catalog:",
     "express-list-endpoints": "^7.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0",
-    "zod": "^3.24.4"
+    "jsonwebtoken": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@biomejs/biome": "catalog:",
     "@types/cookie-parser": "^1.4.8",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.1",
-    "@types/express-serve-static-core": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.18.12",
-    "@types/pg": "^8.15.2",
-    "commitizen": "^4.3.1",
-    "cz-customizable": "^7.4.0",
-    "eslint": "^9.26.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "nodemon": "^3.1.10",
-    "tsc-alias": "^1.8.8",
-    "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.4.0",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-customizable"
-    },
-    "cz-customizable": {
-      "config": ".cz-config.cjs"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": "biome check --apply"
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "@types/express-serve-static-core": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "cross-env": "catalog:",
+    "nodemon": "catalog:",
+    "tsup": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

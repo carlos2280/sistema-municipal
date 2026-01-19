@@ -1,7 +1,7 @@
 import { db } from "@/app";
 import { type NewUsuario, type UsuarioUpdate, usuarios } from "@/db/schemas";
 import { generateRandomPassword } from "@/libs/utils/contrasenaAleatoria.utils";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "./email.service";
 export const getAllUsuarios = async () => {
