@@ -1,163 +1,389 @@
-import { Button, Card } from "@mui/material";
-import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { FormProvider } from "react-hook-form";
-import { Link } from "react-router-dom";
+/**
+ * Login Page - Sistema Municipal CrisCar
+ *
+ * Página de inicio de sesión formal y elegante
+ */
+
+import {
+	Box,
+	Button,
+	Card,
+	Divider,
+	IconButton,
+	InputAdornment,
+	LinearProgress,
+	MenuItem,
+	Stack,
+	Step,
+	StepLabel,
+	Stepper,
+	TextField,
+	Typography,
+	alpha,
+	styled,
+} from "@mui/material";
+import { useTheme as useMuiTheme } from "@mui/material/styles";
+import {
+	ArrowLeft,
+	ArrowRight,
+	Building2,
+	Eye,
+	EyeOff,
+	Layers,
+	Lock,
+	LogIn,
+	Mail,
+} from "lucide-react";
+import { useState } from "react";
+import { Controller, FormProvider, useFormContext } from "react-hook-form";
 import { useLoginFormFlow } from "../../hook/useLoginFormFlow";
-import AuthWrapper1 from "./AuthWrapper1";
-import FormAreaWithModule from "./form/FormAreaWithModule";
-import FormCredentialSteep from "./form/FormCredentialSteep";
 
-export default function Login() {
-	const downMD = useMediaQuery((theme) => theme.breakpoints.down("md"));
-	const { activeStep, areas, sistemas, methods, handleNext } =
-		useLoginFormFlow();
+// ============================================================================
+// STYLED COMPONENTS
+// ============================================================================
+
+const LoginWrapper = styled(Box)(({ theme }) => ({
+	minHeight: "100vh",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	backgroundColor:
+		theme.palette.mode === "light"
+			? theme.palette.grey[100]
+			: theme.palette.grey[900],
+	padding: theme.spacing(3),
+}));
+
+const LoginCard = styled(Card)(({ theme }) => ({
+	width: "100%",
+	maxWidth: 420,
+	padding: theme.spacing(5),
+	borderRadius: 16,
+	boxShadow:
+		theme.palette.mode === "light"
+			? "0 4px 24px rgba(0,0,0,0.08)"
+			: "0 4px 24px rgba(0,0,0,0.4)",
+	border: `1px solid ${theme.palette.divider}`,
+}));
+
+const LogoSection = styled(Box)(({ theme }) => ({
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	marginBottom: theme.spacing(4),
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	"& .MuiOutlinedInput-root": {
+		borderRadius: 8,
+		"&:hover fieldset": {
+			borderColor: theme.palette.primary.main,
+		},
+		"&.Mui-focused fieldset": {
+			borderWidth: 2,
+		},
+	},
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+	height: 48,
+	borderRadius: 8,
+	fontSize: "0.95rem",
+	fontWeight: 600,
+	textTransform: "none",
+}));
+
+// ============================================================================
+// CREDENTIAL FORM (STEP 1)
+// ============================================================================
+
+function CredentialForm() {
+	const { control } = useFormContext();
+	const [showPassword, setShowPassword] = useState(false);
+
 	return (
-		<AuthWrapper1>
-			<Grid
-				container
-				direction="column"
-				sx={{ justifyContent: "flex-end", minHeight: "100vh" }}
-			>
+		<Stack spacing={2.5}>
+			<Controller
+				name="correo"
+				control={control}
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						label="Correo electrónico"
+						type="email"
+						value={field.value ?? ""}
+						error={invalid}
+						helperText={error?.message}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<Mail size={18} style={{ opacity: 0.5 }} />
+								</InputAdornment>
+							),
+						}}
+					/>
+				)}
+			/>
 
-				<Grid size={12}>
-					<Grid
-						container
-						sx={{
-							justifyContent: "center",
-							alignItems: "center",
-							minHeight: "calc(100vh - 68px)",
+			<Controller
+				name="contrasena"
+				control={control}
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						label="Contraseña"
+						type={showPassword ? "text" : "password"}
+						value={field.value ?? ""}
+						error={invalid}
+						helperText={error?.message}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<Lock size={18} style={{ opacity: 0.5 }} />
+								</InputAdornment>
+							),
+							endAdornment: (
+								<InputAdornment position="end">
+									<IconButton
+										size="small"
+										onClick={() => setShowPassword(!showPassword)}
+										edge="end"
+									>
+										{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+									</IconButton>
+								</InputAdornment>
+							),
+						}}
+					/>
+				)}
+			/>
+		</Stack>
+	);
+}
+
+// ============================================================================
+// AREA/SYSTEM FORM (STEP 2)
+// ============================================================================
+
+interface AreaSystemFormProps {
+	areas: Array<{ id: number; nombre: string }>;
+	sistemas: Array<{ id: number; nombre: string }>;
+}
+
+function AreaSystemForm({ areas, sistemas }: AreaSystemFormProps) {
+	const { control, watch } = useFormContext();
+	const selectedArea = watch("areaId");
+
+	return (
+		<Stack spacing={2.5}>
+			<Controller
+				name="areaId"
+				control={control}
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						select
+						fullWidth
+						label="Área de trabajo"
+						value={field.value ?? ""}
+						error={invalid}
+						helperText={error?.message}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<Building2 size={18} style={{ opacity: 0.5 }} />
+								</InputAdornment>
+							),
 						}}
 					>
-						<Grid sx={{ m: { xs: 1, sm: 3 }, mb: 0 }}>
-							<Card
-								sx={{
-									p: 4,
-									maxWidth: 400,
-								}}
+						{areas.map((area) => (
+							<MenuItem key={area.id} value={area.id}>
+								{area.nombre}
+							</MenuItem>
+						))}
+					</StyledTextField>
+				)}
+			/>
+
+			{selectedArea && sistemas.length > 0 && (
+				<Controller
+					name="sistemaId"
+					control={control}
+					render={({ field, fieldState: { invalid, error } }) => (
+						<StyledTextField
+							{...field}
+							select
+							fullWidth
+							label="Sistema"
+							value={field.value ?? ""}
+							error={invalid}
+							helperText={error?.message}
+							InputProps={{
+								startAdornment: (
+									<InputAdornment position="start">
+										<Layers size={18} style={{ opacity: 0.5 }} />
+									</InputAdornment>
+								),
+							}}
+						>
+							{sistemas.map((sistema) => (
+								<MenuItem key={sistema.id} value={sistema.id}>
+									{sistema.nombre}
+								</MenuItem>
+							))}
+						</StyledTextField>
+					)}
+				/>
+			)}
+
+			{selectedArea && sistemas.length === 0 && (
+				<Box sx={{ py: 2 }}>
+					<LinearProgress sx={{ borderRadius: 1 }} />
+					<Typography
+						variant="body2"
+						color="text.secondary"
+						sx={{ mt: 1, textAlign: "center" }}
+					>
+						Cargando sistemas...
+					</Typography>
+				</Box>
+			)}
+		</Stack>
+	);
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function Login() {
+	const theme = useMuiTheme();
+	const { activeStep, areas, sistemas, methods, handleNext, handleBack } =
+		useLoginFormFlow();
+
+	const steps = ["Credenciales", "Área y Sistema"];
+
+	// Watch para reactividad - esto hace que el componente se re-renderice cuando cambian los valores
+	const watchedValues = methods.watch();
+
+	// Validación del paso actual
+	const isStepValid = () => {
+		if (activeStep === 0) {
+			// Paso 1: validar que existan correo y contraseña
+			const correo = watchedValues.correo?.trim();
+			const contrasena = watchedValues.contrasena;
+			return !!(correo && contrasena);
+		}
+
+		if (activeStep === 1) {
+			// Paso 2: validar área y sistema
+			return !!(watchedValues.areaId && watchedValues.sistemaId);
+		}
+
+		return false;
+	};
+
+	return (
+		<LoginWrapper>
+			<LoginCard>
+				{/* Logo */}
+				<LogoSection>
+					<img
+						src="/logo-criscar.svg"
+						alt="CrisCar"
+						width={64}
+						height={64}
+						style={{ marginBottom: 12 }}
+					/>
+					<Typography
+						variant="h5"
+						fontWeight={700}
+						color="primary.main"
+						sx={{ mb: 0.5 }}
+					>
+						CrisCar
+					</Typography>
+					<Typography
+						variant="caption"
+						color="text.secondary"
+						sx={{ letterSpacing: "0.1em", textTransform: "uppercase" }}
+					>
+						Sistema Municipal
+					</Typography>
+				</LogoSection>
+
+				{/* Título */}
+				<Box sx={{ textAlign: "center", mb: 4 }}>
+					<Typography variant="h6" fontWeight={600}>
+						Iniciar Sesión
+					</Typography>
+					<Typography variant="body2" color="text.secondary">
+						{activeStep === 0
+							? "Ingrese sus credenciales"
+							: "Seleccione su área de trabajo"}
+					</Typography>
+				</Box>
+
+				{/* Stepper */}
+				<Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+					{steps.map((label) => (
+						<Step key={label}>
+							<StepLabel>
+								<Typography variant="caption">{label}</Typography>
+							</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+
+				{/* Formulario */}
+				<FormProvider {...methods}>
+					<Box sx={{ mb: 3 }}>
+						{activeStep === 0 && <CredentialForm />}
+						{activeStep === 1 && (
+							<AreaSystemForm areas={areas} sistemas={sistemas} />
+						)}
+					</Box>
+
+					{/* Botones */}
+					<Stack spacing={1.5}>
+						<SubmitButton
+							fullWidth
+							variant="contained"
+							onClick={handleNext}
+							disabled={!isStepValid()}
+							endIcon={
+								activeStep === 0 ? <ArrowRight size={18} /> : <LogIn size={18} />
+							}
+						>
+							{activeStep === 0 ? "Continuar" : "Ingresar"}
+						</SubmitButton>
+
+						{activeStep > 0 && (
+							<Button
+								fullWidth
+								variant="text"
+								onClick={handleBack}
+								startIcon={<ArrowLeft size={18} />}
+								sx={{ textTransform: "none" }}
 							>
-								<FormProvider {...methods}>
-									<Grid
-										container
-										spacing={2}
-										sx={{ alignItems: "center", justifyContent: "center" }}
-									>
-										<Grid sx={{ mb: 1 }}>
-											<Link to="#" aria-label="logo">
-												{/* <Logo /> */}
-											</Link>
-											<img
-												src="/logo_02.svg"
-												width={80}
-												alt="Logo Municipalidad"
-											/>
-										</Grid>
-										<Grid size={12}>
-											<Grid
-												container
-												direction={{ xs: "column-reverse", md: "row" }}
-												sx={{ alignItems: "center", justifyContent: "center" }}
-											>
-												<Grid>
-													<Stack
-														spacing={1}
-														sx={{
-															alignItems: "center",
-															justifyContent: "center",
-														}}
-													>
-														<Typography
-															gutterBottom
-															variant={downMD ? "h3" : "h2"}
-															sx={{
-																color: "primary.main",
-																fontSize: "1.5rem",
-																fontWeight: 400,
-															}}
-														>
-															Municipalidad de Antuco
-														</Typography>
-													</Stack>
-												</Grid>
-											</Grid>
-										</Grid>
+								Volver
+							</Button>
+						)}
+					</Stack>
+				</FormProvider>
 
-										<Grid size={12}>
-											<Grid
-												container
-												direction={{ xs: "column-reverse", md: "row" }}
-												sx={{ alignItems: "center", justifyContent: "center" }}
-											>
-												<Grid>
-													<Stack
-														spacing={1}
-														sx={{
-															alignItems: "center",
-															justifyContent: "center",
-														}}
-													>
-														<Typography
-															gutterBottom
-															variant={downMD ? "h3" : "h2"}
-															sx={{
-																color: "secondary.main",
-																fontSize: "1.25rem",
-																fontWeight: 600,
-															}}
-														>
-															Hola, bienvenido
-														</Typography>
-														<Typography
-															variant="caption"
-															sx={{
-																fontSize: "16px",
-																textAlign: { xs: "center", md: "inherit" },
-															}}
-														>
-															Ingrese sus credenciales para continuar
-														</Typography>
-													</Stack>
-												</Grid>
-											</Grid>
-										</Grid>
-										<Grid size={12}>
-											{/* <AuthLogin /> */}
-											{activeStep === 0 && <FormCredentialSteep />}
-											{activeStep === 1 && (
-												<FormAreaWithModule areas={areas} sistemas={sistemas} />
-											)}
-										</Grid>
-										<Grid size={12}>
-											<Divider />
-										</Grid>
-
-										<Button
-											size="large"
-											fullWidth
-											variant="contained"
-											disabled={!methods.formState.isValid}
-											onClick={handleNext}
-										>
-											{activeStep === 0 ? "Continuar" : "Ingresar"}
-										</Button>
-
-										{/* <Grid size={12}>
-                                            <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
-                                                <Typography component={Link} to="/register" variant="subtitle1" sx={{ textDecoration: 'none' }}>
-                                                    Don&apos;t have an account?
-                                                </Typography>
-                                            </Grid>
-                                        </Grid> */}
-									</Grid>
-								</FormProvider>
-							</Card>
-						</Grid>
-					</Grid>
-				</Grid>
-			</Grid>
-		</AuthWrapper1>
+				{/* Footer */}
+				<Divider sx={{ my: 3 }} />
+				<Typography
+					variant="caption"
+					color="text.secondary"
+					sx={{ display: "block", textAlign: "center" }}
+				>
+					Acceso seguro con encriptación
+				</Typography>
+			</LoginCard>
+		</LoginWrapper>
 	);
 }

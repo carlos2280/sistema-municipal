@@ -1,6 +1,21 @@
+/**
+ * AppLayout - Layout principal del Sistema Municipal CrisCar
+ *
+ * Incluye:
+ * - Drawer colapsable con logo
+ * - AppBar con menú de sistemas, indicadores, tema y cuenta
+ * - Botón de personalización de tema integrado
+ */
+
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Container } from "@mui/material";
+import {
+	Container,
+	Stack,
+	Tooltip,
+	Typography,
+	useMediaQuery,
+} from "@mui/material";
 import MuiAppBar, {
 	type AppBarProps as MuiAppBarProps,
 } from "@mui/material/AppBar";
@@ -16,13 +31,15 @@ import {
 	styled,
 	useTheme,
 } from "@mui/material/styles";
-import * as React from "react";
+import { Palette } from "lucide-react";
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { ToggleThemeButton } from "../component/ToggleThemeBotton";
 import MainMenu from "../component/mainMenu/MainMenu";
 import AccountMenu from "./AccountMenu";
 import CustomizedMenus from "./CustomizedMenus";
 import { EconomicIndicatorsExamples } from "./EconomicIndicatorsExamples";
+import { ThemeCustomizer } from "mf_ui/components";
+import { useTheme as useAppTheme } from "mf_ui/theme";
 
 const drawerWidth = 280;
 const collapsedWidth = 88;
@@ -45,13 +62,44 @@ const closedMixin = (theme: Theme): CSSObject => ({
 	width: collapsedWidth,
 });
 
+// ============================================================================
+// STYLED COMPONENTS
+// ============================================================================
+
 const DrawerHeader = styled("div")(({ theme }) => ({
 	display: "flex",
 	alignItems: "center",
-	justifyContent: "space-between",
-	padding: theme.spacing(0, 2),
-	minHeight: 64,
+	justifyContent: "center",
+	padding: theme.spacing(2),
+	minHeight: 72,
 	position: "relative",
+}));
+
+const LogoContainer = styled(Box, {
+	shouldForwardProp: (prop) => prop !== "collapsed",
+})<{ collapsed?: boolean }>(({ theme, collapsed }) => ({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: theme.spacing(1.5),
+	transition: theme.transitions.create(["opacity", "transform"], {
+		duration: theme.transitions.duration.enteringScreen,
+	}),
+	"& img": {
+		transition: theme.transitions.create("all", {
+			duration: theme.transitions.duration.enteringScreen,
+		}),
+	},
+}));
+
+const LogoText = styled(Typography)(({ theme }) => ({
+	fontWeight: 700,
+	fontSize: "1.1rem",
+	background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+	WebkitBackgroundClip: "text",
+	WebkitTextFillColor: "transparent",
+	backgroundClip: "text",
+	letterSpacing: "-0.02em",
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -126,7 +174,7 @@ const CollapseToggleButton = styled(IconButton, {
 })<{ open?: boolean }>(({ theme, open }) => ({
 	position: "fixed",
 	left: open ? drawerWidth - 16 : collapsedWidth - 16,
-	top: 30,
+	top: 36,
 	transform: "translateY(-50%)",
 	width: 32,
 	height: 32,
@@ -134,99 +182,178 @@ const CollapseToggleButton = styled(IconButton, {
 	border: `1px solid ${theme.palette.divider}`,
 	borderRadius: "50%",
 	zIndex: theme.zIndex.drawer + 10,
-	boxShadow: theme.shadows[1],
+	boxShadow: theme.shadows[2],
 	transition: theme.transitions.create(
-		["left", "transform", "background-color"],
+		["left", "transform", "background-color", "box-shadow"],
 		{
 			easing: theme.transitions.easing.sharp,
 			duration: theme.transitions.duration.enteringScreen,
 		},
 	),
 	"&:hover": {
-		backgroundColor: alpha(theme.palette.primary.main, 0.6),
-		color: theme.palette.common.white,
+		backgroundColor: theme.palette.primary.main,
+		color: theme.palette.primary.contrastText,
 		transform: "translateY(-50%) scale(1.1)",
-		// boxShadow: theme.shadows[6],
+		boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
 	},
 	"& .MuiSvgIcon-root": {
 		fontSize: 18,
-		color: theme.palette.text.secondary,
-		transition: theme.transitions.create("transform", {
+		transition: theme.transitions.create(["color"], {
 			duration: theme.transitions.duration.short,
 		}),
-		"&:hover": {
-			// backgroundColor: alpha(theme.palette.primary.main, 0.8),
-			color: theme.palette.common.white,
-			// transform: 'translateY(-50%) scale(1.1)',
-			// boxShadow: theme.shadows[6],
-		},
 	},
 }));
 
-export default function MiniDrawer() {
+// Botón de personalización de tema
+const ThemeCustomizerButton = styled(IconButton)(({ theme }) => ({
+	backgroundColor: alpha(theme.palette.primary.main, 0.08),
+	borderRadius: 12,
+	padding: theme.spacing(1),
+	transition: theme.transitions.create(["background-color", "transform"], {
+		duration: theme.transitions.duration.short,
+	}),
+	"&:hover": {
+		backgroundColor: alpha(theme.palette.primary.main, 0.16),
+		transform: "rotate(15deg)",
+	},
+}));
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export default function AppLayout() {
 	const theme = useTheme();
-	const [open, setOpen] = React.useState(true);
+	const { isDarkMode } = useAppTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+	const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+	const [customizerOpen, setCustomizerOpen] = useState(false);
 
 	const handleDrawerToggle = () => {
-		setOpen(!open);
+		setDrawerOpen(!drawerOpen);
 	};
 
+	// Seleccionar el logo apropiado según el modo
+	const logoSrc = isDarkMode ? "/logo-criscar-white.svg" : "/logo-criscar.svg";
+	const logoIconSrc = "/logo-criscar-icon.svg";
+
 	return (
-		<Box sx={{ display: "flex" }}>
+		<Box sx={{ display: "flex", minHeight: "100vh" }}>
 			<CssBaseline />
-			<AppBar position="fixed" open={open}>
-				<Toolbar sx={{ minHeight: 64 }}>
-					<Box
-						sx={{
-							flexGrow: 1,
-						}}
-					>
+
+			{/* AppBar */}
+			<AppBar position="fixed" open={drawerOpen}>
+				<Toolbar sx={{ minHeight: 64, gap: 1 }}>
+					<Box sx={{ flexGrow: 1 }}>
 						<CustomizedMenus />
 					</Box>
 
-					<EconomicIndicatorsExamples />
-					<ToggleThemeButton />
-					<AccountMenu />
+					<Stack direction="row" alignItems="center" spacing={1}>
+						<EconomicIndicatorsExamples />
+
+						{/* Botón de personalización de tema */}
+						<Tooltip title="Personalizar tema" arrow>
+							<ThemeCustomizerButton
+								onClick={() => setCustomizerOpen(true)}
+								aria-label="Personalizar tema"
+							>
+								<Palette size={20} />
+							</ThemeCustomizerButton>
+						</Tooltip>
+
+						<AccountMenu />
+					</Stack>
 				</Toolbar>
 			</AppBar>
 
-			<Drawer variant="permanent" open={open}>
+			{/* Drawer lateral */}
+			<Drawer variant="permanent" open={drawerOpen}>
 				<DrawerHeader>
-					{/* Logo o título cuando está abierto */}
-
-					<img src="/logo_02.svg" width={60} alt="Logo Municipalidad" />
+					<LogoContainer collapsed={!drawerOpen}>
+						{drawerOpen ? (
+							<>
+								<img
+									src={logoSrc}
+									width={48}
+									height={48}
+									alt="Logo CrisCar"
+									style={{ objectFit: "contain" }}
+								/>
+								<Box>
+									<LogoText variant="h6">CrisCar</LogoText>
+									<Typography
+										variant="caption"
+										sx={{
+											color: "text.secondary",
+											fontSize: "0.65rem",
+											display: "block",
+											lineHeight: 1.2,
+										}}
+									>
+										Sistema Municipal
+									</Typography>
+								</Box>
+							</>
+						) : (
+							<Tooltip title="Sistema Municipal CrisCar" placement="right" arrow>
+								<img
+									src={logoIconSrc}
+									width={40}
+									height={40}
+									alt="Logo CrisCar"
+									style={{ objectFit: "contain" }}
+								/>
+							</Tooltip>
+						)}
+					</LogoContainer>
 				</DrawerHeader>
 
-				{/* <Divider /> */}
-				<MainMenu collapsed={open} />
+				<MainMenu collapsed={drawerOpen} />
 			</Drawer>
 
-			{/* Botón de colapso circular - posicionado de forma independiente */}
+			{/* Botón de colapso circular */}
 			<CollapseToggleButton
-				open={open}
+				open={drawerOpen}
 				onClick={handleDrawerToggle}
-				aria-label="toggle drawer"
+				aria-label={drawerOpen ? "Colapsar menú" : "Expandir menú"}
 			>
-				{open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+				{drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
 			</CollapseToggleButton>
 
+			{/* Contenido principal */}
 			<Box
 				component="main"
 				sx={{
 					flexGrow: 1,
 					p: 3,
-					transition: theme.transitions.create("margin", {
+					pt: 2,
+					minHeight: "100vh",
+					minWidth: 0, // Permite que flexbox reduzca el ancho
+					overflow: "hidden", // Evita scroll horizontal a nivel de main
+					backgroundColor: (theme) =>
+						theme.palette.mode === "light"
+							? theme.palette.grey[50]
+							: theme.palette.background.default,
+					transition: theme.transitions.create(["margin", "background-color"], {
 						easing: theme.transitions.easing.sharp,
 						duration: theme.transitions.duration.leavingScreen,
 					}),
 				}}
 			>
-				<DrawerHeader />
+				{/* Spacer para el AppBar */}
+				<Box sx={{ minHeight: 64 }} />
 
-				<Container maxWidth={false}>
+				<Box sx={{ py: 2, height: "calc(100vh - 64px - 48px)", minWidth: 0 }}>
 					<Outlet />
-				</Container>
+				</Box>
 			</Box>
+
+			{/* Theme Customizer Drawer */}
+			<ThemeCustomizer
+				open={customizerOpen}
+				onClose={() => setCustomizerOpen(false)}
+			/>
 		</Box>
 	);
 }
