@@ -1,6 +1,6 @@
 import { db } from "@/app";
 import { type NewPlanesCuentas, planesCuentas } from "@/db/schemas";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as csService from "./cuentasSubgrupos.service";
 
 export const crearPlanesCuenta = async (data: NewPlanesCuentas) => {
@@ -109,4 +109,33 @@ export const obtenerArbolCompleto = async () => {
   }
 
   return subgrTree;
+};
+
+/**
+ * Verifica si un código de cuenta ya existe para un año contable específico
+ */
+export const verificarCodigoExiste = async (
+  anoContable: number,
+  codigo: string,
+): Promise<{ existe: boolean; cuenta?: { id: number; codigo: string; nombre: string } }> => {
+  const [row] = await db
+    .select({
+      id: planesCuentas.id,
+      codigo: planesCuentas.codigo,
+      nombre: planesCuentas.nombre,
+    })
+    .from(planesCuentas)
+    .where(
+      and(
+        eq(planesCuentas.anoContable, anoContable),
+        eq(planesCuentas.codigo, codigo),
+      ),
+    )
+    .limit(1);
+
+  if (row) {
+    return { existe: true, cuenta: row };
+  }
+
+  return { existe: false };
 };

@@ -91,3 +91,23 @@ export const obtenerArbolCompleto: RequestHandler = async (_, res, next) => {
         next(error);
     }
 };
+
+export const verificarCodigoExiste: RequestHandler = async (req, res, next) => {
+    const { anoContable, codigo } = req.query;
+
+    if (!anoContable || !codigo) {
+        return next(new AppError("Parámetros anoContable y codigo son requeridos", 400));
+    }
+
+    const ano = Number(anoContable);
+    if (!Number.isInteger(ano)) {
+        return next(new AppError("anoContable debe ser un número válido", 400));
+    }
+
+    try {
+        const result = await pcService.verificarCodigoExiste(ano, String(codigo));
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};

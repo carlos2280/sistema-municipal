@@ -16,6 +16,9 @@ router.get("/arbol", controller.obtenerArbolPlanes);
 // Obtener árbol completo (subgrupos + planes)
 router.get("/arbol-completo", verificarToken, controller.obtenerArbolCompleto);
 
+// Verificar si un código de cuenta existe
+router.get("/verificar-codigo", controller.verificarCodigoExiste);
+
 // Operaciones CRUD por ID de cuenta de plan
 router.get("/:id", controller.obtenerPlanesCuentaPorId);
 router.patch("/:id", controller.actualizarPlanesCuenta);
