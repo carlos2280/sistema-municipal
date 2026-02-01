@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7928ca"/>
+      <stop offset="100%" style="stop-color:#0891b2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Círculo base -->
+  <circle cx="32" cy="32" r="30" fill="url(#iconGradient)"/>
+
+  <!-- C izquierda simplificada -->
+  <path
+    d="M 22 22 C 14 22, 10 27, 10 32 C 10 37, 14 42, 22 42 L 22 38 C 17 38, 14 35, 14 32 C 14 29, 17 26, 22 26 Z"
+    fill="white"
+  />
+
+  <!-- C derecha simplificada (invertida) -->
+  <path
+    d="M 42 22 C 50 22, 54 27, 54 32 C 54 37, 50 42, 42 42 L 42 38 C 47 38, 50 35, 50 32 C 50 29, 47 26, 42 26 Z"
+    fill="white"
+  />
+
+  <!-- Elemento central minimalista -->
+  <rect x="27" y="24" width="10" height="16" rx="1" fill="white"/>
+  <path d="M 25 24 L 32 18 L 39 24 Z" fill="white"/>
+</svg>

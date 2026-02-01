@@ -54,8 +54,9 @@ interface MenuProps {
 	collapsed?: boolean; // Nueva prop para controlar el estado colapsado
 }
 
-const MenuContainer = styled(List)<{ collapsed?: boolean }>(
-	({ theme, collapsed }) => ({
+const MenuContainer = styled(List, {
+	shouldForwardProp: (prop) => prop !== "collapsed",
+})<{ collapsed?: boolean }>(({ theme, collapsed }) => ({
 		width: "100%",
 		backgroundColor: "transparent",
 		padding: collapsed ? theme.spacing(1, 0) : theme.spacing(0.5, 0),
@@ -77,7 +78,12 @@ const MenuContainer = styled(List)<{ collapsed?: boolean }>(
 	}),
 );
 
-const BaseMenuItem = styled(ListItemButton)<{
+const BaseMenuItem = styled(ListItemButton, {
+	shouldForwardProp: (prop) =>
+		!["level", "ischildselected", "haschildren", "collapsed"].includes(
+			prop as string
+		),
+})<{
 	level?: number;
 	ischildselected?: boolean;
 	haschildren?: boolean;
@@ -241,8 +247,9 @@ const BaseMenuItem = styled(ListItemButton)<{
 	},
 }));
 
-const SectionHeader = styled(Box)<{ collapsed?: boolean }>(
-	({ theme, collapsed }) => ({
+const SectionHeader = styled(Box, {
+	shouldForwardProp: (prop) => prop !== "collapsed",
+})<{ collapsed?: boolean }>(({ theme, collapsed }) => ({
 		padding: collapsed ? theme.spacing(1, 0) : theme.spacing(2, 2.5, 1, 2.5),
 		display: collapsed ? "none" : "block",
 
@@ -273,8 +280,9 @@ const PopoverContent = styled(Paper)(({ theme }) => ({
 	backgroundColor: theme.palette.background.paper,
 }));
 
-const PopoverMenuItem = styled(ListItemButton)<{ haschildren?: boolean }>(
-	({ theme, haschildren }) => ({
+const PopoverMenuItem = styled(ListItemButton, {
+	shouldForwardProp: (prop) => prop !== "haschildren",
+})<{ haschildren?: boolean }>(({ theme, haschildren }) => ({
 		padding: theme.spacing(1, 1.5),
 		minHeight: 36,
 		fontSize: "0.875rem",

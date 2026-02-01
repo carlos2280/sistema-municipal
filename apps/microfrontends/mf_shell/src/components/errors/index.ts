@@ -1,0 +1,1 @@
+export { MicrofrontendErrorBoundary } from "./MicrofrontendErrorBoundary";

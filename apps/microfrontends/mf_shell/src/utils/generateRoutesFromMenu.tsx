@@ -1,6 +1,7 @@
 import slugify from "slugify";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "./componentsMap";
+import { MicrofrontendErrorBoundary } from "../components/errors";
 
 interface Route {
 	path: string;
@@ -8,6 +9,10 @@ interface Route {
 	children?: Route[];
 }
 
+/**
+ * Genera rutas de React Router desde la estructura de menú de BD
+ * Envuelve cada componente en un Error Boundary para aislamiento de fallos
+ */
 export function generateRoutesFromMenu(
 	menu: MenuItem[],
 	sistemaId = 2,
@@ -15,7 +20,7 @@ export function generateRoutesFromMenu(
 	const components = componentsBySistemaId[sistemaId] ?? {};
 
 	if (!menu || menu.length === 0) {
-		console.warn("⚠️ Menu is empty, no routes will be generated");
+		console.warn("[Routes] ⚠️ Menu vacío, no se generarán rutas");
 		return [];
 	}
 
@@ -28,7 +33,7 @@ export function generateRoutesFromMenu(
 
 		if (isValidComponentKey && !foundComponent) {
 			console.warn(
-				`❌ Componente no encontrado: "${item.componente}" para sistemaId ${sistemaId}`,
+				`[Routes] ❌ Componente no encontrado: "${item.componente}" para sistemaId ${sistemaId}`,
 			);
 		}
 
@@ -37,11 +42,20 @@ export function generateRoutesFromMenu(
 			children: generateRoutesFromMenu(item.hijos, sistemaId),
 		};
 
+		// Envolver componente en Error Boundary para aislamiento de fallos
 		if (foundComponent) {
-			route.element = foundComponent;
+			route.element = (
+				<MicrofrontendErrorBoundary
+					microfrontendName={item.componente}
+					onRetry={() => {
+						// Forzar recarga del componente
+						window.location.reload();
+					}}
+				>
+					{foundComponent}
+				</MicrofrontendErrorBoundary>
+			);
 		}
-
-		console.log({ route });
 
 		return route;
 	});

@@ -5,6 +5,7 @@ import {
 	selectSistemaId,
 	useAppSelector,
 } from "mf_store/store";
+import { AppLoader } from "mf_ui/components";
 import { useEffect, useState } from "react";
 import { useMenu } from "./hook/useMenu";
 import { createAppRouter } from "./routes/createAppRouter";
@@ -50,9 +51,20 @@ function App() {
 		initializeRouter();
 	}, [menu, sistemaId, isAuthenticated]);
 
-	if (loading) return <div>Cargando menú...</div>;
-	if (error) return <div className="error">{error}</div>;
-	if (!router) return <div>No se pudo inicializar el enrutador</div>;
+	if (loading) {
+		return <AppLoader variant="branded" message="Iniciando aplicación..." />;
+	}
+	if (error) {
+		return (
+			<AppLoader
+				variant="minimal"
+				message="Error al inicializar la aplicación"
+			/>
+		);
+	}
+	if (!router) {
+		return <AppLoader variant="minimal" message="Configurando rutas..." />;
+	}
 
 	return <RouterProvider router={router} />;
 }
