@@ -25,6 +25,7 @@
     "@mui/material": "^7.1.2",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "serve": "^14.2.4"

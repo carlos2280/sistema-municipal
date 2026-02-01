@@ -21,16 +21,15 @@ export default defineConfig(({ mode }) => {
 				name: "mf_ui",
 				filename: "remoteEntry.js",
 				exposes: {
+					// Theme system completo
 					"./theme": "./src/theme/index.ts",
+					// Todos los componentes
 					"./components": "./src/components/index.ts",
+					// Componentes atómicos individuales (para tree-shaking)
+					"./atoms": "./src/components/atoms/index.ts",
+					"./molecules": "./src/components/molecules/index.ts",
 				},
-				shared: {
-					react: {},
-					"react-dom": {},
-					"@mui/material": {},
-					"@emotion/react": {},
-					"@emotion/styled": {},
-				},
+				shared: ["react", "react-dom", "@mui/material", "@emotion/react", "@emotion/styled"],
 			}),
 		],
 		build: {
