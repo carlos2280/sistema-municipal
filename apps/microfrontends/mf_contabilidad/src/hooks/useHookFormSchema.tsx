@@ -27,10 +27,6 @@ const useHookFormSchema = <T extends FieldValues>({
   const methods = useForm<T>({
     mode,
     defaultValues,
-    resetOptions: {
-      keepDirtyValues: true,
-      keepErrors: true,
-    },
     resolver: zodResolver(schema),
   });
 

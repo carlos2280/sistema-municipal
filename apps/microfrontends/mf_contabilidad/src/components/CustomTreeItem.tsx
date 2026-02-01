@@ -9,17 +9,14 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
-import type { FC, JSX } from 'react';
+import { memo, type JSX } from 'react';
 import type { TreeItemData } from '../utils/planDeCuentasUtils';
 
 interface Props {
   item: TreeItemData;
   searchTerm: string;
-  onCreate: (
-    item: TreeItemData,
-    e: React.MouseEvent<HTMLButtonElement>,
-  ) => void;
-  onEdit: (id: string, e: React.MouseEvent) => void;
+  onCreate: (item: TreeItemData) => void;
+  onEdit: (item: TreeItemData) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
   highlight: (text: string, term: string) => JSX.Element;
   expanded?: boolean;
@@ -166,7 +163,10 @@ const getAccountIcon = (codigo: string, expanded: boolean) => {
   return expanded ? <FolderOpen {...iconProps} /> : <Folder {...iconProps} />;
 };
 
-export const CustomTreeItem: FC<Props> = ({
+// Nivel máximo permitido para cuentas (no se pueden crear subcuentas de nivel 8)
+const MAX_NIVEL_CUENTA = 8;
+
+export const CustomTreeItem = memo(function CustomTreeItem({
   item,
   searchTerm,
   onCreate,
@@ -174,8 +174,10 @@ export const CustomTreeItem: FC<Props> = ({
   onDelete,
   highlight,
   expanded = false,
-}) => {
-  const showButtons = (item.tipoCuentaId ?? 0) >= 3;
+}: Props) {
+  const tipoCuentaId = item.tipoCuentaId ?? 0;
+  const showButtons = tipoCuentaId >= 3;
+  const canCreateSubcuenta = tipoCuentaId < MAX_NIVEL_CUENTA;
   const [codigo, ...nombreParts] = item.label.split(' – ');
   const nombre = nombreParts.join(' – ');
   // const hasChildren = item.children && item.children.length > 0;
@@ -201,18 +203,26 @@ export const CustomTreeItem: FC<Props> = ({
 
       {showButtons && (
         <TreeItemActions className="tree-item-actions">
-          <IconButton
-            className="create-btn"
-            size="small"
-            onClick={(e) => onCreate(item, e)}
-            title="Crear subcuenta"
-          >
-            <Plus size={14} />
-          </IconButton>
+          {canCreateSubcuenta && (
+            <IconButton
+              className="create-btn"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCreate(item);
+              }}
+              title="Crear subcuenta"
+            >
+              <Plus size={14} />
+            </IconButton>
+          )}
           <IconButton
             className="edit-btn"
             size="small"
-            onClick={(e) => onEdit(item.id, e)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(item);
+            }}
             title="Editar cuenta"
           >
             <Edit2 size={14} />
@@ -246,4 +256,4 @@ export const CustomTreeItem: FC<Props> = ({
       ))}
     </StyledTreeItem>
   );
-};
+});

@@ -63,3 +63,7 @@ mcp-servers/
 
 # NPM registry tokens
 .npmrc
+
+
+#documentacióm
+docs/

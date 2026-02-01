@@ -42,6 +42,20 @@ interface CrearPlanesCuentaRequest {
 	parentId?: number | null;
 }
 
+interface VerificarCodigoRequest {
+	anoContable: number;
+	codigo: string;
+}
+
+interface VerificarCodigoResponse {
+	existe: boolean;
+	cuenta?: {
+		id: number;
+		codigo: string;
+		nombre: string;
+	};
+}
+
 export const contabilidadApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
 		getBalanceGeneral: builder.query<{ total: number }, void>({
@@ -62,6 +76,15 @@ export const contabilidadApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["PlanCuentas"],
 		}),
+		// Verificar si un código de cuenta ya existe
+		verificarCodigoExiste: builder.query<
+			VerificarCodigoResponse,
+			VerificarCodigoRequest
+		>({
+			query: ({ anoContable, codigo }) =>
+				`contabilidad/plan-cuentas/verificar-codigo?anoContable=${anoContable}&codigo=${codigo}`,
+			providesTags: ["PlanCuentas"],
+		}),
 	}),
 	overrideExisting: false,
 });
@@ -71,4 +94,8 @@ export const {
 	useGetLibroMayorQuery,
 	useObtenerArbolCompletoQuery,
 	useCrearPlanesCuentaMutation,
+	useLazyVerificarCodigoExisteQuery,
 } = contabilidadApi;
+
+// Exportar tipos para uso externo
+export type { VerificarCodigoResponse };
