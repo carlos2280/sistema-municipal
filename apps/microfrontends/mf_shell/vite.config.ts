@@ -11,6 +11,7 @@ import { defineConfig, loadEnv } from "vite";
  * - VITE_MF_STORE_URL: URL del remoteEntry.js de mf_store
  * - VITE_MF_UI_URL: URL del remoteEntry.js de mf_ui
  * - VITE_MF_CONTABILIDAD_URL: URL del remoteEntry.js de mf_contabilidad
+ * - VITE_MF_CHAT_URL: URL del remoteEntry.js de mf_chat
  */
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), "");
@@ -22,6 +23,7 @@ export default defineConfig(({ mode }) => {
 		mf_store: env.VITE_MF_STORE_URL,
 		mf_ui: env.VITE_MF_UI_URL,
 		mf_contabilidad: env.VITE_MF_CONTABILIDAD_URL,
+		mf_chat: env.VITE_MF_CHAT_URL,
 	};
 
 	return {
@@ -39,6 +41,7 @@ export default defineConfig(({ mode }) => {
 					"@emotion/styled": {},
 					"react-redux": {},
 					"@reduxjs/toolkit": {},
+					"socket.io-client": {},
 				},
 			}),
 		],

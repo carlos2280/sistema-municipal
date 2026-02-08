@@ -3,6 +3,7 @@
 //*/
 
 export * from "./api/baseApi";
+export * from "./api/chatApi";
 export * from "./api/contabilidadApi";
 export * from "./api/tesoreriaApi";
 export * from "./api/menuApi";

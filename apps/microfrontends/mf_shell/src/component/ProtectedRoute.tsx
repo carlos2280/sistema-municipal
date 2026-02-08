@@ -1,9 +1,9 @@
-import { useAppSelector, useVerficarTokenQuery } from "mf_store/store";
+import { useAppSelector, useVerificarTokenQuery } from "mf_store/store";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
 	const { isAuthenticated } = useAppSelector((state) => state.auth);
-	const { isLoading, isError } = useVerficarTokenQuery(undefined, {
+	const { isLoading, isError } = useVerificarTokenQuery(undefined, {
 		skip: isAuthenticated,
 		refetchOnReconnect: true,
 	});

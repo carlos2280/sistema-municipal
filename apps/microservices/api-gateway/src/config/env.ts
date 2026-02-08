@@ -8,6 +8,7 @@ const envSchema = z.object({
   AUTH_URL: z.string().url(),
   IDENTITY_URL: z.string().url(),
   CONTABILIDAD_URL: z.string().url(),
+  CHAT_URL: z.string().url(),
   NODE_ENV: z.string().min(1),
 });
 

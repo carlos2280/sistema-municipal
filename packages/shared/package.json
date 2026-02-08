@@ -22,10 +22,14 @@
     "./database/contabilidad": {
       "types": "./dist/database/contabilidad/schemas/index.d.ts",
       "import": "./dist/database/contabilidad/schemas/index.js"
+    },
+    "./database/mensajeria": {
+      "types": "./dist/database/mensajeria/schemas/index.d.ts",
+      "import": "./dist/database/mensajeria/schemas/index.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/database/index.ts src/database/identidad/index.ts src/database/contabilidad/schemas/index.ts --format esm --dts --clean",
+    "build": "tsup src/index.ts src/database/index.ts src/database/identidad/index.ts src/database/contabilidad/schemas/index.ts src/database/mensajeria/schemas/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts src/database/index.ts --format esm --dts --watch",
     "seed": "tsx src/seeders/index.ts",
     "migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",

@@ -41,12 +41,13 @@ export const authApi = createApi({
 			}),
 			async onQueryStarted(args, { dispatch, queryFulfilled }) {
 				try {
-					await queryFulfilled;
+					const { data } = await queryFulfilled;
 					dispatch(
 						tokenReceived({
 							accessToken: "cookie",
 							sistemaId: args.sistemaId,
 							areaId: args.areaId,
+							usuarioId: data.usuario.id,
 						}),
 					);
 				} catch {
@@ -55,20 +56,22 @@ export const authApi = createApi({
 			},
 		}),
 
-		verficarToken: builder.query<void, void>({
-			query: () => "/autorizacion/verficar-token",
+		verificarToken: builder.query<void, void>({
+			query: () => "/autorizacion/verificar-token",
 			async onQueryStarted(_, { dispatch, queryFulfilled }) {
 				try {
 					await queryFulfilled;
-					// Recuperar sistemaId y areaId del localStorage
+					// Recuperar datos del localStorage
 					const sistemaId = localStorage.getItem("sistemaId");
 					const areaId = localStorage.getItem("areaId");
+					const usuarioId = localStorage.getItem("usuarioId");
 
 					dispatch(
 						tokenReceived({
 							accessToken: "cookie",
 							sistemaId: sistemaId ? Number(sistemaId) : undefined,
 							areaId: areaId ? Number(areaId) : undefined,
+							usuarioId: usuarioId ? Number(usuarioId) : undefined,
 						}),
 					);
 				} catch {
@@ -104,7 +107,7 @@ export const {
 	useLoginAreasMutation,
 	useLoginMutation,
 	useLoginSistemasMutation,
-	useVerficarTokenQuery,
+	useVerificarTokenQuery,
 	useContrasenaTemporalQuery,
 	useCambiarContrasenaTemporalMutation,
 } = authApi;

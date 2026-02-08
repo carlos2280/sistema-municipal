@@ -5,6 +5,7 @@ interface AuthState {
 	isAuthenticated: boolean;
 	sistemaId: number | null;
 	areaId: number | null;
+	usuarioId: number | null;
 }
 
 const initialState: AuthState = {
@@ -12,6 +13,7 @@ const initialState: AuthState = {
 	isAuthenticated: false,
 	sistemaId: null,
 	areaId: null,
+	usuarioId: null,
 };
 
 const authSlice = createSlice({
@@ -24,19 +26,22 @@ const authSlice = createSlice({
 				accessToken: string;
 				sistemaId?: number;
 				areaId?: number;
+				usuarioId?: number;
 			}>,
 		) => {
 			state.accessToken = action.payload.accessToken;
 			state.isAuthenticated = true;
 			if (action.payload.sistemaId) {
 				state.sistemaId = action.payload.sistemaId;
-				// Guardar en localStorage
 				localStorage.setItem("sistemaId", String(action.payload.sistemaId));
 			}
 			if (action.payload.areaId) {
 				state.areaId = action.payload.areaId;
-				// Guardar en localStorage
 				localStorage.setItem("areaId", String(action.payload.areaId));
+			}
+			if (action.payload.usuarioId) {
+				state.usuarioId = action.payload.usuarioId;
+				localStorage.setItem("usuarioId", String(action.payload.usuarioId));
 			}
 		},
 		loggedOut: (state) => {
@@ -44,9 +49,10 @@ const authSlice = createSlice({
 			state.isAuthenticated = false;
 			state.sistemaId = null;
 			state.areaId = null;
-			// Limpiar localStorage
+			state.usuarioId = null;
 			localStorage.removeItem("sistemaId");
 			localStorage.removeItem("areaId");
+			localStorage.removeItem("usuarioId");
 		},
 	},
 });
@@ -57,6 +63,8 @@ export const { tokenReceived, loggedOut } = authSlice.actions;
 export const selectSistemaId = (state: { auth: AuthState }) =>
 	state.auth.sistemaId;
 export const selectAreaId = (state: { auth: AuthState }) => state.auth.areaId;
+export const selectUsuarioId = (state: { auth: AuthState }) =>
+	state.auth.usuarioId;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
 	state.auth.isAuthenticated;
 

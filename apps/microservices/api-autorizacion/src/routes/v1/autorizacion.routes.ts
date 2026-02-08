@@ -12,6 +12,7 @@ router
   .post("/refresh-token", controller.refreshToken)
 
   // Rutas protegidas (requieren JWT)
+  .get("/verificar-token", verificarToken, controller.verificarToken)
   .post("/logout", verificarToken, controller.logout)
   .get("/menu-sistema/", verificarToken, controller.obtenerMenuporSistema)
   .get("/me", verificarToken, controller.me)

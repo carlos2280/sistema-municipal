@@ -14,10 +14,45 @@ import {
 const SISTEMA_MODULE_MAP: Record<number, string> = {
 	1: "mf_contabilidad",
 	2: "mf_contabilidad",
+	// Chat es un módulo transversal (no asociado a un sistema específico)
+	// Se carga bajo demanda cuando se abre el panel de chat
 	// Agregar más sistemas según se necesiten:
 	// 3: "mf_rrhh",
 	// 4: "mf_tesoreria",
 };
+
+// Loader para módulo de chat (transversal)
+export async function loadChatModule() {
+	try {
+		const chatRoutes = await import("mf_chat/routes");
+		return chatRoutes.default;
+	} catch (error) {
+		console.error("[MF Registry] Error cargando mf_chat:", error);
+		return null;
+	}
+}
+
+// Loader para ChatPanel (componente standalone)
+export async function loadChatPanel() {
+	try {
+		const { ChatPanel } = await import("mf_chat/ChatPanel");
+		return ChatPanel;
+	} catch (error) {
+		console.error("[MF Registry] Error cargando ChatPanel:", error);
+		return null;
+	}
+}
+
+// Loader para ChatButton (botón de header)
+export async function loadChatButton() {
+	try {
+		const { ChatButton } = await import("mf_chat/ChatButton");
+		return ChatButton;
+	} catch (error) {
+		console.error("[MF Registry] Error cargando ChatButton:", error);
+		return null;
+	}
+}
 
 export async function loadMicrofrontComponents(
 	sistemaId: number
