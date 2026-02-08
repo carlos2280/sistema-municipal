@@ -164,7 +164,13 @@ export const refreshToken: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const validateToken: RequestHandler = async (_req, _res, _next) => {};
+export const verificarToken: RequestHandler = async (req, res, _next) => {
+  // Si llegamos aquí, el middleware verificarToken ya validó el token
+  res.status(200).json({
+    valid: true,
+    user: req.user,
+  });
+};
 
 export const me: RequestHandler = async (req, res, next) => {
   try {

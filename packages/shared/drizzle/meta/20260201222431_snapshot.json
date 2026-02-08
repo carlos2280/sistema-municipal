@@ -1,5 +1,5 @@
 {
-  "id": "f9ae3ab6-4f06-400a-9a6e-260f62904a8f",
+  "id": "d1e29572-f532-4a7d-a97d-be24ea2228cc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -219,7 +219,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_perfil_area_usuario_uid": {
+          "name": "idx_perfil_area_usuario_uid",
+          "columns": [
+            {
+              "expression": "usuario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "perfil_area_usuario_perfil_id_perfiles_id_fk": {
           "name": "perfil_area_usuario_perfil_id_perfiles_id_fk",
@@ -266,8 +282,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "perfil_area_usuario_perfil_id_area_id_usuario_id_unique": {
-          "name": "perfil_area_usuario_perfil_id_area_id_usuario_id_unique",
+        "uq_perfil_area_usuario": {
+          "name": "uq_perfil_area_usuario",
           "nullsNotDistinct": false,
           "columns": [
             "perfil_id",
@@ -411,7 +427,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_menu_sistema": {
+          "name": "idx_menu_sistema",
+          "columns": [
+            {
+              "expression": "id_sistema",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_menu_padre": {
+          "name": "idx_menu_padre",
+          "columns": [
+            {
+              "expression": "id_padre",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "menu_id_sistema_sistemas_id_fk": {
           "name": "menu_id_sistema_sistemas_id_fk",
@@ -671,13 +718,13 @@
           "name": "sistema_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "perfil_id": {
           "name": "perfil_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -694,7 +741,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_sistema_perfil": {
+          "name": "idx_sistema_perfil",
+          "columns": [
+            {
+              "expression": "sistema_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "perfil_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "sistema_perfil_sistema_id_sistemas_id_fk": {
           "name": "sistema_perfil_sistema_id_sistemas_id_fk",
@@ -726,13 +795,67 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "uq_sistema_perfil": {
+          "name": "uq_sistema_perfil",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sistema_id",
+            "perfil_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
     "contabilidad.tipos_cuentas": {
       "name": "tipos_cuentas",
+      "schema": "contabilidad",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "codigo": {
+          "name": "codigo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "contabilidad.titulos_cuentas": {
+      "name": "titulos_cuentas",
       "schema": "contabilidad",
       "columns": {
         "id": {
@@ -935,7 +1058,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_planes_codigo": {
+          "name": "idx_planes_codigo",
+          "columns": [
+            {
+              "expression": "codigo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_planes_ano": {
+          "name": "idx_planes_ano",
+          "columns": [
+            {
+              "expression": "ano_contable",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_planes_tipo_cuenta": {
+          "name": "idx_planes_tipo_cuenta",
+          "columns": [
+            {
+              "expression": "tipo_cuenta_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "planes_cuentas_tipo_cuenta_id_tipos_cuentas_id_fk": {
           "name": "planes_cuentas_tipo_cuenta_id_tipos_cuentas_id_fk",
@@ -981,6 +1150,366 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "uq_cuenta_ano_codigo": {
+          "name": "uq_cuenta_ano_codigo",
+          "nullsNotDistinct": false,
+          "columns": [
+            "ano_contable",
+            "codigo"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "mensajeria.conversaciones": {
+      "name": "conversaciones",
+      "schema": "mensajeria",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creador_id": {
+          "name": "creador_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "mensajeria.participantes": {
+      "name": "participantes",
+      "schema": "mensajeria",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "conversacion_id": {
+          "name": "conversacion_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rol": {
+          "name": "rol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'miembro'"
+        },
+        "silenciado": {
+          "name": "silenciado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "ultima_lectura": {
+          "name": "ultima_lectura",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "participantes_conversacion_id_conversaciones_id_fk": {
+          "name": "participantes_conversacion_id_conversaciones_id_fk",
+          "tableFrom": "participantes",
+          "tableTo": "conversaciones",
+          "schemaTo": "mensajeria",
+          "columnsFrom": [
+            "conversacion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "mensajeria.mensajes": {
+      "name": "mensajes",
+      "schema": "mensajeria",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "conversacion_id": {
+          "name": "conversacion_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remitente_id": {
+          "name": "remitente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contenido": {
+          "name": "contenido",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'texto'"
+        },
+        "reply_to_id": {
+          "name": "reply_to_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editado": {
+          "name": "editado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "eliminado": {
+          "name": "eliminado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "mensajes_conversacion_id_conversaciones_id_fk": {
+          "name": "mensajes_conversacion_id_conversaciones_id_fk",
+          "tableFrom": "mensajes",
+          "tableTo": "conversaciones",
+          "schemaTo": "mensajeria",
+          "columnsFrom": [
+            "conversacion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "mensajeria.archivos": {
+      "name": "archivos",
+      "schema": "mensajeria",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mensaje_id": {
+          "name": "mensaje_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tamanio": {
+          "name": "tamanio",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "thumbnail_url": {
+          "name": "thumbnail_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "archivos_mensaje_id_mensajes_id_fk": {
+          "name": "archivos_mensaje_id_mensajes_id_fk",
+          "tableFrom": "archivos",
+          "tableTo": "mensajes",
+          "schemaTo": "mensajeria",
+          "columnsFrom": [
+            "mensaje_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "mensajeria.estado_usuarios": {
+      "name": "estado_usuarios",
+      "schema": "mensajeria",
+      "columns": {
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'offline'"
+        },
+        "ultima_conexion": {
+          "name": "ultima_conexion",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "socket_id": {
+          "name": "socket_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -988,7 +1517,11 @@
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "contabilidad": "contabilidad",
+    "identidad": "identidad",
+    "mensajeria": "mensajeria"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

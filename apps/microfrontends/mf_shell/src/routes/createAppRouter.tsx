@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../component/ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
+import ChatPage from "../pages/ChatPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
 import Login from "../pages/login/Login";
 import type { MenuItem } from "../types/menu";
@@ -52,6 +53,14 @@ export const createAppRouter = async ({ menuData, sistemaId }: Props) => {
 						{
 							index: true,
 							element: <DashboardPage />,
+						},
+						{
+							path: "chat",
+							element: <ChatPage />,
+						},
+						{
+							path: "chat/:conversacionId",
+							element: <ChatPage />,
 						},
 						...dynamicRoutes,
 					],

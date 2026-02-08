@@ -9,3 +9,6 @@ export const identidadSchema = pgSchema("identidad");
 
 // Esquema para el módulo de contabilidad (planes de cuentas, etc.)
 export const contabilidadSchema = pgSchema("contabilidad");
+
+// Esquema para el módulo de mensajería/chat
+export const mensajeriaSchema = pgSchema("mensajeria");

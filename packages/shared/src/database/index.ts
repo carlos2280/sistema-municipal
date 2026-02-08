@@ -6,3 +6,6 @@ export * from "./identidad";
 
 // Módulo de contabilidad
 export * from "./contabilidad";
+
+// Módulo de mensajería
+export * from "./mensajeria";

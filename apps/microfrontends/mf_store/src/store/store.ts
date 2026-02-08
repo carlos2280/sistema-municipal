@@ -23,7 +23,7 @@ const menuPersistConfig = {
 const authPersistConfig = {
 	key: "autorizacion",
 	storage: storageSession,
-	whitelist: ["isAuthenticated", "sistemaId", "areaId"],
+	whitelist: ["isAuthenticated", "sistemaId", "areaId", "usuarioId"],
 };
 const rootReducer = combineReducers({
 	[authApi.reducerPath]: authApi.reducer,

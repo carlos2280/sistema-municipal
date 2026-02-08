@@ -53,18 +53,20 @@ install: ## Instala dependencias del proyecto
 
 dev: dev-infra ## Inicia entorno de desarrollo (infra + apps en orden)
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
-	@echo "$(CYAN)Orden: 1) APIs + shared  2) MFs remotos  3) Shell$(NC)"
-	@npx concurrently -k -n "shared,gateway,api-id,api-auth,api-cont,mf-store,mf-ui,mf-cont,shell" \
-		-c "gray,blue,blue,blue,blue,green,green,green,yellow" \
+	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs  3) MFs remotos  4) Shell$(NC)"
+	@npx concurrently -k -n "shared,gateway,api-id,api-auth,api-cont,api-chat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
+		-c "gray,blue,blue,blue,blue,magenta,green,green,green,cyan,yellow" \
 		"pnpm --filter @municipal/shared dev" \
-		"pnpm --filter gateway dev" \
-		"pnpm --filter api-identidad dev" \
-		"pnpm --filter api-autorizacion dev" \
-		"pnpm --filter api-contabilidad dev" \
-		"sleep 3 && pnpm --filter mf-store dev" \
-		"sleep 3 && pnpm --filter mf-ui dev" \
-		"sleep 3 && pnpm --filter mf-contabilidad dev" \
-		"sleep 8 && pnpm --filter mf-shell dev"
+		"sleep 2 && pnpm --filter gateway dev" \
+		"sleep 2 && pnpm --filter api-identidad dev" \
+		"sleep 2 && pnpm --filter api-autorizacion dev" \
+		"sleep 2 && pnpm --filter api-contabilidad dev" \
+		"sleep 2 && pnpm --filter api-chat dev" \
+		"sleep 5 && pnpm --filter mf-store dev" \
+		"sleep 5 && pnpm --filter mf-ui dev" \
+		"sleep 5 && pnpm --filter mf-contabilidad dev" \
+		"sleep 5 && pnpm --filter mf-chat dev" \
+		"sleep 10 && pnpm --filter mf-shell dev"
 
 dev-turbo: dev-infra ## Inicia con turbo (sin orden garantizado)
 	@echo "$(GREEN)Iniciando aplicaciones con turbo...$(NC)"
@@ -108,6 +110,8 @@ db-reset: ## Resetea la base de datos (DROP + CREATE + MIGRATE + SEED)
 	@echo "$(RED)⚠️  Esto eliminará todos los datos. ¿Continuar? [y/N]$(NC)"
 	@read -r confirm && [ "$$confirm" = "y" ] || exit 1
 	@echo "$(YELLOW)Reseteando base de datos...$(NC)"
+	@echo "$(YELLOW)Terminando conexiones activas...$(NC)"
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'municipal' AND pid <> pg_backend_pid();" || true
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "DROP DATABASE IF EXISTS municipal;"
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "CREATE DATABASE municipal;"
 	@make db-migrate
@@ -242,3 +246,10 @@ dev-contabilidad: dev-infra ## Desarrollo solo del módulo contabilidad
 dev-shell: dev-infra ## Desarrollo solo del shell
 	@echo "$(GREEN)Iniciando shell...$(NC)"
 	pnpm --filter mf-shell dev
+
+dev-chat: dev-infra ## Desarrollo solo del módulo chat
+	@echo "$(GREEN)Iniciando módulo chat...$(NC)"
+	@npx concurrently -k -n "api-chat,mf-chat" \
+		-c "magenta,cyan" \
+		"pnpm --filter api-chat dev" \
+		"pnpm --filter mf-chat dev"

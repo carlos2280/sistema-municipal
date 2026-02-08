@@ -17,6 +17,44 @@ declare module "mf_contabilidad/routes" {
 	export default routes;
 }
 
+declare module "mf_chat/routes" {
+	import type { RouteObject } from "react-router-dom";
+	const routes: RouteObject[];
+	export default routes;
+}
+
+declare module "mf_chat/ChatPanel" {
+	import type { FC } from "react";
+	interface ChatPanelProps {
+		activeConversationId?: number;
+	}
+	export const ChatPanel: FC<ChatPanelProps>;
+}
+
+declare module "mf_chat/ChatButton" {
+	import type { FC } from "react";
+	interface ChatButtonProps {
+		unreadCount?: number;
+		onClick?: () => void;
+	}
+	export const ChatButton: FC<ChatButtonProps>;
+}
+
+declare module "mf_chat/components" {
+	import type { FC } from "react";
+	export const ChatPage: FC;
+	export const VideoCallPage: FC;
+}
+
+declare module "mf_chat/ChatDrawer" {
+	import type { FC } from "react";
+	interface ChatDrawerProps {
+		open: boolean;
+		onClose: () => void;
+	}
+	export const ChatDrawer: FC<ChatDrawerProps>;
+}
+
 // declare module "mf_store/store" {
 // 	import type { Store } from "redux";
 // 	import type { Persistor } from "redux-persist";

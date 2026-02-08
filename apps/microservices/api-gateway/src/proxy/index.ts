@@ -28,6 +28,12 @@ export const configureProxies = (app: Express) => {
       pathRewrite: "/api/v1",
       timeout: 10000,
     },
+    chat: {
+      baseUrl: env.CHAT_URL,
+      path: "/api/v1/chat",
+      pathRewrite: "/api/chat/v1",
+      timeout: 30000,
+    },
     autorizacion: {
       baseUrl: env.AUTH_URL,
       path: "/api/v1/autorizacion",

@@ -20,18 +20,18 @@ function App() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Si está autenticado pero aún no tiene menu/sistemaId, seguir esperando
+	const isWaitingForAuthData = isAuthenticated && (!sistemaId || !menu);
+
 	useEffect(() => {
+		// No crear router mientras esperamos datos de autenticación
+		if (isWaitingForAuthData) {
+			return;
+		}
+
 		const initializeRouter = async () => {
 			try {
 				setLoading(true);
-
-				// Si está autenticado, esperar a que haya sistemaId y menú antes de crear router
-				if (isAuthenticated) {
-					if (!sistemaId || !menu) {
-						setLoading(false);
-						return;
-					}
-				}
 
 				// Crear el router
 				// - Si NO está autenticado: crea router básico (solo login)
@@ -42,6 +42,7 @@ function App() {
 				});
 				setRouter(routerInstance);
 			} catch (err) {
+				console.error("[App] Error creando router:", err);
 				setError("Failed to initialize application");
 			} finally {
 				setLoading(false);
@@ -49,8 +50,12 @@ function App() {
 		};
 
 		initializeRouter();
-	}, [menu, sistemaId, isAuthenticated]);
+	}, [menu, sistemaId, isAuthenticated, isWaitingForAuthData]);
 
+	// Mostrar loader mientras esperamos datos de autenticación
+	if (isWaitingForAuthData) {
+		return <AppLoader variant="branded" message="Cargando datos del usuario..." />;
+	}
 	if (loading) {
 		return <AppLoader variant="branded" message="Iniciando aplicación..." />;
 	}

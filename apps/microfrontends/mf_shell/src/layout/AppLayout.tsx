@@ -38,6 +38,8 @@ import MainMenu from "../component/mainMenu/MainMenu";
 import AccountMenu from "./AccountMenu";
 import CustomizedMenus from "./CustomizedMenus";
 import { EconomicIndicatorsExamples } from "./EconomicIndicatorsExamples";
+import { HeaderChatButton } from "../components/HeaderChatButton";
+import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
 import { useTheme as useAppTheme } from "mf_ui/theme";
 
@@ -229,9 +231,14 @@ export default function AppLayout() {
 
 	const [drawerOpen, setDrawerOpen] = useState(!isMobile);
 	const [customizerOpen, setCustomizerOpen] = useState(false);
+	const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
 
 	const handleDrawerToggle = () => {
 		setDrawerOpen(!drawerOpen);
+	};
+
+	const handleChatToggle = () => {
+		setChatDrawerOpen(!chatDrawerOpen);
 	};
 
 	// Seleccionar el logo apropiado según el modo
@@ -251,6 +258,9 @@ export default function AppLayout() {
 
 					<Stack direction="row" alignItems="center" spacing={1}>
 						<EconomicIndicatorsExamples />
+
+						{/* Botón de Chat */}
+						<HeaderChatButton onClick={handleChatToggle} unreadCount={3} />
 
 						{/* Botón de personalización de tema */}
 						<Tooltip title="Personalizar tema" arrow>
@@ -353,6 +363,12 @@ export default function AppLayout() {
 			<ThemeCustomizer
 				open={customizerOpen}
 				onClose={() => setCustomizerOpen(false)}
+			/>
+
+			{/* Chat Drawer */}
+			<ChatDrawerWrapper
+				open={chatDrawerOpen}
+				onClose={() => setChatDrawerOpen(false)}
 			/>
 		</Box>
 	);
