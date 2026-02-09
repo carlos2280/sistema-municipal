@@ -1,0 +1,9 @@
+# Documentos generados (regenerables)
+*.docx
+*.pdf
+!templates/*.docx
+
+# Archivos temporales
+*.tmp
+*.temp
+~$*.docx
