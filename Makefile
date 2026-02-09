@@ -200,8 +200,8 @@ status-infra: ## Muestra estado de infraestructura
 	@echo ""
 	@echo "$(CYAN)URLs:$(NC)"
 	@echo "  PostgreSQL:  localhost:5434"
-	@echo "  Redis:       localhost:6379"
-	@echo "  Mailhog UI:  http://localhost:8025"
+	@echo "  Redis:       localhost:6380"
+	@echo "  Mailhog UI:  http://localhost:8026"
 	@echo ""
 
 logs: ## Muestra logs de todos los servicios
