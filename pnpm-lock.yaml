@@ -53,6 +53,9 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      emoji-picker-react:
+        specifier: ^4.18.0
+        version: 4.18.0(react@19.2.3)
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.2.3)
@@ -3774,6 +3777,12 @@ packages:
   electron-to-chromium@1.5.267:
     resolution: {integrity: sha512-0Drusm6MVRXSOJpGbaSVgcQsuB4hEkMpHXaVstcPmhu5LIedxs1xNK/nIxmQIU/RPC0+1/o0AVZfBTkTNJOdUw==}
 
+  emoji-picker-react@4.18.0:
+    resolution: {integrity: sha512-vLTrLfApXAIciguGE57pXPWs9lPLBspbEpPMiUq03TIli2dHZBiB+aZ0R9/Wat0xmTfcd4AuEzQgSYxEZ8C88Q==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
 
@@ -3999,6 +4008,9 @@ packages:
 
   fix-dts-default-cjs-exports@1.0.1:
     resolution: {integrity: sha512-pVIECanWFC61Hzl2+oOCtoJ3F17kglZC/6N94eRWycFgBH35hHx0Li604ZIzhseh97mf2p0cv7vVrOZGoqhlEg==}
+
+  flairup@1.0.0:
+    resolution: {integrity: sha512-IKlE+pNvL2R+kVL1kEhUYqRxVqeFnjiIvHWDMLFXNaqyUdFXQM2wte44EfMYJNHkW16X991t2Zg8apKkhv7OBA==}
 
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
@@ -9126,6 +9138,11 @@ snapshots:
 
   electron-to-chromium@1.5.267: {}
 
+  emoji-picker-react@4.18.0(react@19.2.3):
+    dependencies:
+      flairup: 1.0.0
+      react: 19.2.3
+
   emoji-regex@10.6.0: {}
 
   emoji-regex@8.0.0: {}
@@ -9524,6 +9541,8 @@ snapshots:
       magic-string: 0.30.21
       mlly: 1.8.0
       rollup: 4.55.1
+
+  flairup@1.0.0: {}
 
   flatted@3.3.3: {}
 

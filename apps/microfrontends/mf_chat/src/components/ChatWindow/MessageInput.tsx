@@ -1,10 +1,13 @@
 import Box from '@mui/material/Box'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
 import IconButton from '@mui/material/IconButton'
+import Popper from '@mui/material/Popper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
+import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { Image, Paperclip, Send, Smile } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 interface MessageInputProps {
   onSendMessage: (contenido: string) => void
@@ -22,6 +25,9 @@ export function MessageInput({
   const theme = useTheme()
   const [mensaje, setMensaje] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const emojiAnchorRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMensaje(e.target.value)
@@ -57,6 +63,13 @@ export function MessageInput({
     }
   }
 
+  const handleEmojiClick = useCallback((emojiData: EmojiClickData) => {
+    setMensaje((prev) => prev + emojiData.emoji)
+    inputRef.current?.focus()
+  }, [])
+
+  const emojiTheme = theme.palette.mode === 'dark' ? Theme.DARK : Theme.LIGHT
+
   return (
     <Box
       sx={{
@@ -78,6 +91,7 @@ export function MessageInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={disabled}
+          inputRef={inputRef}
           sx={{
             '& .MuiOutlinedInput-root': {
               bgcolor: theme.palette.action.hover,
@@ -142,12 +156,14 @@ export function MessageInput({
           <Typography sx={{ fontSize: 12 }}>Imagen</Typography>
         </Box>
         <Box
+          ref={emojiAnchorRef}
+          onClick={() => setShowEmojiPicker((prev) => !prev)}
           sx={{
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
             cursor: 'pointer',
-            color: 'text.secondary',
+            color: showEmojiPicker ? 'primary.main' : 'text.secondary',
             '&:hover': { color: 'primary.main' },
           }}
         >
@@ -155,6 +171,28 @@ export function MessageInput({
           <Typography sx={{ fontSize: 12 }}>Emoji</Typography>
         </Box>
       </Box>
+
+      {/* Emoji Picker */}
+      <Popper
+        open={showEmojiPicker}
+        anchorEl={emojiAnchorRef.current}
+        placement="top-end"
+        sx={{ zIndex: 1400 }}
+      >
+        <ClickAwayListener onClickAway={() => setShowEmojiPicker(false)}>
+          <Box sx={{ boxShadow: 8, borderRadius: 2, overflow: 'hidden' }}>
+            <EmojiPicker
+              theme={emojiTheme}
+              onEmojiClick={handleEmojiClick}
+              searchPlaceHolder="Buscar emoji..."
+              width={350}
+              height={400}
+              previewConfig={{ showPreview: false }}
+              lazyLoadEmojis
+            />
+          </Box>
+        </ClickAwayListener>
+      </Popper>
     </Box>
   )
 }
