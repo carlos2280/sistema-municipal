@@ -14,7 +14,8 @@ import {
   selectUsuarioId,
   useAppSelector,
 } from 'mf_store/store'
-import { useConversaciones, useOnlineUsers } from '../../hooks'
+import { useCall, useConversaciones, useOnlineUsers } from '../../hooks'
+import { CallModal, IncomingCallDialog } from '../Call'
 import { ChatPanel } from '../ChatPanel/ChatPanel'
 import { ChatWindow } from '../ChatWindow/ChatWindow'
 import { MembersPanel } from '../ChatWindow/MembersPanel'
@@ -54,6 +55,9 @@ export function ChatDrawer({
   // Hook de usuarios online
   const { onlineUsers } = useOnlineUsers()
   const onlineUsersArray = useMemo(() => Array.from(onlineUsers), [onlineUsers])
+
+  // Hook de llamadas
+  const { callState, initiateCall, acceptCall, rejectCall, endCall } = useCall()
 
   const [crearConversacionDirecta, { isLoading: isCreatingDirecta }] =
     useCrearConversacionDirectaMutation()
@@ -149,6 +153,20 @@ export function ChatDrawer({
     setSearchTerm(term)
   }
 
+  const handleVoiceCall = useCallback(
+    (conversacionId: number) => {
+      initiateCall(conversacionId, 'voz')
+    },
+    [initiateCall]
+  )
+
+  const handleVideoCall = useCallback(
+    (conversacionId: number) => {
+      initiateCall(conversacionId, 'video')
+    },
+    [initiateCall]
+  )
+
   const renderContent = () => {
     switch (view) {
       case 'members':
@@ -172,6 +190,8 @@ export function ChatDrawer({
             onBack={handleBack}
             onClose={onClose}
             onShowMembers={handleShowMembers}
+            onVoiceCall={handleVoiceCall}
+            onVideoCall={handleVideoCall}
           />
         ) : null
 
@@ -226,6 +246,17 @@ export function ChatDrawer({
       }}
     >
       {renderContent()}
+
+      <CallModal
+        callState={callState}
+        onEndCall={endCall}
+      />
+
+      <IncomingCallDialog
+        callState={callState}
+        onAccept={acceptCall}
+        onReject={rejectCall}
+      />
 
       <Menu
         anchorEl={menuAnchor}

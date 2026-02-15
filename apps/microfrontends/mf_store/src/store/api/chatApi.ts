@@ -76,6 +76,28 @@ export interface MensajesResponse {
 	nextCursor?: string;
 }
 
+// ============ LLAMADAS TIPOS ============
+
+export interface Llamada {
+	id: number;
+	conversacionId: number;
+	iniciadoPor: number;
+	tipo: "voz" | "video";
+	estado: "sonando" | "activa" | "finalizada" | "rechazada" | "sin_respuesta";
+	livekitRoom: string;
+	duracionSegundos?: number;
+	participantesIds?: string;
+	iniciadaEn: string;
+	finalizadaEn?: string;
+	createdAt: string;
+}
+
+export interface CallTokenResponse {
+	token: string;
+	livekitUrl: string;
+	roomName: string;
+}
+
 // ============ REQUESTS ============
 
 export interface CrearConversacionDirectaRequest {
@@ -328,6 +350,26 @@ export const chatApi = baseApi.injectEndpoints({
 			}) => response.data,
 			invalidatesTags: ["Conversaciones"],
 		}),
+		// Llamadas
+		obtenerHistorialLlamadas: builder.query<Llamada[], number>({
+			query: (conversacionId) =>
+				`chat/conversaciones/${conversacionId}/llamadas`,
+			transformResponse: (response: {
+				success: boolean;
+				data: Llamada[];
+			}) => response.data,
+			providesTags: (_result, _error, conversacionId) => [
+				{ type: "Llamadas", id: conversacionId },
+			],
+		}),
+
+		obtenerTokenLlamada: builder.query<CallTokenResponse, number>({
+			query: (llamadaId) => `chat/llamadas/${llamadaId}/token`,
+			transformResponse: (response: {
+				success: boolean;
+				data: CallTokenResponse;
+			}) => response.data,
+		}),
 	}),
 	overrideExisting: false,
 });
@@ -357,4 +399,7 @@ export const {
 	// Grupos
 	useRenombrarGrupoMutation,
 	useSincronizarGruposSistemaMutation,
+	// Llamadas
+	useObtenerHistorialLlamadasQuery,
+	useLazyObtenerTokenLlamadaQuery,
 } = chatApi;
