@@ -125,7 +125,8 @@ export const logout: RequestHandler = async (_req, res, _next) => {
 export const refreshToken: RequestHandler = async (req, res, next) => {
   try {
     // Intentar obtener refresh token del body o de la cookie
-    const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+    // Express 5: req.body es undefined si no hay body JSON
+    const refreshToken = req.body?.refreshToken || req.cookies?.refreshToken;
 
     if (!refreshToken) {
       return res.status(401).json({
