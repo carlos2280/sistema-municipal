@@ -55,6 +55,26 @@ services:
       - municipal-network
 
   # ============================================
+  # LiveKit - Media server para llamadas de voz/video
+  # ============================================
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: municipal-livekit
+    restart: unless-stopped
+    ports:
+      - "${LIVEKIT_PORT:-7880}:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+    volumes:
+      - ./infra/livekit.yaml:/etc/livekit.yaml
+    command: --config /etc/livekit.yaml
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - municipal-network
+
+  # ============================================
   # Mailhog - Testing de emails (solo dev)
   # ============================================
   mailhog:

@@ -15,6 +15,8 @@ interface ChatHeaderProps {
   onBack?: () => void
   onClose?: () => void
   onShowMembers?: () => void
+  onVoiceCall?: () => void
+  onVideoCall?: () => void
 }
 
 function getAvatarColor(name: string): string {
@@ -40,13 +42,11 @@ export function ChatHeader({
   onBack,
   onClose,
   onShowMembers,
+  onVoiceCall,
+  onVideoCall,
 }: ChatHeaderProps) {
   const displayName = nombre || `Conversación ${conversacionId}`
   const isOnline = online ?? false
-
-  const handleVideoCall = () => {
-    console.log('Iniciar videollamada')
-  }
 
   return (
     <Box
@@ -154,6 +154,7 @@ export function ChatHeader({
           size="small"
           sx={{ color: 'text.secondary' }}
           title="Llamada de voz"
+          onClick={onVoiceCall}
         >
           <Phone size={20} />
         </IconButton>
@@ -161,7 +162,7 @@ export function ChatHeader({
           size="small"
           sx={{ color: 'text.secondary' }}
           title="Videollamada"
-          onClick={handleVideoCall}
+          onClick={onVideoCall}
         >
           <Video size={20} />
         </IconButton>

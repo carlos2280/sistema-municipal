@@ -8,6 +8,9 @@ export const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5000'),
   MAX_FILE_SIZE: z.string().default('10485760'),
   UPLOAD_DIR: z.string().default('./uploads'),
+  LIVEKIT_URL: z.string().default('ws://localhost:7880'),
+  LIVEKIT_API_KEY: z.string().min(1),
+  LIVEKIT_API_SECRET: z.string().min(1),
 })
 
 export type Env = z.infer<typeof envSchema>

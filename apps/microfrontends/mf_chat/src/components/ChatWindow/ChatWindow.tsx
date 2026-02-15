@@ -13,6 +13,8 @@ interface ChatWindowProps {
   onBack?: () => void
   onClose?: () => void
   onShowMembers?: () => void
+  onVoiceCall?: (conversacionId: number) => void
+  onVideoCall?: (conversacionId: number) => void
 }
 
 export function ChatWindow({
@@ -21,6 +23,8 @@ export function ChatWindow({
   onBack,
   onClose,
   onShowMembers,
+  onVoiceCall,
+  onVideoCall,
 }: ChatWindowProps) {
   const {
     mensajes,
@@ -104,6 +108,8 @@ export function ChatWindow({
         onBack={onBack}
         onClose={onClose}
         onShowMembers={conversacionInfo?.esGrupo ? onShowMembers : undefined}
+        onVoiceCall={() => onVoiceCall?.(conversacionId)}
+        onVideoCall={() => onVideoCall?.(conversacionId)}
       />
 
       {isLoading ? (
