@@ -1,12 +1,15 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ClientRequest } from "node:http";
+import { X_USER_HEADERS } from "@municipal/shared/auth";
 import type { Express } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import type { GatewayUserPayload } from "../middleware/auth";
 import { env } from "../config/env";
 import { logger } from "../logger";
 
 interface RequestWithBody extends IncomingMessage {
   body?: unknown;
+  __gatewayUser?: GatewayUserPayload;
 }
 
 interface ServiceConfig {
@@ -95,6 +98,21 @@ export const configureProxies = (app: Express) => {
               "X-Forwarded-Proto",
               isProduction ? "https" : "http",
             );
+            // Inyectar datos del usuario autenticado como headers internos
+            const reqWithUser = req as RequestWithBody;
+            if (reqWithUser.__gatewayUser) {
+              const user = reqWithUser.__gatewayUser;
+              proxyReq.setHeader(X_USER_HEADERS.userId, String(user.userId));
+              proxyReq.setHeader(X_USER_HEADERS.email, user.email);
+              proxyReq.setHeader(X_USER_HEADERS.nombre, user.nombre);
+              proxyReq.setHeader(X_USER_HEADERS.areaId, String(user.areaId));
+              proxyReq.setHeader(
+                X_USER_HEADERS.sistemaId,
+                String(user.sistemaId),
+              );
+              proxyReq.setHeader(X_USER_HEADERS.sub, user.sub);
+            }
+
             // Construir URL final para logging
             const targetUrl = `${config.baseUrl}${req.url}`;
 

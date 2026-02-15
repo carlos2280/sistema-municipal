@@ -10,6 +10,8 @@ const envSchema = z.object({
   CONTABILIDAD_URL: z.string().url(),
   CHAT_URL: z.string().url(),
   NODE_ENV: z.string().min(1),
+  JWT_SECRET: z.string().min(1),
+  CORS_ORIGINS: z.string().default("http://localhost:5000"),
 });
 
 const parsed = envSchema.safeParse(process.env);

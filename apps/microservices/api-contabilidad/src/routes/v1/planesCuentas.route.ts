@@ -1,4 +1,4 @@
-import { verificarToken } from "@/libs/middleware/verficarToken";
+import { extractUser } from "@/libs/middleware/extractUser";
 import * as controller from "@controllers/planesCuentas.controller";
 import { Router } from "express";
 
@@ -14,7 +14,7 @@ router.get("/", controller.obtenerPlanesCuentas);
 router.get("/arbol", controller.obtenerArbolPlanes);
 
 // Obtener árbol completo (subgrupos + planes)
-router.get("/arbol-completo", verificarToken, controller.obtenerArbolCompleto);
+router.get("/arbol-completo", extractUser, controller.obtenerArbolCompleto);
 
 // Verificar si un código de cuenta existe
 router.get("/verificar-codigo", controller.verificarCodigoExiste);
