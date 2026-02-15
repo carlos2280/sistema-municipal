@@ -34,5 +34,5 @@ app.get('*', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`mf_chat server running on http://localhost:${PORT}`)
-  console.log(`Remote Entry: http://localhost:${PORT}/remoteEntry.js`)
+  console.log(`Remote Entry: http://localhost:${PORT}/mf-manifest.json`)
 })

@@ -16,15 +16,10 @@ if (fs.existsSync(distPath)) {
 	const files = fs.readdirSync(distPath);
 	console.log(`[mf_ui] dist folder contents: ${files.join(", ")}`);
 
-	const assetsPath = path.join(distPath, "assets");
-	if (fs.existsSync(assetsPath)) {
-		const assetFiles = fs.readdirSync(assetsPath);
-		console.log(`[mf_ui] assets folder contents: ${assetFiles.join(", ")}`);
-		const hasRemoteEntry = assetFiles.some(f => f.includes("remoteEntry"));
-		console.log(`[mf_ui] remoteEntry.js exists: ${hasRemoteEntry}`);
-	} else {
-		console.error(`[mf_ui] ERROR: assets folder does not exist!`);
-	}
+	const hasRemoteEntry = fs.existsSync(path.join(distPath, "remoteEntry.js"));
+	console.log(`[mf_ui] remoteEntry.js exists: ${hasRemoteEntry}`);
+	const hasMfManifest = fs.existsSync(path.join(distPath, "mf-manifest.json"));
+	console.log(`[mf_ui] mf-manifest.json exists: ${hasMfManifest}`);
 } else {
 	console.error(`[mf_ui] ERROR: dist folder does not exist!`);
 }
@@ -46,7 +41,7 @@ app.use(express.static(distPath));
 // Health check endpoint
 app.get("/health", (_req, res) => {
 	const hasDistFolder = fs.existsSync(distPath);
-	const hasRemoteEntry = fs.existsSync(path.join(distPath, "assets", "remoteEntry.js"));
+	const hasRemoteEntry = fs.existsSync(path.join(distPath, "remoteEntry.js"));
 
 	res.status(200).json({
 		status: "healthy",

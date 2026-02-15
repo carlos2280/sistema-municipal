@@ -124,9 +124,9 @@ export async function checkMFHealth(
  */
 export async function checkAllMFHealth(): Promise<Record<string, MFHealth>> {
   const endpoints: Record<string, string> = {
-    mf_store: import.meta.env.VITE_MF_STORE_URL || "http://localhost:5010/assets/remoteEntry.js",
-    mf_ui: import.meta.env.VITE_MF_UI_URL || "http://localhost:5011/assets/remoteEntry.js",
-    mf_contabilidad: import.meta.env.VITE_MF_CONTABILIDAD_URL || "http://localhost:5020/assets/remoteEntry.js",
+    mf_store: import.meta.env.VITE_MF_STORE_URL || "http://localhost:5010/mf-manifest.json",
+    mf_ui: import.meta.env.VITE_MF_UI_URL || "http://localhost:5011/mf-manifest.json",
+    mf_contabilidad: import.meta.env.VITE_MF_CONTABILIDAD_URL || "http://localhost:5020/mf-manifest.json",
   };
 
   const healthChecks = await Promise.all(
