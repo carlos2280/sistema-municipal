@@ -93,6 +93,7 @@ export function ChatPanel({
         noLeidos: conv.mensajesNoLeidos,
         online,
         tipo: conv.tipo,
+        sistema: conv.sistema ?? false,
       }
     })
   }, [conversaciones, currentUserId, isUserOnline])
@@ -273,6 +274,7 @@ export function ChatPanel({
               noLeidos={conv.noLeidos}
               online={conv.online}
               tipo={conv.tipo}
+              sistema={conv.sistema}
               isActive={activeConversationId === conv.id}
               onClick={() => handleConversationClick(conv.id)}
             />

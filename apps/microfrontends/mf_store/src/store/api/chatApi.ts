@@ -38,6 +38,8 @@ export interface Conversacion {
 	avatarUrl?: string;
 	activo: boolean;
 	creadorId: number;
+	sistema?: boolean;
+	departamentoId?: number;
 	createdAt: string;
 	updatedAt: string;
 	participantes: Participante[];
@@ -255,6 +257,77 @@ export const chatApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["Mensajes"],
 		}),
+
+		// Participantes
+		obtenerParticipantes: builder.query<Participante[], number>({
+			query: (conversacionId) =>
+				`chat/conversaciones/${conversacionId}/participantes`,
+			transformResponse: (response: {
+				success: boolean;
+				data: Participante[];
+			}) => response.data,
+			providesTags: (_result, _error, id) => [
+				{ type: "Participantes", id },
+			],
+		}),
+
+		agregarParticipante: builder.mutation<
+			void,
+			{ conversacionId: number; usuarioId: number }
+		>({
+			query: ({ conversacionId, usuarioId }) => ({
+				url: `chat/conversaciones/${conversacionId}/participantes`,
+				method: "POST",
+				body: { usuarioId },
+			}),
+			invalidatesTags: (_result, _error, { conversacionId }) => [
+				{ type: "Participantes", id: conversacionId },
+				"Conversaciones",
+			],
+		}),
+
+		eliminarParticipante: builder.mutation<
+			void,
+			{ conversacionId: number; usuarioId: number }
+		>({
+			query: ({ conversacionId, usuarioId }) => ({
+				url: `chat/conversaciones/${conversacionId}/participantes/${usuarioId}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: (_result, _error, { conversacionId }) => [
+				{ type: "Participantes", id: conversacionId },
+				"Conversaciones",
+			],
+		}),
+
+		// Renombrar grupo
+		renombrarGrupo: builder.mutation<
+			void,
+			{ conversacionId: number; nombre: string }
+		>({
+			query: ({ conversacionId, nombre }) => ({
+				url: `chat/conversaciones/${conversacionId}/nombre`,
+				method: "PATCH",
+				body: { nombre },
+			}),
+			invalidatesTags: ["Conversaciones"],
+		}),
+
+		// Grupos del sistema
+		sincronizarGruposSistema: builder.mutation<
+			{ created: number[]; updated: number[] },
+			void
+		>({
+			query: () => ({
+				url: "chat/grupos-sistema/sync",
+				method: "POST",
+			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: { created: number[]; updated: number[] };
+			}) => response.data,
+			invalidatesTags: ["Conversaciones"],
+		}),
 	}),
 	overrideExisting: false,
 });
@@ -277,4 +350,11 @@ export const {
 	useCrearMensajeMutation,
 	useEditarMensajeMutation,
 	useEliminarMensajeMutation,
+	// Participantes
+	useObtenerParticipantesQuery,
+	useAgregarParticipanteMutation,
+	useEliminarParticipanteMutation,
+	// Grupos
+	useRenombrarGrupoMutation,
+	useSincronizarGruposSistemaMutation,
 } = chatApi;

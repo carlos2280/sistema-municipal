@@ -1,4 +1,4 @@
-import { boolean, serial, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, integer, serial, text, timestamp } from 'drizzle-orm/pg-core'
 import { identidadSchema } from '../../config/schemaPG.js'
 
 // Schema de usuarios (solo lectura desde api-chat)
@@ -7,6 +7,7 @@ export const usuarios = identidadSchema.table('usuarios', {
   id: serial('id').primaryKey(),
   nombreCompleto: text('nombre_completo').notNull(),
   email: text('email').notNull(),
+  idOficina: integer('id_oficina'),
   activo: boolean('activo').default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

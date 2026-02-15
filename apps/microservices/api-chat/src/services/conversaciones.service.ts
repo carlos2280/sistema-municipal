@@ -76,6 +76,8 @@ export const conversacionesService = {
       avatarUrl: conv.avatarUrl,
       creadorId: conv.creadorId,
       activo: conv.activo,
+      sistema: conv.sistema ?? false,
+      departamentoId: conv.departamentoId,
       createdAt: conv.createdAt,
       updatedAt: conv.updatedAt,
       participantes: participantesPorConversacion.get(conv.id) || [],
@@ -182,5 +184,148 @@ export const conversacionesService = {
       .select()
       .from(participantes)
       .where(eq(participantes.conversacionId, conversacionId))
+  },
+
+  async obtenerParticipantesConUsuario(conversacionId: number) {
+    return db
+      .select({
+        id: participantes.id,
+        usuarioId: participantes.usuarioId,
+        conversacionId: participantes.conversacionId,
+        rol: participantes.rol,
+        createdAt: participantes.createdAt,
+        usuario: {
+          id: usuarios.id,
+          nombreCompleto: usuarios.nombreCompleto,
+          email: usuarios.email,
+        },
+      })
+      .from(participantes)
+      .innerJoin(usuarios, eq(usuarios.id, participantes.usuarioId))
+      .where(eq(participantes.conversacionId, conversacionId))
+  },
+
+  async eliminarParticipante(
+    conversacionId: number,
+    usuarioIdToRemove: number,
+    solicitanteId: number
+  ) {
+    const [conv] = await db
+      .select()
+      .from(conversaciones)
+      .where(eq(conversaciones.id, conversacionId))
+
+    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (conv.tipo !== 'grupo')
+      return { success: false, error: 'Solo se pueden eliminar miembros de grupos' }
+    if (conv.sistema)
+      return { success: false, error: 'No se pueden eliminar miembros de grupos del sistema' }
+
+    const [solicitante] = await db
+      .select()
+      .from(participantes)
+      .where(
+        and(
+          eq(participantes.conversacionId, conversacionId),
+          eq(participantes.usuarioId, solicitanteId)
+        )
+      )
+
+    if (!solicitante || solicitante.rol !== 'admin') {
+      return { success: false, error: 'Solo administradores pueden eliminar miembros' }
+    }
+
+    if (usuarioIdToRemove === solicitanteId) {
+      return { success: false, error: 'No puedes eliminarte a ti mismo del grupo' }
+    }
+
+    await db
+      .delete(participantes)
+      .where(
+        and(
+          eq(participantes.conversacionId, conversacionId),
+          eq(participantes.usuarioId, usuarioIdToRemove)
+        )
+      )
+
+    return { success: true }
+  },
+
+  async agregarParticipante(
+    conversacionId: number,
+    nuevoUsuarioId: number,
+    solicitanteId: number
+  ) {
+    const [conv] = await db
+      .select()
+      .from(conversaciones)
+      .where(eq(conversaciones.id, conversacionId))
+
+    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (conv.tipo !== 'grupo')
+      return { success: false, error: 'Solo se pueden agregar miembros a grupos' }
+
+    const [solicitante] = await db
+      .select()
+      .from(participantes)
+      .where(
+        and(
+          eq(participantes.conversacionId, conversacionId),
+          eq(participantes.usuarioId, solicitanteId)
+        )
+      )
+
+    if (!solicitante || solicitante.rol !== 'admin') {
+      return { success: false, error: 'Solo administradores pueden agregar miembros' }
+    }
+
+    const yaExiste = await this.verificarParticipante(conversacionId, nuevoUsuarioId)
+    if (yaExiste) return { success: false, error: 'El usuario ya es miembro del grupo' }
+
+    await db.insert(participantes).values({
+      conversacionId,
+      usuarioId: nuevoUsuarioId,
+      rol: 'miembro',
+    })
+
+    return { success: true }
+  },
+
+  async renombrarGrupo(
+    conversacionId: number,
+    nuevoNombre: string,
+    solicitanteId: number
+  ) {
+    const [conv] = await db
+      .select()
+      .from(conversaciones)
+      .where(eq(conversaciones.id, conversacionId))
+
+    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (conv.tipo !== 'grupo')
+      return { success: false, error: 'Solo se pueden renombrar grupos' }
+    if (conv.sistema)
+      return { success: false, error: 'No se pueden renombrar grupos del sistema' }
+
+    const [solicitante] = await db
+      .select()
+      .from(participantes)
+      .where(
+        and(
+          eq(participantes.conversacionId, conversacionId),
+          eq(participantes.usuarioId, solicitanteId)
+        )
+      )
+
+    if (!solicitante || solicitante.rol !== 'admin') {
+      return { success: false, error: 'Solo administradores pueden renombrar el grupo' }
+    }
+
+    await db
+      .update(conversaciones)
+      .set({ nombre: nuevoNombre.trim(), updatedAt: new Date() })
+      .where(eq(conversaciones.id, conversacionId))
+
+    return { success: true }
   },
 }
