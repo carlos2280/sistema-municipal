@@ -1,6 +1,7 @@
 import { createServer } from 'node:http'
 import app from './app.js'
 import { env } from './config/env.js'
+import { gruposSistemaService } from './services/gruposSistema.service.js'
 import { initializeSocket } from './socket/index.js'
 
 const httpServer = createServer(app)
@@ -22,6 +23,20 @@ httpServer.listen(Number(env.PORT), () => {
 ║  Environment: ${env.NODE_ENV.padEnd(30)}   ║
 ╚══════════════════════════════════════════════════╝
   `)
+
+  // Sincronizar grupos del sistema por departamento al arrancar
+  gruposSistemaService
+    .sincronizarGrupos()
+    .then((result) => {
+      if (result.created.length > 0 || result.updated.length > 0) {
+        console.log(
+          `[Sync] Grupos del sistema: ${result.created.length} creados, ${result.updated.length} actualizados`
+        )
+      }
+    })
+    .catch((err) => {
+      console.error('[Sync] Error al sincronizar grupos del sistema:', err)
+    })
 })
 
 // Graceful shutdown
