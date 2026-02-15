@@ -134,6 +134,10 @@ export const chatApi = baseApi.injectEndpoints({
 
 		obtenerConversacion: builder.query<Conversacion, number>({
 			query: (id) => `chat/conversaciones/${id}`,
+			transformResponse: (response: {
+				success: boolean;
+				data: Conversacion;
+			}) => response.data,
 			providesTags: (_result, _error, id) => [
 				{ type: "Conversaciones", id },
 			],
@@ -148,6 +152,28 @@ export const chatApi = baseApi.injectEndpoints({
 				method: "POST",
 				body: data,
 			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: Conversacion;
+			}) => response.data,
+			async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+				try {
+					const { data: newConversacion } = await queryFulfilled;
+					dispatch(
+						chatApi.util.updateQueryData(
+							"obtenerConversaciones",
+							undefined,
+							(draft) => {
+								if (!draft.find((c) => c.id === newConversacion.id)) {
+									draft.unshift(newConversacion);
+								}
+							},
+						),
+					);
+				} catch {
+					// Error handled by mutation caller
+				}
+			},
 			invalidatesTags: ["Conversaciones"],
 		}),
 
@@ -157,6 +183,28 @@ export const chatApi = baseApi.injectEndpoints({
 				method: "POST",
 				body: data,
 			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: Conversacion;
+			}) => response.data,
+			async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+				try {
+					const { data: newConversacion } = await queryFulfilled;
+					dispatch(
+						chatApi.util.updateQueryData(
+							"obtenerConversaciones",
+							undefined,
+							(draft) => {
+								if (!draft.find((c) => c.id === newConversacion.id)) {
+									draft.unshift(newConversacion);
+								}
+							},
+						),
+					);
+				} catch {
+					// Error handled by mutation caller
+				}
+			},
 			invalidatesTags: ["Conversaciones"],
 		}),
 
