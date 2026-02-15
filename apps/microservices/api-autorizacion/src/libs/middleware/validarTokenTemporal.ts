@@ -14,7 +14,6 @@ export const validarTokenTemporal = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("HEADERS:", req.headers);
   // 1. Buscar token en query ?token=abc
   const tokenFromQuery =
     typeof req.query.token === "string" ? req.query.token : undefined;
@@ -26,7 +25,6 @@ export const validarTokenTemporal = async (
     : undefined;
 
   const token = tokenFromHeader || tokenFromQuery;
-  console.log("token=>", token);
 
   if (!token) {
     res.status(401).json({ mensaje: "No autorizado" });
@@ -39,9 +37,7 @@ export const validarTokenTemporal = async (
   }
 
   try {
-    console.log("LLEGO");
     const decoded = jwt.verify(token, JWT_SECRET_TEMP) as CustomJwtPayload;
-    console.log("LLEGO + DECODE ", decoded);
     req.user = decoded;
     req.tokenTemporal = token;
 

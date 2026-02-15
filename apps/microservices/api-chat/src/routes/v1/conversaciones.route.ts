@@ -5,12 +5,12 @@ import {
   obtenerConversacion,
   obtenerConversaciones,
 } from '../../controllers/conversaciones.controller.js'
-import { verificarToken } from '../../libs/middleware/verficarToken.js'
+import { extractUser } from '../../libs/middleware/extractUser.js'
 
 const router = Router()
 
 // Todas las rutas requieren autenticación
-router.use(verificarToken)
+router.use(extractUser)
 
 // GET /api/chat/v1/conversaciones
 router.get('/', obtenerConversaciones)

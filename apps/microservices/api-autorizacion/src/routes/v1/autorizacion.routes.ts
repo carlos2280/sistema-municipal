@@ -1,6 +1,6 @@
 import * as controller from "@/controllers/autorizacion.controller";
 import { validarTokenTemporal } from "@/libs/middleware/validarTokenTemporal";
-import { verificarToken } from "@/libs/middleware/verficarToken";
+import { extractUser } from "@/libs/middleware/extractUser";
 import { Router } from "express";
 const router = Router();
 
@@ -12,10 +12,10 @@ router
   .post("/refresh-token", controller.refreshToken)
 
   // Rutas protegidas (requieren JWT)
-  .get("/verificar-token", verificarToken, controller.verificarToken)
-  .post("/logout", verificarToken, controller.logout)
-  .get("/menu-sistema/", verificarToken, controller.obtenerMenuporSistema)
-  .get("/me", verificarToken, controller.me)
+  .get("/verificar-token", extractUser, controller.verificarToken)
+  .post("/logout", extractUser, controller.logout)
+  .get("/menu-sistema/", extractUser, controller.obtenerMenuporSistema)
+  .get("/me", extractUser, controller.me)
 
   // Rutas con token temporal
   .post(

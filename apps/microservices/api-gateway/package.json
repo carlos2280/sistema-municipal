@@ -19,7 +19,9 @@
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
   "dependencies": {
+    "@municipal/shared": "workspace:*",
     "compression": "^1.8.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -33,9 +35,11 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/compression": "^1.8.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/express-serve-static-core": "^5.1.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.18.12",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.10",

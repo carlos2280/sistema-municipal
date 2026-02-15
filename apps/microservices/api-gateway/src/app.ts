@@ -1,11 +1,14 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
+import { env } from "./config/env";
 import { logger } from "./logger";
+import { authenticateToken, stripUserHeaders } from "./middleware/auth";
 import { applySecurityMiddleware } from "./middleware/security";
 import { configureProxies } from "./proxy";
 
 const corsOptions = {
-  origin: true,
+  origin: env.CORS_ORIGINS.split(",").map((o) => o.trim()),
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -27,9 +30,20 @@ export const createApp = (): Express => {
     next();
   });
 
+  // Parse cookies (necesario para leer JWT del cookie "token")
+  app.use(cookieParser());
+
   app.use(express.json({ limit: "5mb" }));
 
+  // SEGURIDAD: Eliminar headers X-User-* spoofados de requests externos
+  app.use(stripUserHeaders);
+
   applySecurityMiddleware(app);
+
+  // AUTH: Validar JWT y almacenar datos del usuario en req.__gatewayUser
+  app.use(authenticateToken);
+
+  // PROXY: Rutas a servicios backend (inyecta X-User-* headers en onProxyReq)
   configureProxies(app);
 
   app.get("/health", (_req, res) => {
