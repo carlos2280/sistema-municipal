@@ -128,3 +128,92 @@ export const crearGrupo: RequestHandler = async (req, res, next) => {
     next(error)
   }
 }
+
+export const obtenerParticipantesConUsuario: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { id } = req.params
+    const usuarioId = req.usuario?.id
+    if (!usuarioId) throw new AppError('Usuario no autenticado', 401)
+
+    const esParticipante = await conversacionesService.verificarParticipante(
+      Number(id),
+      usuarioId
+    )
+    if (!esParticipante) throw new AppError('No tienes acceso a esta conversación', 403)
+
+    const participantes =
+      await conversacionesService.obtenerParticipantesConUsuario(Number(id))
+
+    res.json({ success: true, data: participantes })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const agregarParticipante: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { usuarioId: nuevoUsuarioId } = req.body
+    const solicitanteId = req.usuario?.id
+    if (!solicitanteId) throw new AppError('Usuario no autenticado', 401)
+    if (!nuevoUsuarioId) throw new AppError('ID del usuario requerido', 400)
+
+    const result = await conversacionesService.agregarParticipante(
+      Number(id),
+      nuevoUsuarioId,
+      solicitanteId
+    )
+
+    if (!result.success) throw new AppError(result.error!, 400)
+
+    res.json({ success: true, message: 'Participante agregado' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const eliminarParticipante: RequestHandler = async (req, res, next) => {
+  try {
+    const { id, usuarioId: targetId } = req.params
+    const solicitanteId = req.usuario?.id
+    if (!solicitanteId) throw new AppError('Usuario no autenticado', 401)
+
+    const result = await conversacionesService.eliminarParticipante(
+      Number(id),
+      Number(targetId),
+      solicitanteId
+    )
+
+    if (!result.success) throw new AppError(result.error!, 400)
+
+    res.json({ success: true, message: 'Participante eliminado' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const renombrarGrupo: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { nombre } = req.body
+    const solicitanteId = req.usuario?.id
+    if (!solicitanteId) throw new AppError('Usuario no autenticado', 401)
+    if (!nombre?.trim()) throw new AppError('Nombre requerido', 400)
+
+    const result = await conversacionesService.renombrarGrupo(
+      Number(id),
+      nombre,
+      solicitanteId
+    )
+
+    if (!result.success) throw new AppError(result.error!, 400)
+
+    res.json({ success: true, message: 'Grupo renombrado' })
+  } catch (error) {
+    next(error)
+  }
+}

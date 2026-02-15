@@ -2,7 +2,8 @@ import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import { Users } from 'lucide-react'
+import { Building2, Users } from 'lucide-react'
+import { SystemGroupBadge } from '../shared'
 
 interface ConversationItemProps {
   id: number
@@ -12,6 +13,7 @@ interface ConversationItemProps {
   noLeidos: number
   online: boolean
   tipo: 'directa' | 'grupo'
+  sistema?: boolean
   isActive?: boolean
   onClick?: () => void
 }
@@ -45,6 +47,7 @@ export function ConversationItem({
   noLeidos,
   online,
   tipo,
+  sistema,
   isActive,
   onClick,
 }: ConversationItemProps) {
@@ -84,7 +87,11 @@ export function ConversationItem({
             fontSize: 16,
           }}
         >
-          {tipo === 'grupo' ? <Users size={20} /> : getInitials(nombre)}
+          {tipo === 'grupo' ? (
+            sistema ? <Building2 size={20} /> : <Users size={20} />
+          ) : (
+            getInitials(nombre)
+          )}
         </Box>
         {tipo === 'directa' && (
           <Box
@@ -111,18 +118,21 @@ export function ConversationItem({
             justifyContent: 'space-between',
           }}
         >
-          <Typography
-            sx={{
-              fontWeight: noLeidos > 0 ? 600 : 500,
-              fontSize: 14,
-              color: 'text.primary',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {nombre}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+            <Typography
+              sx={{
+                fontWeight: noLeidos > 0 ? 600 : 500,
+                fontSize: 14,
+                color: 'text.primary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {nombre}
+            </Typography>
+            {sistema && <SystemGroupBadge />}
+          </Box>
           <Typography
             sx={{
               fontSize: 12,

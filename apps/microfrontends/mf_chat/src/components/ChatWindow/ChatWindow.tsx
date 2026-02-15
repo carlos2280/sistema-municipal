@@ -12,6 +12,7 @@ interface ChatWindowProps {
   currentUserId?: number
   onBack?: () => void
   onClose?: () => void
+  onShowMembers?: () => void
 }
 
 export function ChatWindow({
@@ -19,6 +20,7 @@ export function ChatWindow({
   currentUserId,
   onBack,
   onClose,
+  onShowMembers,
 }: ChatWindowProps) {
   const {
     mensajes,
@@ -47,6 +49,9 @@ export function ChatWindow({
       return {
         nombre: otherParticipant?.usuario?.nombreCompleto || conv.nombre || 'Chat',
         online: otherUserId ? isUserOnline(otherUserId) : false,
+        esGrupo: false,
+        esSistema: false,
+        participantesCount: 2,
       }
     }
 
@@ -54,6 +59,9 @@ export function ChatWindow({
     return {
       nombre: conv.nombre || 'Grupo',
       online: false,
+      esGrupo: true,
+      esSistema: conv.sistema ?? false,
+      participantesCount: conv.participantes.length,
     }
   }, [conversaciones, conversacionId, currentUserId, isUserOnline])
 
@@ -90,8 +98,12 @@ export function ChatWindow({
         isConnected={isConnected}
         nombre={conversacionInfo?.nombre}
         online={conversacionInfo?.online}
+        esGrupo={conversacionInfo?.esGrupo}
+        esSistema={conversacionInfo?.esSistema}
+        participantesCount={conversacionInfo?.participantesCount}
         onBack={onBack}
         onClose={onClose}
+        onShowMembers={conversacionInfo?.esGrupo ? onShowMembers : undefined}
       />
 
       {isLoading ? (

@@ -14,12 +14,13 @@ import {
   selectUsuarioId,
   useAppSelector,
 } from 'mf_store/store'
-import { useOnlineUsers } from '../../hooks'
+import { useConversaciones, useOnlineUsers } from '../../hooks'
 import { ChatPanel } from '../ChatPanel/ChatPanel'
 import { ChatWindow } from '../ChatWindow/ChatWindow'
+import { MembersPanel } from '../ChatWindow/MembersPanel'
 import { NewChatPanel, NewGroupPanel } from '../NewChat'
 
-type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup'
+type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup' | 'members'
 
 interface ChatDrawerProps {
   open: boolean
@@ -65,13 +66,35 @@ export function ChatDrawer({
     setView('chat')
   }
 
+  // Hook de conversaciones para derivar info del grupo activo
+  const { conversaciones } = useConversaciones()
+
+  const activeConversacion = useMemo(
+    () => conversaciones.find((c) => c.id === activeConversationId),
+    [conversaciones, activeConversationId]
+  )
+
+  const isActiveGroupAdmin = useMemo(() => {
+    if (!activeConversacion || activeConversacion.tipo !== 'grupo') return false
+    const participante = activeConversacion.participantes.find(
+      (p) => p.usuarioId === currentUserId
+    )
+    return participante?.rol === 'admin'
+  }, [activeConversacion, currentUserId])
+
   const handleBack = () => {
-    if (view === 'chat') {
+    if (view === 'members') {
+      setView('chat')
+    } else if (view === 'chat') {
       setActiveConversationId(undefined)
       setView('conversations')
     } else if (view === 'newChat' || view === 'newGroup') {
       setView('conversations')
     }
+  }
+
+  const handleShowMembers = () => {
+    setView('members')
   }
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -128,6 +151,19 @@ export function ChatDrawer({
 
   const renderContent = () => {
     switch (view) {
+      case 'members':
+        return activeConversationId ? (
+          <MembersPanel
+            conversacionId={activeConversationId}
+            currentUserId={currentUserId ?? undefined}
+            esSistema={activeConversacion?.sistema ?? false}
+            esAdmin={isActiveGroupAdmin}
+            nombreGrupo={activeConversacion?.nombre ?? undefined}
+            onBack={handleBack}
+            onClose={onClose}
+          />
+        ) : null
+
       case 'chat':
         return activeConversationId ? (
           <ChatWindow
@@ -135,6 +171,7 @@ export function ChatDrawer({
             currentUserId={currentUserId ?? undefined}
             onBack={handleBack}
             onClose={onClose}
+            onShowMembers={handleShowMembers}
           />
         ) : null
 
