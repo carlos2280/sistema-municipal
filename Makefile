@@ -53,20 +53,21 @@ install: ## Instala dependencias del proyecto
 
 dev: dev-infra ## Inicia entorno de desarrollo (infra + apps en orden)
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
-	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs  3) MFs remotos  4) Shell$(NC)"
-	@npx concurrently -k -n "shared,gateway,api-id,api-auth,api-cont,api-chat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
+	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs (esperan postgres)  3) MFs remotos  4) Shell (espera remotes)$(NC)"
+	@npx concurrently -k \
+		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
 		-c "gray,blue,blue,blue,blue,magenta,green,green,green,cyan,yellow" \
 		"pnpm --filter @municipal/shared dev" \
-		"sleep 2 && pnpm --filter gateway dev" \
-		"sleep 2 && pnpm --filter api-identidad dev" \
-		"sleep 2 && pnpm --filter api-autorizacion dev" \
-		"sleep 2 && pnpm --filter api-contabilidad dev" \
-		"sleep 2 && pnpm --filter api-chat dev" \
-		"sleep 5 && pnpm --filter mf-store dev" \
-		"sleep 5 && pnpm --filter mf-ui dev" \
-		"sleep 5 && pnpm --filter mf-contabilidad dev" \
-		"sleep 5 && pnpm --filter mf-chat dev" \
-		"sleep 10 && pnpm --filter mf-shell dev"
+		"npx wait-on tcp:5434 && pnpm --filter gateway dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-identidad dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-autorizacion dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-contabilidad dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-chat dev" \
+		"pnpm --filter mf-store dev" \
+		"pnpm --filter mf-ui dev" \
+		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-contabilidad dev" \
+		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json && pnpm --filter mf-chat dev" \
+		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json http-get://localhost:5020/mf-manifest.json http-get://localhost:5021/mf-manifest.json && pnpm --filter mf-shell dev"
 
 dev-turbo: dev-infra ## Inicia con turbo (sin orden garantizado)
 	@echo "$(GREEN)Iniciando aplicaciones con turbo...$(NC)"
