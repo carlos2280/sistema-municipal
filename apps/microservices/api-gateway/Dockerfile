@@ -4,7 +4,8 @@ RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 # --- Install dependencies ---
 FROM base AS deps
 WORKDIR /app
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/microservices/api-gateway/package.json ./apps/microservices/api-gateway/
 RUN pnpm install --frozen-lockfile
@@ -19,7 +20,8 @@ RUN pnpm --filter @municipal/shared build && pnpm --filter gateway build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/microservices/api-gateway/package.json ./apps/microservices/api-gateway/
 RUN pnpm install --frozen-lockfile --prod
