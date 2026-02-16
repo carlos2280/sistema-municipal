@@ -5,6 +5,14 @@ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 export default defineConfig(() => {
   const { publicVars } = loadEnv({ prefixes: ['VITE_'] });
 
+  // Inject VITE_* from process.env into client bundle (import.meta.env.VITE_*)
+  const processEnvDefines: Record<string, string> = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith('VITE_')) {
+      processEnvDefines[`import.meta.env.${key}`] = JSON.stringify(process.env[key]);
+    }
+  }
+
   return {
     plugins: [
       pluginReact(),
@@ -26,7 +34,7 @@ export default defineConfig(() => {
         },
       }),
     ],
-    source: { entry: { index: './src/main.tsx' }, define: publicVars },
+    source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines } },
     resolve: { alias: { '@': './src' } },
     server: {
       port: 5011,
