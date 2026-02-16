@@ -8,6 +8,10 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   { method: "GET", pattern: /^\/health$/ },
   { method: "GET", pattern: /\/health$/ },
 
+  // Socket.IO (auth handled by api-chat socket middleware)
+  { method: "GET", pattern: /^\/socket\.io\// },
+  { method: "POST", pattern: /^\/socket\.io\// },
+
   // Auth service - flujo de login (3 pasos)
   { method: "POST", pattern: /^\/api\/v1\/autorizacion\/login$/ },
   { method: "POST", pattern: /^\/api\/v1\/autorizacion\/areas$/ },

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { type Socket, io } from 'socket.io-client'
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3004'
+// Socket.IO goes through api-gateway so the HTTP-only cookie (JWT) is sent automatically
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 interface UseSocketOptions {
   autoConnect?: boolean
@@ -29,6 +30,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     socketRef.current = io(SOCKET_URL, {
       autoConnect: true,
       auth: token ? { token } : undefined,
+      withCredentials: true,
       transports: ['websocket', 'polling'],
     })
 
