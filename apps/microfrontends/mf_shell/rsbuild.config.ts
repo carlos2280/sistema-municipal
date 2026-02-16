@@ -45,7 +45,7 @@ export default defineConfig(() => {
     source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines } },
     resolve: { alias: { '@': './src' } },
     server: { port: 5000, strictPort: true, host: '0.0.0.0' },
-    output: { distPath: { root: 'dist' } },
+    output: { distPath: { root: 'dist' }, assetPrefix: 'auto' },
     html: {
       title: '[M] SHELL',
       favicon: './public/logo.svg',

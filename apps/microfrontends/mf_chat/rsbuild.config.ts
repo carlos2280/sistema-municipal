@@ -52,7 +52,7 @@ export default defineConfig(() => {
       host: '0.0.0.0',
       headers: { 'Access-Control-Allow-Origin': '*' },
     },
-    output: { distPath: { root: 'dist' } },
+    output: { distPath: { root: 'dist' }, assetPrefix: 'auto' },
     html: { title: 'MF Chat - Sistema Municipal' },
   };
 });
