@@ -2,9 +2,9 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "apps/microservices/api-contabilidad/Dockerfile",
+    "dockerfilePath": "apps/microservices/api-chat/Dockerfile",
     "watchPatterns": [
-      "apps/microservices/api-contabilidad/**",
+      "apps/microservices/api-chat/**",
       "packages/shared/**"
     ]
   },
