@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ClientRequest } from "node:http";
+import type http from "node:http";
 import { X_USER_HEADERS } from "@municipal/shared/auth";
 import type { Express } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -189,4 +190,55 @@ export const configureProxies = (app: Express) => {
       `[Gateway] ${name.toUpperCase()}: ${config.path} (AA) ${config.baseUrl}`,
     );
   }
+
+  // Socket.IO proxy → api-chat (WebSocket + polling)
+  const socketProxy = createProxyMiddleware({
+    target: env.CHAT_URL,
+    changeOrigin: true,
+    ws: true,
+    secure: isProduction,
+    on: {
+      proxyReq: (_proxyReq, req) => {
+        logger.info({
+          event: "socket_proxy",
+          method: req.method,
+          path: req.url,
+          target: env.CHAT_URL,
+        });
+      },
+      error: (err, req) => {
+        logger.error({
+          event: "socket_proxy_error",
+          path: req.url,
+          error: err.message,
+        });
+      },
+    },
+  });
+
+  app.use("/socket.io", socketProxy);
+
+  logger.info(
+    `[Gateway] SOCKET.IO: /socket.io → ${env.CHAT_URL}`,
+  );
+};
+
+/**
+ * Attaches WebSocket upgrade handler to the HTTP server.
+ * Must be called after configureProxies.
+ */
+export const attachWebSocketUpgrade = (server: http.Server) => {
+  const socketUpgradeProxy = createProxyMiddleware({
+    target: env.CHAT_URL,
+    changeOrigin: true,
+    ws: true,
+  });
+
+  server.on("upgrade", (req, socket, head) => {
+    if (req.url?.startsWith("/socket.io")) {
+      socketUpgradeProxy.upgrade?.(req, socket, head);
+    }
+  });
+
+  logger.info("[Gateway] WebSocket upgrade handler attached");
 };
