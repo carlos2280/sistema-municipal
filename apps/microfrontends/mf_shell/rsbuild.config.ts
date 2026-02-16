@@ -2,8 +2,20 @@ import { defineConfig, loadEnv } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 
+// Reads from process.env (Railway) first, then .env files (local), then fallback
+const env = (key: string, parsed: Record<string, string>, fallback: string) =>
+  process.env[key] || parsed[key] || fallback;
+
 export default defineConfig(() => {
   const { parsed, publicVars } = loadEnv({ prefixes: ['VITE_'] });
+
+  // Inject VITE_* from process.env into client bundle (import.meta.env.VITE_*)
+  const processEnvDefines: Record<string, string> = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith('VITE_')) {
+      processEnvDefines[`import.meta.env.${key}`] = JSON.stringify(process.env[key]);
+    }
+  }
 
   return {
     plugins: [
@@ -12,10 +24,10 @@ export default defineConfig(() => {
         name: 'mf_shell',
         dts: false,
         remotes: {
-          mf_store: `mf_store@${parsed.VITE_MF_STORE_URL || 'http://localhost:5010/mf-manifest.json'}`,
-          mf_ui: `mf_ui@${parsed.VITE_MF_UI_URL || 'http://localhost:5011/mf-manifest.json'}`,
-          mf_contabilidad: `mf_contabilidad@${parsed.VITE_MF_CONTABILIDAD_URL || 'http://localhost:5020/mf-manifest.json'}`,
-          mf_chat: `mf_chat@${parsed.VITE_MF_CHAT_URL || 'http://localhost:5021/mf-manifest.json'}`,
+          mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,
+          mf_ui: `mf_ui@${env('VITE_MF_UI_URL', parsed, 'http://localhost:5011/mf-manifest.json')}`,
+          mf_contabilidad: `mf_contabilidad@${env('VITE_MF_CONTABILIDAD_URL', parsed, 'http://localhost:5020/mf-manifest.json')}`,
+          mf_chat: `mf_chat@${env('VITE_MF_CHAT_URL', parsed, 'http://localhost:5021/mf-manifest.json')}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: false },
@@ -30,7 +42,7 @@ export default defineConfig(() => {
         },
       }),
     ],
-    source: { entry: { index: './src/main.tsx' }, define: publicVars },
+    source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines } },
     resolve: { alias: { '@': './src' } },
     server: { port: 5000, strictPort: true, host: '0.0.0.0' },
     output: { distPath: { root: 'dist' } },
