@@ -19,7 +19,7 @@ RUN pnpm --filter @municipal/shared build && pnpm --filter gateway build
 # --- Production ---
 FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=production CI=true
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/shared/package.json ./packages/shared/
