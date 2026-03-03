@@ -5,7 +5,11 @@ import { env } from "./config/env";
 import { logger } from "./logger";
 import { authenticateToken, stripUserHeaders } from "./middleware/auth";
 import { applySecurityMiddleware } from "./middleware/security";
-import { subscriptionGuard } from "./middleware/subscriptionGuard";
+import {
+  clearSubscriptionCache,
+  invalidateSubscriptionCache,
+  subscriptionGuard,
+} from "./middleware/subscriptionGuard";
 import { configureProxies } from "./proxy";
 
 const corsOptions = {
@@ -46,6 +50,25 @@ export const createApp = (): Express => {
 
   // SUBSCRIPTION: Bloquear acceso a módulos no contratados por el tenant
   app.use(subscriptionGuard);
+
+  // INTERNAL: Endpoint para invalidar cache de suscripciones (llamado por api-platform)
+  app.post("/internal/cache/invalidate", (req, res) => {
+    const adminKey = req.headers["x-admin-key"] as string;
+    if (!adminKey || adminKey !== env.ADMIN_API_KEY) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const { tenantSlug } = req.body as { tenantSlug?: string };
+
+    if (tenantSlug) {
+      invalidateSubscriptionCache(tenantSlug);
+      res.json({ ok: true, invalidated: tenantSlug });
+    } else {
+      clearSubscriptionCache();
+      res.json({ ok: true, invalidated: "all" });
+    }
+  });
 
   // PROXY: Rutas a servicios backend (inyecta X-User-* headers en onProxyReq)
   configureProxies(app);

@@ -20,6 +20,10 @@ export const envSchema = z.object({
 
   // Platform config
   PLATFORM_DOMAIN: z.string().min(1).default("localhost"),
+
+  // Admin API
+  ADMIN_API_KEY: z.string().min(16).default("dev-admin-key-sistema-municipal-2024"),
+  GATEWAY_INTERNAL_URL: z.string().url().default("http://localhost:3000"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

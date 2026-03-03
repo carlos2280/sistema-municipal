@@ -48,7 +48,8 @@
     "platform:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.platform.config.ts",
     "platform:push": "tsx node_modules/drizzle-kit/bin.cjs push --config drizzle.platform.config.ts",
     "platform:studio": "tsx node_modules/drizzle-kit/bin.cjs studio --config drizzle.platform.config.ts",
-    "platform:seed": "tsx src/seeders/platform.seed.ts"
+    "platform:seed": "tsx src/seeders/platform.seed.ts",
+    "tenant:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.tenant.config.ts"
   },
   "keywords": [
     "municipal",
