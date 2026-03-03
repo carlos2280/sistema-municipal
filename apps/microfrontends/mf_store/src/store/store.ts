@@ -32,6 +32,8 @@ const authPersistConfig = {
 		"usuarioId",
 		"tenantId",
 		"tenantSlug",
+		"email",
+		"nombreCompleto",
 	],
 };
 const subscriptionsPersistConfig = {

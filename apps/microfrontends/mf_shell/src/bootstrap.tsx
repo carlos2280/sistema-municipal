@@ -8,6 +8,8 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "sonner";
 import App from "./App.tsx";
+import { PersistorProvider } from "./context/PersistorContext";
+
 const { store, persistor } = createStore();
 
 const rootElement = document.getElementById("root");
@@ -20,10 +22,12 @@ createRoot(rootElement).render(
 	<StrictMode>
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
-				<ThemeProvider>
-					<App />
-					<Toaster position="top-center" richColors />
-				</ThemeProvider>
+				<PersistorProvider value={persistor}>
+					<ThemeProvider>
+						<App />
+						<Toaster position="top-center" richColors />
+					</ThemeProvider>
+				</PersistorProvider>
 			</PersistGate>
 		</Provider>
 	</StrictMode>,

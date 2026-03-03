@@ -8,6 +8,8 @@ interface AuthState {
 	usuarioId: number | null;
 	tenantId: number | null;
 	tenantSlug: string | null;
+	email: string | null;
+	nombreCompleto: string | null;
 }
 
 const initialState: AuthState = {
@@ -18,6 +20,8 @@ const initialState: AuthState = {
 	usuarioId: null,
 	tenantId: null,
 	tenantSlug: null,
+	email: null,
+	nombreCompleto: null,
 };
 
 const authSlice = createSlice({
@@ -33,6 +37,8 @@ const authSlice = createSlice({
 				usuarioId?: number;
 				tenantId?: number;
 				tenantSlug?: string;
+				email?: string;
+				nombreCompleto?: string;
 			}>,
 		) => {
 			state.accessToken = action.payload.accessToken;
@@ -55,6 +61,12 @@ const authSlice = createSlice({
 			if (action.payload.tenantSlug) {
 				state.tenantSlug = action.payload.tenantSlug;
 			}
+			if (action.payload.email) {
+				state.email = action.payload.email;
+			}
+			if (action.payload.nombreCompleto) {
+				state.nombreCompleto = action.payload.nombreCompleto;
+			}
 		},
 		loggedOut: (state) => {
 			state.accessToken = null;
@@ -64,10 +76,11 @@ const authSlice = createSlice({
 			state.usuarioId = null;
 			state.tenantId = null;
 			state.tenantSlug = null;
+			state.email = null;
+			state.nombreCompleto = null;
 			localStorage.removeItem("sistemaId");
 			localStorage.removeItem("areaId");
 			localStorage.removeItem("usuarioId");
-			sessionStorage.removeItem("modulosActivos");
 		},
 	},
 });
@@ -86,6 +99,9 @@ export const selectTenantId = (state: { auth: AuthState }) =>
 	state.auth.tenantId;
 export const selectTenantSlug = (state: { auth: AuthState }) =>
 	state.auth.tenantSlug;
+export const selectEmail = (state: { auth: AuthState }) => state.auth.email;
+export const selectNombreCompleto = (state: { auth: AuthState }) =>
+	state.auth.nombreCompleto;
 
 export default authSlice.reducer;
 export type { AuthState };

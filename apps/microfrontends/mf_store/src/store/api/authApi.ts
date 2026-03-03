@@ -49,6 +49,8 @@ export const authApi = createApi({
 							sistemaId: args.sistemaId,
 							areaId: args.areaId,
 							usuarioId: data.usuario.id,
+							email: data.usuario.email,
+							nombreCompleto: data.usuario.nombreCompleto,
 						}),
 					);
 
@@ -114,13 +116,16 @@ export const authApi = createApi({
 				method: "POST",
 			}),
 			async onQueryStarted(_, { dispatch, queryFulfilled }) {
-				// Limpiar estado sin importar si el backend responde
-				dispatch(loggedOut());
-				dispatch(modulosCleared());
 				try {
+					// Esperar a que el backend confirme la eliminación de cookies
+					// ANTES de limpiar el estado local, para evitar que ProtectedRoute
+					// dispare verificarToken con la cookie aún válida (race condition).
 					await queryFulfilled;
 				} catch {
-					// Ignorar errores — las cookies podrían ya estar expiradas
+					// Si el backend falla (cookie ya expirada, red, etc.) igual limpiamos.
+				} finally {
+					dispatch(loggedOut());
+					dispatch(modulosCleared());
 				}
 			},
 		}),
