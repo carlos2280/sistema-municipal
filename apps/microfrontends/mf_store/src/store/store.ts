@@ -42,7 +42,7 @@ const subscriptionsPersistConfig = {
 const tenantPersistConfig = {
 	key: "tenant",
 	storage: storageSession,
-	whitelist: ["tenantId", "tenantSlug"],
+	whitelist: ["tenantId", "tenantSlug", "nombre", "logoUrl", "tema", "resolved"],
 };
 const rootReducer = combineReducers({
 	[authApi.reducerPath]: authApi.reducer,

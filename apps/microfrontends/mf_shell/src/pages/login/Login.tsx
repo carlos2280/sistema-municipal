@@ -36,6 +36,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
+import {
+	selectTenantLogoUrl,
+	selectTenantNombre,
+	useAppSelector,
+} from "mf_store/store";
 import { useLoginFormFlow } from "../../hook/useLoginFormFlow";
 
 // ============================================================================
@@ -260,6 +265,8 @@ function AreaSystemForm({ areas, sistemas }: AreaSystemFormProps) {
 
 export default function Login() {
 	const theme = useMuiTheme();
+	const tenantNombre = useAppSelector(selectTenantNombre);
+	const tenantLogoUrl = useAppSelector(selectTenantLogoUrl);
 	const { activeStep, areas, sistemas, methods, handleNext, handleBack } =
 		useLoginFormFlow();
 
@@ -291,11 +298,11 @@ export default function Login() {
 				{/* Logo */}
 				<LogoSection>
 					<img
-						src="/logo-criscar.svg"
-						alt="CrisCar"
+						src={tenantLogoUrl || "/logo-criscar.svg"}
+						alt={tenantNombre || "CrisCar"}
 						width={64}
 						height={64}
-						style={{ marginBottom: 12 }}
+						style={{ marginBottom: 12, objectFit: "contain" }}
 					/>
 					<Typography
 						variant="h5"
@@ -303,7 +310,7 @@ export default function Login() {
 						color="primary.main"
 						sx={{ mb: 0.5 }}
 					>
-						CrisCar
+						{tenantNombre || "CrisCar"}
 					</Typography>
 					<Typography
 						variant="caption"
