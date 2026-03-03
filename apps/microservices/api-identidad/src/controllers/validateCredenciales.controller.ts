@@ -1,6 +1,11 @@
+import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
-import * as validarService from "@services/validarCredenciales.service"; // Asegúrate de que la ruta sea correcta
+import * as validarService from "@services/validarCredenciales.service";
 import type { RequestHandler } from "express";
+
+const getDb = (req: { tenantDb?: unknown }): DbClient =>
+  (req.tenantDb ?? db) as DbClient;
 
 export const obtenerAreasUsuario: RequestHandler = async (req, res, next) => {
   try {
@@ -8,6 +13,7 @@ export const obtenerAreasUsuario: RequestHandler = async (req, res, next) => {
 
     // Validar credenciales y obtener áreas
     const { usuario, areas } = await validarService.validarCredenciales(
+      getDb(req),
       correo,
       contrasena,
     );

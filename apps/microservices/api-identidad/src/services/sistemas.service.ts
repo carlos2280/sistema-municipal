@@ -1,4 +1,4 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import {
   type NewSistema,
   type Sistema,
@@ -7,7 +7,7 @@ import {
 } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
-export const createSistema = async (data: NewSistema): Promise<Sistema> => {
+export const createSistema = async (db: DbClient, data: NewSistema): Promise<Sistema> => {
   try {
     const [createdSistema] = await db.insert(sistemas).values(data).returning();
     return createdSistema;
@@ -18,7 +18,7 @@ export const createSistema = async (data: NewSistema): Promise<Sistema> => {
   }
 };
 
-export const getAllSistemas = async (): Promise<Sistema[]> => {
+export const getAllSistemas = async (db: DbClient): Promise<Sistema[]> => {
   try {
     return await db.select().from(sistemas);
   } catch (error) {
@@ -29,6 +29,7 @@ export const getAllSistemas = async (): Promise<Sistema[]> => {
 };
 
 export const getSistemaById = async (
+  db: DbClient,
   id: number,
 ): Promise<Sistema | undefined> => {
   try {
@@ -45,6 +46,7 @@ export const getSistemaById = async (
 };
 
 export const updateSistema = async (
+  db: DbClient,
   id: number,
   data: SistemaUpdate,
 ): Promise<Sistema | undefined> => {
@@ -62,7 +64,7 @@ export const updateSistema = async (
   }
 };
 
-export const deleteSistema = async (id: number): Promise<Sistema | null> => {
+export const deleteSistema = async (db: DbClient, id: number): Promise<Sistema | null> => {
   try {
     const [deletedSistema] = await db
       .delete(sistemas)

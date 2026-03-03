@@ -1,4 +1,5 @@
 import type { Server, Socket } from 'socket.io'
+import { db } from '../../db/client.js'
 import { conversacionesService } from '../../services/conversaciones.service.js'
 import { mensajesService } from '../../services/mensajes.service.js'
 
@@ -19,12 +20,16 @@ interface TypingPayload {
 
 export function setupChatHandlers(io: Server, socket: Socket) {
   const userId = socket.data.userId as number
+  // Para sockets se usa la DB por defecto como fallback.
+  // En el futuro se puede extraer el tenant del handshake/JWT.
+  const socketDb = db
 
   // Unirse a una sala de conversación
   socket.on('chat:join', async ({ conversacionId }: ChatJoinPayload) => {
     try {
       // Verificar que el usuario es participante
       const esParticipante = await conversacionesService.verificarParticipante(
+        socketDb,
         conversacionId,
         userId
       )
@@ -55,6 +60,7 @@ export function setupChatHandlers(io: Server, socket: Socket) {
     try {
       // Verificar acceso
       const esParticipante = await conversacionesService.verificarParticipante(
+        socketDb,
         conversacionId,
         userId
       )
@@ -65,7 +71,7 @@ export function setupChatHandlers(io: Server, socket: Socket) {
       }
 
       // Crear mensaje en BD (incluye datos del remitente)
-      const mensaje = await mensajesService.crearMensaje({
+      const mensaje = await mensajesService.crearMensaje(socketDb, {
         conversacionId,
         remitenteId: userId,
         contenido,

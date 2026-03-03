@@ -1,20 +1,24 @@
+import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
 import type { RequestHandler } from "express";
 import * as pcService from "../services/planesCuentas.service";
 
+const getDb = (req: { tenantDb?: unknown }): DbClient =>
+  (req.tenantDb ?? db) as DbClient;
 
 export const crearPlanesCuenta: RequestHandler = async (req, res, next) => {
     try {
-        const nuevo = await pcService.crearPlanesCuenta(req.body);
+        const nuevo = await pcService.crearPlanesCuenta(getDb(req), req.body);
         res.status(201).json(nuevo);
     } catch (error) {
         next(error);
     }
 };
 
-export const obtenerPlanesCuentas: RequestHandler = async (_, res, next) => {
+export const obtenerPlanesCuentas: RequestHandler = async (req, res, next) => {
     try {
-        const lista = await pcService.obtenerPlanesCuentas();
+        const lista = await pcService.obtenerPlanesCuentas(getDb(req));
         res.status(200).json(lista);
     } catch (error) {
         next(error);
@@ -31,7 +35,7 @@ export const obtenerPlanesCuentaPorId: RequestHandler = async (
         return next(new AppError("ID inválido", 400));
     }
     try {
-        const item = await pcService.obtenerPlanesCuentaPorId(id);
+        const item = await pcService.obtenerPlanesCuentaPorId(getDb(req), id);
         if (!item) {
             return next(new AppError("Cuenta no encontrada", 404));
         }
@@ -51,7 +55,7 @@ export const actualizarPlanesCuenta: RequestHandler = async (
         return next(new AppError("ID inválido", 400));
     }
     try {
-        const updated = await pcService.actualizarPlanesCuenta(id, req.body);
+        const updated = await pcService.actualizarPlanesCuenta(getDb(req), id, req.body);
         if (!updated) {
             return next(new AppError("Cuenta no encontrada", 404));
         }
@@ -67,25 +71,25 @@ export const eliminarPlanesCuenta: RequestHandler = async (req, res, next) => {
         return next(new AppError("ID inválido", 400));
     }
     try {
-        await pcService.eliminarPlanesCuenta(id);
+        await pcService.eliminarPlanesCuenta(getDb(req), id);
         res.sendStatus(204);
     } catch (error) {
         next(error);
     }
 };
 
-export const obtenerArbolPlanes: RequestHandler = async (_, res, next) => {
+export const obtenerArbolPlanes: RequestHandler = async (req, res, next) => {
     try {
-        const tree = await pcService.obtenerArbolPlanes();
+        const tree = await pcService.obtenerArbolPlanes(getDb(req));
         res.status(200).json(tree);
     } catch (error) {
         next(error);
     }
 };
 
-export const obtenerArbolCompleto: RequestHandler = async (_, res, next) => {
+export const obtenerArbolCompleto: RequestHandler = async (req, res, next) => {
     try {
-        const tree = await pcService.obtenerArbolCompleto();
+        const tree = await pcService.obtenerArbolCompleto(getDb(req));
         res.status(200).json(tree);
     } catch (error) {
         next(error);
@@ -105,7 +109,7 @@ export const verificarCodigoExiste: RequestHandler = async (req, res, next) => {
     }
 
     try {
-        const result = await pcService.verificarCodigoExiste(ano, String(codigo));
+        const result = await pcService.verificarCodigoExiste(getDb(req), ano, String(codigo));
         res.status(200).json(result);
     } catch (error) {
         next(error);

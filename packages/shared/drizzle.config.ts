@@ -11,7 +11,7 @@ const {
   DB_PASSWORD = "postgres",
   DB_HOST = "localhost",
   DB_PORT = "5432",
-  DB_NAME = "municipal",
+  DB_NAME = "muni_default",
   DB_SSL = "false",
 } = process.env;
 

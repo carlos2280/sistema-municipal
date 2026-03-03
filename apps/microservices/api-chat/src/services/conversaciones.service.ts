@@ -1,5 +1,5 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import {
   type Conversacion,
   type NewConversacion,
@@ -12,7 +12,7 @@ import {
 import { usuarios } from '../db/schemas/usuarios.schema.js'
 
 export const conversacionesService = {
-  async obtenerConversacionesPorUsuario(usuarioId: number) {
+  async obtenerConversacionesPorUsuario(db: DbClient, usuarioId: number) {
     // Obtener IDs de conversaciones del usuario
     const conversacionesDelUsuario = await db
       .select({ id: conversaciones.id })
@@ -86,7 +86,7 @@ export const conversacionesService = {
     }))
   },
 
-  async obtenerConversacionPorId(id: number): Promise<Conversacion | undefined> {
+  async obtenerConversacionPorId(db: DbClient, id: number): Promise<Conversacion | undefined> {
     const [result] = await db
       .select()
       .from(conversaciones)
@@ -96,6 +96,7 @@ export const conversacionesService = {
   },
 
   async crearConversacion(
+    db: DbClient,
     data: NewConversacion,
     participantesIds: number[]
   ): Promise<Conversacion> {
@@ -119,6 +120,7 @@ export const conversacionesService = {
   },
 
   async crearConversacionDirecta(
+    db: DbClient,
     usuarioId1: number,
     usuarioId2: number
   ): Promise<Conversacion> {
@@ -157,12 +159,14 @@ export const conversacionesService = {
 
     // Crear nueva conversación directa
     return this.crearConversacion(
+      db,
       { tipo: 'directa', creadorId: usuarioId1 },
       [usuarioId1, usuarioId2]
     )
   },
 
   async verificarParticipante(
+    db: DbClient,
     conversacionId: number,
     usuarioId: number
   ): Promise<boolean> {
@@ -179,14 +183,14 @@ export const conversacionesService = {
     return !!result
   },
 
-  async obtenerParticipantes(conversacionId: number) {
+  async obtenerParticipantes(db: DbClient, conversacionId: number) {
     return db
       .select()
       .from(participantes)
       .where(eq(participantes.conversacionId, conversacionId))
   },
 
-  async obtenerParticipantesConUsuario(conversacionId: number) {
+  async obtenerParticipantesConUsuario(db: DbClient, conversacionId: number) {
     return db
       .select({
         id: participantes.id,
@@ -206,6 +210,7 @@ export const conversacionesService = {
   },
 
   async eliminarParticipante(
+    db: DbClient,
     conversacionId: number,
     usuarioIdToRemove: number,
     solicitanteId: number
@@ -252,6 +257,7 @@ export const conversacionesService = {
   },
 
   async agregarParticipante(
+    db: DbClient,
     conversacionId: number,
     nuevoUsuarioId: number,
     solicitanteId: number
@@ -279,7 +285,7 @@ export const conversacionesService = {
       return { success: false, error: 'Solo administradores pueden agregar miembros' }
     }
 
-    const yaExiste = await this.verificarParticipante(conversacionId, nuevoUsuarioId)
+    const yaExiste = await this.verificarParticipante(db, conversacionId, nuevoUsuarioId)
     if (yaExiste) return { success: false, error: 'El usuario ya es miembro del grupo' }
 
     await db.insert(participantes).values({
@@ -292,6 +298,7 @@ export const conversacionesService = {
   },
 
   async renombrarGrupo(
+    db: DbClient,
     conversacionId: number,
     nuevoNombre: string,
     solicitanteId: number

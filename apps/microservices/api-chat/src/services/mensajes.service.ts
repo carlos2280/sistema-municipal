@@ -1,5 +1,5 @@
 import { and, desc, eq, lt } from 'drizzle-orm'
-import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
 import {
   type Mensaje,
@@ -20,6 +20,7 @@ interface MensajeConRemitente extends Mensaje {
 
 export const mensajesService = {
   async obtenerMensajes(
+    db: DbClient,
     conversacionId: number,
     cursor?: number
   ): Promise<MensajeConRemitente[]> {
@@ -69,7 +70,7 @@ export const mensajesService = {
     }))
   },
 
-  async crearMensaje(data: NewMensaje): Promise<MensajeConRemitente> {
+  async crearMensaje(db: DbClient, data: NewMensaje): Promise<MensajeConRemitente> {
     const [nuevoMensaje] = await db.insert(mensajes).values(data).returning()
 
     // Actualizar timestamp de la conversación
@@ -98,12 +99,13 @@ export const mensajesService = {
     }
   },
 
-  async obtenerMensajePorId(id: number): Promise<Mensaje | undefined> {
+  async obtenerMensajePorId(db: DbClient, id: number): Promise<Mensaje | undefined> {
     const [result] = await db.select().from(mensajes).where(eq(mensajes.id, id))
     return result
   },
 
   async editarMensaje(
+    db: DbClient,
     id: number,
     contenido: string,
     usuarioId: number
@@ -126,7 +128,7 @@ export const mensajesService = {
     return actualizado
   },
 
-  async eliminarMensaje(id: number, usuarioId: number): Promise<boolean> {
+  async eliminarMensaje(db: DbClient, id: number, usuarioId: number): Promise<boolean> {
     const [mensaje] = await db
       .select()
       .from(mensajes)

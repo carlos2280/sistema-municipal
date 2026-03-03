@@ -1,4 +1,5 @@
 import type { EnvConfig } from "@/env/schema";
+import { getTenantPool } from "@municipal/shared/database";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schemas";
@@ -45,3 +46,22 @@ export function getDB() {
 }
 
 export type DbClient = ReturnType<typeof createDbClient>;
+
+/**
+ * Crea una instancia de drizzle conectada a la DB de un tenant específico.
+ * Reutiliza pools vía getTenantPool() del shared package.
+ */
+export function createTenantDbClient(
+  dbName: string,
+  config: EnvConfig,
+): DbClient {
+  const pool = getTenantPool(dbName, {
+    host: config.DB_HOST,
+    port: config.DB_PORT,
+    user: config.DB_USER,
+    password: config.DB_PASSWORD,
+    ssl: config.DB_SSL,
+    maxConnections: config.DB_POOL_MAX,
+  });
+  return drizzle(pool, { schema });
+}

@@ -1,4 +1,5 @@
 import type { Server, Socket } from 'socket.io'
+import { db } from '../../db/client.js'
 import { env } from '../../config/env.js'
 import { conversacionesService } from '../../services/conversaciones.service.js'
 import { llamadasService } from '../../services/llamadas.service.js'
@@ -26,6 +27,8 @@ const activeCallParticipants = new Map<number, Set<number>>()
 
 export function setupCallHandlers(io: Server, socket: Socket) {
   const userId = socket.data.userId as number
+  // Para sockets se usa la DB por defecto como fallback
+  const socketDb = db
 
   // Iniciar llamada
   socket.on(
@@ -34,6 +37,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
       try {
         const esParticipante =
           await conversacionesService.verificarParticipante(
+            socketDb,
             conversacionId,
             userId
           )
@@ -45,7 +49,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
         }
 
         const existing =
-          await llamadasService.obtenerLlamadaActiva(conversacionId)
+          await llamadasService.obtenerLlamadaActiva(socketDb, conversacionId)
         if (existing) {
           socket.emit('call:error', {
             message: 'Ya hay una llamada activa en esta conversación',
@@ -53,14 +57,14 @@ export function setupCallHandlers(io: Server, socket: Socket) {
           return
         }
 
-        const caller = await llamadasService.obtenerUsuario(userId)
+        const caller = await llamadasService.obtenerUsuario(socketDb, userId)
         if (!caller) {
           socket.emit('call:error', { message: 'Usuario no encontrado' })
           return
         }
 
         const roomName = llamadasService.generateRoomName(conversacionId)
-        const llamada = await llamadasService.crearLlamada({
+        const llamada = await llamadasService.crearLlamada(socketDb, {
           conversacionId,
           iniciadoPor: userId,
           tipo,
@@ -85,7 +89,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
         })
 
         const participanteIds =
-          await llamadasService.obtenerParticipanteIds(conversacionId)
+          await llamadasService.obtenerParticipanteIds(socketDb, conversacionId)
         for (const targetId of participanteIds) {
           if (targetId !== userId) {
             io.to(`user:${targetId}`).emit('call:incoming', {
@@ -104,9 +108,10 @@ export function setupCallHandlers(io: Server, socket: Socket) {
 
         // Auto-timeout 30s si nadie contesta
         setTimeout(async () => {
-          const current = await llamadasService.obtenerPorId(llamada.id)
+          const current = await llamadasService.obtenerPorId(socketDb, llamada.id)
           if (current && current.estado === 'sonando') {
             await llamadasService.rechazarLlamada(
+              socketDb,
               llamada.id,
               'sin_respuesta'
             )
@@ -131,7 +136,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
     'call:response',
     async ({ llamadaId, accepted }: CallResponsePayload) => {
       try {
-        const llamada = await llamadasService.obtenerPorId(llamadaId)
+        const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
         if (!llamada) {
           socket.emit('call:error', { message: 'Llamada no encontrada' })
           return
@@ -145,9 +150,9 @@ export function setupCallHandlers(io: Server, socket: Socket) {
         }
 
         if (accepted) {
-          await llamadasService.actualizarEstado(llamadaId, 'activa')
+          await llamadasService.actualizarEstado(socketDb, llamadaId, 'activa')
 
-          const user = await llamadasService.obtenerUsuario(userId)
+          const user = await llamadasService.obtenerUsuario(socketDb, userId)
           if (!user) {
             socket.emit('call:error', { message: 'Usuario no encontrado' })
             return
@@ -182,13 +187,15 @@ export function setupCallHandlers(io: Server, socket: Socket) {
           )
         } else {
           const conv = await conversacionesService.obtenerConversacionPorId(
+            socketDb,
             llamada.conversacionId
           )
 
           if (conv?.tipo === 'directa') {
-            await llamadasService.rechazarLlamada(llamadaId, 'rechazada')
+            await llamadasService.rechazarLlamada(socketDb, llamadaId, 'rechazada')
             const participanteIds =
               await llamadasService.obtenerParticipanteIds(
+                socketDb,
                 llamada.conversacionId
               )
             for (const pid of participanteIds) {
@@ -219,7 +226,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
   // Unirse a llamada activa (late join en grupo)
   socket.on('call:join', async ({ llamadaId }: JoinCallPayload) => {
     try {
-      const llamada = await llamadasService.obtenerPorId(llamadaId)
+      const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
       if (!llamada || llamada.estado !== 'activa') {
         socket.emit('call:error', {
           message: 'Llamada no encontrada o no activa',
@@ -229,6 +236,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
 
       const esParticipante =
         await conversacionesService.verificarParticipante(
+          socketDb,
           llamada.conversacionId,
           userId
         )
@@ -239,7 +247,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
         return
       }
 
-      const user = await llamadasService.obtenerUsuario(userId)
+      const user = await llamadasService.obtenerUsuario(socketDb, userId)
       if (!user) {
         socket.emit('call:error', { message: 'Usuario no encontrado' })
         return
@@ -265,6 +273,7 @@ export function setupCallHandlers(io: Server, socket: Socket) {
       })
 
       const participanteIds = await llamadasService.obtenerParticipanteIds(
+        socketDb,
         llamada.conversacionId
       )
       for (const pid of participanteIds) {
@@ -284,15 +293,16 @@ export function setupCallHandlers(io: Server, socket: Socket) {
   // Finalizar llamada
   socket.on('call:end', async ({ llamadaId }: EndCallPayload) => {
     try {
-      const llamada = await llamadasService.obtenerPorId(llamadaId)
+      const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
       if (!llamada) return
 
       const participants = activeCallParticipants.get(llamadaId)
       const participantsArray = participants ? Array.from(participants) : []
 
-      await llamadasService.finalizarLlamada(llamadaId, participantsArray)
+      await llamadasService.finalizarLlamada(socketDb, llamadaId, participantsArray)
 
       const participanteIds = await llamadasService.obtenerParticipanteIds(
+        socketDb,
         llamada.conversacionId
       )
       for (const pid of participanteIds) {
@@ -317,14 +327,15 @@ export function setupCallHandlers(io: Server, socket: Socket) {
         participants.delete(userId)
 
         if (participants.size === 0) {
-          const llamada = await llamadasService.obtenerPorId(llamadaId)
+          const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
           if (
             llamada &&
             (llamada.estado === 'activa' || llamada.estado === 'sonando')
           ) {
-            await llamadasService.finalizarLlamada(llamadaId, [])
+            await llamadasService.finalizarLlamada(socketDb, llamadaId, [])
             const participanteIds =
               await llamadasService.obtenerParticipanteIds(
+                socketDb,
                 llamada.conversacionId
               )
             for (const pid of participanteIds) {
@@ -336,10 +347,11 @@ export function setupCallHandlers(io: Server, socket: Socket) {
             activeCallParticipants.delete(llamadaId)
           }
         } else {
-          const llamada = await llamadasService.obtenerPorId(llamadaId)
+          const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
           if (llamada) {
             const participanteIds =
               await llamadasService.obtenerParticipanteIds(
+                socketDb,
                 llamada.conversacionId
               )
             for (const pid of participanteIds) {

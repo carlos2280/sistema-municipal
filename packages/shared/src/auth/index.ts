@@ -14,6 +14,7 @@ export interface UserPayload {
   sistemaId: number;
   tenantId: number;
   tenantSlug: string;
+  tenantDbName: string;
 }
 
 export const X_USER_HEADERS = {
@@ -25,6 +26,7 @@ export const X_USER_HEADERS = {
   sub: "x-user-sub",
   tenantId: "x-tenant-id",
   tenantSlug: "x-tenant-slug",
+  tenantDbName: "x-tenant-db-name",
   secured: "x-secured-by",
 } as const;
 
@@ -57,5 +59,6 @@ export function extractUserFromHeaders(
     sistemaId: Number(headers[X_USER_HEADERS.sistemaId]) || 0,
     tenantId: Number(headers[X_USER_HEADERS.tenantId]) || 0,
     tenantSlug: (headers[X_USER_HEADERS.tenantSlug] as string) || "default",
+    tenantDbName: (headers[X_USER_HEADERS.tenantDbName] as string) || "muni_default",
   };
 }

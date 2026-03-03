@@ -1,4 +1,4 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { tokensContrasenaTemporal } from "@/db/schemas";
 import nodemailer from "nodemailer";
 import { generarTokenTemporal } from "../libs/utils/jwt.tokenTemoral";
@@ -15,6 +15,7 @@ const transporter = nodemailer.createTransport({
 
 // Función para enviar email de bienvenida
 export const sendWelcomeEmail = async (
+  db: DbClient,
   email: string,
   nombre: string,
   usuarioId: number,

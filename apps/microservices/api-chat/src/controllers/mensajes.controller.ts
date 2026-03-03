@@ -1,7 +1,12 @@
-import type { RequestHandler } from 'express'
+import type { Request, RequestHandler } from 'express'
+import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { AppError } from '../libs/middleware/AppError.js'
 import { conversacionesService } from '../services/conversaciones.service.js'
 import { mensajesService } from '../services/mensajes.service.js'
+
+/** Obtiene la instancia de DB del tenant o la por defecto */
+const getDb = (req: Request) => (req.tenantDb ?? db) as DbClient
 
 export const obtenerMensajes: RequestHandler = async (req, res, next) => {
   try {
@@ -13,8 +18,11 @@ export const obtenerMensajes: RequestHandler = async (req, res, next) => {
       throw new AppError('Usuario no autenticado', 401)
     }
 
+    const tenantDb = getDb(req)
+
     // Verificar acceso a la conversación
     const esParticipante = await conversacionesService.verificarParticipante(
+      tenantDb,
       Number(conversacionId),
       usuarioId
     )
@@ -24,6 +32,7 @@ export const obtenerMensajes: RequestHandler = async (req, res, next) => {
     }
 
     const mensajes = await mensajesService.obtenerMensajes(
+      tenantDb,
       Number(conversacionId),
       cursor ? Number(cursor) : undefined
     )
@@ -52,8 +61,11 @@ export const crearMensaje: RequestHandler = async (req, res, next) => {
       throw new AppError('Contenido del mensaje requerido', 400)
     }
 
+    const tenantDb = getDb(req)
+
     // Verificar acceso a la conversación
     const esParticipante = await conversacionesService.verificarParticipante(
+      tenantDb,
       Number(conversacionId),
       usuarioId
     )
@@ -62,7 +74,7 @@ export const crearMensaje: RequestHandler = async (req, res, next) => {
       throw new AppError('No tienes acceso a esta conversación', 403)
     }
 
-    const mensaje = await mensajesService.crearMensaje({
+    const mensaje = await mensajesService.crearMensaje(tenantDb, {
       conversacionId: Number(conversacionId),
       remitenteId: usuarioId,
       contenido,
@@ -92,7 +104,10 @@ export const editarMensaje: RequestHandler = async (req, res, next) => {
       throw new AppError('Contenido del mensaje requerido', 400)
     }
 
+    const tenantDb = getDb(req)
+
     const mensaje = await mensajesService.editarMensaje(
+      tenantDb,
       Number(id),
       contenido,
       usuarioId
@@ -120,7 +135,10 @@ export const eliminarMensaje: RequestHandler = async (req, res, next) => {
       throw new AppError('Usuario no autenticado', 401)
     }
 
+    const tenantDb = getDb(req)
+
     const eliminado = await mensajesService.eliminarMensaje(
+      tenantDb,
       Number(id),
       usuarioId
     )

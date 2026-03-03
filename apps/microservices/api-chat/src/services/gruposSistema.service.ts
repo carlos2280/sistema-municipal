@@ -1,5 +1,5 @@
 import { and, eq, inArray } from 'drizzle-orm'
-import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
 import { departamentos } from '../db/schemas/departamentos.schema.js'
@@ -12,7 +12,7 @@ interface SyncResult {
 }
 
 export const gruposSistemaService = {
-  async sincronizarGrupos(): Promise<SyncResult> {
+  async sincronizarGrupos(db: DbClient): Promise<SyncResult> {
     const allDepartamentos = await db.select().from(departamentos)
 
     const gruposSistema = await db
@@ -27,7 +27,7 @@ export const gruposSistemaService = {
     const result: SyncResult = { created: [], updated: [] }
 
     for (const depto of allDepartamentos) {
-      // Obtener usuarios activos del departamento (usuarios → oficinas → departamento)
+      // Obtener usuarios activos del departamento (usuarios -> oficinas -> departamento)
       const usuariosDepto = await db
         .select({ id: usuarios.id })
         .from(usuarios)

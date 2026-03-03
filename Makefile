@@ -122,9 +122,9 @@ db-reset: ## Resetea la base de datos (DROP + CREATE + MIGRATE + SEED)
 	@read -r confirm && [ "$$confirm" = "y" ] || exit 1
 	@echo "$(YELLOW)Reseteando base de datos...$(NC)"
 	@echo "$(YELLOW)Terminando conexiones activas...$(NC)"
-	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'municipal' AND pid <> pg_backend_pid();" || true
-	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "DROP DATABASE IF EXISTS municipal;"
-	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "CREATE DATABASE municipal;"
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'muni_default' AND pid <> pg_backend_pid();" || true
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "DROP DATABASE IF EXISTS muni_default;"
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) exec postgres psql -U postgres -c "CREATE DATABASE muni_default;"
 	@make db-migrate
 	@make db-seed
 

@@ -1,12 +1,17 @@
+import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import type { NewArea } from "@/db/schema";
 import { AppError } from "@/libs/middleware/AppError";
 import * as areasService from "@services/areas.service";
 import type { RequestHandler } from "express";
 
+const getDb = (req: { tenantDb?: unknown }): DbClient =>
+  (req.tenantDb ?? db) as DbClient;
+
 export const createArea: RequestHandler = async (req, res, next) => {
   try {
     const newArea = req.body as NewArea;
-    const data = await areasService.createArea(newArea);
+    const data = await areasService.createArea(getDb(req), newArea);
     res.status(201).json(data);
   } catch (error) {
     next(error);
@@ -15,7 +20,7 @@ export const createArea: RequestHandler = async (req, res, next) => {
 
 export const getAllAreas: RequestHandler = async (req, res, next) => {
   try {
-    const data = await areasService.getAllAreas();
+    const data = await areasService.getAllAreas(getDb(req));
     res.status(200).json(data);
   } catch (error) {
     next(error);
@@ -27,7 +32,7 @@ export const getAreaById: RequestHandler = async (req, res, next) => {
   if (Number.isNaN(id)) return next(new AppError("ID inválido", 400));
 
   try {
-    const data = await areasService.getAreaById(id);
+    const data = await areasService.getAreaById(getDb(req), id);
     if (!data) return next(new AppError("Area no encontrada", 404));
     res.status(200).json(data);
   } catch (error) {
@@ -40,7 +45,7 @@ export const updateArea: RequestHandler = async (req, res, next) => {
   if (Number.isNaN(id)) return next(new AppError("ID inválido", 400));
 
   try {
-    const data = await areasService.updateArea(id, req.body);
+    const data = await areasService.updateArea(getDb(req), id, req.body);
     if (!data) return next(new AppError("Area no encontrado", 404));
     res.status(200).json(data);
   } catch (error) {
@@ -53,7 +58,7 @@ export const deleteArea: RequestHandler = async (req, res, next) => {
   if (Number.isNaN(id)) return next(new AppError("ID inválido", 400));
 
   try {
-    const data = await areasService.deleteArea(id);
+    const data = await areasService.deleteArea(getDb(req), id);
     if (!data) return next(new AppError("Area no encontrada", 404));
     res.status(200).json({ message: "Area eliminada", data });
   } catch (error) {

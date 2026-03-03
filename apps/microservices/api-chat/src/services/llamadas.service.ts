@@ -1,6 +1,6 @@
 import { AccessToken } from 'livekit-server-sdk'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { env } from '../config/env.js'
 import {
   type Llamada,
@@ -34,7 +34,7 @@ export const llamadasService = {
     return await at.toJwt()
   },
 
-  async crearLlamada(data: NewLlamada): Promise<Llamada> {
+  async crearLlamada(db: DbClient, data: NewLlamada): Promise<Llamada> {
     const [nuevaLlamada] = await db
       .insert(llamadas)
       .values(data)
@@ -43,6 +43,7 @@ export const llamadasService = {
   },
 
   async actualizarEstado(
+    db: DbClient,
     llamadaId: number,
     estado: Llamada['estado'],
     extra?: Partial<NewLlamada>
@@ -56,6 +57,7 @@ export const llamadasService = {
   },
 
   async finalizarLlamada(
+    db: DbClient,
     llamadaId: number,
     participantesQueUnieron: number[]
   ): Promise<Llamada | undefined> {
@@ -86,7 +88,7 @@ export const llamadasService = {
     // Insertar mensaje sistema en la conversación
     const duracionStr = this.formatDuration(duracionSegundos)
     const tipoLabel = llamada.tipo === 'video' ? 'Videollamada' : 'Llamada de voz'
-    await mensajesService.crearMensaje({
+    await mensajesService.crearMensaje(db, {
       conversacionId: llamada.conversacionId,
       remitenteId: llamada.iniciadoPor,
       contenido: `${tipoLabel} - ${duracionStr}`,
@@ -97,6 +99,7 @@ export const llamadasService = {
   },
 
   async rechazarLlamada(
+    db: DbClient,
     llamadaId: number,
     estado: 'rechazada' | 'sin_respuesta'
   ): Promise<Llamada | undefined> {
@@ -115,7 +118,7 @@ export const llamadasService = {
         estado === 'rechazada'
           ? 'Llamada rechazada'
           : 'Llamada sin respuesta'
-      await mensajesService.crearMensaje({
+      await mensajesService.crearMensaje(db, {
         conversacionId: updated.conversacionId,
         remitenteId: updated.iniciadoPor,
         contenido: label,
@@ -126,7 +129,7 @@ export const llamadasService = {
     return updated
   },
 
-  async obtenerPorId(id: number): Promise<Llamada | undefined> {
+  async obtenerPorId(db: DbClient, id: number): Promise<Llamada | undefined> {
     const [result] = await db
       .select()
       .from(llamadas)
@@ -135,6 +138,7 @@ export const llamadasService = {
   },
 
   async obtenerLlamadaActiva(
+    db: DbClient,
     conversacionId: number
   ): Promise<Llamada | undefined> {
     const [result] = await db
@@ -150,6 +154,7 @@ export const llamadasService = {
   },
 
   async obtenerHistorial(
+    db: DbClient,
     conversacionId: number,
     limit = 20
   ): Promise<Llamada[]> {
@@ -161,7 +166,7 @@ export const llamadasService = {
       .limit(limit)
   },
 
-  async obtenerUsuario(userId: number) {
+  async obtenerUsuario(db: DbClient, userId: number) {
     const [user] = await db
       .select({
         id: usuarios.id,
@@ -172,7 +177,7 @@ export const llamadasService = {
     return user
   },
 
-  async obtenerParticipanteIds(conversacionId: number): Promise<number[]> {
+  async obtenerParticipanteIds(db: DbClient, conversacionId: number): Promise<number[]> {
     const parts = await db
       .select({ usuarioId: participantes.usuarioId })
       .from(participantes)

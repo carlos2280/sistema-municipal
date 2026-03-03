@@ -3,6 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import { env } from './config/env.js'
 import { errorHandler } from './libs/middleware/error.middleware.js'
+import { tenantDbMiddleware } from './middleware/tenantDb.js'
 import apiRoutes from './routes/index.js'
 
 const app = express()
@@ -16,6 +17,9 @@ app.use(
 )
 app.use(express.json())
 app.use(cookieParser())
+
+// Middleware multi-tenant: inyecta req.tenantDb si llega x-tenant-db-name
+app.use(tenantDbMiddleware)
 
 // Health check
 app.get('/health', (_req, res) => {

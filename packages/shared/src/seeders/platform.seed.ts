@@ -2,7 +2,7 @@
  * Seed de datos iniciales para la DB platform.
  *
  * Crea:
- * - Tenant "default" apuntando a la DB "municipal" existente
+ * - Tenant "default" apuntando a la DB "muni_default"
  * - Módulos: contabilidad y chat
  * - Suscripciones: default tiene ambos módulos activos
  */
@@ -37,14 +37,14 @@ async function seed() {
   console.log("Seeding platform DB...\n");
 
   await db.transaction(async (tx) => {
-    // 1. Tenant default (DB existente: "municipal")
+    // 1. Tenant default
     const [tenant] = await tx
       .insert(municipalidades)
       .values({
         nombre: "Municipalidad Default",
         slug: "default",
         dominioBase: "default.localhost",
-        dbName: "municipal",
+        dbName: "muni_default",
         activo: true,
         maxUsuarios: 50,
       })
