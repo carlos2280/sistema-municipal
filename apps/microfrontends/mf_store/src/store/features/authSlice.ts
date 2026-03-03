@@ -67,6 +67,7 @@ const authSlice = createSlice({
 			localStorage.removeItem("sistemaId");
 			localStorage.removeItem("areaId");
 			localStorage.removeItem("usuarioId");
+			sessionStorage.removeItem("modulosActivos");
 		},
 	},
 });
