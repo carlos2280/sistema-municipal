@@ -26,7 +26,7 @@ const envConfig = {
 	// CORS
 	CORS: {
 		allowedOrigins: process.env.VITE_ALLOWED_ORIGINS?.split(",") || [
-			"http://localhost:5000",
+			"http://localhost:5030",
 			"http://localhost:5010",
 			"http://localhost:5011",
 			"http://localhost:5020",
@@ -44,7 +44,7 @@ const envConfig = {
 
 	// Microfrontends
 	MF_URLS: {
-		SHELL: process.env.VITE_SHELL_URL || "http://localhost:5000",
+		SHELL: process.env.VITE_SHELL_URL || "http://localhost:5030",
 		STORE: process.env.VITE_STORE_URL || "http://localhost:5010",
 		CONTABILIDAD: process.env.VITE_CONTABILIDAD_URL || "http://localhost:5020",
 		UI:

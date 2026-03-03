@@ -145,7 +145,7 @@ make dev-contabilidad
 
 | Servicio | URL |
 |----------|-----|
-| Shell (Frontend) | http://localhost:5000 |
+| Shell (Frontend) | http://localhost:5030 |
 | API Gateway | http://localhost:3000 |
 | Mailhog (emails) | http://localhost:8025 |
 | Drizzle Studio | `make db-studio` |
