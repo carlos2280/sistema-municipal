@@ -1,7 +1,9 @@
 import {
 	MenuApi,
 	menuReceived,
+	selectResolvedTenantSlug,
 	useAppDispatch,
+	useAppSelector,
 	useLoginAreasMutation,
 	useLoginMutation,
 	useLoginSistemasMutation,
@@ -17,6 +19,7 @@ import {
 import useHookFormSchema from "./useHookFormSchema"; // ya lo estás usando
 export const useLoginFormFlow = () => {
 	const dispatch = useAppDispatch();
+	const tenantSlug = useAppSelector(selectResolvedTenantSlug) ?? "default";
 
 	const navigate = useNavigate();
 	const [activeStep, setActiveStep] = useState(0);
@@ -47,6 +50,7 @@ export const useLoginFormFlow = () => {
 						correo,
 						contrasena,
 						areaId,
+						tenantSlug,
 					}).unwrap();
 					setSistemas(payload);
 
@@ -77,7 +81,7 @@ export const useLoginFormFlow = () => {
 				isValid = await methods.trigger(["correo", "contrasena"]);
 				if (isValid) {
 					try {
-						const payload = await loginAreas({ correo, contrasena }).unwrap();
+						const payload = await loginAreas({ correo, contrasena, tenantSlug }).unwrap();
 						setAreas(payload);
 						setActiveStep((prev) => prev + 1);
 					} catch (error) {
@@ -114,7 +118,7 @@ export const useLoginFormFlow = () => {
 			// 1. Login (authApi.onQueryStarted almacena modulosActivos en subscriptionsSlice)
 			let loginData;
 			if (areaId && sistemaId && correo && contrasena) {
-				loginData = await login({ correo, contrasena, areaId, sistemaId }).unwrap();
+				loginData = await login({ correo, contrasena, areaId, sistemaId, tenantSlug }).unwrap();
 			}
 
 			// 2. Registrar remotes dinámicos de MF según módulos contratados

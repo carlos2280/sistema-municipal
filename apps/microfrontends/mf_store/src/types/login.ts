@@ -40,6 +40,7 @@ export type Login = {
 	contrasena: string;
 	areaId?: number;
 	sistemaId?: number;
+	tenantSlug?: string;
 };
 
 export type LoginAreas = {

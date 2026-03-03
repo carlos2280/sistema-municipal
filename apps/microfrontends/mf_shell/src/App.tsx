@@ -9,10 +9,13 @@ import {
 import { AppLoader } from "mf_ui/components";
 import { useEffect, useState } from "react";
 import { useMenu } from "./hook/useMenu";
+import { useTenantResolver } from "./hooks/useTenantResolver";
 import { registerDynamicRemotes } from "./modules/dynamicModuleLoader";
+import TenantNotFound from "./pages/TenantNotFound";
 import { createAppRouter } from "./routes/createAppRouter";
 
 function App() {
+	const { status: tenantStatus } = useTenantResolver();
 	const { menu } = useMenu();
 	const sistemaId = useAppSelector(selectSistemaId);
 	const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -27,6 +30,11 @@ function App() {
 	const isWaitingForAuthData = isAuthenticated && (!sistemaId || !menu);
 
 	useEffect(() => {
+		// No crear router hasta que el tenant esté resuelto
+		if (tenantStatus !== "resolved") {
+			return;
+		}
+
 		// No crear router mientras esperamos datos de autenticación
 		if (isWaitingForAuthData) {
 			return;
@@ -61,7 +69,17 @@ function App() {
 		};
 
 		initializeRouter();
-	}, [menu, sistemaId, isAuthenticated, isWaitingForAuthData, modulosActivos]);
+	}, [menu, sistemaId, isAuthenticated, isWaitingForAuthData, modulosActivos, tenantStatus]);
+
+	// Resolución de tenant en progreso
+	if (tenantStatus === "loading") {
+		return <AppLoader variant="branded" message="Identificando municipalidad..." />;
+	}
+
+	// Hostname no encontrado
+	if (tenantStatus === "error") {
+		return <TenantNotFound />;
+	}
 
 	// Mostrar loader mientras esperamos datos de autenticación
 	if (isWaitingForAuthData) {
