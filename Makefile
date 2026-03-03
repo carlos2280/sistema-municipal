@@ -52,8 +52,8 @@ install: ## Instala dependencias del proyecto
 	pnpm install
 
 dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
-	@for port in 5000 5010 5011 5020 5021 3001 3002 3003 3004 3005 3006; do \
-		pid=$$(lsof -t -i:$$port 2>/dev/null); \
+	@for port in 5030 5010 5011 5020 5021 3000 3001 3002 3003 3004 3006; do \
+		pid=$$(fuser $$port/tcp 2>/dev/null); \
 		if [ -n "$$pid" ]; then \
 			echo "$(YELLOW)Matando proceso en puerto $$port (PID $$pid)$(NC)"; \
 			kill -9 $$pid 2>/dev/null || true; \

@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview --port 5000",
+    "preview": "rsbuild preview --port 5030",
     "start": "node server.js",
     "lint": "biome lint --write ./src",
     "format": "biome format --write ./src",

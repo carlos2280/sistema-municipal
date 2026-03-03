@@ -113,7 +113,7 @@
   ```bash
   pnpm dev:all
   ```
-- [ ] Acceder a http://localhost:5000 y ver el login
+- [ ] Acceder a http://localhost:5030 y ver el login
 
 ---
 

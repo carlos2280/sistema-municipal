@@ -12,7 +12,7 @@ const envSchema = z.object({
   PLATFORM_URL: z.string().url(),
   NODE_ENV: z.string().min(1),
   JWT_SECRET: z.string().min(1),
-  CORS_ORIGINS: z.string().default("http://localhost:5000"),
+  CORS_ORIGINS: z.string().default("http://localhost:5030"),
 });
 
 const parsed = envSchema.safeParse(process.env);
