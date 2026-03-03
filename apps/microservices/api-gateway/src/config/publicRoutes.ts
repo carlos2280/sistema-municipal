@@ -21,6 +21,15 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   // Platform - resolución de tenant (pública, sin auth)
   { method: "GET", pattern: /^\/api\/v1\/platform\/resolve$/ },
 
+  // Platform Admin API (auth via x-admin-key en api-platform)
+  { method: "GET", pattern: /^\/api\/v1\/platform\/admin\// },
+  { method: "POST", pattern: /^\/api\/v1\/platform\/admin\// },
+  { method: "PUT", pattern: /^\/api\/v1\/platform\/admin\// },
+  { method: "DELETE", pattern: /^\/api\/v1\/platform\/admin\// },
+
+  // Internal cache invalidation (auth via x-admin-key en handler)
+  { method: "POST", pattern: /^\/internal\/cache\/invalidate$/ },
+
   // Rutas con token temporal (validadas por el servicio, no por JWT)
   {
     method: "POST",

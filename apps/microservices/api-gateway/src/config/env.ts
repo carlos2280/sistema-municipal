@@ -13,6 +13,7 @@ const envSchema = z.object({
   NODE_ENV: z.string().min(1),
   JWT_SECRET: z.string().min(1),
   CORS_ORIGINS: z.string().default("http://localhost:5030"),
+  ADMIN_API_KEY: z.string().min(16).default("dev-admin-key-sistema-municipal-2024"),
 });
 
 const parsed = envSchema.safeParse(process.env);
