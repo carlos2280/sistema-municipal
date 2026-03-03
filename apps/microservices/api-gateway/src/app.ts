@@ -5,6 +5,7 @@ import { env } from "./config/env";
 import { logger } from "./logger";
 import { authenticateToken, stripUserHeaders } from "./middleware/auth";
 import { applySecurityMiddleware } from "./middleware/security";
+import { subscriptionGuard } from "./middleware/subscriptionGuard";
 import { configureProxies } from "./proxy";
 
 const corsOptions = {
@@ -42,6 +43,9 @@ export const createApp = (): Express => {
 
   // AUTH: Validar JWT y almacenar datos del usuario en req.__gatewayUser
   app.use(authenticateToken);
+
+  // SUBSCRIPTION: Bloquear acceso a módulos no contratados por el tenant
+  app.use(subscriptionGuard);
 
   // PROXY: Rutas a servicios backend (inyecta X-User-* headers en onProxyReq)
   configureProxies(app);
