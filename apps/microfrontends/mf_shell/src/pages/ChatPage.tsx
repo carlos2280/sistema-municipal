@@ -1,9 +1,9 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, type FC } from 'react'
+import { loadRemote } from '@module-federation/enhanced/runtime'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 
-// Componente de error
 function ChatError() {
   return (
     <Box
@@ -26,10 +26,13 @@ function ChatError() {
   )
 }
 
-// Carga dinámica del ChatPage desde mf_chat
+// Carga dinámica del ChatPage desde mf_chat via runtime
 const MfChatPage = lazy(() =>
-  import('mf_chat/components')
-    .then((mod) => ({ default: mod.ChatPage }))
+  loadRemote<{ ChatPage: FC }>('mf_chat/components')
+    .then((mod) => {
+      if (!mod?.ChatPage) throw new Error('ChatPage no encontrado')
+      return { default: mod.ChatPage }
+    })
     .catch((err) => {
       console.error('[ChatPage] Error cargando mf_chat/components:', err)
       return { default: ChatError }
@@ -58,7 +61,7 @@ function ChatLoadingFallback() {
 
 /**
  * Página wrapper para el módulo de chat.
- * Carga dinámicamente el microfrontend mf_chat.
+ * Carga dinámicamente el microfrontend mf_chat via Module Federation runtime.
  */
 export default function ChatPage() {
   return (

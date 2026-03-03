@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type FC } from 'react'
+import { loadRemote } from '@module-federation/enhanced/runtime'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
@@ -32,8 +33,9 @@ export function ChatDrawerWrapper({ open, onClose }: ChatDrawerProps) {
     hasAttemptedLoadRef.current = true
     setIsLoading(true)
 
-    import('mf_chat/ChatDrawer')
+    loadRemote<{ ChatDrawer?: FC<ChatDrawerProps>; default?: FC<ChatDrawerProps> }>('mf_chat/ChatDrawer')
       .then((mod) => {
+        if (!mod) throw new Error('Módulo no disponible')
         const ChatDrawerComponent = mod.ChatDrawer || mod.default
 
         if (ChatDrawerComponent) {
