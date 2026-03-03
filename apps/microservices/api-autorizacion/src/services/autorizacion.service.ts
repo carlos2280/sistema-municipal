@@ -1,4 +1,4 @@
-import { db } from "@/app";
+import { db, platformDb } from "@/app";
 import {
   type Menu,
   type Usuario,
@@ -12,13 +12,20 @@ import {
 } from "@/db/schemas";
 import { generarTokens, verificarToken } from "@/libs/utils/jwt.utils";
 import type { TokenPayload } from "@/libs/utils/jwt.utils";
+import {
+  modulos,
+  municipalidades,
+  suscripciones,
+} from "@municipal/shared/database/platform";
 import bcrypt from "bcryptjs";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
+
 type LoginProps = {
   correo: string;
   contrasena: string;
   areaId: number;
   sistemaId: number;
+  tenantSlug?: string;
 };
 
 export const login = async ({
@@ -26,9 +33,29 @@ export const login = async ({
   contrasena,
   areaId,
   sistemaId,
+  tenantSlug = "default",
 }: LoginProps) => {
   try {
-    // Buscar usuario por correo
+    // 1. Resolver tenant desde platform DB
+    const [tenant] = await platformDb
+      .select({
+        id: municipalidades.id,
+        slug: municipalidades.slug,
+        nombre: municipalidades.nombre,
+        activo: municipalidades.activo,
+      })
+      .from(municipalidades)
+      .where(eq(municipalidades.slug, tenantSlug));
+
+    if (!tenant) {
+      throw new Error("Municipalidad no encontrada");
+    }
+
+    if (!tenant.activo) {
+      throw new Error("Municipalidad inactiva");
+    }
+
+    // 2. Buscar usuario por correo (en tenant DB actual)
     const [usuario]: Usuario[] = await db
       .select()
       .from(usuarios)
@@ -38,7 +65,7 @@ export const login = async ({
       throw new Error("Usuario no encontrado");
     }
 
-    // Comparar contraseñas
+    // 3. Comparar contraseñas
     const passwordValida = await bcrypt.compare(contrasena, usuario.password);
     if (!passwordValida) {
       throw new Error("Contraseña incorrecta");
@@ -48,15 +75,43 @@ export const login = async ({
       throw new Error("No se encontraron areas");
     }
 
-    // Obtener menú del usuario
-    // const menu = await obtenerMenuPorUsuarioYArea(usuario.id, areaId);
-    // Generar tokens (access + refresh)
+    // 4. Obtener módulos activos del tenant desde platform DB
+    const modulosActivos = await platformDb
+      .select({
+        codigo: modulos.codigo,
+        nombre: modulos.nombre,
+        mfName: modulos.mfName,
+        mfManifestUrlTpl: modulos.mfManifestUrlTpl,
+        icono: modulos.icono,
+        apiPrefix: modulos.apiPrefix,
+      })
+      .from(suscripciones)
+      .innerJoin(modulos, eq(modulos.id, suscripciones.moduloId))
+      .innerJoin(
+        municipalidades,
+        eq(municipalidades.id, suscripciones.municipalidadId),
+      )
+      .where(
+        and(
+          eq(municipalidades.slug, tenantSlug),
+          eq(municipalidades.activo, true),
+          inArray(suscripciones.estado, ["activa", "trial"]),
+          or(
+            isNull(suscripciones.fechaFin),
+            gt(suscripciones.fechaFin, new Date()),
+          ),
+        ),
+      );
+
+    // 5. Generar tokens con tenant info
     const tokens = generarTokens({
       id: usuario.id,
       email: usuario.email,
       nombreCompleto: usuario.nombreCompleto,
       areaId,
       sistemaId,
+      tenantId: tenant.id,
+      tenantSlug: tenant.slug,
     });
 
     return {
@@ -65,6 +120,7 @@ export const login = async ({
         email: usuario.email,
         nombreCompleto: usuario.nombreCompleto,
       },
+      modulosActivos,
       ...tokens,
     };
   } catch (error) {
@@ -339,13 +395,15 @@ export const refrescarToken = async (refreshToken: string) => {
       throw new Error("Usuario inactivo");
     }
 
-    // Generar nuevo par de tokens
+    // Generar nuevo par de tokens (mantener tenant context del refresh token)
     const tokens = generarTokens({
       id: usuario.id,
       email: usuario.email,
       nombreCompleto: usuario.nombreCompleto,
       areaId: payload.areaId,
       sistemaId: payload.sistemaId,
+      tenantId: payload.tenantId || 0,
+      tenantSlug: payload.tenantSlug || "default",
     });
 
     return tokens;

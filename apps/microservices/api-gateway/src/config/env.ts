@@ -9,6 +9,7 @@ const envSchema = z.object({
   IDENTITY_URL: z.string().url(),
   CONTABILIDAD_URL: z.string().url(),
   CHAT_URL: z.string().url(),
+  PLATFORM_URL: z.string().url(),
   NODE_ENV: z.string().min(1),
   JWT_SECRET: z.string().min(1),
   CORS_ORIGINS: z.string().default("http://localhost:5000"),

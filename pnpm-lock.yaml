@@ -874,6 +874,58 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
+  apps/microservices/api-platform:
+    dependencies:
+      '@municipal/shared':
+        specifier: workspace:*
+        version: link:../../../packages/shared
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+      express:
+        specifier: ^5.1.0
+        version: 5.2.1
+      pg:
+        specifier: ^8.16.0
+        version: 8.16.3
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.76
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.9.4
+        version: 1.9.4
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
+      '@types/express':
+        specifier: ^5.0.3
+        version: 5.0.6
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      '@types/pg':
+        specifier: ^8.15.2
+        version: 8.16.0
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.21.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
   packages/shared:
     dependencies:
       dotenv:

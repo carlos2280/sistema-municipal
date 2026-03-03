@@ -62,7 +62,7 @@ export const obtenerSistemasPorAreaUsuario: RequestHandler = async (
 };
 
 export const login: RequestHandler = async (req, res, next) => {
-  const { correo, contrasena, areaId, sistemaId } = req.body;
+  const { correo, contrasena, areaId, sistemaId, tenantSlug } = req.body;
 
   try {
     const result = await autorizacionService.login({
@@ -70,6 +70,7 @@ export const login: RequestHandler = async (req, res, next) => {
       contrasena,
       areaId,
       sistemaId,
+      tenantSlug,
     });
 
     // Setear access token en cookie (HTTP-only)
@@ -90,6 +91,7 @@ export const login: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({
       usuario: result.usuario,
+      modulosActivos: result.modulosActivos,
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       expiresIn: result.expiresIn,

@@ -24,6 +24,8 @@ export const extractUser = (
       nombre: user.nombre,
       areaId: user.areaId,
       sistemaId: user.sistemaId,
+      tenantId: user.tenantId,
+      tenantSlug: user.tenantSlug,
     } as CustomJwtPayload;
     return next();
   }
@@ -44,6 +46,8 @@ export const extractUser = (
         nombre: payload.nombre || "",
         areaId: payload.areaId || 0,
         sistemaId: payload.sistemaId || 0,
+        tenantId: payload.tenantId || 0,
+        tenantSlug: payload.tenantSlug || "default",
       } as CustomJwtPayload;
       return next();
     } catch {
