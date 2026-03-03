@@ -153,6 +153,8 @@ CREATE TABLE "mensajeria"."conversaciones" (
 	"avatar_url" text,
 	"creador_id" integer NOT NULL,
 	"activo" boolean DEFAULT true,
+	"sistema" boolean DEFAULT false,
+	"departamento_id" integer,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );

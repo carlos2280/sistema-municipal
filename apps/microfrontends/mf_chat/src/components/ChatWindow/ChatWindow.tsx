@@ -45,8 +45,10 @@ export function ChatWindow({
     if (!conv) return null
 
     // Para conversaciones directas, obtener el nombre del otro participante
-    if (conv.tipo === 'directa' && conv.participantes.length > 0) {
-      const otherParticipant = conv.participantes.find(
+    const participantes = conv.participantes ?? []
+
+    if (conv.tipo === 'directa' && participantes.length > 0) {
+      const otherParticipant = participantes.find(
         (p) => p.usuarioId !== currentUserId
       )
       const otherUserId = otherParticipant?.usuarioId
@@ -65,7 +67,7 @@ export function ChatWindow({
       online: false,
       esGrupo: true,
       esSistema: conv.sistema ?? false,
-      participantesCount: conv.participantes.length,
+      participantesCount: participantes.length,
     }
   }, [conversaciones, conversacionId, currentUserId, isUserOnline])
 

@@ -8,13 +8,14 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
-import { loggedOut, useAppDispatch } from "mf_store/store";
+import { useLogoutMutation, useAppDispatch } from "mf_store/store";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AccountMenu() {
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
+	const [logout] = useLogoutMutation();
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -24,9 +25,9 @@ export default function AccountMenu() {
 		setAnchorEl(null);
 	};
 
-	const handleLogout = () => {
-		dispatch(loggedOut());
-		navigate("/login", { replace: true }); // 👈 redirige al login
+	const handleLogout = async () => {
+		await logout(); // Llama al backend para borrar cookies httpOnly
+		navigate("/login", { replace: true });
 	};
 	return (
 		<React.Fragment>

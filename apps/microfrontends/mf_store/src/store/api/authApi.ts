@@ -107,6 +107,23 @@ export const authApi = createApi({
 				},
 			}),
 		}),
+
+		logout: builder.mutation<void, void>({
+			query: () => ({
+				url: "/autorizacion/logout",
+				method: "POST",
+			}),
+			async onQueryStarted(_, { dispatch, queryFulfilled }) {
+				// Limpiar estado sin importar si el backend responde
+				dispatch(loggedOut());
+				dispatch(modulosCleared());
+				try {
+					await queryFulfilled;
+				} catch {
+					// Ignorar errores — las cookies podrían ya estar expiradas
+				}
+			},
+		}),
 	}),
 });
 
@@ -117,4 +134,5 @@ export const {
 	useVerificarTokenQuery,
 	useContrasenaTemporalQuery,
 	useCambiarContrasenaTemporalMutation,
+	useLogoutMutation,
 } = authApi;
