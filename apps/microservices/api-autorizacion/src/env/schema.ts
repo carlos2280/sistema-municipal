@@ -25,6 +25,9 @@ export const envSchema = z.object({
   JWT_ISSUER: z.string().min(1).default("sistema-municipal"),
   JWT_SECRET_TEMP: z.string().min(1).default("temp-secret-dev"),
 
+  // Platform DB (multi-tenant)
+  PLATFORM_DB_NAME: z.string().min(1).default("platform"),
+
   // Connection pool settings
   DB_POOL_MIN: z.coerce.number().int().positive().default(1),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),

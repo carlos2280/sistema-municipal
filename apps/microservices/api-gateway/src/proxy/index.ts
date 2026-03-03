@@ -50,6 +50,12 @@ export const configureProxies = (app: Express) => {
       pathRewrite: "/api/v1/identidad",
       timeout: 10000,
     },
+    platform: {
+      baseUrl: env.PLATFORM_URL,
+      path: "/api/v1/platform",
+      pathRewrite: "/api/v1",
+      timeout: 10000,
+    },
   };
 
   // Middleware común para todos los proxies
@@ -112,6 +118,14 @@ export const configureProxies = (app: Express) => {
                 String(user.sistemaId),
               );
               proxyReq.setHeader(X_USER_HEADERS.sub, user.sub);
+              proxyReq.setHeader(
+                X_USER_HEADERS.tenantId,
+                String(user.tenantId),
+              );
+              proxyReq.setHeader(
+                X_USER_HEADERS.tenantSlug,
+                user.tenantSlug,
+              );
             }
 
             // Construir URL final para logging

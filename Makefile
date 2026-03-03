@@ -5,7 +5,7 @@
 # Uso: make <comando>
 # ============================================
 
-.PHONY: help dev dev-infra dev-stop dev-down build build-api build-mf prod prod-stop \
+.PHONY: help dev dev-infra dev-kill-ports dev-stop dev-down build build-api build-mf prod prod-stop \
         logs logs-api clean status test deploy-staging deploy-production \
         install db-migrate db-seed
 
@@ -51,18 +51,28 @@ install: ## Instala dependencias del proyecto
 	@echo "$(GREEN)Instalando dependencias...$(NC)"
 	pnpm install
 
-dev: dev-infra ## Inicia entorno de desarrollo (infra + apps en orden)
+dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
+	@for port in 5000 5010 5011 5020 5021 3001 3002 3003 3004 3005 3006; do \
+		pid=$$(lsof -t -i:$$port 2>/dev/null); \
+		if [ -n "$$pid" ]; then \
+			echo "$(YELLOW)Matando proceso en puerto $$port (PID $$pid)$(NC)"; \
+			kill -9 $$pid 2>/dev/null || true; \
+		fi; \
+	done
+
+dev: dev-infra dev-kill-ports ## Inicia entorno de desarrollo (infra + apps en orden)
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
 	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs (esperan postgres)  3) MFs remotos  4) Shell (espera remotes)$(NC)"
 	@npx concurrently -k \
-		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
-		-c "gray,blue,blue,blue,blue,magenta,green,green,green,cyan,yellow" \
+		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
+		-c "gray,blue,blue,blue,blue,magenta,blue,green,green,green,cyan,yellow" \
 		"pnpm --filter @municipal/shared dev" \
 		"npx wait-on tcp:5434 && pnpm --filter gateway dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-identidad dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-autorizacion dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-contabilidad dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-chat dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-platform dev" \
 		"pnpm --filter mf-store dev" \
 		"pnpm --filter mf-ui dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-contabilidad dev" \

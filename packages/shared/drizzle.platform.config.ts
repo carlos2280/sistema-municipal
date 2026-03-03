@@ -11,17 +11,13 @@ const {
   DB_PASSWORD = "postgres",
   DB_HOST = "localhost",
   DB_PORT = "5432",
-  DB_NAME = "municipal",
   DB_SSL = "false",
+  PLATFORM_DB_NAME = "platform",
 } = process.env;
 
 export default defineConfig({
-  schema: [
-    "./src/database/identidad/schemas/*.schema.ts",
-    "./src/database/contabilidad/schemas/*.schema.ts",
-    "./src/database/mensajeria/schemas/*.schema.ts",
-  ],
-  out: "./drizzle",
+  schema: "./src/database/platform/schemas/*.schema.ts",
+  out: "./drizzle/platform",
   dialect: "postgresql",
   migrations: {
     prefix: "timestamp",
@@ -29,6 +25,6 @@ export default defineConfig({
     schema: "public",
   },
   dbCredentials: {
-    url: `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_SSL === "true" ? "?sslmode=require" : ""}`,
+    url: `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${PLATFORM_DB_NAME}${DB_SSL === "true" ? "?sslmode=require" : ""}`,
   },
 });

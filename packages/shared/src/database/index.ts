@@ -9,3 +9,6 @@ export * from "./contabilidad";
 
 // Módulo de mensajería
 export * from "./mensajeria";
+
+// Módulo de plataforma (multi-tenant)
+export * from "./platform";

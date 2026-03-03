@@ -12,6 +12,8 @@ export interface UserPayload {
   nombre: string;
   areaId: number;
   sistemaId: number;
+  tenantId: number;
+  tenantSlug: string;
 }
 
 export const X_USER_HEADERS = {
@@ -21,6 +23,8 @@ export const X_USER_HEADERS = {
   areaId: "x-user-area-id",
   sistemaId: "x-user-sistema-id",
   sub: "x-user-sub",
+  tenantId: "x-tenant-id",
+  tenantSlug: "x-tenant-slug",
   secured: "x-secured-by",
 } as const;
 
@@ -51,5 +55,7 @@ export function extractUserFromHeaders(
     nombre: (headers[X_USER_HEADERS.nombre] as string) || "",
     areaId: Number(headers[X_USER_HEADERS.areaId]) || 0,
     sistemaId: Number(headers[X_USER_HEADERS.sistemaId]) || 0,
+    tenantId: Number(headers[X_USER_HEADERS.tenantId]) || 0,
+    tenantSlug: (headers[X_USER_HEADERS.tenantSlug] as string) || "default",
   };
 }

@@ -18,6 +18,9 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   { method: "POST", pattern: /^\/api\/v1\/autorizacion\/sistemas$/ },
   { method: "POST", pattern: /^\/api\/v1\/autorizacion\/refresh-token$/ },
 
+  // Platform - resolución de tenant (pública, sin auth)
+  { method: "GET", pattern: /^\/api\/v1\/platform\/resolve$/ },
+
   // Rutas con token temporal (validadas por el servicio, no por JWT)
   {
     method: "POST",

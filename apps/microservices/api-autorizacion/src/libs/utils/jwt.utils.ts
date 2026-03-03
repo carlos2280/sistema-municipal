@@ -19,6 +19,8 @@ export interface TokenPayload {
   nombre: string;
   areaId: number;
   sistemaId: number;
+  tenantId: number;
+  tenantSlug: string;
   tipo: "access" | "refresh";
 }
 
@@ -37,6 +39,8 @@ export const generarTokens = (
   usuario: Pick<Usuario, "id" | "email" | "nombreCompleto"> & {
     areaId: number;
     sistemaId: number;
+    tenantId: number;
+    tenantSlug: string;
   },
 ): TokenPair => {
   const basePayload = {
@@ -46,6 +50,8 @@ export const generarTokens = (
     nombre: usuario.nombreCompleto,
     areaId: usuario.areaId,
     sistemaId: usuario.sistemaId,
+    tenantId: usuario.tenantId,
+    tenantSlug: usuario.tenantSlug,
   };
 
   // Access Token (corta duración)
@@ -61,11 +67,13 @@ export const generarTokens = (
     } as jwt.SignOptions,
   );
 
-  // Refresh Token (larga duración)
+  // Refresh Token (larga duración, incluye tenant para mantener contexto)
   const refreshToken = jwt.sign(
     {
       sub: usuario.id.toString(),
       userId: usuario.id,
+      tenantId: usuario.tenantId,
+      tenantSlug: usuario.tenantSlug,
       tipo: "refresh",
     },
     JWT_CONFIG.secret,
@@ -90,6 +98,8 @@ export const generarToken = (
   usuario: Pick<Usuario, "id" | "email" | "nombreCompleto"> & {
     areaId: number;
     sistemaId: number;
+    tenantId: number;
+    tenantSlug: string;
   },
 ): string => {
   const payload: jwt.JwtPayload = {
@@ -99,6 +109,8 @@ export const generarToken = (
     nombre: usuario.nombreCompleto,
     areaId: usuario.areaId,
     sistemaId: usuario.sistemaId,
+    tenantId: usuario.tenantId,
+    tenantSlug: usuario.tenantSlug,
     tipo: "access",
     iat: Math.floor(Date.now() / 1000),
   };

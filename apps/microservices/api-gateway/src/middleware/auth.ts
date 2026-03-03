@@ -12,6 +12,8 @@ export interface GatewayUserPayload {
   nombre: string;
   areaId: number;
   sistemaId: number;
+  tenantId: number;
+  tenantSlug: string;
 }
 
 declare module "express-serve-static-core" {
@@ -85,6 +87,8 @@ export const authenticateToken = (
       nombre: decoded.nombre || "",
       areaId: decoded.areaId || 0,
       sistemaId: decoded.sistemaId || 0,
+      tenantId: decoded.tenantId || 0,
+      tenantSlug: decoded.tenantSlug || "default",
     };
 
     next();
