@@ -1,8 +1,8 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { cuentasSubgrupos } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
-export const crearCuentasSubgrupo = async (data: {
+export const crearCuentasSubgrupo = async (db: DbClient, data: {
   codigo: string;
   nombre: string;
   tipoCuentaId: number;
@@ -12,14 +12,14 @@ export const crearCuentasSubgrupo = async (data: {
   return inserted;
 };
 
-export const obtenerCuentasSubgrupos = async () => {
+export const obtenerCuentasSubgrupos = async (db: DbClient) => {
   return await db
     .select()
     .from(cuentasSubgrupos)
     .orderBy(cuentasSubgrupos.codigo);
 };
 
-export const obtenerCuentasSubgrupoPorId = async (id: number) => {
+export const obtenerCuentasSubgrupoPorId = async (db: DbClient, id: number) => {
   const [row] = await db
     .select()
     .from(cuentasSubgrupos)
@@ -28,6 +28,7 @@ export const obtenerCuentasSubgrupoPorId = async (id: number) => {
 };
 
 export const actualizarCuentasSubgrupo = async (
+  db: DbClient,
   id: number,
   updates: Partial<{
     codigo: string;
@@ -44,12 +45,12 @@ export const actualizarCuentasSubgrupo = async (
   return row ?? null;
 };
 
-export const eliminarCuentasSubgrupo = async (id: number) => {
+export const eliminarCuentasSubgrupo = async (db: DbClient, id: number) => {
   await db.delete(cuentasSubgrupos).where(eq(cuentasSubgrupos.id, id));
 };
 
-export const obtenerArbolSubgrupos = async () => {
-  const items = await obtenerCuentasSubgrupos();
+export const obtenerArbolSubgrupos = async (db: DbClient) => {
+  const items = await obtenerCuentasSubgrupos(db);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const map = new Map<number, any>();
 

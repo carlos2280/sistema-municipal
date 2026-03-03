@@ -126,6 +126,10 @@ export const configureProxies = (app: Express) => {
                 X_USER_HEADERS.tenantSlug,
                 user.tenantSlug,
               );
+              proxyReq.setHeader(
+                X_USER_HEADERS.tenantDbName,
+                user.tenantDbName,
+              );
             }
 
             // Construir URL final para logging

@@ -1,8 +1,8 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { type Area, type AreaUpdate, type NewArea, areas } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
-export const createArea = async (data: NewArea): Promise<Area> => {
+export const createArea = async (db: DbClient, data: NewArea): Promise<Area> => {
   try {
     const [createdArea] = await db.insert(areas).values(data).returning();
     return createdArea;
@@ -13,7 +13,7 @@ export const createArea = async (data: NewArea): Promise<Area> => {
   }
 };
 
-export const getAllAreas = async (): Promise<Area[]> => {
+export const getAllAreas = async (db: DbClient): Promise<Area[]> => {
   try {
     return await db.select().from(areas);
   } catch (error) {
@@ -23,7 +23,7 @@ export const getAllAreas = async (): Promise<Area[]> => {
   }
 };
 
-export const getAreaById = async (id: number): Promise<Area | undefined> => {
+export const getAreaById = async (db: DbClient, id: number): Promise<Area | undefined> => {
   try {
     const [area] = await db.select().from(areas).where(eq(areas.id, id));
     return area;
@@ -35,6 +35,7 @@ export const getAreaById = async (id: number): Promise<Area | undefined> => {
 };
 
 export const updateArea = async (
+  db: DbClient,
   id: number,
   data: AreaUpdate,
 ): Promise<Area | undefined> => {
@@ -52,7 +53,7 @@ export const updateArea = async (
   }
 };
 
-export const deleteArea = async (id: number): Promise<Area | null> => {
+export const deleteArea = async (db: DbClient, id: number): Promise<Area | null> => {
   try {
     const [deletedArea] = await db
       .delete(areas)

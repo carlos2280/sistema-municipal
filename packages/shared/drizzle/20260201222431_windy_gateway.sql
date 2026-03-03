@@ -1,8 +1,8 @@
-CREATE SCHEMA "contabilidad";
+CREATE SCHEMA IF NOT EXISTS "contabilidad";
 --> statement-breakpoint
-CREATE SCHEMA "identidad";
+CREATE SCHEMA IF NOT EXISTS "identidad";
 --> statement-breakpoint
-CREATE SCHEMA "mensajeria";
+CREATE SCHEMA IF NOT EXISTS "mensajeria";
 --> statement-breakpoint
 CREATE TABLE "identidad"."usuarios" (
 	"id" serial PRIMARY KEY NOT NULL,

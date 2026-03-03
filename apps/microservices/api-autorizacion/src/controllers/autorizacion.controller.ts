@@ -1,8 +1,14 @@
+import { db } from "@/app";
 import { loadEnv } from "@/config/env";
+import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
 import type { RequestHandler } from "express-serve-static-core";
 import * as autorizacionService from "../services/autorizacion.service";
+
 const { NODE_ENV } = loadEnv();
+
+const getDb = (req: { tenantDb?: unknown }): DbClient =>
+  (req.tenantDb ?? db) as DbClient;
 
 export const obtenerAreasUsuario: RequestHandler = async (req, res, next) => {
   try {
@@ -10,6 +16,7 @@ export const obtenerAreasUsuario: RequestHandler = async (req, res, next) => {
 
     // Validar credenciales y obtener áreas
     const { usuario, areas } = await autorizacionService.obtenerAreasUsuario(
+      getDb(req),
       correo,
       contrasena,
     );
@@ -49,10 +56,10 @@ export const obtenerSistemasPorAreaUsuario: RequestHandler = async (
     // if (Number.isNaN(usuarioIdNum)) return next(new AppError("ID inválido", 400));
     // Validar credenciales y obtener áreas
     const data = await autorizacionService.obtenerSistemasPorAreaUsuario(
+      getDb(req),
       correo,
       contrasena,
       areaIdNum,
-      // usuarioIdNum,
     );
 
     res.status(200).json(data);
@@ -111,7 +118,7 @@ export const obtenerMenuporSistema: RequestHandler = async (req, res, next) => {
     return next(new AppError("ID inválido", 400));
   }
   try {
-    const data = await autorizacionService.obtenerMenuPorSistema(id);
+    const data = await autorizacionService.obtenerMenuPorSistema(getDb(req), id);
     res.status(200).json(data);
   } catch (error) {
     next(error);
@@ -184,7 +191,7 @@ export const me: RequestHandler = async (req, res, next) => {
     }
 
     // Obtener datos completos del usuario desde la BD
-    const usuario = await autorizacionService.obtenerUsuarioPorId(userId);
+    const usuario = await autorizacionService.obtenerUsuarioPorId(getDb(req), userId);
 
     if (!usuario || !usuario.activo) {
       throw new AppError("Usuario no encontrado o inactivo", 404);
@@ -218,6 +225,7 @@ export const cambiarContrasenaTemporal: RequestHandler = async (
   }
   try {
     const result = await autorizacionService.cambiarContrasenaTemporal(
+      getDb(req),
       contrasenaTemporal,
       contrasenaNueva,
       email,

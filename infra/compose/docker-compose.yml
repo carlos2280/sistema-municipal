@@ -21,7 +21,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-municipal}
+      POSTGRES_DB: ${POSTGRES_DB:-muni_default}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:

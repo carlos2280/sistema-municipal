@@ -1,9 +1,10 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { areas, perfilAreaUsuario, perfiles, usuarios } from "@/db/schemas";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 export const validarCredenciales = async (
+  db: DbClient,
   correo: string,
   contrasena: string,
 ) => {

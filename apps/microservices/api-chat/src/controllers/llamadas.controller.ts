@@ -1,7 +1,12 @@
-import type { RequestHandler } from 'express'
+import type { Request, RequestHandler } from 'express'
+import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { AppError } from '../libs/middleware/AppError.js'
 import { conversacionesService } from '../services/conversaciones.service.js'
 import { llamadasService } from '../services/llamadas.service.js'
+
+/** Obtiene la instancia de DB del tenant o la por defecto */
+const getDb = (req: Request) => (req.tenantDb ?? db) as DbClient
 
 export const obtenerHistorial: RequestHandler = async (req, res, next) => {
   try {
@@ -9,7 +14,10 @@ export const obtenerHistorial: RequestHandler = async (req, res, next) => {
     const usuarioId = req.usuario?.id
     if (!usuarioId) throw new AppError('Usuario no autenticado', 401)
 
+    const tenantDb = getDb(req)
+
     const esParticipante = await conversacionesService.verificarParticipante(
+      tenantDb,
       Number(conversacionId),
       usuarioId
     )
@@ -17,6 +25,7 @@ export const obtenerHistorial: RequestHandler = async (req, res, next) => {
       throw new AppError('No tienes acceso a esta conversación', 403)
 
     const historial = await llamadasService.obtenerHistorial(
+      tenantDb,
       Number(conversacionId)
     )
     res.json({ success: true, data: historial })
@@ -31,19 +40,22 @@ export const obtenerTokenLlamada: RequestHandler = async (req, res, next) => {
     const usuarioId = req.usuario?.id
     if (!usuarioId) throw new AppError('Usuario no autenticado', 401)
 
-    const llamada = await llamadasService.obtenerPorId(Number(llamadaId))
+    const tenantDb = getDb(req)
+
+    const llamada = await llamadasService.obtenerPorId(tenantDb, Number(llamadaId))
     if (!llamada) throw new AppError('Llamada no encontrada', 404)
 
     if (llamada.estado !== 'activa')
       throw new AppError('La llamada no está activa', 400)
 
     const esParticipante = await conversacionesService.verificarParticipante(
+      tenantDb,
       llamada.conversacionId,
       usuarioId
     )
     if (!esParticipante) throw new AppError('No tienes acceso', 403)
 
-    const user = await llamadasService.obtenerUsuario(usuarioId)
+    const user = await llamadasService.obtenerUsuario(tenantDb, usuarioId)
     if (!user) throw new AppError('Usuario no encontrado', 404)
 
     const token = await llamadasService.generateToken(

@@ -1,4 +1,6 @@
-import { db, platformDb } from "@/app";
+import { platformDb } from "@/app";
+import { loadEnv } from "@/config/env";
+import { createTenantDbClient, type DbClient } from "@/db/client";
 import {
   type Menu,
   type Usuario,
@@ -19,6 +21,8 @@ import {
 } from "@municipal/shared/database/platform";
 import bcrypt from "bcryptjs";
 import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
+
+const env = loadEnv();
 
 type LoginProps = {
   correo: string;
@@ -42,6 +46,7 @@ export const login = async ({
         id: municipalidades.id,
         slug: municipalidades.slug,
         nombre: municipalidades.nombre,
+        dbName: municipalidades.dbName,
         activo: municipalidades.activo,
       })
       .from(municipalidades)
@@ -55,8 +60,11 @@ export const login = async ({
       throw new Error("Municipalidad inactiva");
     }
 
-    // 2. Buscar usuario por correo (en tenant DB actual)
-    const [usuario]: Usuario[] = await db
+    // 2. Crear conexión dinámica al tenant DB
+    const tenantDb = createTenantDbClient(tenant.dbName, env);
+
+    // 3. Buscar usuario por correo (en tenant DB)
+    const [usuario]: Usuario[] = await tenantDb
       .select()
       .from(usuarios)
       .where(eq(usuarios.email, correo));
@@ -65,17 +73,17 @@ export const login = async ({
       throw new Error("Usuario no encontrado");
     }
 
-    // 3. Comparar contraseñas
+    // 4. Comparar contraseñas
     const passwordValida = await bcrypt.compare(contrasena, usuario.password);
     if (!passwordValida) {
       throw new Error("Contraseña incorrecta");
     }
-    const areaValida = await validarAreasUsuario(usuario.id, areaId);
+    const areaValida = await validarAreasUsuario(tenantDb, usuario.id, areaId);
     if (!areaValida) {
       throw new Error("No se encontraron areas");
     }
 
-    // 4. Obtener módulos activos del tenant desde platform DB
+    // 5. Obtener módulos activos del tenant desde platform DB
     const modulosActivos = await platformDb
       .select({
         codigo: modulos.codigo,
@@ -103,7 +111,7 @@ export const login = async ({
         ),
       );
 
-    // 5. Generar tokens con tenant info
+    // 6. Generar tokens con tenant info
     const tokens = generarTokens({
       id: usuario.id,
       email: usuario.email,
@@ -112,6 +120,7 @@ export const login = async ({
       sistemaId,
       tenantId: tenant.id,
       tenantSlug: tenant.slug,
+      tenantDbName: tenant.dbName,
     });
 
     return {
@@ -131,6 +140,7 @@ export const login = async ({
 };
 
 export const obtenerAreasUsuario = async (
+  db: DbClient,
   correo: string,
   contrasena: string,
 ) => {
@@ -176,6 +186,7 @@ export const obtenerAreasUsuario = async (
 
 // Función auxiliar para validar áreas de un usuario desde perfilAreaUsuario
 export const validarAreasUsuario = async (
+  db: DbClient,
   usuarioId: number,
   areaId: number,
 ) => {
@@ -198,6 +209,7 @@ export const validarAreasUsuario = async (
 };
 
 export const obtenerSistemasPorAreaUsuario = async (
+  db: DbClient,
   correo: string,
   contrasena: string,
   areaId: number,
@@ -252,7 +264,10 @@ interface MenuJerarquico extends Menu {
   hijos?: MenuJerarquico[];
 }
 
-export const obtenerMenuPorSistema = async (idSistema: number) => {
+export const obtenerMenuPorSistema = async (
+  db: DbClient,
+  idSistema: number,
+) => {
   try {
     // 1. Obtener todos los menús del sistema especificado
 
@@ -308,8 +323,8 @@ export const obtenerMenuPorSistema = async (idSistema: number) => {
   }
 };
 
-// Función auxiliar para validar áreas de un usuario desde perfilAreaUsuario
 export const cambiarContrasenaTemporal = async (
+  db: DbClient,
   contrasenaTemporal: string,
   nuevaContrasena: string,
   email: string,
@@ -334,13 +349,6 @@ export const cambiarContrasenaTemporal = async (
       throw new Error("Contraseña temporal incorrecta");
     }
     const nuevaHash = await bcrypt.hash(nuevaContrasena, 10);
-    // await db.update(usuarios)
-    //   .set({ password: nuevaHash, passwordTemp: false })
-    //   .where(eq(usuarios.id, usuario.id));
-
-    // await db.update(tokensContrasenaTemporal)
-    //   .set({ usado: true })
-    //   .where(eq(tokensContrasenaTemporal.token, token));
 
     await db.transaction(async (tx) => {
       await tx
@@ -380,8 +388,14 @@ export const refrescarToken = async (refreshToken: string) => {
       throw new Error("El token proporcionado no es un refresh token");
     }
 
-    // Buscar usuario en la base de datos
-    const [usuario] = await db
+    // Crear conexión dinámica al tenant DB desde el payload del refresh token
+    const tenantDb = createTenantDbClient(
+      payload.tenantDbName || "muni_default",
+      env,
+    );
+
+    // Buscar usuario en la base de datos del tenant
+    const [usuario] = await tenantDb
       .select()
       .from(usuarios)
       .where(eq(usuarios.id, payload.userId));
@@ -404,6 +418,7 @@ export const refrescarToken = async (refreshToken: string) => {
       sistemaId: payload.sistemaId,
       tenantId: payload.tenantId || 0,
       tenantSlug: payload.tenantSlug || "default",
+      tenantDbName: payload.tenantDbName || "muni_default",
     });
 
     return tokens;
@@ -419,7 +434,7 @@ export const refrescarToken = async (refreshToken: string) => {
  * @param userId ID del usuario
  * @returns Usuario con sus datos completos (sin contraseña)
  */
-export const obtenerUsuarioPorId = async (userId: number) => {
+export const obtenerUsuarioPorId = async (db: DbClient, userId: number) => {
   try {
     const usuario = await db.query.usuarios.findFirst({
       where: eq(usuarios.id, userId),

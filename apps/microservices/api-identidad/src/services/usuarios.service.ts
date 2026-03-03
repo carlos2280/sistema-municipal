@@ -1,10 +1,11 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import { type NewUsuario, type UsuarioUpdate, usuarios } from "@/db/schemas";
 import { generateRandomPassword } from "@/libs/utils/contrasenaAleatoria.utils";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "./email.service";
-export const getAllUsuarios = async () => {
+
+export const getAllUsuarios = async (db: DbClient) => {
   try {
     return await db.select().from(usuarios);
   } catch (error) {
@@ -14,7 +15,7 @@ export const getAllUsuarios = async () => {
   }
 };
 
-export const getUsuarioById = async (id: number) => {
+export const getUsuarioById = async (db: DbClient, id: number) => {
   try {
     const [usuario] = await db
       .select()
@@ -28,7 +29,7 @@ export const getUsuarioById = async (id: number) => {
   }
 };
 
-export const createUsuario = async (usuario: NewUsuario) => {
+export const createUsuario = async (db: DbClient, usuario: NewUsuario) => {
   try {
     const randomPassword = generateRandomPassword();
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
@@ -40,6 +41,7 @@ export const createUsuario = async (usuario: NewUsuario) => {
 
     // Enviar email de bienvenida (sin bloquear si falla)
     sendWelcomeEmail(
+      db,
       createdUsuario.email,
       createdUsuario.nombreCompleto,
       createdUsuario.id,
@@ -67,7 +69,11 @@ export const createUsuario = async (usuario: NewUsuario) => {
   }
 };
 
-export const updateUsuario = async (id: number, data: UsuarioUpdate) => {
+export const updateUsuario = async (
+  db: DbClient,
+  id: number,
+  data: UsuarioUpdate,
+) => {
   try {
     const updatedData = { ...data };
 
@@ -89,7 +95,7 @@ export const updateUsuario = async (id: number, data: UsuarioUpdate) => {
   }
 };
 
-export const deleteUsuario = async (id: number) => {
+export const deleteUsuario = async (db: DbClient, id: number) => {
   try {
     const [deletedUsuario] = await db
       .delete(usuarios)

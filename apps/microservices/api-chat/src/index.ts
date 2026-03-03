@@ -1,6 +1,7 @@
 import { createServer } from 'node:http'
 import app from './app.js'
 import { env } from './config/env.js'
+import { db } from './db/client.js'
 import { gruposSistemaService } from './services/gruposSistema.service.js'
 import { initializeSocket } from './socket/index.js'
 
@@ -26,7 +27,7 @@ httpServer.listen(Number(env.PORT), () => {
 
   // Sincronizar grupos del sistema por departamento al arrancar
   gruposSistemaService
-    .sincronizarGrupos()
+    .sincronizarGrupos(db)
     .then((result) => {
       if (result.created.length > 0 || result.updated.length > 0) {
         console.log(

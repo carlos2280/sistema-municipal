@@ -2,6 +2,7 @@ import { loadEnv } from "@/config/env";
 
 import { type DbClient, initializeDB } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
+import { tenantDbMiddleware } from "@/libs/middleware/tenantDb";
 import router from "@/routes";
 import cookieParser from 'cookie-parser';
 import cors from "cors";
@@ -26,6 +27,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(tenantDbMiddleware);
 
 app.use("/api", router);
 // Ruta de prueba

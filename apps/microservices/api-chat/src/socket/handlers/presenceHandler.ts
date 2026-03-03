@@ -5,11 +5,13 @@ import { estadoUsuarios } from '../../db/schemas/estadoUsuarios.schema.js'
 
 export function setupPresenceHandlers(io: Server, socket: Socket) {
   const userId = socket.data.userId as number
+  // Para sockets se usa la DB por defecto como fallback
+  const socketDb = db
 
   // Marcar usuario como online al conectar
   const setOnline = async () => {
     try {
-      await db
+      await socketDb
         .insert(estadoUsuarios)
         .values({
           usuarioId: userId,
@@ -37,7 +39,7 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
   // Marcar usuario como offline al desconectar
   const setOffline = async () => {
     try {
-      await db
+      await socketDb
         .update(estadoUsuarios)
         .set({
           estado: 'offline',
@@ -57,7 +59,7 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
   // Obtener lista de usuarios online
   socket.on('presence:get-online', async () => {
     try {
-      const onlineUsers = await db
+      const onlineUsers = await socketDb
         .select({ usuarioId: estadoUsuarios.usuarioId })
         .from(estadoUsuarios)
         .where(eq(estadoUsuarios.estado, 'online'))
@@ -73,7 +75,7 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
   // Cambiar estado manualmente
   socket.on('presence:status', async ({ status }: { status: 'online' | 'away' | 'busy' }) => {
     try {
-      await db
+      await socketDb
         .update(estadoUsuarios)
         .set({ estado: status })
         .where(eq(estadoUsuarios.usuarioId, userId))

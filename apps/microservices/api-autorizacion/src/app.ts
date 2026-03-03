@@ -5,6 +5,7 @@ import { loadEnv } from "./config/env";
 import { type DbClient, initializeDB } from "./db/client";
 import { type PlatformDbClient, initializePlatformDB } from "./db/platformClient";
 import { errorHandler } from "./libs/middleware/error.middleware";
+import { tenantDbMiddleware } from "./libs/middleware/tenantDb";
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -22,7 +23,7 @@ const platformDb: PlatformDbClient = initializePlatformDB(env);
 app.use(express.json());
 
 app.use(cookieParser());
-
+app.use(tenantDbMiddleware);
 
 // Configuración CORS para el gateway
 app.use(cors({

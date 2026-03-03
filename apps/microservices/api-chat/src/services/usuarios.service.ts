@@ -1,9 +1,9 @@
 import { ilike, ne, and, eq } from 'drizzle-orm'
-import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { usuarios } from '../db/schemas/usuarios.schema.js'
 
 export const usuariosService = {
-  async buscarUsuarios(busqueda: string, usuarioActualId: number, limit = 20) {
+  async buscarUsuarios(db: DbClient, busqueda: string, usuarioActualId: number, limit = 20) {
     const resultado = await db
       .select({
         id: usuarios.id,
@@ -25,7 +25,7 @@ export const usuariosService = {
     return resultado
   },
 
-  async obtenerUsuarioPorId(id: number) {
+  async obtenerUsuarioPorId(db: DbClient, id: number) {
     const [usuario] = await db
       .select({
         id: usuarios.id,

@@ -21,6 +21,7 @@ export interface TokenPayload {
   sistemaId: number;
   tenantId: number;
   tenantSlug: string;
+  tenantDbName: string;
   tipo: "access" | "refresh";
 }
 
@@ -41,6 +42,7 @@ export const generarTokens = (
     sistemaId: number;
     tenantId: number;
     tenantSlug: string;
+    tenantDbName: string;
   },
 ): TokenPair => {
   const basePayload = {
@@ -52,6 +54,7 @@ export const generarTokens = (
     sistemaId: usuario.sistemaId,
     tenantId: usuario.tenantId,
     tenantSlug: usuario.tenantSlug,
+    tenantDbName: usuario.tenantDbName,
   };
 
   // Access Token (corta duración)
@@ -74,6 +77,7 @@ export const generarTokens = (
       userId: usuario.id,
       tenantId: usuario.tenantId,
       tenantSlug: usuario.tenantSlug,
+      tenantDbName: usuario.tenantDbName,
       tipo: "refresh",
     },
     JWT_CONFIG.secret,
@@ -100,6 +104,7 @@ export const generarToken = (
     sistemaId: number;
     tenantId: number;
     tenantSlug: string;
+    tenantDbName: string;
   },
 ): string => {
   const payload: jwt.JwtPayload = {
@@ -111,6 +116,7 @@ export const generarToken = (
     sistemaId: usuario.sistemaId,
     tenantId: usuario.tenantId,
     tenantSlug: usuario.tenantSlug,
+    tenantDbName: usuario.tenantDbName,
     tipo: "access",
     iat: Math.floor(Date.now() / 1000),
   };

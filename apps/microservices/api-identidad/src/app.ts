@@ -2,6 +2,7 @@ import { loadEnv } from "@/config/env";
 import swaggerOptions from "@/config/swagger";
 import { type DbClient, initializeDB } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
+import { tenantDbMiddleware } from "@/libs/middleware/tenantDb";
 import router from "@/routes";
 import cors from "cors";
 import express, { type Express } from "express";
@@ -19,6 +20,7 @@ const app: Express = express();
 const specs = swaggerJSDoc(swaggerOptions);
 app.use(cors());
 app.use(express.json());
+app.use(tenantDbMiddleware);
 // Ruta para la documentación Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/api", router);

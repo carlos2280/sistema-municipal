@@ -1,13 +1,19 @@
-import type { RequestHandler } from 'express'
+import type { Request, RequestHandler } from 'express'
+import { db } from '../db/client.js'
+import type { DbClient } from '../db/client.js'
 import { gruposSistemaService } from '../services/gruposSistema.service.js'
 
+/** Obtiene la instancia de DB del tenant o la por defecto */
+const getDb = (req: Request) => (req.tenantDb ?? db) as DbClient
+
 export const sincronizarGruposSistema: RequestHandler = async (
-  _req,
+  req,
   res,
   next
 ) => {
   try {
-    const result = await gruposSistemaService.sincronizarGrupos()
+    const tenantDb = getDb(req)
+    const result = await gruposSistemaService.sincronizarGrupos(tenantDb)
 
     res.json({
       success: true,

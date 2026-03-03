@@ -1,4 +1,4 @@
-import { db } from "@/app";
+import type { DbClient } from "@/db/client";
 import {
   type NewPerfil,
   type Perfil,
@@ -7,7 +7,7 @@ import {
 } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 
-export const createPerfil = async (data: NewPerfil): Promise<Perfil> => {
+export const createPerfil = async (db: DbClient, data: NewPerfil): Promise<Perfil> => {
   try {
     const [createdPerfil] = await db.insert(perfiles).values(data).returning();
     return createdPerfil;
@@ -18,7 +18,7 @@ export const createPerfil = async (data: NewPerfil): Promise<Perfil> => {
   }
 };
 
-export const getAllPerfiles = async (): Promise<Perfil[]> => {
+export const getAllPerfiles = async (db: DbClient): Promise<Perfil[]> => {
   try {
     return await db.select().from(perfiles);
   } catch (error) {
@@ -29,6 +29,7 @@ export const getAllPerfiles = async (): Promise<Perfil[]> => {
 };
 
 export const getPerfilById = async (
+  db: DbClient,
   id: number,
 ): Promise<Perfil | undefined> => {
   try {
@@ -45,6 +46,7 @@ export const getPerfilById = async (
 };
 
 export const updatePerfil = async (
+  db: DbClient,
   id: number,
   data: PerfilUpdate,
 ): Promise<Perfil | undefined> => {
@@ -62,7 +64,7 @@ export const updatePerfil = async (
   }
 };
 
-export const deletePerfil = async (id: number): Promise<Perfil | null> => {
+export const deletePerfil = async (db: DbClient, id: number): Promise<Perfil | null> => {
   try {
     const [deletedPerfil] = await db
       .delete(perfiles)

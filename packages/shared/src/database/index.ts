@@ -12,3 +12,6 @@ export * from "./mensajeria";
 
 // Módulo de plataforma (multi-tenant)
 export * from "./platform";
+
+// Conexión dinámica por tenant
+export * from "./tenant-connection";
