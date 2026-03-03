@@ -23,3 +23,5 @@ export * from "./hooks";
 
 export * from "./features/authSlice";
 export * from "./features/menuSlice";
+export * from "./features/subscriptionsSlice";
+export * from "./features/tenantSlice";

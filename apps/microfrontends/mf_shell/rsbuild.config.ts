@@ -24,10 +24,11 @@ export default defineConfig(() => {
         name: 'mf_shell',
         dts: false,
         remotes: {
+          // Core remotes (siempre disponibles)
           mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,
           mf_ui: `mf_ui@${env('VITE_MF_UI_URL', parsed, 'http://localhost:5011/mf-manifest.json')}`,
-          mf_contabilidad: `mf_contabilidad@${env('VITE_MF_CONTABILIDAD_URL', parsed, 'http://localhost:5020/mf-manifest.json')}`,
-          mf_chat: `mf_chat@${env('VITE_MF_CHAT_URL', parsed, 'http://localhost:5021/mf-manifest.json')}`,
+          // mf_contabilidad y mf_chat se registran dinámicamente en runtime
+          // según los módulos contratados por el tenant (ver dynamicModuleLoader.ts)
         },
         shared: {
           react: { singleton: true, requiredVersion: false },

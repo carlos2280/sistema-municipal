@@ -1,25 +1,26 @@
-// src/routes/createAppRouter.ts
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../component/ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
-import ChatPage from "../pages/ChatPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
 import Login from "../pages/login/Login";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "../utils/componentsMap";
-// import { filterRoutesByMenu } from "../utils/filterRoutesByMenu";
 import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
 import { loadMicrofrontComponents } from "./microfrontRegistry";
-// import { loadMicrofrontRoutes } from "./microfrontRegistry";
-// const contabilidadRoutes = await import('contabilidad/routes').then(mod => mod.default);
+import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 
 interface Props {
 	menuData?: MenuItem[];
 	sistemaId?: number;
+	activeModuleCodes?: string[];
 }
 
-export const createAppRouter = async ({ menuData, sistemaId }: Props) => {
+export const createAppRouter = async ({
+	menuData,
+	sistemaId,
+	activeModuleCodes = [],
+}: Props) => {
 	let dynamicRoutes: ReturnType<typeof generateRoutesFromMenu> = [];
 
 	// Solo cargar microfrontends si hay sistemaId y menuData
@@ -29,9 +30,13 @@ export const createAppRouter = async ({ menuData, sistemaId }: Props) => {
 		componentsBySistemaId[sistemaId] = microfront.components;
 
 		dynamicRoutes = generateRoutesFromMenu(menuData, sistemaId);
-	} else {
-		console.warn("⚠️ Skipping microfrontend loading - no sistemaId or menuData");
 	}
+
+	// Rutas de chat solo si el módulo está contratado y el remote registrado
+	const chatRoutes =
+		activeModuleCodes.includes("chat") && isRemoteRegistered("mf_chat")
+			? await buildChatRoutes()
+			: [];
 
 	return createBrowserRouter([
 		{
@@ -54,14 +59,7 @@ export const createAppRouter = async ({ menuData, sistemaId }: Props) => {
 							index: true,
 							element: <DashboardPage />,
 						},
-						{
-							path: "chat",
-							element: <ChatPage />,
-						},
-						{
-							path: "chat/:conversacionId",
-							element: <ChatPage />,
-						},
+						...chatRoutes,
 						...dynamicRoutes,
 					],
 				},
@@ -69,3 +67,20 @@ export const createAppRouter = async ({ menuData, sistemaId }: Props) => {
 		},
 	]);
 };
+
+/**
+ * Construye las rutas de chat cargando el componente dinámicamente.
+ * Se llama solo si el módulo chat está activo.
+ */
+async function buildChatRoutes() {
+	try {
+		const { default: ChatPage } = await import("../pages/ChatPage");
+		return [
+			{ path: "chat", element: <ChatPage /> },
+			{ path: "chat/:conversacionId", element: <ChatPage /> },
+		];
+	} catch {
+		console.warn("[Router] No se pudo cargar ChatPage");
+		return [];
+	}
+}

@@ -2,18 +2,21 @@ import { RouterProvider, type RouterProviderProps } from "react-router-dom";
 import "./App.css";
 import {
 	selectIsAuthenticated,
+	selectModulosActivos,
 	selectSistemaId,
 	useAppSelector,
 } from "mf_store/store";
 import { AppLoader } from "mf_ui/components";
 import { useEffect, useState } from "react";
 import { useMenu } from "./hook/useMenu";
+import { registerDynamicRemotes } from "./modules/dynamicModuleLoader";
 import { createAppRouter } from "./routes/createAppRouter";
 
 function App() {
 	const { menu } = useMenu();
 	const sistemaId = useAppSelector(selectSistemaId);
 	const isAuthenticated = useAppSelector(selectIsAuthenticated);
+	const modulosActivos = useAppSelector(selectModulosActivos);
 	const [router, setRouter] = useState<RouterProviderProps["router"] | null>(
 		null,
 	);
@@ -33,28 +36,38 @@ function App() {
 			try {
 				setLoading(true);
 
+				// Registrar remotes dinámicos de MF según módulos contratados
+				// (necesario en refresh de página, ya que los remotes no persisten)
+				if (isAuthenticated && modulosActivos.length > 0) {
+					await registerDynamicRemotes(modulosActivos);
+				}
+
 				// Crear el router
 				// - Si NO está autenticado: crea router básico (solo login)
 				// - Si SÍ está autenticado: crea router con microfrontends
+				const activeModuleCodes = modulosActivos.map((m) => m.codigo);
 				const routerInstance = await createAppRouter({
 					menuData: isAuthenticated && menu ? menu : undefined,
 					sistemaId: isAuthenticated && sistemaId ? sistemaId : undefined,
+					activeModuleCodes: isAuthenticated ? activeModuleCodes : [],
 				});
 				setRouter(routerInstance);
 			} catch (err) {
 				console.error("[App] Error creando router:", err);
-				setError("Failed to initialize application");
+				setError("Error al inicializar la aplicación");
 			} finally {
 				setLoading(false);
 			}
 		};
 
 		initializeRouter();
-	}, [menu, sistemaId, isAuthenticated, isWaitingForAuthData]);
+	}, [menu, sistemaId, isAuthenticated, isWaitingForAuthData, modulosActivos]);
 
 	// Mostrar loader mientras esperamos datos de autenticación
 	if (isWaitingForAuthData) {
-		return <AppLoader variant="branded" message="Cargando datos del usuario..." />;
+		return (
+			<AppLoader variant="branded" message="Cargando datos del usuario..." />
+		);
 	}
 	if (loading) {
 		return <AppLoader variant="branded" message="Iniciando aplicación..." />;

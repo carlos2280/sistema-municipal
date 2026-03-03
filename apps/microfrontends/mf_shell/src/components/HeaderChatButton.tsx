@@ -1,4 +1,5 @@
 import { useState, useEffect, type FC } from 'react'
+import { loadRemote } from '@module-federation/enhanced/runtime'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import Skeleton from '@mui/material/Skeleton'
@@ -27,15 +28,18 @@ export function HeaderChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonP
   useEffect(() => {
     let mounted = true
 
-    import('mf_chat/ChatButton')
+    loadRemote<{ ChatButton: FC<ChatButtonComponentProps> }>('mf_chat/ChatButton')
       .then((mod) => {
-        if (mounted) {
+        if (mounted && mod?.ChatButton) {
           setRemoteChatButton(() => mod.ChatButton)
+          setIsLoading(false)
+        } else if (mounted) {
+          setLoadFailed(true)
           setIsLoading(false)
         }
       })
       .catch((err) => {
-        console.warn('[HeaderChatButton] mf_chat no disponible, usando fallback local:', err.message)
+        console.warn('[HeaderChatButton] mf_chat no disponible, usando fallback local:', err?.message)
         if (mounted) {
           setLoadFailed(true)
           setIsLoading(false)

@@ -111,18 +111,24 @@ export const useLoginFormFlow = () => {
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
 
 		try {
-			// 1. Login
+			// 1. Login (authApi.onQueryStarted almacena modulosActivos en subscriptionsSlice)
+			let loginData;
 			if (areaId && sistemaId && correo && contrasena) {
-				await login({ correo, contrasena, areaId, sistemaId }).unwrap();
+				loginData = await login({ correo, contrasena, areaId, sistemaId }).unwrap();
 			}
 
-			// 2. Obtener el menú del sistema
+			// 2. Registrar remotes dinámicos de MF según módulos contratados
+			if (loginData?.modulosActivos) {
+				const { registerDynamicRemotes } = await import("../modules/dynamicModuleLoader");
+				await registerDynamicRemotes(loginData.modulosActivos);
+			}
 
+			// 3. Obtener el menú del sistema
 			const menuResponse = await dispatch(
 				MenuApi.endpoints.getMenuSistema.initiate(),
 			).unwrap();
 
-			// 3. Guardar el menú en el estado
+			// 4. Guardar el menú en el estado
 			dispatch(
 				menuReceived({
 					nombreSistema: menuResponse.nombreSistema,

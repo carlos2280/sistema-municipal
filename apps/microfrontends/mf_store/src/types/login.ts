@@ -1,4 +1,14 @@
 import type { IconName } from "lucide-react/dynamic";
+
+export interface ActiveModuleResponse {
+	codigo: string;
+	nombre: string;
+	mfName: string | null;
+	mfManifestUrlTpl: string | null;
+	icono: string | null;
+	apiPrefix: string;
+}
+
 export type UsuarioConMenuResponse = {
 	usuario: {
 		otro: string;
@@ -6,6 +16,7 @@ export type UsuarioConMenuResponse = {
 		email: string;
 		nombreCompleto: string;
 	};
+	modulosActivos?: ActiveModuleResponse[];
 	menu: MenuItem[];
 	token: string;
 };

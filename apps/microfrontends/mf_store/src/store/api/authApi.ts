@@ -7,6 +7,7 @@ import type {
 } from "../../types/login";
 import { baseQueryRefresh } from "../api/baseApi";
 import { loggedOut, tokenReceived } from "../features/authSlice";
+import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
 
 export type ResponseCambioContrasena = {
 	success: boolean;
@@ -50,8 +51,14 @@ export const authApi = createApi({
 							usuarioId: data.usuario.id,
 						}),
 					);
+
+					// Guardar módulos activos del tenant en el store
+					if (data.modulosActivos) {
+						dispatch(modulosReceived(data.modulosActivos));
+					}
 				} catch {
 					dispatch(loggedOut());
+					dispatch(modulosCleared());
 				}
 			},
 		}),

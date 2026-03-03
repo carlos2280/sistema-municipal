@@ -14,6 +14,8 @@ import { authApi } from "./api/authApi";
 import { baseApi } from "./api/baseApi";
 import authReducer from "./features/authSlice";
 import menuReducer from "./features/menuSlice";
+import subscriptionsReducer from "./features/subscriptionsSlice";
+import tenantReducer from "./features/tenantSlice";
 
 const menuPersistConfig = {
 	key: "menu",
@@ -23,13 +25,32 @@ const menuPersistConfig = {
 const authPersistConfig = {
 	key: "autorizacion",
 	storage: storageSession,
-	whitelist: ["isAuthenticated", "sistemaId", "areaId", "usuarioId"],
+	whitelist: [
+		"isAuthenticated",
+		"sistemaId",
+		"areaId",
+		"usuarioId",
+		"tenantId",
+		"tenantSlug",
+	],
+};
+const subscriptionsPersistConfig = {
+	key: "subscriptions",
+	storage: storageSession,
+	whitelist: ["modulosActivos"],
+};
+const tenantPersistConfig = {
+	key: "tenant",
+	storage: storageSession,
+	whitelist: ["tenantId", "tenantSlug"],
 };
 const rootReducer = combineReducers({
 	[authApi.reducerPath]: authApi.reducer,
 	[baseApi.reducerPath]: baseApi.reducer,
 	auth: persistReducer(authPersistConfig, authReducer),
 	menu: persistReducer(menuPersistConfig, menuReducer),
+	subscriptions: persistReducer(subscriptionsPersistConfig, subscriptionsReducer),
+	tenant: persistReducer(tenantPersistConfig, tenantReducer),
 });
 
 export function createStore(

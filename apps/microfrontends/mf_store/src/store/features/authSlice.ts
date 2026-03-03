@@ -6,6 +6,8 @@ interface AuthState {
 	sistemaId: number | null;
 	areaId: number | null;
 	usuarioId: number | null;
+	tenantId: number | null;
+	tenantSlug: string | null;
 }
 
 const initialState: AuthState = {
@@ -14,6 +16,8 @@ const initialState: AuthState = {
 	sistemaId: null,
 	areaId: null,
 	usuarioId: null,
+	tenantId: null,
+	tenantSlug: null,
 };
 
 const authSlice = createSlice({
@@ -27,6 +31,8 @@ const authSlice = createSlice({
 				sistemaId?: number;
 				areaId?: number;
 				usuarioId?: number;
+				tenantId?: number;
+				tenantSlug?: string;
 			}>,
 		) => {
 			state.accessToken = action.payload.accessToken;
@@ -43,6 +49,12 @@ const authSlice = createSlice({
 				state.usuarioId = action.payload.usuarioId;
 				localStorage.setItem("usuarioId", String(action.payload.usuarioId));
 			}
+			if (action.payload.tenantId) {
+				state.tenantId = action.payload.tenantId;
+			}
+			if (action.payload.tenantSlug) {
+				state.tenantSlug = action.payload.tenantSlug;
+			}
 		},
 		loggedOut: (state) => {
 			state.accessToken = null;
@@ -50,6 +62,8 @@ const authSlice = createSlice({
 			state.sistemaId = null;
 			state.areaId = null;
 			state.usuarioId = null;
+			state.tenantId = null;
+			state.tenantSlug = null;
 			localStorage.removeItem("sistemaId");
 			localStorage.removeItem("areaId");
 			localStorage.removeItem("usuarioId");
@@ -67,6 +81,10 @@ export const selectUsuarioId = (state: { auth: AuthState }) =>
 	state.auth.usuarioId;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
 	state.auth.isAuthenticated;
+export const selectTenantId = (state: { auth: AuthState }) =>
+	state.auth.tenantId;
+export const selectTenantSlug = (state: { auth: AuthState }) =>
+	state.auth.tenantSlug;
 
 export default authSlice.reducer;
 export type { AuthState };
