@@ -20,14 +20,18 @@ function App() {
 	const sistemaId = useAppSelector(selectSistemaId);
 	const isAuthenticated = useAppSelector(selectIsAuthenticated);
 	const modulosActivos = useAppSelector(selectModulosActivos);
+	// Estado raw del menú para saber si fue cargado (independiente del filtrado por módulos activos)
+	const menuLoaded = useAppSelector((state: { menu: unknown }) => !!state.menu);
 	const [router, setRouter] = useState<RouterProviderProps["router"] | null>(
 		null,
 	);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// Si está autenticado pero aún no tiene menu/sistemaId, seguir esperando
-	const isWaitingForAuthData = isAuthenticated && (!sistemaId || !menu);
+	// Si está autenticado pero aún no tiene menu/sistemaId, seguir esperando.
+	// Usamos menuLoaded (raw) en vez de menu (filtrado) para no bloquear
+	// cuando un módulo se desactiva y useMenu retorna null.
+	const isWaitingForAuthData = isAuthenticated && (!sistemaId || !menuLoaded);
 
 	useEffect(() => {
 		// No crear router hasta que el tenant esté resuelto

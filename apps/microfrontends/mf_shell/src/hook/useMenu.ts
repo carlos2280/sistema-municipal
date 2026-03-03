@@ -1,4 +1,4 @@
-import { useAppSelector } from "mf_store/store";
+import { selectModulosActivos, useAppSelector } from "mf_store/store";
 import type { MenuItem } from "../types/menu";
 
 export const useMenu = () => {
@@ -7,8 +7,13 @@ export const useMenu = () => {
 		nombreSistema?: string;
 	} | null;
 
+	const modulosActivos = useAppSelector(selectModulosActivos);
+	const hasContabilidad = modulosActivos.some(
+		(m) => m.mfName === "mf_contabilidad",
+	);
+
 	return {
-		menu: menuData?.menuRaiz || null,
+		menu: hasContabilidad ? menuData?.menuRaiz || null : null,
 		nombreSistema: menuData?.nombreSistema || "",
 	};
 };

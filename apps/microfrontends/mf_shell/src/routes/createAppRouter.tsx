@@ -9,6 +9,7 @@ import { componentsBySistemaId } from "../utils/componentsMap";
 import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
 import { loadMicrofrontComponents } from "./microfrontRegistry";
 import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
+import ModuleUnavailablePage from "../pages/ModuleUnavailablePage";
 
 interface Props {
 	menuData?: MenuItem[];
@@ -23,8 +24,12 @@ export const createAppRouter = async ({
 }: Props) => {
 	let dynamicRoutes: ReturnType<typeof generateRoutesFromMenu> = [];
 
-	// Solo cargar microfrontends si hay sistemaId y menuData
-	if (sistemaId && menuData) {
+	// Solo cargar microfrontends si hay sistemaId, menuData y el módulo activo
+	if (
+		sistemaId &&
+		menuData &&
+		activeModuleCodes.includes("contabilidad")
+	) {
 		const microfront = await loadMicrofrontComponents(sistemaId);
 
 		componentsBySistemaId[sistemaId] = microfront.components;
@@ -61,6 +66,10 @@ export const createAppRouter = async ({
 						},
 						...chatRoutes,
 						...dynamicRoutes,
+						{
+							path: "*",
+							element: <ModuleUnavailablePage />,
+						},
 					],
 				},
 			],

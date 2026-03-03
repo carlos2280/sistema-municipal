@@ -10,7 +10,6 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
-	Container,
 	Stack,
 	Tooltip,
 	Typography,
@@ -42,6 +41,7 @@ import { HeaderChatButton } from "../components/HeaderChatButton";
 import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
 import { useTheme as useAppTheme } from "mf_ui/theme";
+import { useModuleSync } from "../hooks/useModuleSync";
 
 const drawerWidth = 280;
 const collapsedWidth = 88;
@@ -225,6 +225,7 @@ const ThemeCustomizerButton = styled(IconButton)(({ theme }) => ({
 // ============================================================================
 
 export default function AppLayout() {
+	useModuleSync();
 	const theme = useTheme();
 	const { isDarkMode } = useAppTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
