@@ -52,7 +52,7 @@ install: ## Instala dependencias del proyecto
 	pnpm install
 
 dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
-	@for port in 5030 5010 5011 5020 5021 3000 3001 3002 3003 3004 3006; do \
+	@for port in 5030 5010 5011 5020 5021 5050 3000 3001 3002 3003 3004 3006; do \
 		pid=$$(fuser $$port/tcp 2>/dev/null); \
 		if [ -n "$$pid" ]; then \
 			echo "$(YELLOW)Matando proceso en puerto $$port (PID $$pid)$(NC)"; \
@@ -264,3 +264,7 @@ dev-chat: dev-infra ## Desarrollo solo del módulo chat
 		-c "magenta,cyan" \
 		"pnpm --filter api-chat dev" \
 		"pnpm --filter mf-chat dev"
+
+dev-admin: dev-infra ## Desarrollo del panel de administración
+	@echo "$(GREEN)Iniciando panel de administración...$(NC)"
+	pnpm --filter admin-panel dev

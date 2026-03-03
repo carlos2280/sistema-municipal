@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import Skeleton from '@mui/material/Skeleton'
 import Tooltip from '@mui/material/Tooltip'
 import { MessageSquare } from 'lucide-react'
+import { selectModulosActivos, useAppSelector, type ActiveModule } from 'mf_store/store'
 
 interface HeaderChatButtonProps {
   onClick: () => void
@@ -21,6 +22,8 @@ interface ChatButtonComponentProps {
  * Intenta cargar el componente de mf_chat, con fallback local si no está disponible.
  */
 export function HeaderChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonProps) {
+  const modulosActivos = useAppSelector(selectModulosActivos)
+  const isChatActive = modulosActivos.some((m: ActiveModule) => m.codigo === 'chat')
   const [RemoteChatButton, setRemoteChatButton] = useState<FC<ChatButtonComponentProps> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadFailed, setLoadFailed] = useState(false)
@@ -50,6 +53,9 @@ export function HeaderChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonP
       mounted = false
     }
   }, [])
+
+  // Ocultar si módulo chat no está activo
+  if (!isChatActive) return null
 
   // Loading state
   if (isLoading) {

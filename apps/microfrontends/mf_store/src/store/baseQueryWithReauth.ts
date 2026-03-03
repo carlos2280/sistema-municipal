@@ -51,5 +51,13 @@ export const baseQueryWithReauth: BaseQueryFn<
 		}
 	}
 
+	// Interceptar 403 MODULE_NOT_SUBSCRIBED para forzar re-sync de módulos
+	if (result.error?.status === 403) {
+		const data = result.error.data as { code?: string } | undefined;
+		if (data?.code === "MODULE_NOT_SUBSCRIBED") {
+			window.dispatchEvent(new CustomEvent("module-not-subscribed"));
+		}
+	}
+
 	return result;
 };

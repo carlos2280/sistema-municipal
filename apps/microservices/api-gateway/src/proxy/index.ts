@@ -155,12 +155,20 @@ export const configureProxies = (app: Express) => {
               proxyReq.write(bodyData);
             }
           },
-          proxyRes: (proxyRes, req, res) => {
-            // Agregar headers CORS a la respuesta del proxy
+          proxyRes: (proxyRes, req, _res) => {
+            // Eliminar headers CORS del upstream para evitar conflictos
+            // (el upstream puede enviar Access-Control-Allow-Origin: * que es
+            // incompatible con credentials: "include" del frontend)
+            delete proxyRes.headers["access-control-allow-origin"];
+            delete proxyRes.headers["access-control-allow-credentials"];
+            delete proxyRes.headers["access-control-allow-methods"];
+            delete proxyRes.headers["access-control-allow-headers"];
+
+            // Setear CORS correcto con el origen específico
             const origin = req.headers.origin;
             if (origin) {
-              res.setHeader("Access-Control-Allow-Origin", origin);
-              res.setHeader("Access-Control-Allow-Credentials", "true");
+              proxyRes.headers["access-control-allow-origin"] = origin;
+              proxyRes.headers["access-control-allow-credentials"] = "true";
             }
 
             logger.info({

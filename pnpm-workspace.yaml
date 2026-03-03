@@ -1,6 +1,7 @@
 packages:
   - apps/microfrontends/*
   - apps/microservices/*
+  - apps/admin-panel
   - packages/*
 
 onlyBuiltDependencies:
