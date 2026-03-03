@@ -8,14 +8,17 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
-import { useLogoutMutation, useAppDispatch } from "mf_store/store";
+import { useLogoutMutation, useAppSelector, selectEmail, selectNombreCompleto } from "mf_store/store";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { usePersistor } from "../context/PersistorContext";
 
 export default function AccountMenu() {
-	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
+	const persistor = usePersistor();
 	const [logout] = useLogoutMutation();
+	const email = useAppSelector(selectEmail);
+	const nombreCompleto = useAppSelector(selectNombreCompleto);
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -26,7 +29,11 @@ export default function AccountMenu() {
 	};
 
 	const handleLogout = async () => {
-		await logout(); // Llama al backend para borrar cookies httpOnly
+		// 1. El backend borra las cookies httpOnly (espera confirmación)
+		// 2. La mutation despacha loggedOut() en el finally
+		await logout();
+		// 3. Purgar sessionStorage persist para garantizar slate limpio
+		await persistor.purge();
 		navigate("/login", { replace: true });
 	};
 	return (
@@ -48,7 +55,7 @@ export default function AccountMenu() {
 								bgcolor: (theme) => theme.palette.primary.main,
 							}}
 						>
-							C
+							{nombreCompleto?.charAt(0).toUpperCase() ?? "U"}
 						</Avatar>
 					</IconButton>
 				</Tooltip>
@@ -60,8 +67,14 @@ export default function AccountMenu() {
 						alignItems: "flex-start",
 					}}
 				>
-					{/* <Typography variant="body1"> {`${email}`}</Typography> */}
-					<Typography variant="body1"> cfuentes@gmail.com</Typography>
+					{nombreCompleto && (
+						<Typography variant="body2" fontWeight={600}>
+							{nombreCompleto}
+						</Typography>
+					)}
+					<Typography variant="body2" color="text.secondary">
+						{email ?? ""}
+					</Typography>
 				</Stack>
 			</Box>
 			<Menu

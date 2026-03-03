@@ -51,13 +51,8 @@ export const useLogin = () => {
 	const handleLogin = async (data: TSchemaCredenciales) => {
 		try {
 			if (data?.areaId && data.sistemaId && data.correo && data.contrasena) {
-				const response = await login(data).unwrap();
-				localStorage.setItem("user", JSON.stringify(response.usuario));
-				localStorage.setItem("token", response.token);
+				await login(data).unwrap();
 			}
-
-			// Redirige a dashboard principal
-			// window.location.href = '/';
 		} catch (error) {
 			console.log(error);
 			toast.error("Ocurrio un error con sus credenciales.");
