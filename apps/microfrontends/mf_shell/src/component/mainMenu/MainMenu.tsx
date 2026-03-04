@@ -9,11 +9,11 @@ interface Props {
 const MainMenu = ({ collapsed = false }: Props) => {
   const { menu, nombreSistema } = useMenu();
 
-  if (!menu) {
+  if (!menu || menu.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          No hay módulos activos
+          {!menu ? 'No hay módulos activos' : 'Sin ítems de menú para este sistema'}
         </Typography>
       </Box>
     );

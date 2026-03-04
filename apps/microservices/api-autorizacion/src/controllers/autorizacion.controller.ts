@@ -68,6 +68,76 @@ export const obtenerSistemasPorAreaUsuario: RequestHandler = async (
   }
 };
 
+export const obtenerMisSistemas: RequestHandler = async (req, res, next) => {
+  const userId = req.user?.userId;
+  const areaId = req.user?.areaId;
+
+  if (!userId || !areaId) {
+    return next(new AppError("Usuario no autenticado", 401));
+  }
+
+  try {
+    const data = await autorizacionService.obtenerSistemasDelUsuario(
+      getDb(req),
+      userId,
+      areaId,
+    );
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const cambiarSistema: RequestHandler = async (req, res, next) => {
+  const userId = req.user?.userId;
+  const areaId = req.user?.areaId;
+  const tenantSlug = req.user?.tenantSlug;
+  const tenantId = req.user?.tenantId;
+  const email = req.user?.email;
+  const nombre = req.user?.nombre;
+  const { sistemaId } = req.body;
+
+  if (!userId || !areaId || !tenantSlug || !tenantId || !email || !nombre) {
+    return next(new AppError("Usuario no autenticado", 401));
+  }
+
+  const sistemaIdNum = Number(sistemaId);
+  if (Number.isNaN(sistemaIdNum)) {
+    return next(new AppError("sistemaId inválido", 400));
+  }
+
+  try {
+    const result = await autorizacionService.cambiarSistema(
+      getDb(req),
+      userId,
+      areaId,
+      sistemaIdNum,
+      tenantSlug,
+      tenantId,
+      email,
+      nombre,
+    );
+
+    res.cookie("token", result.tokens.accessToken, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 15,
+    });
+
+    res.cookie("refreshToken", result.tokens.refreshToken, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+
+    res.status(200).json({ sistemaId: sistemaIdNum, menu: result.menu });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const login: RequestHandler = async (req, res, next) => {
   const { correo, contrasena, areaId, sistemaId, tenantSlug } = req.body;
 

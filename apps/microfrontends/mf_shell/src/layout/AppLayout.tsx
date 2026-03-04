@@ -9,6 +9,7 @@
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
 	Stack,
 	Tooltip,
@@ -79,7 +80,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const LogoContainer = styled(Box, {
 	shouldForwardProp: (prop) => prop !== "collapsed",
-})<{ collapsed?: boolean }>(({ theme, collapsed }) => ({
+})<{ collapsed?: boolean }>(({ theme }) => ({
 	display: "flex",
 	alignItems: "center",
 	justifyContent: "center",
@@ -88,7 +89,8 @@ const LogoContainer = styled(Box, {
 		duration: theme.transitions.duration.enteringScreen,
 	}),
 	"& img": {
-		transition: theme.transitions.create("all", {
+		// ✅ Propiedades explícitas — nunca transition: all
+		transition: theme.transitions.create(["width", "height", "opacity"], {
 			duration: theme.transitions.duration.enteringScreen,
 		}),
 	},
@@ -123,19 +125,25 @@ const AppBar = styled(MuiAppBar, {
 		{
 			props: ({ open }) => open,
 			style: {
-				marginLeft: drawerWidth,
-				width: `calc(100% - ${drawerWidth}px)`,
-				transition: theme.transitions.create(["width", "margin"], {
-					easing: theme.transitions.easing.sharp,
-					duration: theme.transitions.duration.enteringScreen,
-				}),
+				// Solo en desktop: ajustar margen al drawer expandido
+				[theme.breakpoints.up("lg")]: {
+					marginLeft: drawerWidth,
+					width: `calc(100% - ${drawerWidth}px)`,
+					transition: theme.transitions.create(["width", "margin"], {
+						easing: theme.transitions.easing.sharp,
+						duration: theme.transitions.duration.enteringScreen,
+					}),
+				},
 			},
 		},
 		{
 			props: ({ open }) => !open,
 			style: {
-				marginLeft: collapsedWidth,
-				width: `calc(100% - ${collapsedWidth}px)`,
+				// Solo en desktop: ajustar margen al drawer colapsado
+				[theme.breakpoints.up("lg")]: {
+					marginLeft: collapsedWidth,
+					width: `calc(100% - ${collapsedWidth}px)`,
+				},
 			},
 		},
 	],
@@ -151,6 +159,18 @@ const Drawer = styled(MuiDrawer, {
 	"& .MuiDrawer-paper": {
 		backgroundColor: theme.palette.background.paper,
 		borderRight: `1px solid ${theme.palette.divider}`,
+		overflowX: "hidden",
+		overscrollBehavior: "contain",
+		// Scrollbar personalizado
+		"&::-webkit-scrollbar": { width: 4 },
+		"&::-webkit-scrollbar-track": { background: "transparent" },
+		"&::-webkit-scrollbar-thumb": {
+			background: alpha(theme.palette.text.primary, 0.15),
+			borderRadius: 2,
+			"&:hover": { background: alpha(theme.palette.text.primary, 0.3) },
+		},
+		scrollbarWidth: "thin",
+		scrollbarColor: `${alpha(theme.palette.text.primary, 0.15)} transparent`,
 	},
 	variants: [
 		{
@@ -206,19 +226,23 @@ const CollapseToggleButton = styled(IconButton, {
 	},
 }));
 
-// Botón de personalización de tema
-const ThemeCustomizerButton = styled(IconButton)(({ theme }) => ({
-	backgroundColor: alpha(theme.palette.primary.main, 0.08),
-	borderRadius: 12,
+// Estilo base para todos los IconButton del AppBar — usar en cualquier botón del header
+const AppBarIconButton = styled(IconButton)(({ theme }) => ({
+	borderRadius: 10,
 	padding: theme.spacing(1),
-	transition: theme.transitions.create(["background-color", "transform"], {
+	color: theme.palette.text.secondary,
+	transition: theme.transitions.create(["background-color", "color", "transform"], {
 		duration: theme.transitions.duration.short,
 	}),
 	"&:hover": {
-		backgroundColor: alpha(theme.palette.primary.main, 0.16),
-		transform: "rotate(15deg)",
+		backgroundColor: alpha(theme.palette.primary.main, 0.08),
+		color: theme.palette.primary.main,
+		transform: "scale(1.05)",
 	},
 }));
+
+// Alias semántico para el botón de tema
+const ThemeCustomizerButton = AppBarIconButton;
 
 // ============================================================================
 // COMPONENT
@@ -228,31 +252,88 @@ export default function AppLayout() {
 	useModuleSync();
 	const theme = useTheme();
 	const { isDarkMode } = useAppTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+	// Desktop: lg+. Mobile/tablet: < lg (drawer temporal)
+	const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
+	// Desktop: empieza expandido. Mobile: empieza cerrado (temporal)
 	const [drawerOpen, setDrawerOpen] = useState(!isMobile);
 	const [customizerOpen, setCustomizerOpen] = useState(false);
 	const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
 
-	const handleDrawerToggle = () => {
-		setDrawerOpen(!drawerOpen);
-	};
+	const handleDrawerToggle = () => setDrawerOpen((prev) => !prev);
+	const handleChatToggle = () => setChatDrawerOpen((prev) => !prev);
 
-	const handleChatToggle = () => {
-		setChatDrawerOpen(!chatDrawerOpen);
-	};
-
-	// Seleccionar el logo apropiado según el modo
 	const logoSrc = isDarkMode ? "/logo-criscar-white.svg" : "/logo-criscar.svg";
 	const logoIconSrc = "/logo-criscar-icon.svg";
+
+	// En desktop colapsado muestra solo el ícono; en cualquier otro caso, logo completo
+	const isCollapsed = !isMobile && !drawerOpen;
+
+	const drawerContent = (
+		<>
+			<DrawerHeader>
+				<LogoContainer>
+					{isCollapsed ? (
+						<Tooltip title="Sistema Municipal CrisCar" placement="right" arrow>
+							<img
+								src={logoIconSrc}
+								width={40}
+								height={40}
+								alt="Logo CrisCar"
+								style={{ objectFit: "contain" }}
+							/>
+						</Tooltip>
+					) : (
+						<>
+							<img
+								src={logoSrc}
+								width={48}
+								height={48}
+								alt="Logo CrisCar"
+								style={{ objectFit: "contain" }}
+							/>
+							<Box>
+								<LogoText variant="h6">CrisCar</LogoText>
+								<Typography
+									variant="caption"
+									sx={{
+										color: "text.secondary",
+										fontSize: "0.65rem",
+										display: "block",
+										lineHeight: 1.2,
+									}}
+								>
+									Sistema Municipal
+								</Typography>
+							</Box>
+						</>
+					)}
+				</LogoContainer>
+			</DrawerHeader>
+
+			<MainMenu collapsed={!isCollapsed} />
+		</>
+	);
 
 	return (
 		<Box sx={{ display: "flex", minHeight: "100vh" }}>
 			<CssBaseline />
 
 			{/* AppBar */}
-			<AppBar position="fixed" open={drawerOpen}>
+			<AppBar position="fixed" open={!isMobile && drawerOpen}>
 				<Toolbar sx={{ minHeight: 64, gap: 1 }}>
+					{/* Hamburger — solo en mobile/tablet */}
+					{isMobile && (
+						<IconButton
+							onClick={handleDrawerToggle}
+							aria-label="Abrir menú de navegación"
+							edge="start"
+							sx={{ mr: 1 }}
+						>
+							<MenuIcon />
+						</IconButton>
+					)}
+
 					<Box sx={{ flexGrow: 1 }}>
 						<CustomizedMenus />
 					</Box>
@@ -260,10 +341,8 @@ export default function AppLayout() {
 					<Stack direction="row" alignItems="center" spacing={1}>
 						<EconomicIndicatorsExamples />
 
-						{/* Botón de Chat */}
 						<HeaderChatButton onClick={handleChatToggle} unreadCount={3} />
 
-						{/* Botón de personalización de tema */}
 						<Tooltip title="Personalizar tema" arrow>
 							<ThemeCustomizerButton
 								onClick={() => setCustomizerOpen(true)}
@@ -278,84 +357,96 @@ export default function AppLayout() {
 				</Toolbar>
 			</AppBar>
 
-			{/* Drawer lateral */}
-			<Drawer variant="permanent" open={drawerOpen}>
-				<DrawerHeader>
-					<LogoContainer collapsed={!drawerOpen}>
-						{drawerOpen ? (
-							<>
-								<img
-									src={logoSrc}
-									width={48}
-									height={48}
-									alt="Logo CrisCar"
-									style={{ objectFit: "contain" }}
-								/>
-								<Box>
-									<LogoText variant="h6">CrisCar</LogoText>
-									<Typography
-										variant="caption"
-										sx={{
-											color: "text.secondary",
-											fontSize: "0.65rem",
-											display: "block",
-											lineHeight: 1.2,
-										}}
-									>
-										Sistema Municipal
-									</Typography>
-								</Box>
-							</>
-						) : (
-							<Tooltip title="Sistema Municipal CrisCar" placement="right" arrow>
-								<img
-									src={logoIconSrc}
-									width={40}
-									height={40}
-									alt="Logo CrisCar"
-									style={{ objectFit: "contain" }}
-								/>
-							</Tooltip>
-						)}
-					</LogoContainer>
-				</DrawerHeader>
+			{/* Desktop: drawer permanente colapsable */}
+			{!isMobile && (
+				<Drawer variant="permanent" open={drawerOpen}>
+					{drawerContent}
+				</Drawer>
+			)}
 
-				<MainMenu collapsed={drawerOpen} />
-			</Drawer>
+			{/* Mobile/Tablet: drawer temporal */}
+			{isMobile && (
+				<MuiDrawer
+					variant="temporary"
+					open={drawerOpen}
+					onClose={handleDrawerToggle}
+					ModalProps={{ keepMounted: true }}
+					sx={{
+						"& .MuiDrawer-paper": {
+							width: drawerWidth,
+							backgroundColor: "background.paper",
+							borderRight: `1px solid ${theme.palette.divider}`,
+							overscrollBehavior: "contain",
+							"&::-webkit-scrollbar": { width: 4 },
+							"&::-webkit-scrollbar-track": { background: "transparent" },
+							"&::-webkit-scrollbar-thumb": {
+								background: alpha(theme.palette.text.primary, 0.15),
+								borderRadius: 2,
+							},
+						},
+						"& .MuiBackdrop-root": {
+							backdropFilter: "blur(2px)",
+							backgroundColor: alpha(theme.palette.common.black, 0.3),
+						},
+					}}
+				>
+					{drawerContent}
+				</MuiDrawer>
+			)}
 
-			{/* Botón de colapso circular */}
-			<CollapseToggleButton
-				open={drawerOpen}
-				onClick={handleDrawerToggle}
-				aria-label={drawerOpen ? "Colapsar menú" : "Expandir menú"}
-			>
-				{drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-			</CollapseToggleButton>
+			{/* Botón de colapso circular — solo en desktop */}
+			{!isMobile && (
+				<CollapseToggleButton
+					open={drawerOpen}
+					onClick={handleDrawerToggle}
+					aria-label={drawerOpen ? "Colapsar menú" : "Expandir menú"}
+				>
+					{drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+				</CollapseToggleButton>
+			)}
 
 			{/* Contenido principal */}
 			<Box
 				component="main"
 				sx={{
 					flexGrow: 1,
-					p: 3,
-					pt: 2,
 					minHeight: "100vh",
-					minWidth: 0, // Permite que flexbox reduzca el ancho
-					overflow: "hidden", // Evita scroll horizontal a nivel de main
-					backgroundColor: (theme) =>
-						theme.palette.mode === "light"
-							? theme.palette.grey[50]
-							: theme.palette.background.default,
-					transition: theme.transitions.create(["margin", "background-color"], {
+					minWidth: 0,
+					display: "flex",
+					flexDirection: "column",
+					backgroundColor: (t) =>
+						t.palette.mode === "light"
+							? t.palette.grey[50]
+							: t.palette.background.default,
+					transition: theme.transitions.create("background-color", {
 						easing: theme.transitions.easing.sharp,
 						duration: theme.transitions.duration.leavingScreen,
 					}),
 				}}
 			>
-				{/* Spacer para el AppBar */}
-				<Box sx={{ minHeight: 64 }} />
+				{/* Spacer para el AppBar fijo */}
+				<Box sx={{ minHeight: 64, flexShrink: 0 }} />
 
-				<Box sx={{ py: 2, height: "calc(100vh - 64px - 48px)", minWidth: 0 }}>
+				{/* Área de contenido con scroll propio */}
+				<Box
+					sx={{
+						flex: 1,
+						p: { xs: 2, sm: 3, lg: 3 },
+						overflowY: "auto",
+						overflowX: "hidden",
+						overscrollBehavior: "contain",
+						minWidth: 0,
+						"&::-webkit-scrollbar": { width: 6 },
+						"&::-webkit-scrollbar-track": { background: "transparent" },
+						"&::-webkit-scrollbar-thumb": {
+							background: alpha(theme.palette.text.primary, 0.12),
+							borderRadius: 3,
+							"&:hover": { background: alpha(theme.palette.text.primary, 0.25) },
+						},
+						scrollbarWidth: "thin",
+						scrollbarColor: `${alpha(theme.palette.text.primary, 0.12)} transparent`,
+					}}
+				>
 					<Outlet />
 				</Box>
 			</Box>

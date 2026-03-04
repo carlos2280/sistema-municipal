@@ -58,3 +58,11 @@ export type ContrasenaTemporal = {
 	contrasenaTemporal: string;
 	contrasenaNueva: string;
 };
+
+export type CambiarSistemaResponse = {
+	sistemaId: number;
+	menu: {
+		nombreSistema: string;
+		menuRaiz: MenuItem[];
+	};
+};

@@ -4,8 +4,24 @@ import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import Skeleton from '@mui/material/Skeleton'
 import Tooltip from '@mui/material/Tooltip'
+import { alpha, styled } from '@mui/material/styles'
 import { MessageSquare } from 'lucide-react'
 import { selectModulosActivos, useAppSelector, type ActiveModule } from 'mf_store/store'
+
+// Mismo estilo base que AppBarIconButton en AppLayout — mantener sincronizados
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  borderRadius: 10,
+  padding: theme.spacing(1),
+  color: theme.palette.text.secondary,
+  transition: theme.transitions.create(['background-color', 'color', 'transform'], {
+    duration: theme.transitions.duration.short,
+  }),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    color: theme.palette.primary.main,
+    transform: 'scale(1.05)',
+  },
+}))
 
 interface HeaderChatButtonProps {
   onClick: () => void
@@ -81,19 +97,7 @@ export function HeaderChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonP
 export function LocalChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonProps) {
   return (
     <Tooltip title="Chat" arrow disableInteractive>
-      <IconButton
-        onClick={onClick}
-        sx={{
-          width: 40,
-          height: 40,
-          borderRadius: '50%',
-          border: '1px solid',
-          borderColor: 'divider',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          },
-        }}
-      >
+      <StyledIconButton onClick={onClick} aria-label="Abrir chat">
         <Badge
           badgeContent={unreadCount}
           color="primary"
@@ -103,13 +107,12 @@ export function LocalChatButton({ onClick, unreadCount = 0 }: HeaderChatButtonPr
               fontSize: 10,
               height: 18,
               minWidth: 18,
-              bgcolor: '#7C3AED',
             },
           }}
         >
           <MessageSquare size={20} />
         </Badge>
-      </IconButton>
+      </StyledIconButton>
     </Tooltip>
   )
 }

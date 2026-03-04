@@ -1,18 +1,26 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type {
 	Areas,
+	CambiarSistemaResponse,
 	ContrasenaTemporal,
 	Login,
 	UsuarioConMenuResponse,
 } from "../../types/login";
 import { baseQueryRefresh } from "../api/baseApi";
 import { loggedOut, tokenReceived } from "../features/authSlice";
+import { menuReceived } from "../features/menuSlice";
 import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
 
 export type ResponseCambioContrasena = {
 	success: boolean;
 	mensaje: string;
 	email: string;
+};
+
+export type Sistema = {
+	id: number;
+	nombre: string;
+	icono: string | null;
 };
 export const authApi = createApi({
 	reducerPath: "authApi", // Nombre único para este slice de API
@@ -110,6 +118,25 @@ export const authApi = createApi({
 			}),
 		}),
 
+		misSistemas: builder.query<Sistema[], void>({
+			query: () => "/autorizacion/mis-sistemas",
+		}),
+
+		cambiarSistema: builder.mutation<CambiarSistemaResponse, { sistemaId: number }>({
+			query: (body) => ({
+				url: "/autorizacion/cambiar-sistema",
+				method: "POST",
+				body,
+			}),
+			async onQueryStarted({ sistemaId }, { dispatch, queryFulfilled }) {
+				try {
+					const { data } = await queryFulfilled;
+					dispatch(tokenReceived({ accessToken: "cookie", sistemaId }));
+					dispatch(menuReceived({ nombreSistema: data.menu.nombreSistema, menuRaiz: data.menu.menuRaiz }));
+				} catch { /* noop */ }
+			},
+		}),
+
 		logout: builder.mutation<void, void>({
 			query: () => ({
 				url: "/autorizacion/logout",
@@ -140,4 +167,6 @@ export const {
 	useContrasenaTemporalQuery,
 	useCambiarContrasenaTemporalMutation,
 	useLogoutMutation,
+	useMisSistemasQuery,
+	useCambiarSistemaMutation,
 } = authApi;
