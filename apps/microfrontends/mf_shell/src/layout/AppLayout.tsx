@@ -329,7 +329,7 @@ export default function AppLayout() {
 	);
 
 	return (
-		<Box sx={{ display: "flex", minHeight: "100vh" }}>
+		<Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
 			<CssBaseline />
 
 			{/* AppBar */}
@@ -423,7 +423,7 @@ export default function AppLayout() {
 				component="main"
 				sx={{
 					flexGrow: 1,
-					minHeight: "100vh",
+					height: "100vh",
 					minWidth: 0,
 					display: "flex",
 					flexDirection: "column",

@@ -84,9 +84,9 @@ export default function CustomizedMenus() {
         onClick={handleClick}
         endIcon={isLoading ? <CircularProgress size={14} /> : <KeyboardArrowDownIcon />}
         disabled={isLoading}
-        sx={{ minWidth: 180, justifyContent: 'space-between' }}
+        sx={{ minWidth: 260, justifyContent: 'space-between' }}
       >
-        <span style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', minWidth: 120, height: '1.4em' }}>
+        <span style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', minWidth: 210, height: '1.5em' }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={sistemaId ?? 'default'}

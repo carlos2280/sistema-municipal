@@ -96,6 +96,9 @@ export const AccountPanel = memo(function AccountPanel({
       sx={{
         flex: open ? `0 0 ${PANEL_WIDTH}px` : '0 0 0px',
         transition: 'flex 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        height: '100%',
+        '& .MuiCollapse-wrapper': { height: '100%' },
+        '& .MuiCollapse-wrapperInner': { height: '100%' },
       }}
     >
       <Paper
@@ -176,25 +179,18 @@ export const AccountPanel = memo(function AccountPanel({
           </IconButton>
         </Box>
 
-        {/* Formulario */}
+        {/* Formulario — scroll independiente del árbol */}
         <Box
           component="form"
           onSubmit={handleSubmit}
           sx={{
             flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            minHeight: 0,
           }}
         >
-          <Box
-            sx={{
-              flex: 1,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              p: 2.5,
-            }}
-          >
+          <Box sx={{ p: 2.5 }}>
             <FormProvider {...methods}>
               <AccountFormFields
                 mode={mode}
@@ -205,10 +201,17 @@ export const AccountPanel = memo(function AccountPanel({
             </FormProvider>
           </Box>
 
-          <Divider />
-
-          {/* Acciones */}
-          <Box sx={{ p: 2.5 }}>
+          {/* Acciones — sticky al fondo del scroll */}
+          <Box
+            sx={{
+              position: 'sticky',
+              bottom: 0,
+              bgcolor: 'background.paper',
+              zIndex: 1,
+            }}
+          >
+            <Divider />
+            <Box sx={{ p: 2.5 }}>
             <Stack direction="row" spacing={1.5}>
               <Button
                 type="submit"
@@ -250,6 +253,7 @@ export const AccountPanel = memo(function AccountPanel({
                 Cancelar
               </Button>
             </Stack>
+            </Box>
           </Box>
         </Box>
       </Paper>
