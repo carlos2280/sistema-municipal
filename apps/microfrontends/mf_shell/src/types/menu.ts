@@ -11,4 +11,5 @@ export type MenuItem = {
 	updatedAt: string; // or Date if you parse it
 	hijos: MenuItem[];
 	componente: string;
+	icono: string;
 };

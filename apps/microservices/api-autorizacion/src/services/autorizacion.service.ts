@@ -260,6 +260,72 @@ export const obtenerSistemasPorAreaUsuario = async (
   }
 };
 
+export const obtenerSistemasDelUsuario = async (
+  db: DbClient,
+  userId: number,
+  areaId: number,
+) => {
+  const perfilAreaData = await db.query.perfilAreaUsuario.findFirst({
+    where: and(
+      eq(perfilAreaUsuario.usuarioId, userId),
+      eq(perfilAreaUsuario.areaId, areaId),
+    ),
+  });
+
+  if (!perfilAreaData) return [];
+
+  return db
+    .select({
+      id: sistemas.id,
+      nombre: sistemas.nombre,
+      icono: sistemas.icono,
+    })
+    .from(sistemaPerfil)
+    .innerJoin(sistemas, eq(sistemaPerfil.sistemaId, sistemas.id))
+    .where(eq(sistemaPerfil.perfilId, perfilAreaData.perfilId));
+};
+
+export const cambiarSistema = async (
+  db: DbClient,
+  userId: number,
+  areaId: number,
+  sistemaId: number,
+  tenantSlug: string,
+  tenantId: number,
+  userEmail: string,
+  userNombre: string,
+) => {
+  // 1. Validar que el usuario tiene acceso al sistema solicitado
+  const sistemasUsuario = await obtenerSistemasDelUsuario(db, userId, areaId);
+  const tieneAcceso = sistemasUsuario.some((s) => s.id === sistemaId);
+  if (!tieneAcceso) throw new Error("No tienes acceso a este sistema");
+
+  // 2. Obtener dbName del tenant para re-emitir el token
+  const [tenant] = await platformDb
+    .select({ dbName: municipalidades.dbName, slug: municipalidades.slug })
+    .from(municipalidades)
+    .where(eq(municipalidades.slug, tenantSlug));
+
+  if (!tenant) throw new Error("Tenant no encontrado");
+
+  // 3. Re-emitir tokens con el nuevo sistemaId
+  const tokens = generarTokens({
+    id: userId,
+    email: userEmail,
+    nombreCompleto: userNombre,
+    areaId,
+    sistemaId,
+    tenantId,
+    tenantSlug: tenant.slug,
+    tenantDbName: tenant.dbName,
+  });
+
+  // 4. Obtener el menú del nuevo sistema
+  const menu = await obtenerMenuPorSistema(db, sistemaId);
+
+  return { tokens, menu };
+};
+
 interface MenuJerarquico extends Menu {
   hijos?: MenuJerarquico[];
 }
@@ -289,7 +355,7 @@ export const obtenerMenuPorSistema = async (
       )
       .orderBy(menus.orden);
 
-    if (todosLosMenus.length === 0) return [];
+    if (todosLosMenus.length === 0) return { nombreSistema, menuRaiz: [] };
 
     // 2. Crear mapa de id -> item con hijos
     const menuMap = new Map<number, MenuJerarquico>();

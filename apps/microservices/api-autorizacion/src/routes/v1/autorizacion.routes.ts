@@ -16,6 +16,8 @@ router
   .post("/logout", extractUser, controller.logout)
   .get("/menu-sistema/", extractUser, controller.obtenerMenuporSistema)
   .get("/me", extractUser, controller.me)
+  .get("/mis-sistemas", extractUser, controller.obtenerMisSistemas)
+  .post("/cambiar-sistema", extractUser, controller.cambiarSistema)
 
   // Rutas con token temporal
   .post(
