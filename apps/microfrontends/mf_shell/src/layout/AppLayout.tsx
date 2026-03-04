@@ -32,7 +32,7 @@ import {
 	useTheme,
 } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import { Palette } from "lucide-react";
+import { Network, Palette } from "lucide-react";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useAppSelector, selectSistemaId } from "mf_store/store";
@@ -43,6 +43,7 @@ import { EconomicIndicatorsExamples } from "./EconomicIndicatorsExamples";
 import { HeaderChatButton } from "../components/HeaderChatButton";
 import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
+import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
 import { useTheme as useAppTheme } from "mf_ui/theme";
 import { useModuleSync } from "../hooks/useModuleSync";
 
@@ -262,6 +263,7 @@ export default function AppLayout() {
 	const [drawerOpen, setDrawerOpen] = useState(!isMobile);
 	const [customizerOpen, setCustomizerOpen] = useState(false);
 	const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
+	const [orgOpen, setOrgOpen] = useState(false);
 
 	const handleDrawerToggle = () => setDrawerOpen((prev) => !prev);
 	const handleChatToggle = () => setChatDrawerOpen((prev) => !prev);
@@ -347,8 +349,16 @@ export default function AppLayout() {
 						</IconButton>
 					)}
 
-					<Box sx={{ flexGrow: 1 }}>
+					<Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1 }}>
 						<CustomizedMenus />
+						<Tooltip title="Organigrama" arrow>
+							<AppBarIconButton
+								onClick={() => setOrgOpen(true)}
+								aria-label="Abrir organigrama"
+							>
+								<Network size={20} />
+							</AppBarIconButton>
+						</Tooltip>
 					</Box>
 
 					<Stack direction="row" alignItems="center" spacing={1}>
@@ -474,6 +484,12 @@ export default function AppLayout() {
 			<ChatDrawerWrapper
 				open={chatDrawerOpen}
 				onClose={() => setChatDrawerOpen(false)}
+			/>
+
+			{/* Organigrama Dialog */}
+			<OrganigramaDialog
+				open={orgOpen}
+				onClose={() => setOrgOpen(false)}
 			/>
 		</Box>
 	);
