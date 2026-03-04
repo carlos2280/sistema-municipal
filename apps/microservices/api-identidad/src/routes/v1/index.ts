@@ -1,5 +1,6 @@
 import areaRouter from "@routes/v1/areas.route";
 import menuRouter from "@routes/v1/menus.route";
+import organigramaRouter from "@routes/v1/organigrama.route";
 import perfilRouter from "@routes/v1/perfiles.route";
 import sistemasRouter from "@routes/v1/sistemas.route";
 import usuarioRouter from "@routes/v1/usuarios.route";
@@ -14,4 +15,5 @@ router.use("/sistemas", sistemasRouter);
 router.use("/perfiles", perfilRouter);
 router.use("/menus", menuRouter);
 router.use("/valida", validaRouter);
+router.use("/organigrama", organigramaRouter);
 export default router;
