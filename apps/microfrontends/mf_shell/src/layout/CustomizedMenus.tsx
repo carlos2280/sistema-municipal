@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Menu, { type MenuProps } from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { alpha, styled } from '@mui/material/styles';
+import { AnimatePresence, motion } from 'framer-motion';
 import * as React from 'react';
 import {
   useAppSelector,
@@ -83,8 +84,22 @@ export default function CustomizedMenus() {
         onClick={handleClick}
         endIcon={isLoading ? <CircularProgress size={14} /> : <KeyboardArrowDownIcon />}
         disabled={isLoading}
+        sx={{ minWidth: 180, justifyContent: 'space-between' }}
       >
-        {sistemaActual?.nombre ?? 'Sistemas'}
+        <span style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', minWidth: 120, height: '1.4em' }}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={sistemaId ?? 'default'}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+              style={{ position: 'absolute', left: 0, whiteSpace: 'nowrap' }}
+            >
+              {sistemaActual?.nombre ?? 'Sistemas'}
+            </motion.span>
+          </AnimatePresence>
+        </span>
       </Button>
       <StyledMenu
         id="sistemas-menu"

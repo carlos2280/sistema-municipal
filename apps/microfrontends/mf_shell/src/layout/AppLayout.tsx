@@ -31,9 +31,11 @@ import {
 	styled,
 	useTheme,
 } from "@mui/material/styles";
+import { AnimatePresence, motion } from "framer-motion";
 import { Palette } from "lucide-react";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { useAppSelector, selectSistemaId } from "mf_store/store";
 import MainMenu from "../component/mainMenu/MainMenu";
 import AccountMenu from "./AccountMenu";
 import CustomizedMenus from "./CustomizedMenus";
@@ -252,6 +254,7 @@ export default function AppLayout() {
 	useModuleSync();
 	const theme = useTheme();
 	const { isDarkMode } = useAppTheme();
+	const sistemaId = useAppSelector(selectSistemaId);
 	// Desktop: lg+. Mobile/tablet: < lg (drawer temporal)
 	const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
@@ -311,7 +314,17 @@ export default function AppLayout() {
 				</LogoContainer>
 			</DrawerHeader>
 
-			<MainMenu collapsed={!isCollapsed} />
+			<AnimatePresence mode="wait">
+				<motion.div
+					key={sistemaId ?? "no-sistema"}
+					initial={{ opacity: 0, x: -28, scale: 0.97 }}
+					animate={{ opacity: 1, x: 0, scale: 1 }}
+					exit={{ opacity: 0, x: 28, scale: 0.97 }}
+					transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+				>
+					<MainMenu collapsed={!isCollapsed} />
+				</motion.div>
+			</AnimatePresence>
 		</>
 	);
 
