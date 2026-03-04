@@ -11,6 +11,7 @@ export * from "./api/authApi";
 export * from "./api/indicadoresApi";
 export * from "./api/platformApi";
 export * from "./api/identidadApi";
+export * from "./api/configuracionApi";
 
 //**
 // Store

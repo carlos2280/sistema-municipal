@@ -14,6 +14,7 @@ import {
 } from "@/db/schemas";
 import { generarTokens, verificarToken } from "@/libs/utils/jwt.utils";
 import type { TokenPayload } from "@/libs/utils/jwt.utils";
+import { decryptSecret } from "@/libs/utils/crypto.utils";
 import {
   modulos,
   municipalidades,
@@ -21,8 +22,21 @@ import {
 } from "@municipal/shared/database/platform";
 import bcrypt from "bcryptjs";
 import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
+import { authenticator } from "otplib";
 
 const env = loadEnv();
+
+// Resultado cuando el usuario tiene MFA activo y aún no lo verificó
+export type MfaRequiredResult = {
+  mfaRequired: true;
+  userId: number;
+};
+
+// Resultado cuando la política del tenant exige MFA pero el usuario no lo ha configurado
+export type MfaSetupRequiredResult = {
+  mfaSetupRequired: true;
+  userId: number;
+};
 
 type LoginProps = {
   correo: string;
@@ -30,6 +44,7 @@ type LoginProps = {
   areaId: number;
   sistemaId: number;
   tenantSlug?: string;
+  mfaCode?: string;   // TOTP code o backup code — opcional, requerido si MFA activo
 };
 
 export const login = async ({
@@ -38,6 +53,7 @@ export const login = async ({
   areaId,
   sistemaId,
   tenantSlug = "default",
+  mfaCode,
 }: LoginProps) => {
   try {
     // 1. Resolver tenant desde platform DB
@@ -48,6 +64,7 @@ export const login = async ({
         nombre: municipalidades.nombre,
         dbName: municipalidades.dbName,
         activo: municipalidades.activo,
+        mfaPolicy: municipalidades.mfaPolicy,
       })
       .from(municipalidades)
       .where(eq(municipalidades.slug, tenantSlug));
@@ -70,20 +87,71 @@ export const login = async ({
       .where(eq(usuarios.email, correo));
 
     if (!usuario) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("Credenciales inválidas");
     }
 
     // 4. Comparar contraseñas
     const passwordValida = await bcrypt.compare(contrasena, usuario.password);
     if (!passwordValida) {
-      throw new Error("Contraseña incorrecta");
+      throw new Error("Credenciales inválidas");
     }
+
     const areaValida = await validarAreasUsuario(tenantDb, usuario.id, areaId);
     if (!areaValida) {
       throw new Error("No se encontraron areas");
     }
 
-    // 5. Obtener módulos activos del tenant desde platform DB
+    // 5. Aplicar política MFA del tenant
+    const mfaPolicy = (tenant.mfaPolicy ?? "optional") as "required" | "optional" | "disabled";
+
+    if (mfaPolicy !== "disabled") {
+      // Política 'required': el usuario DEBE tener MFA activo
+      if (mfaPolicy === "required" && (!usuario.mfaEnabled || !usuario.mfaVerified)) {
+        return { mfaSetupRequired: true, userId: usuario.id };
+      }
+
+      // MFA activo en el usuario (required o optional con MFA configurado)
+      if (usuario.mfaEnabled && usuario.mfaVerified) {
+        if (!mfaCode) {
+          // Sin código → indicar al frontend que lo solicite (sin emitir cookies)
+          return { mfaRequired: true, userId: usuario.id };
+        }
+
+        // Con código → validar TOTP o backup code
+        if (!usuario.mfaSecret) {
+          throw new Error("Configuración MFA inválida");
+        }
+
+        const secret = decryptSecret(usuario.mfaSecret);
+
+        if (/^\d{6}$/.test(mfaCode)) {
+          const valid = authenticator.verify({ token: mfaCode, secret });
+          if (!valid) throw new Error("Código MFA inválido");
+        } else {
+          // Backup code
+          const storedHashes = (usuario.mfaBackupCodes as string[] | null) ?? [];
+          if (storedHashes.length === 0) throw new Error("No quedan códigos de respaldo");
+          const normalized = mfaCode.replace("-", "").toUpperCase();
+          let matched = false;
+          let matchIndex = -1;
+          for (let i = 0; i < storedHashes.length; i++) {
+            if (await bcrypt.compare(normalized, storedHashes[i])) {
+              matched = true;
+              matchIndex = i;
+              break;
+            }
+          }
+          if (!matched) throw new Error("Código de respaldo inválido");
+          const remaining = storedHashes.filter((_, i) => i !== matchIndex);
+          await tenantDb
+            .update(usuarios)
+            .set({ mfaBackupCodes: remaining })
+            .where(eq(usuarios.id, usuario.id));
+        }
+      }
+    }
+
+    // 6. Obtener módulos activos del tenant desde platform DB
     const modulosActivos = await platformDb
       .select({
         codigo: modulos.codigo,

@@ -19,20 +19,20 @@ import {
 	Stepper,
 	TextField,
 	Typography,
-	alpha,
 	styled,
 } from "@mui/material";
-import { useTheme as useMuiTheme } from "@mui/material/styles";
 import {
 	ArrowLeft,
 	ArrowRight,
 	Building2,
 	Eye,
 	EyeOff,
+	KeyRound,
 	Layers,
 	Lock,
 	LogIn,
 	Mail,
+	ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
@@ -260,36 +260,133 @@ function AreaSystemForm({ areas, sistemas }: AreaSystemFormProps) {
 }
 
 // ============================================================================
+// MFA FORM (STEP 3)
+// ============================================================================
+
+interface MfaFormProps {
+	mfaCode: string;
+	onCodeChange: (code: string) => void;
+}
+
+function MfaForm({ mfaCode, onCodeChange }: MfaFormProps) {
+	const [useBackupCode, setUseBackupCode] = useState(false);
+
+	const handleChange = (value: string) => {
+		if (useBackupCode) {
+			onCodeChange(value.trim().slice(0, 32));
+		} else {
+			onCodeChange(value.replace(/\D/g, "").slice(0, 6));
+		}
+	};
+
+	return (
+		<Stack spacing={2.5}>
+			<Typography
+				variant="body2"
+				color="text.secondary"
+				textAlign="center"
+				sx={{ px: 1 }}
+			>
+				{useBackupCode
+					? "Ingrese uno de sus códigos de respaldo."
+					: "Ingrese el código de 6 dígitos de su aplicación autenticadora."}
+			</Typography>
+
+			<StyledTextField
+				fullWidth
+				label={useBackupCode ? "Código de respaldo" : "Código MFA"}
+				value={mfaCode}
+				onChange={(e) => handleChange(e.target.value)}
+				autoFocus
+				inputProps={{
+					inputMode: useBackupCode ? "text" : "numeric",
+					pattern: useBackupCode ? undefined : "[0-9]*",
+					maxLength: useBackupCode ? 32 : 6,
+				}}
+				InputProps={{
+					startAdornment: (
+						<InputAdornment position="start">
+							{useBackupCode ? (
+								<KeyRound size={18} style={{ opacity: 0.5 }} />
+							) : (
+								<ShieldCheck size={18} style={{ opacity: 0.5 }} />
+							)}
+						</InputAdornment>
+					),
+				}}
+			/>
+
+			<Button
+				variant="text"
+				size="small"
+				onClick={() => {
+					setUseBackupCode((prev) => !prev);
+					onCodeChange("");
+				}}
+				sx={{ textTransform: "none", alignSelf: "center", color: "text.secondary" }}
+			>
+				{useBackupCode
+					? "Usar código TOTP en su lugar"
+					: "Usar código de respaldo en su lugar"}
+			</Button>
+		</Stack>
+	);
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export default function Login() {
-	const theme = useMuiTheme();
 	const tenantNombre = useAppSelector(selectTenantNombre);
 	const tenantLogoUrl = useAppSelector(selectTenantLogoUrl);
-	const { activeStep, areas, sistemas, methods, handleNext, handleBack } =
-		useLoginFormFlow();
+	const {
+		activeStep,
+		areas,
+		sistemas,
+		methods,
+		handleNext,
+		handleBack,
+		mfaCode,
+		setMfaCode,
+	} = useLoginFormFlow();
 
 	const steps = ["Credenciales", "Área y Sistema"];
 
-	// Watch para reactividad - esto hace que el componente se re-renderice cuando cambian los valores
+	// Watch para reactividad
 	const watchedValues = methods.watch();
 
-	// Validación del paso actual
 	const isStepValid = () => {
 		if (activeStep === 0) {
-			// Paso 1: validar que existan correo y contraseña
 			const correo = watchedValues.correo?.trim();
 			const contrasena = watchedValues.contrasena;
 			return !!(correo && contrasena);
 		}
-
 		if (activeStep === 1) {
-			// Paso 2: validar área y sistema
 			return !!(watchedValues.areaId && watchedValues.sistemaId);
 		}
-
+		if (activeStep === 2) {
+			return mfaCode.trim().length >= 6;
+		}
 		return false;
+	};
+
+	const getSubtitle = () => {
+		if (activeStep === 0) return "Ingrese sus credenciales";
+		if (activeStep === 1) return "Seleccione su área de trabajo";
+		return "Ingrese su código de verificación";
+	};
+
+	const getButtonLabel = () => {
+		if (activeStep === 0) return "Continuar";
+		if (activeStep === 1) return "Ingresar";
+		return "Verificar";
+	};
+
+	const getButtonIcon = () => {
+		if (activeStep === 0) return <ArrowRight size={18} />;
+		if (activeStep === 1) return <LogIn size={18} />;
+		return <ShieldCheck size={18} />;
 	};
 
 	return (
@@ -324,25 +421,40 @@ export default function Login() {
 				{/* Título */}
 				<Box sx={{ textAlign: "center", mb: 4 }}>
 					<Typography variant="h6" fontWeight={600}>
-						Iniciar Sesión
+						{activeStep === 2 ? "Verificación en dos pasos" : "Iniciar Sesión"}
 					</Typography>
 					<Typography variant="body2" color="text.secondary">
-						{activeStep === 0
-							? "Ingrese sus credenciales"
-							: "Seleccione su área de trabajo"}
+						{getSubtitle()}
 					</Typography>
 				</Box>
 
-				{/* Stepper */}
-				<Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-					{steps.map((label) => (
-						<Step key={label}>
-							<StepLabel>
-								<Typography variant="caption">{label}</Typography>
-							</StepLabel>
-						</Step>
-					))}
-				</Stepper>
+				{/* Stepper — solo para pasos 0 y 1 */}
+				{activeStep < 2 && (
+					<Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+						{steps.map((label) => (
+							<Step key={label}>
+								<StepLabel>
+									<Typography variant="caption">{label}</Typography>
+								</StepLabel>
+							</Step>
+						))}
+					</Stepper>
+				)}
+
+				{/* Ícono MFA en paso 2 */}
+				{activeStep === 2 && (
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "center",
+							mb: 3,
+							color: "primary.main",
+							opacity: 0.8,
+						}}
+					>
+						<ShieldCheck size={48} />
+					</Box>
+				)}
 
 				{/* Formulario */}
 				<FormProvider {...methods}>
@@ -350,6 +462,9 @@ export default function Login() {
 						{activeStep === 0 && <CredentialForm />}
 						{activeStep === 1 && (
 							<AreaSystemForm areas={areas} sistemas={sistemas} />
+						)}
+						{activeStep === 2 && (
+							<MfaForm mfaCode={mfaCode} onCodeChange={setMfaCode} />
 						)}
 					</Box>
 
@@ -360,11 +475,9 @@ export default function Login() {
 							variant="contained"
 							onClick={handleNext}
 							disabled={!isStepValid()}
-							endIcon={
-								activeStep === 0 ? <ArrowRight size={18} /> : <LogIn size={18} />
-							}
+							endIcon={getButtonIcon()}
 						>
-							{activeStep === 0 ? "Continuar" : "Ingresar"}
+							{getButtonLabel()}
 						</SubmitButton>
 
 						{activeStep > 0 && (

@@ -1,5 +1,12 @@
 import { customSchemaItentidad } from "@/config/schemaPG";
-import { boolean, integer, serial, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  serial,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { oficinas } from "./oficinas.schema";
 
 export const usuarios = customSchemaItentidad.table("usuarios", {
@@ -14,6 +21,15 @@ export const usuarios = customSchemaItentidad.table("usuarios", {
   passwordTemp: boolean("password_temp").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  // MFA — Multi-Factor Authentication
+  mfaEnabled: boolean("mfa_enabled").notNull().default(false),
+  // Secreto TOTP cifrado con AES-256-GCM. null hasta que el usuario active MFA.
+  mfaSecret: text("mfa_secret"),
+  // true tras validar el primer código TOTP exitosamente (previene activaciones a medias).
+  mfaVerified: boolean("mfa_verified").notNull().default(false),
+  // Array de hashes bcrypt de los 8 códigos de respaldo de un solo uso.
+  mfaBackupCodes: jsonb("mfa_backup_codes").$type<string[]>(),
 });
 
 // Tipos basados en convenciones comunes

@@ -16,7 +16,7 @@ const corsOptions = {
   origin: env.CORS_ORIGINS.split(",").map((o) => o.trim()),
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 };
 
 export const createApp = (): Express => {

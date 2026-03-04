@@ -1,6 +1,13 @@
 import { customSchemaItentidad } from "@/config/schemaPG";
 import { relations } from "drizzle-orm";
-import { boolean, integer, serial, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  serial,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { oficinas } from "./oficinas.schema";
 
 export const usuarios = customSchemaItentidad.table("usuarios", {
@@ -15,6 +22,12 @@ export const usuarios = customSchemaItentidad.table("usuarios", {
   passwordTemp: boolean("password_temp").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  // MFA — espejo de api-identidad (misma tabla, misma DB del tenant)
+  mfaEnabled: boolean("mfa_enabled").notNull().default(false),
+  mfaSecret: text("mfa_secret"),
+  mfaVerified: boolean("mfa_verified").notNull().default(false),
+  mfaBackupCodes: jsonb("mfa_backup_codes").$type<string[]>(),
 });
 
 // Relaciones

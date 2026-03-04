@@ -45,13 +45,21 @@ export const validarCredenciales = async (
     const areasUnicas = areasConPerfiles.map((item) => item.area);
     const perfilesUnicos = areasConPerfiles.map((item) => item.perfil);
 
-    // 5. Retornar datos sin la contraseña
-    const { password: _, ...usuarioSinPassword } = usuario;
+    // 5. Retornar datos sin campos sensibles
+    const {
+      password: _,
+      mfaSecret: __,
+      mfaBackupCodes: ___,
+      ...usuarioSinDatosSensibles
+    } = usuario;
 
     return {
-      usuario: usuarioSinPassword,
+      usuario: usuarioSinDatosSensibles,
       areas: areasUnicas,
       perfiles: perfilesUnicos,
+      // El servicio de autorizacion usa este flag para decidir si emitir
+      // un JWT completo o un tempToken que requiere verificación MFA.
+      mfaRequired: usuario.mfaEnabled && usuario.mfaVerified,
     };
   } catch (error) {
     throw new Error(

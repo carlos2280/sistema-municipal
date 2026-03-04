@@ -41,6 +41,17 @@ export type Login = {
 	areaId?: number;
 	sistemaId?: number;
 	tenantSlug?: string;
+	mfaCode?: string;
+};
+
+export type MfaRequiredResponse = {
+	mfaRequired: true;
+	userId: number;
+};
+
+export type MfaSetupRequiredResponse = {
+	mfaSetupRequired: true;
+	userId: number;
 };
 
 export type LoginAreas = {

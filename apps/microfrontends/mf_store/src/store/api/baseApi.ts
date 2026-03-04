@@ -12,5 +12,5 @@ export const baseApi = createApi({
 	reducerPath: "api", // Esta propiedad define el key del reducer
 	baseQuery: baseQueryWithReauth,
 	endpoints: () => ({}),
-	tagTypes: ["autorizacion", "User", "PlanCuentas", "Conversaciones", "Mensajes", "Participantes", "Llamadas", "Organigrama"],
+	tagTypes: ["autorizacion", "User", "PlanCuentas", "Conversaciones", "Mensajes", "Participantes", "Llamadas", "Organigrama", "ConfiguracionMfa", "UsuariosMfa"],
 });

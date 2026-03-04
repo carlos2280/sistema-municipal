@@ -23,6 +23,10 @@ export const municipalidades = pgTable("municipalidades", {
   dbName: text("db_name").notNull().unique(),
   activo: boolean("activo").default(true),
   maxUsuarios: integer("max_usuarios").default(50),
+  mfaPolicy: text("mfa_policy")
+    .$type<"required" | "optional" | "disabled">()
+    .notNull()
+    .default("optional"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
