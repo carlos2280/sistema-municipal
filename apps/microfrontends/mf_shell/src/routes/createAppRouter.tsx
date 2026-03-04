@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../component/ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
+import MfaPolicyPage from "../pages/configuracion/MfaPolicyPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
 import Login from "../pages/login/Login";
 import type { MenuItem } from "../types/menu";
@@ -65,6 +66,10 @@ export const createAppRouter = async ({
 							element: <DashboardPage />,
 						},
 						...chatRoutes,
+						{
+							path: "seguridad/autenticacion-mfa",
+							element: <MfaPolicyPage />,
+						},
 						...dynamicRoutes,
 						{
 							path: "*",

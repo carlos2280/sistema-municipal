@@ -4,10 +4,12 @@ import type {
 	CambiarSistemaResponse,
 	ContrasenaTemporal,
 	Login,
+	MfaRequiredResponse,
+	MfaSetupRequiredResponse,
 	UsuarioConMenuResponse,
 } from "../../types/login";
 import { baseQueryRefresh } from "../api/baseApi";
-import { loggedOut, tokenReceived } from "../features/authSlice";
+import { loggedOut, mfaPendingSet, tokenReceived } from "../features/authSlice";
 import { menuReceived } from "../features/menuSlice";
 import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
 
@@ -42,7 +44,7 @@ export const authApi = createApi({
 			}),
 		}),
 
-		login: builder.mutation<UsuarioConMenuResponse, Login>({
+		login: builder.mutation<UsuarioConMenuResponse | MfaRequiredResponse | MfaSetupRequiredResponse, Login>({
 			query: (body) => ({
 				url: "/autorizacion/login",
 				method: "POST",
@@ -51,6 +53,19 @@ export const authApi = createApi({
 			async onQueryStarted(args, { dispatch, queryFulfilled }) {
 				try {
 					const { data } = await queryFulfilled;
+
+					// Setup MFA obligatorio por política del tenant — redirigir a setup
+					if ("mfaSetupRequired" in data) {
+						dispatch(mfaPendingSet(data.userId));
+						return;
+					}
+
+					// MFA requerido — no autenticar aún, solo marcar pendiente
+					if ("mfaRequired" in data) {
+						dispatch(mfaPendingSet(data.userId));
+						return;
+					}
+
 					dispatch(
 						tokenReceived({
 							accessToken: "cookie",

@@ -28,6 +28,16 @@ export const envSchema = z.object({
   // Platform DB (multi-tenant)
   PLATFORM_DB_NAME: z.string().min(1).default("platform"),
 
+  // MFA — clave AES-256-GCM (debe coincidir con api-identidad en el mismo entorno)
+  // Generar con: openssl rand -hex 32
+  MFA_ENCRYPTION_KEY: z
+    .string()
+    .regex(
+      /^[0-9a-fA-F]{64}$/,
+      "MFA_ENCRYPTION_KEY debe ser exactamente 64 caracteres hexadecimales (32 bytes)",
+    )
+    .default("0".repeat(64)),
+
   // Connection pool settings
   DB_POOL_MIN: z.coerce.number().int().positive().default(1),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),

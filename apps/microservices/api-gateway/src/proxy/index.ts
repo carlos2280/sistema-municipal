@@ -44,6 +44,12 @@ export const configureProxies = (app: Express) => {
       pathRewrite: "/api/v1/autorizacion",
       timeout: 5000,
     },
+    configuracion: {
+      baseUrl: env.AUTH_URL,
+      path: "/api/v1/configuracion",
+      pathRewrite: "/api/v1/configuracion",
+      timeout: 5000,
+    },
     identity: {
       baseUrl: env.IDENTITY_URL,
       path: "/api/v1/identidad",

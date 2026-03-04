@@ -16,7 +16,8 @@ import {
 	type TSchemaCredenciales,
 	schemaCredenciales,
 } from "../types/login.zod";
-import useHookFormSchema from "./useHookFormSchema"; // ya lo estás usando
+import useHookFormSchema from "./useHookFormSchema";
+
 export const useLoginFormFlow = () => {
 	const dispatch = useAppDispatch();
 	const tenantSlug = useAppSelector(selectResolvedTenantSlug) ?? "default";
@@ -27,6 +28,8 @@ export const useLoginFormFlow = () => {
 	const [sistemas, setSistemas] = useState<{ id: number; nombre: string }[]>(
 		[],
 	);
+	const [mfaCode, setMfaCode] = useState("");
+
 	const { methods } = useHookFormSchema<TSchemaCredenciales>({
 		schema: schemaCredenciales,
 		defaultValues: {},
@@ -35,13 +38,13 @@ export const useLoginFormFlow = () => {
 	const [loginAreas] = useLoginAreasMutation();
 	const [loginSistemas] = useLoginSistemasMutation();
 	const [login] = useLoginMutation();
+
 	useEffect(() => {
 		let previousAreaId: number | undefined;
 
 		const subscription = methods.watch(async (values) => {
 			const { correo, contrasena, areaId } = values;
 
-			// Solo continuar si el areaId cambió
 			if (areaId && areaId !== previousAreaId && correo && contrasena) {
 				previousAreaId = areaId;
 
@@ -54,12 +57,11 @@ export const useLoginFormFlow = () => {
 					}).unwrap();
 					setSistemas(payload);
 
-					// Limpiar sistemaId solo si cambió areaId
 					methods.setValue("sistemaId", undefined, {
 						shouldValidate: true,
 						shouldDirty: true,
 					});
-				} catch (error) {
+				} catch {
 					toast.error("Error al obtener los sistemas");
 					setSistemas([]);
 					methods.setValue("sistemaId", undefined, {
@@ -73,32 +75,63 @@ export const useLoginFormFlow = () => {
 		return () => subscription.unsubscribe();
 	}, [loginSistemas, methods]);
 
+	// biome-ignore lint/suspicious/noExplicitAny: login data inferred from MF-federated module
+	const finishLogin = async (loginData: any) => {
+		if (loginData.modulosActivos) {
+			const { registerDynamicRemotes } = await import(
+				"../modules/dynamicModuleLoader"
+			);
+			await registerDynamicRemotes(loginData.modulosActivos);
+		}
+
+		const menuResponse = await dispatch(
+			MenuApi.endpoints.getMenuSistema.initiate(),
+		).unwrap();
+
+		dispatch(
+			menuReceived({
+				nombreSistema: menuResponse.nombreSistema,
+				menuRaiz: menuResponse.menuRaiz,
+			}),
+		);
+
+		toast.success("Login exitoso");
+		navigate("/");
+	};
+
 	const handleNext = async () => {
-		let isValid = false;
 		const { correo, contrasena } = methods.getValues();
 		switch (activeStep) {
-			case 0:
-				isValid = await methods.trigger(["correo", "contrasena"]);
+			case 0: {
+				const isValid = await methods.trigger(["correo", "contrasena"]);
 				if (isValid) {
 					try {
-						const payload = await loginAreas({ correo, contrasena, tenantSlug }).unwrap();
+						const payload = await loginAreas({
+							correo,
+							contrasena,
+							tenantSlug,
+						}).unwrap();
 						setAreas(payload);
 						setActiveStep((prev) => prev + 1);
-					} catch (error) {
-						toast.error("Ocurrio un error con sus credenciales.");
+					} catch {
+						toast.error("Ocurrió un error con sus credenciales.");
 					}
 				}
 				break;
+			}
 			case 1:
 				await handleLogin();
 				break;
+			case 2:
+				await handleMfaVerify();
+				break;
 			default:
-				isValid = false;
 				break;
 		}
 	};
 
 	const handleBack = () => {
+		if (activeStep === 2) setMfaCode("");
 		setActiveStep((prev) => prev - 1);
 	};
 
@@ -113,40 +146,58 @@ export const useLoginFormFlow = () => {
 		if (!isValid) return;
 
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
+		if (!areaId || !sistemaId || !correo || !contrasena) return;
 
 		try {
-			// 1. Login (authApi.onQueryStarted almacena modulosActivos en subscriptionsSlice)
-			let loginData;
-			if (areaId && sistemaId && correo && contrasena) {
-				loginData = await login({ correo, contrasena, areaId, sistemaId, tenantSlug }).unwrap();
+			const loginData = await login({
+				correo,
+				contrasena,
+				areaId,
+				sistemaId,
+				tenantSlug,
+			}).unwrap();
+
+			if ("mfaRequired" in loginData) {
+				setActiveStep(2);
+				return;
 			}
 
-			// 2. Registrar remotes dinámicos de MF según módulos contratados
-			if (loginData?.modulosActivos) {
-				const { registerDynamicRemotes } = await import("../modules/dynamicModuleLoader");
-				await registerDynamicRemotes(loginData.modulosActivos);
-			}
-
-			// 3. Obtener el menú del sistema
-			const menuResponse = await dispatch(
-				MenuApi.endpoints.getMenuSistema.initiate(),
-			).unwrap();
-
-			// 4. Guardar el menú en el estado
-			dispatch(
-				menuReceived({
-					nombreSistema: menuResponse.nombreSistema,
-					menuRaiz: menuResponse.menuRaiz,
-				}),
-			);
-
-			toast.success("Login exitoso");
-			navigate("/");
+			await finishLogin(loginData);
 		} catch (error) {
 			console.error("❌ Error en handleLogin:", error);
 			toast.error("Error al ingresar al sistema.");
 		}
 	};
+
+	const handleMfaVerify = async () => {
+		if (!mfaCode.trim()) return;
+
+		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
+
+		try {
+			const loginData = await login({
+				correo,
+				contrasena,
+				areaId,
+				sistemaId,
+				tenantSlug,
+				mfaCode,
+			}).unwrap();
+
+			if ("mfaRequired" in loginData) {
+				toast.error("Código MFA incorrecto. Intente nuevamente.");
+				setMfaCode("");
+				return;
+			}
+
+			await finishLogin(loginData);
+		} catch (error) {
+			console.error("❌ Error en handleMfaVerify:", error);
+			toast.error("Código MFA inválido o expirado.");
+			setMfaCode("");
+		}
+	};
+
 	return {
 		activeStep,
 		setActiveStep,
@@ -155,5 +206,7 @@ export const useLoginFormFlow = () => {
 		areas,
 		sistemas,
 		methods,
+		mfaCode,
+		setMfaCode,
 	};
 };

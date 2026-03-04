@@ -139,7 +139,7 @@ export const cambiarSistema: RequestHandler = async (req, res, next) => {
 };
 
 export const login: RequestHandler = async (req, res, next) => {
-  const { correo, contrasena, areaId, sistemaId, tenantSlug } = req.body;
+  const { correo, contrasena, areaId, sistemaId, tenantSlug, mfaCode } = req.body;
 
   try {
     const result = await autorizacionService.login({
@@ -148,31 +148,39 @@ export const login: RequestHandler = async (req, res, next) => {
       areaId,
       sistemaId,
       tenantSlug,
+      mfaCode,
     });
 
-    // Setear access token en cookie (HTTP-only)
-    res.cookie("token", result.accessToken, {
-      httpOnly: true,
-      secure: NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 15, // 15 minutos
-    });
+    // Setup MFA obligatorio por política del tenant
+    if ("mfaSetupRequired" in result) {
+      res.status(200).json(result); // { mfaSetupRequired: true, userId }
+    // MFA requerido: NO setear cookies — el frontend debe solicitar el código
+    } else if ("mfaRequired" in result) {
+      res.status(200).json(result); // { mfaRequired: true, userId }
+    } else {
+      // Login completo: setear cookies HTTP-only
+      res.cookie("token", result.accessToken, {
+        httpOnly: true,
+        secure: NODE_ENV === "production",
+        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 1000 * 60 * 15,
+      });
 
-    // Setear refresh token en cookie separada (HTTP-only)
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
-    });
+      res.cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: NODE_ENV === "production",
+        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      });
 
-    res.status(200).json({
-      usuario: result.usuario,
-      modulosActivos: result.modulosActivos,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      expiresIn: result.expiresIn,
-    });
+      res.status(200).json({
+        usuario: result.usuario,
+        modulosActivos: result.modulosActivos,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
+      });
+    }
   } catch (error) {
     res.status(401).json({
       mensaje:

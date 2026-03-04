@@ -10,6 +10,8 @@ interface AuthState {
 	tenantSlug: string | null;
 	email: string | null;
 	nombreCompleto: string | null;
+	mfaPending: boolean;
+	mfaPendingUserId: number | null;
 }
 
 const initialState: AuthState = {
@@ -22,6 +24,8 @@ const initialState: AuthState = {
 	tenantSlug: null,
 	email: null,
 	nombreCompleto: null,
+	mfaPending: false,
+	mfaPendingUserId: null,
 };
 
 const authSlice = createSlice({
@@ -43,6 +47,8 @@ const authSlice = createSlice({
 		) => {
 			state.accessToken = action.payload.accessToken;
 			state.isAuthenticated = true;
+			state.mfaPending = false;
+			state.mfaPendingUserId = null;
 			if (action.payload.sistemaId) {
 				state.sistemaId = action.payload.sistemaId;
 				localStorage.setItem("sistemaId", String(action.payload.sistemaId));
@@ -68,6 +74,10 @@ const authSlice = createSlice({
 				state.nombreCompleto = action.payload.nombreCompleto;
 			}
 		},
+		mfaPendingSet: (state, action: PayloadAction<number>) => {
+			state.mfaPending = true;
+			state.mfaPendingUserId = action.payload;
+		},
 		loggedOut: (state) => {
 			state.accessToken = null;
 			state.isAuthenticated = false;
@@ -78,6 +88,8 @@ const authSlice = createSlice({
 			state.tenantSlug = null;
 			state.email = null;
 			state.nombreCompleto = null;
+			state.mfaPending = false;
+			state.mfaPendingUserId = null;
 			localStorage.removeItem("sistemaId");
 			localStorage.removeItem("areaId");
 			localStorage.removeItem("usuarioId");
@@ -85,7 +97,7 @@ const authSlice = createSlice({
 	},
 });
 
-export const { tokenReceived, loggedOut } = authSlice.actions;
+export const { tokenReceived, loggedOut, mfaPendingSet } = authSlice.actions;
 
 // Selectores
 export const selectSistemaId = (state: { auth: AuthState }) =>
@@ -102,6 +114,10 @@ export const selectTenantSlug = (state: { auth: AuthState }) =>
 export const selectEmail = (state: { auth: AuthState }) => state.auth.email;
 export const selectNombreCompleto = (state: { auth: AuthState }) =>
 	state.auth.nombreCompleto;
+export const selectMfaPending = (state: { auth: AuthState }) =>
+	state.auth.mfaPending;
+export const selectMfaPendingUserId = (state: { auth: AuthState }) =>
+	state.auth.mfaPendingUserId;
 
 export default authSlice.reducer;
 export type { AuthState };
