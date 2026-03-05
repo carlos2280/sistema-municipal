@@ -151,9 +151,9 @@ export const login: RequestHandler = async (req, res, next) => {
       mfaCode,
     });
 
-    // Setup MFA obligatorio por política del tenant
-    if ("mfaSetupRequired" in result) {
-      res.status(200).json(result); // { mfaSetupRequired: true, userId }
+    // Setup MFA obligatorio: email enviado, frontend muestra mensaje
+    if ("mfaSetupPending" in result) {
+      res.status(200).json(result); // { mfaSetupPending: true, userId }
     // MFA requerido: NO setear cookies — el frontend debe solicitar el código
     } else if ("mfaRequired" in result) {
       res.status(200).json(result); // { mfaRequired: true, userId }
@@ -173,13 +173,8 @@ export const login: RequestHandler = async (req, res, next) => {
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
 
-      res.status(200).json({
-        usuario: result.usuario,
-        modulosActivos: result.modulosActivos,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        expiresIn: result.expiresIn,
-      });
+      const { accessToken: _at, refreshToken: _rt, ...rest } = result;
+      res.status(200).json(rest);
     }
   } catch (error) {
     res.status(401).json({
@@ -312,5 +307,31 @@ export const cambiarContrasenaTemporal: RequestHandler = async (
     res.json(result);
   } catch (error) {
     next(error);
+  }
+};
+
+// ─── MFA Setup ───────────────────────────────────────────
+
+export const iniciarSetupMfa: RequestHandler = async (req, res, next) => {
+  const { setupToken } = req.body;
+  if (!setupToken) return next(new AppError("setupToken requerido", 400));
+  try {
+    const result = await autorizacionService.iniciarSetupMfa(setupToken);
+    res.status(200).json(result);
+  } catch (error) {
+    next(new AppError(error instanceof Error ? error.message : "Error al iniciar setup MFA", 400));
+  }
+};
+
+export const activarMfa: RequestHandler = async (req, res, next) => {
+  const { setupToken, code } = req.body;
+  if (!setupToken || !code) {
+    return next(new AppError("setupToken y code son requeridos", 400));
+  }
+  try {
+    const result = await autorizacionService.activarMfa(setupToken, code);
+    res.status(200).json(result); // { backupCodes: string[] }
+  } catch (error) {
+    next(new AppError(error instanceof Error ? error.message : "Error al activar MFA", 400));
   }
 };

@@ -1,14 +1,18 @@
+import type { JSX } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../component/ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
-import MfaPolicyPage from "../pages/configuracion/MfaPolicyPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
 import Login from "../pages/login/Login";
+import MfaSetupPage from "../pages/mfa-setup/MfaSetupPage";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "../utils/componentsMap";
 import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
-import { loadMicrofrontComponents } from "./microfrontRegistry";
+import {
+	loadConfiguracionComponents,
+	loadMicrofrontComponents,
+} from "./microfrontRegistry";
 import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 import ModuleUnavailablePage from "../pages/ModuleUnavailablePage";
 
@@ -23,20 +27,42 @@ export const createAppRouter = async ({
 	sistemaId,
 	activeModuleCodes = [],
 }: Props) => {
-	let dynamicRoutes: ReturnType<typeof generateRoutesFromMenu> = [];
+	// ── Cargar componentes de microfrontends activos ───────────────────────────
+	// Se acumulan en un mapa común; generateRoutesFromMenu solo matchea las
+	// claves presentes en el menú activo, así que no hay conflicto entre MFs.
 
-	// Solo cargar microfrontends si hay sistemaId, menuData y el módulo activo
-	if (
-		sistemaId &&
-		menuData &&
-		activeModuleCodes.includes("contabilidad")
-	) {
-		const microfront = await loadMicrofrontComponents(sistemaId);
+	if (sistemaId && menuData) {
+		const mergedComponents: Record<string, JSX.Element> = {};
 
-		componentsBySistemaId[sistemaId] = microfront.components;
+		// mf_contabilidad — cargado solo si el módulo está suscripto y registrado
+		if (
+			activeModuleCodes.includes("contabilidad") &&
+			isRemoteRegistered("mf_contabilidad")
+		) {
+			const mf = await loadMicrofrontComponents(sistemaId);
+			if (mf.status !== "failed") {
+				Object.assign(mergedComponents, mf.components);
+			}
+		}
 
-		dynamicRoutes = generateRoutesFromMenu(menuData, sistemaId);
+		// mf_configuracion — cargado si el módulo está suscripto y registrado
+		if (
+			activeModuleCodes.includes("configuracion") &&
+			isRemoteRegistered("mf_configuracion")
+		) {
+			const mf = await loadConfiguracionComponents();
+			if (mf.status !== "failed") {
+				Object.assign(mergedComponents, mf.components);
+			}
+		}
+
+		componentsBySistemaId[sistemaId] = mergedComponents;
 	}
+
+	const dynamicRoutes =
+		sistemaId && menuData
+			? generateRoutesFromMenu(menuData, sistemaId)
+			: [];
 
 	// Rutas de chat solo si el módulo está contratado y el remote registrado
 	const chatRoutes =
@@ -54,6 +80,10 @@ export const createAppRouter = async ({
 			element: <ContrasenaTemporal />,
 		},
 		{
+			path: "/mfa-setup",
+			element: <MfaSetupPage />,
+		},
+		{
 			path: "/",
 			element: <ProtectedRoute />,
 			children: [
@@ -66,10 +96,6 @@ export const createAppRouter = async ({
 							element: <DashboardPage />,
 						},
 						...chatRoutes,
-						{
-							path: "seguridad/autenticacion-mfa",
-							element: <MfaPolicyPage />,
-						},
 						...dynamicRoutes,
 						{
 							path: "*",

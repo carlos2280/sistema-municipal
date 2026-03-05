@@ -49,9 +49,21 @@ export type MfaRequiredResponse = {
 	userId: number;
 };
 
-export type MfaSetupRequiredResponse = {
-	mfaSetupRequired: true;
+// El backend envió email con link de enrollment; frontend muestra aviso.
+export type MfaSetupPendingResponse = {
+	mfaSetupPending: true;
 	userId: number;
+};
+
+export type MfaSetupIniciarResponse = {
+	qrDataUrl: string;
+	secret: string;
+	otpauthUri: string;
+};
+
+// activarMfa solo activa MFA; el login completo ocurre en paso posterior.
+export type MfaSetupActivarResponse = {
+	backupCodes: string[];
 };
 
 export type LoginAreas = {

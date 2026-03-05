@@ -12,9 +12,11 @@ import {
   tokensContrasenaTemporal,
   usuarios,
 } from "@/db/schemas";
-import { generarTokens, verificarToken } from "@/libs/utils/jwt.utils";
+import { generarTokens, generarTokenSetup, verificarToken } from "@/libs/utils/jwt.utils";
 import type { TokenPayload } from "@/libs/utils/jwt.utils";
-import { decryptSecret } from "@/libs/utils/crypto.utils";
+import { decryptSecret, encryptSecret } from "@/libs/utils/crypto.utils";
+import { enviarEmailEnrollmentMfa, enviarEmailMfaActivado } from "@/libs/email/emailService";
+import QRCode from "qrcode";
 import {
   modulos,
   municipalidades,
@@ -32,9 +34,10 @@ export type MfaRequiredResult = {
   userId: number;
 };
 
-// Resultado cuando la política del tenant exige MFA pero el usuario no lo ha configurado
-export type MfaSetupRequiredResult = {
-  mfaSetupRequired: true;
+// Resultado cuando la política del tenant exige MFA pero el usuario no lo ha configurado:
+// el backend envía email con link de enrollment y notifica al frontend sin exponer el token.
+export type MfaSetupPendingResult = {
+  mfaSetupPending: true;
   userId: number;
 };
 
@@ -107,7 +110,15 @@ export const login = async ({
     if (mfaPolicy !== "disabled") {
       // Política 'required': el usuario DEBE tener MFA activo
       if (mfaPolicy === "required" && (!usuario.mfaEnabled || !usuario.mfaVerified)) {
-        return { mfaSetupRequired: true, userId: usuario.id };
+        // Generar token y enviar por email — no se expone en la respuesta HTTP
+        const setupToken = generarTokenSetup(usuario.id, tenantSlug, tenant.dbName);
+        // Enviar email en background (no bloquear la respuesta si falla)
+        enviarEmailEnrollmentMfa({
+          email: usuario.email,
+          nombreCompleto: usuario.nombreCompleto,
+          setupToken,
+        }).catch((err) => console.error("[Email] Error al enviar enrollment MFA:", err));
+        return { mfaSetupPending: true, userId: usuario.id };
       }
 
       // MFA activo en el usuario (required o optional con MFA configurado)
@@ -508,6 +519,88 @@ export const cambiarContrasenaTemporal = async (
  * @param refreshToken Refresh token válido
  * @returns Nuevo par de tokens
  */
+// ─────────────────────────────────────────────────────────
+// MFA SETUP (primer login con política "required")
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Genera el secreto TOTP + QR para que el usuario configure su autenticador.
+ * Guarda el secreto (cifrado) provisionalmente en la DB.
+ */
+export const iniciarSetupMfa = async (setupToken: string) => {
+  const { JWT_SECRET, JWT_ISSUER } = loadEnv();
+  const jwt = await import("jsonwebtoken");
+  let payload: { userId: number; tenantSlug: string; tenantDbName: string; tipo: string };
+  try {
+    payload = jwt.default.verify(setupToken, JWT_SECRET, { issuer: JWT_ISSUER || "api-autorizacion" }) as typeof payload;
+  } catch {
+    throw new Error("Token de setup inválido o expirado");
+  }
+  if (payload.tipo !== "mfa-setup") throw new Error("Token de setup inválido");
+
+  const tenantDb = createTenantDbClient(payload.tenantDbName, loadEnv());
+  const [usuario] = await tenantDb.select().from(usuarios).where(eq(usuarios.id, payload.userId));
+  if (!usuario) throw new Error("Usuario no encontrado");
+
+  const secret = authenticator.generateSecret();
+  const otpauthUri = authenticator.keyuri(usuario.email, "Sistema Municipal", secret);
+  const qrDataUrl = await QRCode.toDataURL(otpauthUri);
+  const encryptedSecret = encryptSecret(secret);
+
+  // Guardar secreto provisional (mfaEnabled=false hasta que verifique)
+  await tenantDb
+    .update(usuarios)
+    .set({ mfaSecret: encryptedSecret, mfaEnabled: false, mfaVerified: false })
+    .where(eq(usuarios.id, payload.userId));
+
+  return { qrDataUrl, secret, otpauthUri };
+};
+
+/**
+ * Verifica el código TOTP y activa MFA en la cuenta.
+ * No emite tokens — el usuario debe iniciar sesión normalmente después.
+ */
+export const activarMfa = async (setupToken: string, code: string) => {
+  const { JWT_SECRET, JWT_ISSUER } = loadEnv();
+  const jwt = await import("jsonwebtoken");
+  let payload: { userId: number; tenantSlug: string; tenantDbName: string; tipo: string };
+  try {
+    payload = jwt.default.verify(setupToken, JWT_SECRET, { issuer: JWT_ISSUER || "api-autorizacion" }) as typeof payload;
+  } catch {
+    throw new Error("Token de setup inválido o expirado");
+  }
+  if (payload.tipo !== "mfa-setup") throw new Error("Token de setup inválido");
+
+  const tenantDb = createTenantDbClient(payload.tenantDbName, loadEnv());
+  const [usuario] = await tenantDb.select().from(usuarios).where(eq(usuarios.id, payload.userId));
+  if (!usuario || !usuario.mfaSecret) throw new Error("Configuración MFA no iniciada");
+
+  const secret = decryptSecret(usuario.mfaSecret);
+  const valid = authenticator.verify({ token: code, secret });
+  if (!valid) throw new Error("Código MFA incorrecto");
+
+  // Generar backup codes (mostrar al usuario una sola vez)
+  const backupCodes = Array.from({ length: 8 }, () =>
+    Math.random().toString(36).substring(2, 7).toUpperCase() +
+    Math.random().toString(36).substring(2, 7).toUpperCase(),
+  );
+  const backupHashes = await Promise.all(backupCodes.map((c) => bcrypt.hash(c, 10)));
+
+  // Activar MFA
+  await tenantDb
+    .update(usuarios)
+    .set({ mfaEnabled: true, mfaVerified: true, mfaBackupCodes: backupHashes })
+    .where(eq(usuarios.id, payload.userId));
+
+  // Notificación de seguridad (sin bloquear si falla)
+  enviarEmailMfaActivado({
+    email: usuario.email,
+    nombreCompleto: usuario.nombreCompleto,
+  }).catch((err) => console.error("[Email] Error al enviar notificación MFA activado:", err));
+
+  return { backupCodes };
+};
+
 export const refrescarToken = async (refreshToken: string) => {
   try {
     // Verificar el refresh token

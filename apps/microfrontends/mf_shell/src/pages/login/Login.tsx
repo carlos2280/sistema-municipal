@@ -32,6 +32,7 @@ import {
 	Lock,
 	LogIn,
 	Mail,
+	MailCheck,
 	ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
@@ -334,6 +335,43 @@ function MfaForm({ mfaCode, onCodeChange }: MfaFormProps) {
 }
 
 // ============================================================================
+// MFA SETUP PENDING — Email enviado, usuario debe revisar su correo
+// ============================================================================
+
+function MfaSetupPendingNotice() {
+	return (
+		<Stack spacing={2.5} alignItems="center">
+			<Box sx={{ color: "primary.main", opacity: 0.85 }}>
+				<MailCheck size={56} />
+			</Box>
+			<Typography variant="h6" fontWeight={600} textAlign="center">
+				Revisa tu correo electrónico
+			</Typography>
+			<Typography variant="body2" color="text.secondary" textAlign="center" sx={{ px: 1 }}>
+				Tu municipalidad requiere autenticación de dos factores (MFA).
+				Te enviamos un enlace a tu correo corporativo para configurar tu aplicación autenticadora.
+			</Typography>
+			<Box
+				sx={{
+					bgcolor: "info.light",
+					borderRadius: 1,
+					px: 2,
+					py: 1.5,
+					width: "100%",
+					border: "1px solid",
+					borderColor: "info.main",
+				}}
+			>
+				<Typography variant="body2" color="info.dark" textAlign="center">
+					El enlace es válido por <strong>10 minutos</strong>. Si no lo recibes,
+					vuelve e intenta ingresar nuevamente.
+				</Typography>
+			</Box>
+		</Stack>
+	);
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -349,6 +387,7 @@ export default function Login() {
 		handleBack,
 		mfaCode,
 		setMfaCode,
+		mfaSetupPending,
 	} = useLoginFormFlow();
 
 	const steps = ["Credenciales", "Área y Sistema"];
@@ -357,10 +396,9 @@ export default function Login() {
 	const watchedValues = methods.watch();
 
 	const isStepValid = () => {
+		if (mfaSetupPending) return false;
 		if (activeStep === 0) {
-			const correo = watchedValues.correo?.trim();
-			const contrasena = watchedValues.contrasena;
-			return !!(correo && contrasena);
+			return !!(watchedValues.correo?.trim() && watchedValues.contrasena);
 		}
 		if (activeStep === 1) {
 			return !!(watchedValues.areaId && watchedValues.sistemaId);
@@ -375,6 +413,12 @@ export default function Login() {
 		if (activeStep === 0) return "Ingrese sus credenciales";
 		if (activeStep === 1) return "Seleccione su área de trabajo";
 		return "Ingrese su código de verificación";
+	};
+
+	const getTitle = () => {
+		if (mfaSetupPending) return "Configuración MFA";
+		if (activeStep === 2) return "Verificación en dos pasos";
+		return "Iniciar Sesión";
 	};
 
 	const getButtonLabel = () => {
@@ -421,15 +465,17 @@ export default function Login() {
 				{/* Título */}
 				<Box sx={{ textAlign: "center", mb: 4 }}>
 					<Typography variant="h6" fontWeight={600}>
-						{activeStep === 2 ? "Verificación en dos pasos" : "Iniciar Sesión"}
+						{getTitle()}
 					</Typography>
-					<Typography variant="body2" color="text.secondary">
-						{getSubtitle()}
-					</Typography>
+					{!mfaSetupPending && (
+						<Typography variant="body2" color="text.secondary">
+							{getSubtitle()}
+						</Typography>
+					)}
 				</Box>
 
-				{/* Stepper — solo para pasos 0 y 1 */}
-				{activeStep < 2 && (
+				{/* Stepper — solo para pasos 0 y 1 sin pending */}
+				{activeStep < 2 && !mfaSetupPending && (
 					<Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
 						{steps.map((label) => (
 							<Step key={label}>
@@ -442,7 +488,7 @@ export default function Login() {
 				)}
 
 				{/* Ícono MFA en paso 2 */}
-				{activeStep === 2 && (
+				{activeStep === 2 && !mfaSetupPending && (
 					<Box
 						sx={{
 							display: "flex",
@@ -456,43 +502,49 @@ export default function Login() {
 					</Box>
 				)}
 
-				{/* Formulario */}
-				<FormProvider {...methods}>
+				{/* Contenido principal */}
+				{mfaSetupPending ? (
 					<Box sx={{ mb: 3 }}>
-						{activeStep === 0 && <CredentialForm />}
-						{activeStep === 1 && (
-							<AreaSystemForm areas={areas} sistemas={sistemas} />
-						)}
-						{activeStep === 2 && (
-							<MfaForm mfaCode={mfaCode} onCodeChange={setMfaCode} />
-						)}
+						<MfaSetupPendingNotice />
 					</Box>
+				) : (
+					<FormProvider {...methods}>
+						<Box sx={{ mb: 3 }}>
+							{activeStep === 0 && <CredentialForm />}
+							{activeStep === 1 && (
+								<AreaSystemForm areas={areas} sistemas={sistemas} />
+							)}
+							{activeStep === 2 && (
+								<MfaForm mfaCode={mfaCode} onCodeChange={setMfaCode} />
+							)}
+						</Box>
 
-					{/* Botones */}
-					<Stack spacing={1.5}>
-						<SubmitButton
-							fullWidth
-							variant="contained"
-							onClick={handleNext}
-							disabled={!isStepValid()}
-							endIcon={getButtonIcon()}
-						>
-							{getButtonLabel()}
-						</SubmitButton>
-
-						{activeStep > 0 && (
-							<Button
+						{/* Botones */}
+						<Stack spacing={1.5}>
+							<SubmitButton
 								fullWidth
-								variant="text"
-								onClick={handleBack}
-								startIcon={<ArrowLeft size={18} />}
-								sx={{ textTransform: "none" }}
+								variant="contained"
+								onClick={handleNext}
+								disabled={!isStepValid()}
+								endIcon={getButtonIcon()}
 							>
-								Volver
-							</Button>
-						)}
-					</Stack>
-				</FormProvider>
+								{getButtonLabel()}
+							</SubmitButton>
+
+							{activeStep > 0 && (
+								<Button
+									fullWidth
+									variant="text"
+									onClick={handleBack}
+									startIcon={<ArrowLeft size={18} />}
+									sx={{ textTransform: "none" }}
+								>
+									Volver
+								</Button>
+							)}
+						</Stack>
+					</FormProvider>
+				)}
 
 				{/* Footer */}
 				<Divider sx={{ my: 3 }} />

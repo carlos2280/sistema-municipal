@@ -127,6 +127,25 @@ export const generarToken = (
   } as jwt.SignOptions);
 };
 
+export interface SetupTokenPayload {
+  sub: string;
+  userId: number;
+  tenantSlug: string;
+  tenantDbName: string;
+  tipo: "mfa-setup";
+}
+
+export const generarTokenSetup = (
+  userId: number,
+  tenantSlug: string,
+  tenantDbName: string,
+): string =>
+  jwt.sign(
+    { sub: String(userId), userId, tenantSlug, tenantDbName, tipo: "mfa-setup" },
+    JWT_CONFIG.secret,
+    { expiresIn: "10m", issuer: JWT_CONFIG.issuer } as jwt.SignOptions,
+  );
+
 /**
  * Función para verificar y decodificar un token JWT
  * @param token Token JWT a verificar
