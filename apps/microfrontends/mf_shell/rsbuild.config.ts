@@ -27,8 +27,9 @@ export default defineConfig(() => {
           // Core remotes (siempre disponibles)
           mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,
           mf_ui: `mf_ui@${env('VITE_MF_UI_URL', parsed, 'http://localhost:5011/mf-manifest.json')}`,
-          // mf_contabilidad y mf_chat se registran dinámicamente en runtime
+          // mf_contabilidad, mf_chat y mf_configuracion se registran dinámicamente en runtime
           // según los módulos contratados por el tenant (ver dynamicModuleLoader.ts)
+          mf_configuracion: `mf_configuracion@${env('VITE_MF_CONFIGURACION_URL', parsed, 'http://localhost:5040/mf-manifest.json')}`,
         },
         shared: {
           // eager:true en el host garantiza que el shared scope se inicializa
