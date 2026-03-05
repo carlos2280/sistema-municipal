@@ -11,7 +11,7 @@ import { clearApiKey, getApiKey } from "./auth";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-const API_PREFIX = "/api/v1/platform/admin";
+const API_PREFIX = "/api/v1/admin";
 
 export class ApiError extends Error {
   constructor(
