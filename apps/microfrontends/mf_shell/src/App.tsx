@@ -31,7 +31,11 @@ function App() {
 	// Si está autenticado pero aún no tiene menu/sistemaId, seguir esperando.
 	// Usamos menuLoaded (raw) en vez de menu (filtrado) para no bloquear
 	// cuando un módulo se desactiva y useMenu retorna null.
-	const isWaitingForAuthData = isAuthenticated && (!sistemaId || !menuLoaded);
+	// Además esperamos a que menu tenga items reales si hay módulo con menú activo,
+	// evitando crear el router con dynamicRoutes=[] por condición de carrera.
+	const hasMenuModule = modulosActivos.some((m) => m.mfName === "mf_contabilidad");
+	const isWaitingForAuthData =
+		isAuthenticated && (!sistemaId || !menuLoaded || (hasMenuModule && !menu));
 
 	useEffect(() => {
 		// No crear router hasta que el tenant esté resuelto
