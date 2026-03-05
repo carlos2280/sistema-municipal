@@ -8,6 +8,9 @@ import {
 } from "../utils/mfLoader";
 import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 
+// Clave de caché fija para configuracion (no varía por sistemaId)
+const CONFIGURACION_CACHE_KEY = 9999;
+
 /**
  * Registry de Microfrontends — versión dinámica
  *
@@ -80,6 +83,65 @@ export async function loadMicrofrontComponents(
 		};
 
 		setCachedModule(sistemaId, failedModule);
+		return failedModule;
+	}
+}
+
+// ─── Loader para módulo de configuracion ──────────────────────────────────────
+
+/**
+ * Carga los componentes de mf_configuracion.
+ * No depende del sistemaId activo porque el sistema Configuración
+ * siempre expone el mismo mapa de componentes.
+ */
+export async function loadConfiguracionComponents(): Promise<MicrofrontModule> {
+	const cached = getCachedModule(CONFIGURACION_CACHE_KEY);
+	if (cached?.status === "loaded") {
+		return cached;
+	}
+
+	if (!isRemoteRegistered("mf_configuracion")) {
+		console.warn("[MF Registry] mf_configuracion no registrado, omitiendo carga");
+		return { sistemaId: CONFIGURACION_CACHE_KEY, components: {}, status: "fallback" };
+	}
+
+	try {
+		const startTime = performance.now();
+
+		const moduleData = await loadWithRetry(
+			() =>
+				loadRemote<{ default: MicrofrontModule }>("mf_configuracion/routes").then(
+					(mod) => mod!.default,
+				),
+			{ attempts: 3, delay: 1000, moduleName: "mf_configuracion" },
+		);
+
+		const loadTime = performance.now() - startTime;
+
+		const result: MicrofrontModule = {
+			...moduleData,
+			status: "loaded",
+			loadTime,
+		};
+
+		setCachedModule(CONFIGURACION_CACHE_KEY, result);
+
+		console.info(`[MF Registry] mf_configuracion cargado (${loadTime.toFixed(0)}ms)`);
+
+		return result;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+
+		console.error("[MF Registry] Error cargando mf_configuracion:", errorMessage);
+
+		const failedModule: MicrofrontModule = {
+			sistemaId: CONFIGURACION_CACHE_KEY,
+			components: {},
+			status: "failed",
+			error: errorMessage,
+		};
+
+		setCachedModule(CONFIGURACION_CACHE_KEY, failedModule);
 		return failedModule;
 	}
 }

@@ -54,7 +54,7 @@ const PolicyIcon = ({ policy }: { policy: MfaPolicy }) => {
 	return <ShieldOff size={20} />;
 };
 
-const policyColor = (policy: MfaPolicy) => {
+const policyColor = (policy: MfaPolicy): "success" | "warning" | "error" => {
 	if (policy === "required") return "success";
 	if (policy === "optional") return "warning";
 	return "error";

@@ -13,6 +13,7 @@ export interface ModuleInfo {
 const ENV_MANIFEST_MAP: Record<string, string | undefined> = {
 	mf_contabilidad: import.meta.env.VITE_MF_CONTABILIDAD_URL,
 	mf_chat: import.meta.env.VITE_MF_CHAT_URL,
+	mf_configuracion: import.meta.env.VITE_MF_CONFIGURACION_URL,
 };
 
 // Registro de remotes ya registrados para evitar duplicados

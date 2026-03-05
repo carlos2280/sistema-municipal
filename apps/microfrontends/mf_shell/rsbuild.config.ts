@@ -31,14 +31,17 @@ export default defineConfig(() => {
           // según los módulos contratados por el tenant (ver dynamicModuleLoader.ts)
         },
         shared: {
-          react: { singleton: true, requiredVersion: false },
-          'react-dom': { singleton: true, requiredVersion: false },
-          '@mui/material': { singleton: true, requiredVersion: false },
-          '@mui/icons-material': { singleton: true, requiredVersion: false },
-          '@emotion/react': { singleton: true, requiredVersion: false },
-          '@emotion/styled': { singleton: true, requiredVersion: false },
-          'react-redux': { singleton: true, requiredVersion: false },
-          '@reduxjs/toolkit': { singleton: true, requiredVersion: false },
+          // eager:true en el host garantiza que el shared scope se inicializa
+          // antes de que cualquier remote intente consumir estas libs (evita
+          // "factory is undefined" en Module Federation con pnpm).
+          react: { singleton: true, eager: true, requiredVersion: false },
+          'react-dom': { singleton: true, eager: true, requiredVersion: false },
+          '@mui/material': { singleton: true, eager: true, requiredVersion: false },
+          '@mui/icons-material': { singleton: true, eager: true, requiredVersion: false },
+          '@emotion/react': { singleton: true, eager: true, requiredVersion: false },
+          '@emotion/styled': { singleton: true, eager: true, requiredVersion: false },
+          'react-redux': { singleton: true, eager: true, requiredVersion: false },
+          '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: false },
           'socket.io-client': { singleton: true, requiredVersion: false },
         },
       }),
