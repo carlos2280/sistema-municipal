@@ -1,5 +1,5 @@
-import { areas, perfilAreaUsuario, sistemaPerfil } from "../database";
-import type { DbExecutor } from "../types/db";
+import { areas, perfilAreaUsuario, sistemaPerfil } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedSistemaPerfil(db: DbExecutor) {
     const datos = [

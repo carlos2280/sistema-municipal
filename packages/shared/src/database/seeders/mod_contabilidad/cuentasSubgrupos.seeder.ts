@@ -1,5 +1,5 @@
-import { cuentasSubgrupos } from "../../database";
-import type { DbExecutor } from "../../types/db";
+import { cuentasSubgrupos } from "../../";
+import type { DbExecutor } from "../../../types/db";
 
 export async function seedCuentasSubgrupos(db: DbExecutor) {
     // ========================================================================

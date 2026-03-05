@@ -52,20 +52,21 @@ install: ## Instala dependencias del proyecto
 	pnpm install
 
 dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
-	@for port in 5030 5010 5011 5020 5021 5050 3000 3001 3002 3003 3004 3006; do \
-		pid=$$(fuser $$port/tcp 2>/dev/null); \
+	@for port in 5030 5010 5011 5020 5021 5041 5050 3000 3001 3002 3003 3004 3006; do \
+		pid=$$(lsof -ti :$$port 2>/dev/null); \
 		if [ -n "$$pid" ]; then \
 			echo "$(YELLOW)Matando proceso en puerto $$port (PID $$pid)$(NC)"; \
 			kill -9 $$pid 2>/dev/null || true; \
 		fi; \
 	done
+	@sleep 1
 
 dev: dev-infra dev-kill-ports ## Inicia entorno de desarrollo (infra + apps en orden)
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
 	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs (esperan postgres)  3) MFs remotos  4) Shell (espera remotes)$(NC)"
 	@npx concurrently -k \
-		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,shell" \
-		-c "gray,blue,blue,blue,blue,magenta,blue,green,green,green,cyan,yellow" \
+		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,mf-conf,shell" \
+		-c "gray,blue,blue,blue,blue,magenta,blue,green,green,green,cyan,magenta,yellow" \
 		"pnpm --filter @municipal/shared dev" \
 		"npx wait-on tcp:5434 && pnpm --filter gateway dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-identidad dev" \
@@ -77,7 +78,8 @@ dev: dev-infra dev-kill-ports ## Inicia entorno de desarrollo (infra + apps en o
 		"pnpm --filter mf-ui dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-contabilidad dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json && pnpm --filter mf-chat dev" \
-		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json http-get://localhost:5020/mf-manifest.json http-get://localhost:5021/mf-manifest.json && pnpm --filter mf-shell dev"
+		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-configuracion dev" \
+		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json http-get://localhost:5020/mf-manifest.json http-get://localhost:5021/mf-manifest.json http-get://localhost:5041/mf-manifest.json && pnpm --filter mf-shell dev"
 
 dev-turbo: dev-infra ## Inicia con turbo (sin orden garantizado)
 	@echo "$(GREEN)Iniciando aplicaciones con turbo...$(NC)"
@@ -150,6 +152,7 @@ build-mf: ## Build solo de Microfrontends
 	docker build -t $(REGISTRY)/municipal-mf-store:$(VERSION) ./apps/microfrontends/mf_store
 	docker build -t $(REGISTRY)/municipal-mf-ui:$(VERSION) ./apps/microfrontends/mf_ui
 	docker build -t $(REGISTRY)/municipal-mf-contabilidad:$(VERSION) ./apps/microfrontends/mf_contabilidad
+	docker build -t $(REGISTRY)/municipal-mf-configuracion:$(VERSION) ./apps/microfrontends/mf_configuracion
 
 build-push: build ## Build y push al registry
 	@echo "$(GREEN)Pushing imágenes a $(REGISTRY)...$(NC)"
@@ -161,6 +164,7 @@ build-push: build ## Build y push al registry
 	docker push $(REGISTRY)/municipal-mf-store:$(VERSION)
 	docker push $(REGISTRY)/municipal-mf-ui:$(VERSION)
 	docker push $(REGISTRY)/municipal-mf-contabilidad:$(VERSION)
+	docker push $(REGISTRY)/municipal-mf-configuracion:$(VERSION)
 
 # ============================================
 # Producción (local)
@@ -257,6 +261,10 @@ dev-contabilidad: dev-infra ## Desarrollo solo del módulo contabilidad
 dev-shell: dev-infra ## Desarrollo solo del shell
 	@echo "$(GREEN)Iniciando shell...$(NC)"
 	pnpm --filter mf-shell dev
+
+dev-configuracion: dev-infra ## Desarrollo solo del módulo configuración
+	@echo "$(GREEN)Iniciando módulo configuración...$(NC)"
+	pnpm --filter mf-configuracion dev
 
 dev-chat: dev-infra ## Desarrollo solo del módulo chat
 	@echo "$(GREEN)Iniciando módulo chat...$(NC)"

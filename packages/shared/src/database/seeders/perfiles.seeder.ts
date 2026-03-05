@@ -1,6 +1,6 @@
-import { db } from "../config/client";
-import { perfiles } from "../database";
-import type { DbExecutor } from "../types/db";
+import { db } from "../../config/client";
+import { perfiles } from "../";
+import type { DbExecutor } from "../../types/db";
 
 
 export async function seedPerfiles(db: DbExecutor) {

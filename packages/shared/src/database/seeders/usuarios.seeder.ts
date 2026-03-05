@@ -1,6 +1,6 @@
 
-import { usuarios } from "../database";
-import type { DbExecutor } from "../types/db";
+import { usuarios } from "../";
+import type { DbExecutor } from "../../types/db";
 
 // Contraseña hasheada: "password123" (bcrypt 10 rounds)
 const PASSWORD_HASH = '$2b$10$WBPfeIvXU1NLN4h9b14H0urJMBG306IR3iHNqVc0Din3gT5yv7GYW';
