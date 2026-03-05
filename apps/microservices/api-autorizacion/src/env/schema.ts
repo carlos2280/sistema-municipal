@@ -41,6 +41,14 @@ export const envSchema = z.object({
   // Connection pool settings
   DB_POOL_MIN: z.coerce.number().int().positive().default(1),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+
+  // Email (SMTP — Mailhog en dev, SMTP real en prod)
+  SMTP_HOST: z.string().default("localhost"),
+  SMTP_PORT: z.coerce.number().int().positive().default(1025),
+  SMTP_FROM: z.string().default("no-reply@sistema-municipal.cl"),
+
+  // URL pública del frontend (para armar links en emails)
+  APP_URL: z.string().url().default("http://localhost:5030"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

@@ -25,10 +25,9 @@ export const useLoginFormFlow = () => {
 	const navigate = useNavigate();
 	const [activeStep, setActiveStep] = useState(0);
 	const [areas, setAreas] = useState<TSchemaAreas[]>([]);
-	const [sistemas, setSistemas] = useState<{ id: number; nombre: string }[]>(
-		[],
-	);
+	const [sistemas, setSistemas] = useState<{ id: number; nombre: string }[]>([]);
 	const [mfaCode, setMfaCode] = useState("");
+	const [mfaSetupPending, setMfaSetupPending] = useState(false);
 
 	const { methods } = useHookFormSchema<TSchemaCredenciales>({
 		schema: schemaCredenciales,
@@ -132,6 +131,7 @@ export const useLoginFormFlow = () => {
 
 	const handleBack = () => {
 		if (activeStep === 2) setMfaCode("");
+		setMfaSetupPending(false);
 		setActiveStep((prev) => prev - 1);
 	};
 
@@ -156,6 +156,12 @@ export const useLoginFormFlow = () => {
 				sistemaId,
 				tenantSlug,
 			}).unwrap();
+
+			if ("mfaSetupPending" in loginData) {
+				// Email enviado — mostrar aviso al usuario
+				setMfaSetupPending(true);
+				return;
+			}
 
 			if ("mfaRequired" in loginData) {
 				setActiveStep(2);
@@ -208,5 +214,6 @@ export const useLoginFormFlow = () => {
 		methods,
 		mfaCode,
 		setMfaCode,
+		mfaSetupPending,
 	};
 };

@@ -167,6 +167,85 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
+  apps/microfrontends/mf_configuracion:
+    dependencies:
+      '@emotion/react':
+        specifier: ^11.14.0
+        version: 11.14.0(@types/react@19.2.8)(react@19.2.3)
+      '@emotion/styled':
+        specifier: ^11.14.0
+        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
+      '@mui/icons-material':
+        specifier: ^7.1.2
+        version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
+      '@mui/material':
+        specifier: ^7.1.2
+        version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reduxjs/toolkit':
+        specifier: ^2.8.2
+        version: 2.8.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
+      express:
+        specifier: ^4.21.2
+        version: 4.22.1
+      lucide-react:
+        specifier: ^0.525.0
+        version: 0.525.0(react@19.2.3)
+      react:
+        specifier: ^19.1.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.2.3(react@19.2.3)
+      react-redux:
+        specifier: ^9.2.0
+        version: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
+      react-router-dom:
+        specifier: ^7.6.1
+        version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      serve:
+        specifier: ^14.2.4
+        version: 14.2.5
+      sonner:
+        specifier: ^2.0.6
+        version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.76
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.9.4
+        version: 1.9.4
+      '@module-federation/rsbuild-plugin':
+        specifier: ^0.8.0
+        version: 0.8.12(@rsbuild/core@1.7.3)(@rspack/core@1.7.6(@swc/helpers@0.5.18))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.8.3)(webpack@5.104.1)
+      '@rsbuild/core':
+        specifier: ^1.2.0
+        version: 1.7.3
+      '@rsbuild/plugin-react':
+        specifier: ^1.1.0
+        version: 1.4.5(@rsbuild/core@1.7.3)
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      '@types/react':
+        specifier: ^19.1.2
+        version: 19.2.8
+      '@types/react-dom':
+        specifier: ^19.1.2
+        version: 19.2.3(@types/react@19.2.8)
+      globals:
+        specifier: ^16.0.0
+        version: 16.5.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
   apps/microfrontends/mf_contabilidad:
     dependencies:
       '@emotion/react':
@@ -521,12 +600,18 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.3
+      nodemailer:
+        specifier: ^7.0.12
+        version: 7.0.12
       otplib:
         specifier: ^12.0.1
         version: 12.0.1
       pg:
         specifier: ^8.16.0
         version: 8.16.3
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
       zod:
         specifier: ^3.25.67
         version: 3.25.76
@@ -552,9 +637,15 @@ importers:
       '@types/node':
         specifier: ^22.18.12
         version: 22.19.5
+      '@types/nodemailer':
+        specifier: ^6.4.21
+        version: 6.4.21
       '@types/pg':
         specifier: ^8.15.2
         version: 8.16.0
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3

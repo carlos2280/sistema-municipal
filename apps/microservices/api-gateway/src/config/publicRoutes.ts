@@ -30,6 +30,10 @@ const PUBLIC_ROUTES: PublicRoute[] = [
   // Internal cache invalidation (auth via x-admin-key en handler)
   { method: "POST", pattern: /^\/internal\/cache\/invalidate$/ },
 
+  // MFA setup (validado por setupToken, no por JWT)
+  { method: "POST", pattern: /^\/api\/v1\/autorizacion\/mfa-setup\/iniciar$/ },
+  { method: "POST", pattern: /^\/api\/v1\/autorizacion\/mfa-setup\/activar$/ },
+
   // Rutas con token temporal (validadas por el servicio, no por JWT)
   {
     method: "POST",

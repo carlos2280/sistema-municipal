@@ -5,7 +5,9 @@ import type {
 	ContrasenaTemporal,
 	Login,
 	MfaRequiredResponse,
-	MfaSetupRequiredResponse,
+	MfaSetupActivarResponse,
+	MfaSetupIniciarResponse,
+	MfaSetupPendingResponse,
 	UsuarioConMenuResponse,
 } from "../../types/login";
 import { baseQueryRefresh } from "../api/baseApi";
@@ -44,7 +46,7 @@ export const authApi = createApi({
 			}),
 		}),
 
-		login: builder.mutation<UsuarioConMenuResponse | MfaRequiredResponse | MfaSetupRequiredResponse, Login>({
+		login: builder.mutation<UsuarioConMenuResponse | MfaRequiredResponse | MfaSetupPendingResponse, Login>({
 			query: (body) => ({
 				url: "/autorizacion/login",
 				method: "POST",
@@ -54,8 +56,8 @@ export const authApi = createApi({
 				try {
 					const { data } = await queryFulfilled;
 
-					// Setup MFA obligatorio por política del tenant — redirigir a setup
-					if ("mfaSetupRequired" in data) {
+					// Email enviado — usuario debe configurar MFA desde el link recibido
+					if ("mfaSetupPending" in data) {
 						dispatch(mfaPendingSet(data.userId));
 						return;
 					}
@@ -152,6 +154,25 @@ export const authApi = createApi({
 			},
 		}),
 
+		mfaSetupIniciar: builder.mutation<MfaSetupIniciarResponse, { setupToken: string }>({
+			query: (body) => ({
+				url: "/autorizacion/mfa-setup/iniciar",
+				method: "POST",
+				body,
+			}),
+		}),
+
+		mfaSetupActivar: builder.mutation<
+			MfaSetupActivarResponse,
+			{ setupToken: string; code: string }
+		>({
+			query: (body) => ({
+				url: "/autorizacion/mfa-setup/activar",
+				method: "POST",
+				body,
+			}),
+		}),
+
 		logout: builder.mutation<void, void>({
 			query: () => ({
 				url: "/autorizacion/logout",
@@ -178,6 +199,8 @@ export const {
 	useLoginAreasMutation,
 	useLoginMutation,
 	useLoginSistemasMutation,
+	useMfaSetupIniciarMutation,
+	useMfaSetupActivarMutation,
 	useVerificarTokenQuery,
 	useContrasenaTemporalQuery,
 	useCambiarContrasenaTemporalMutation,

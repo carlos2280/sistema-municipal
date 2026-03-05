@@ -19,6 +19,10 @@ router
   .get("/mis-sistemas", extractUser, controller.obtenerMisSistemas)
   .post("/cambiar-sistema", extractUser, controller.cambiarSistema)
 
+  // Setup MFA (usuario sin MFA en tenant con política "required")
+  .post("/mfa-setup/iniciar", controller.iniciarSetupMfa)
+  .post("/mfa-setup/activar", controller.activarMfa)
+
   // Rutas con token temporal
   .post(
     "/cambiar-contrasena-temporal",
