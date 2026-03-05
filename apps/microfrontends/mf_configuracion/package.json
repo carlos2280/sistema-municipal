@@ -1,0 +1,48 @@
+{
+  "name": "mf-configuracion",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview --port 5040",
+    "start": "node server.js",
+    "serve-local": "pnpm build && pnpm start",
+    "lint": "biome lint --write ./src",
+    "format": "biome format --write ./src",
+    "check": "biome check --write ./src"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.1.2",
+    "@mui/icons-material": "^7.1.2",
+    "@reduxjs/toolkit": "^2.8.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "lucide-react": "^0.525.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.6.1",
+    "serve": "^14.2.4",
+    "sonner": "^2.0.6",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@module-federation/rsbuild-plugin": "^0.8.0",
+    "@rsbuild/core": "^1.2.0",
+    "@rsbuild/plugin-react": "^1.1.0",
+    "@types/node": "^22.18.12",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "globals": "^16.0.0",
+    "typescript": "^5.8.3"
+  }
+}
