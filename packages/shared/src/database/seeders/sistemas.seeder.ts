@@ -1,5 +1,5 @@
-import { sistemas } from "../database";
-import type { DbExecutor } from "../types/db";
+import { sistemas } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedSistemas(db: DbExecutor) {
     const datos = [

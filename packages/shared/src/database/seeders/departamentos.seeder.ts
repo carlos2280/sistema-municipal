@@ -1,5 +1,5 @@
-import { departamentos } from "../database";
-import type { DbExecutor } from "../types/db";
+import { departamentos } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedDepartamentos(db: DbExecutor) {
     const datos = [

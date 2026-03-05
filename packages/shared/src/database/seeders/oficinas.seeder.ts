@@ -1,5 +1,5 @@
-import { oficinas } from "../database";
-import type { DbExecutor } from "../types/db";
+import { oficinas } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedOficinas(db: DbExecutor) {
     const datos = [

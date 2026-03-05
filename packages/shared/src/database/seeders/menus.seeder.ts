@@ -1,5 +1,5 @@
-import { menus } from "../database";
-import type { DbExecutor } from "../types/db";
+import { menus } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedMenus(db: DbExecutor) {
     const datos = [

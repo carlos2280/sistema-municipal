@@ -1,5 +1,5 @@
-import { direcciones } from "../database";
-import type { DbExecutor } from "../types/db";
+import { direcciones } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedDirecciones(db: DbExecutor) {
     const datos = [

@@ -1,6 +1,6 @@
-import { cuentasSubgrupos, planesCuentas } from "../../database";
+import { cuentasSubgrupos, planesCuentas } from "../../";
 import { eq } from "drizzle-orm";
-import type { DbExecutor } from "../../types/db";
+import type { DbExecutor } from "../../../types/db";
 
 export async function seedPlanesCuentas(db: DbExecutor) {
     try {

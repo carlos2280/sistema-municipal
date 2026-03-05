@@ -1,15 +1,26 @@
 import { customSchemaItentidad } from "@/config/schemaPG";
-import { integer, serial, timestamp } from "drizzle-orm/pg-core";
+import { index, integer, serial, timestamp, unique } from "drizzle-orm/pg-core";
 import { perfiles } from "./perfiles.schema";
 import { sistemas } from "./sistemas.schema";
 
-export const sistemaPerfil = customSchemaItentidad.table("sistema_perfil", {
-  id: serial("id").primaryKey(),
-  sistemaId: integer("sistema_id").references(() => sistemas.id),
-  perfilId: integer("perfil_id").references(() => perfiles.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const sistemaPerfil = customSchemaItentidad.table(
+  "sistema_perfil",
+  {
+    id: serial("id").primaryKey(),
+    sistemaId: integer("sistema_id")
+      .notNull()
+      .references(() => sistemas.id),
+    perfilId: integer("perfil_id")
+      .notNull()
+      .references(() => perfiles.id),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_sistema_perfil").on(table.sistemaId, table.perfilId),
+    unique("uq_sistema_perfil").on(table.sistemaId, table.perfilId),
+  ],
+);
 
 // Tipos
 export type SistemaPerfil = typeof sistemaPerfil.$inferSelect;

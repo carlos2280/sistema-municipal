@@ -1,5 +1,5 @@
-import { areas } from "../database";
-import type { DbExecutor } from "../types/db";
+import { areas } from "../";
+import type { DbExecutor } from "../../types/db";
 
 export async function seedAreas(db: DbExecutor) {
     const datos = [

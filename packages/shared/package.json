@@ -39,7 +39,7 @@
   "scripts": {
     "build": "tsup src/index.ts src/auth/index.ts src/database/index.ts src/database/identidad/index.ts src/database/contabilidad/schemas/index.ts src/database/mensajeria/schemas/index.ts src/database/platform/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts src/database/index.ts --format esm --dts --watch",
-    "seed": "tsx src/seeders/index.ts",
+    "seed": "tsx src/database/seeders/index.ts",
     "migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",
     "generate": "tsx node_modules/drizzle-kit/bin.cjs generate",
     "db:push": "tsx node_modules/drizzle-kit/bin.cjs push",
@@ -48,7 +48,7 @@
     "platform:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.platform.config.ts",
     "platform:push": "tsx node_modules/drizzle-kit/bin.cjs push --config drizzle.platform.config.ts",
     "platform:studio": "tsx node_modules/drizzle-kit/bin.cjs studio --config drizzle.platform.config.ts",
-    "platform:seed": "tsx src/seeders/platform.seed.ts",
+    "platform:seed": "tsx src/database/seeders/platform.seed.ts",
     "tenant:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.tenant.config.ts"
   },
   "keywords": [

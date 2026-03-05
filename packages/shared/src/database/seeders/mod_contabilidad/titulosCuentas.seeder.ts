@@ -1,5 +1,5 @@
-import { tiposCuentas } from "../../database";
-import type { DbExecutor } from "../../types/db";
+import { tiposCuentas } from "../../";
+import type { DbExecutor } from "../../../types/db";
 
 export async function seedTitulosCuentas(db: DbExecutor) {
         const datos = [
