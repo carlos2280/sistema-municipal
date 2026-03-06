@@ -70,11 +70,13 @@ export const generarTokens = (
     } as jwt.SignOptions,
   );
 
-  // Refresh Token (larga duración, incluye tenant para mantener contexto)
+  // Refresh Token (larga duración, incluye tenant + contexto de sesión para renovar access token)
   const refreshToken = jwt.sign(
     {
       sub: usuario.id.toString(),
       userId: usuario.id,
+      areaId: usuario.areaId,
+      sistemaId: usuario.sistemaId,
       tenantId: usuario.tenantId,
       tenantSlug: usuario.tenantSlug,
       tenantDbName: usuario.tenantDbName,
