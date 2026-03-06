@@ -55,6 +55,7 @@ const StyledMenu = styled((props: MenuProps) => (
 export default function CustomizedMenus() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const sistemaId = useAppSelector(selectSistemaId);
   const { data: sistemas = [] } = useMisSistemasQuery();
@@ -70,7 +71,10 @@ export default function CustomizedMenus() {
   const handleSelectSistema = async (id: number) => {
     handleClose();
     if (id === sistemaId) return;
-    await cambiarSistema({ sistemaId: id });
+    const result = await cambiarSistema({ sistemaId: id });
+    if (!('error' in result)) {
+      navigate('/');
+    }
   };
 
   return (
