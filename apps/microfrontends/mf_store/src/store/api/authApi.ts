@@ -10,7 +10,7 @@ import type {
 	MfaSetupPendingResponse,
 	UsuarioConMenuResponse,
 } from "../../types/login";
-import { baseQueryRefresh } from "../api/baseApi";
+import { baseQueryWithReauth } from "../baseQueryWithReauth";
 import { loggedOut, mfaPendingSet, tokenReceived } from "../features/authSlice";
 import { menuReceived } from "../features/menuSlice";
 import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
@@ -28,7 +28,7 @@ export type Sistema = {
 };
 export const authApi = createApi({
 	reducerPath: "authApi", // Nombre único para este slice de API
-	baseQuery: baseQueryRefresh, // Usa directamente el baseQuery sin reauth
+	baseQuery: baseQueryWithReauth,
 	tagTypes: ["Auth"], // Tags para gestión de cache
 	endpoints: (builder) => ({
 		loginAreas: builder.mutation<Areas[], Omit<Login, "areaId" | "sistemaId">>({

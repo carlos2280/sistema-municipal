@@ -77,11 +77,7 @@ function App() {
 		};
 
 		initializeRouter();
-	// Nota: menu y sistemaId se omiten intencionalmente de las deps.
-	// El router se crea una vez al autenticarse. Los cambios de sistema
-	// solo actualizan el store (sidebar/botón) sin destruir el RouterProvider.
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isAuthenticated, isWaitingForAuthData, modulosActivos, tenantStatus]);
+	}, [isAuthenticated, isWaitingForAuthData, modulosActivos, tenantStatus, sistemaId, menu]);
 
 	// Resolución de tenant en progreso
 	if (tenantStatus === "loading") {
