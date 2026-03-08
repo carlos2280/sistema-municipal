@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   CircularProgress,
   Collapse,
@@ -8,12 +9,13 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { AlertCircle, ArrowRightLeft, CheckCircle, Hash, Type } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import {
   Controller,
   useFormContext,
   useWatch,
 } from 'react-hook-form';
+import { useLazyBuscarCuentasPorPrefijoQuery } from 'mf_store/store';
 
 import type {
   AccountFormData,
@@ -21,11 +23,19 @@ import type {
   CuentaExistente,
   PanelMode,
 } from './AccountPanel.types';
+import { getContraCuentaPrefijo } from './AccountPanel.types';
 import { formatCodigo } from '../../../utils/planDeCuentasUtils';
+
+interface ContraCuentaOption {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
 
 interface AccountFormFieldsProps {
   mode: PanelMode;
   showContraCuenta: boolean;
+  codigoPadre?: string;
   codigoStatus?: CodigoStatus;
   codigoExistente?: CuentaExistente | null;
 }
@@ -37,6 +47,7 @@ interface AccountFormFieldsProps {
 export const AccountFormFields = memo(function AccountFormFields({
   mode,
   showContraCuenta,
+  codigoPadre = '',
   codigoStatus = 'idle',
   codigoExistente = null,
 }: AccountFormFieldsProps) {
@@ -44,6 +55,23 @@ export const AccountFormFields = memo(function AccountFormFields({
 
   const valorPadre = useWatch({ control, name: 'valorPadre' });
   const tipoCuentaId = useWatch({ control, name: 'tipoCuentaId' });
+
+  // ── ContraCuenta Autocomplete state ──
+  const [buscarCuentas, { isFetching: buscandoCuentas }] = useLazyBuscarCuentasPorPrefijoQuery();
+  const [contraCuentaOptions, setContraCuentaOptions] = useState<ContraCuentaOption[]>([]);
+  const contraCuentaPrefijo = useMemo(() => getContraCuentaPrefijo(codigoPadre), [codigoPadre]);
+
+  // Cargar opciones cuando se muestra el campo de contraCuenta
+  useEffect(() => {
+    if (showContraCuenta && contraCuentaPrefijo) {
+      buscarCuentas(contraCuentaPrefijo)
+        .unwrap()
+        .then((data) => setContraCuentaOptions(data))
+        .catch(() => setContraCuentaOptions([]));
+    } else {
+      setContraCuentaOptions([]);
+    }
+  }, [showContraCuenta, contraCuentaPrefijo, buscarCuentas]);
 
   // Calcular dígitos permitidos según nivel
   const digitCount = getDigitCountByLevel(tipoCuentaId ?? 0);
@@ -192,32 +220,66 @@ export const AccountFormFields = memo(function AccountFormFields({
         />
       </Box>
 
-      {/* Campo Contracuenta (condicional) */}
+      {/* Campo Contracuenta (condicional con Autocomplete) */}
       <Collapse in={showContraCuenta} timeout={200}>
         <Box>
           <FieldLabel
             icon={<ArrowRightLeft size={14} />}
             label="Contracuenta Asociada"
-            hint="Requerida para cuentas de los grupos 115, 215"
+            hint={`Cuenta del Titulo ${contraCuentaPrefijo === '4' ? '4 (Ingresos)' : '5 (Gastos)'}`}
           />
           <Controller
             name="contraCuenta"
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <TextField
-                {...field}
-                value={field.value || ''}
-                placeholder="Código de la contracuenta"
+              <Autocomplete
+                options={contraCuentaOptions}
+                getOptionLabel={(opt) =>
+                  typeof opt === 'string' ? opt : `${formatCodigo(opt.codigo, 4)} - ${opt.nombre}`
+                }
+                value={
+                  contraCuentaOptions.find((o) => o.codigo === field.value) ?? null
+                }
+                onChange={(_e, newValue) => {
+                  field.onChange(newValue ? newValue.codigo : '');
+                }}
+                loading={buscandoCuentas}
+                noOptionsText="Sin cuentas disponibles"
+                loadingText="Buscando..."
                 size="small"
                 fullWidth
-                error={!!error}
-                helperText={error?.message}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: (theme) => alpha(theme.palette.warning.main, 0.02),
-                    borderColor: (theme) => alpha(theme.palette.warning.main, 0.2),
-                  },
-                }}
+                isOptionEqualToValue={(opt, val) => opt.codigo === val.codigo}
+                renderOption={(props, opt) => (
+                  <li {...props} key={opt.id}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline', width: '100%' }}>
+                      <Typography
+                        component="span"
+                        sx={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.8125rem', color: 'primary.main', flexShrink: 0 }}
+                      >
+                        {formatCodigo(opt.codigo, 4)}
+                      </Typography>
+                      <Typography
+                        component="span"
+                        sx={{ fontSize: '0.8125rem', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
+                        {opt.nombre}
+                      </Typography>
+                    </Box>
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Seleccione la contracuenta"
+                    error={!!error}
+                    helperText={error?.message}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: (theme) => alpha(theme.palette.warning.main, 0.02),
+                      },
+                    }}
+                  />
+                )}
               />
             )}
           />

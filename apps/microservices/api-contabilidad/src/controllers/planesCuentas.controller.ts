@@ -96,6 +96,21 @@ export const obtenerArbolCompleto: RequestHandler = async (req, res, next) => {
     }
 };
 
+export const buscarCuentasPorPrefijo: RequestHandler = async (req, res, next) => {
+    const { prefijo } = req.query;
+
+    if (!prefijo || typeof prefijo !== "string") {
+        return next(new AppError("Parametro prefijo es requerido", 400));
+    }
+
+    try {
+        const result = await pcService.buscarCuentasPorPrefijo(getDb(req), prefijo);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const verificarCodigoExiste: RequestHandler = async (req, res, next) => {
     const { anoContable, codigo } = req.query;
 

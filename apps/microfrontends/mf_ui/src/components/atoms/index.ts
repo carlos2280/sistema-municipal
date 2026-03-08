@@ -15,3 +15,5 @@ export { IconButton } from "./IconButton";
 export { Logo } from "./Logo";
 export { StatusDot } from "./StatusDot";
 export { Divider } from "./Divider";
+export { StatusChip } from "./StatusChip";
+export type { StatusChipProps } from "./StatusChip";

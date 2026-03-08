@@ -1,557 +1,381 @@
 /**
- * Dashboard Page - Sistema Municipal CrisCar
+ * DashboardPage — CIVITAS v3
  *
- * Página principal con estadísticas, gráficos y actividad reciente
+ * Layout:
+ * ┌──────────────────────────────────────────────────┐
+ * │ WelcomeCard (gradient jade→indigo)               │
+ * ├──────────┬──────────┬──────────┬────────────────┤
+ * │ KPI 1    │ KPI 2    │ KPI 3    │ KPI 4          │
+ * │ featured │          │          │                │
+ * ├────────────────────────┬─────────────────────────┤
+ * │ Tareas Pendientes      │ Actividad Reciente      │
+ * │ Ejecución Presupuest.  │ Indicadores Económicos  │
+ * └────────────────────────┴─────────────────────────┘
  */
 
+import { Box, Typography, keyframes, styled, useTheme } from "@mui/material";
 import {
-	Box,
-	Card,
-	CardContent,
-	Grid,
-	LinearProgress,
-	Stack,
-	Typography,
-	alpha,
-	styled,
-	useTheme,
-} from "@mui/material";
-import {
-	Activity,
-	Calendar,
-	ClipboardList,
-	DollarSign,
-	FileText,
-	Users,
-	Clock,
-	ArrowUpRight,
+  TrendingUp,
+  ArrowDownLeft,
+  ArrowUpRight,
+  FileText,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import {
-	PageHeader,
-	StatCard,
-	SkeletonPage,
-	Badge,
+  WelcomeCard,
+  KpiCard,
+  TaskCard,
+  StatusChip,
+  QuickStatsCard,
 } from "mf_ui/components";
-import { listContainer, listItem } from "mf_ui/motion";
-import { useTheme as useAppTheme } from "mf_ui/theme";
+import { ActivityFeed, BudgetChart } from "mf_ui/components";
+import { SkeletonPage } from "mf_ui/components";
 import { useAppSelector, selectNombreCompleto } from "mf_store/store";
+import type { ActivityItem as ActivityItemType } from "mf_ui/components";
+
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
 // ============================================================================
 // STYLED COMPONENTS
 // ============================================================================
-
-const WelcomeCard = styled(Card)(({ theme }) => ({
-	background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-	color: theme.palette.primary.contrastText,
-	borderRadius: 16,
-	overflow: "hidden",
-	position: "relative",
-	"&::before": {
-		content: '""',
-		position: "absolute",
-		top: 0,
-		right: 0,
-		width: "40%",
-		height: "100%",
-		background: `radial-gradient(circle at 70% 50%, ${alpha("#fff", 0.1)} 0%, transparent 60%)`,
-		pointerEvents: "none",
-	},
-	"&::after": {
-		content: '""',
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		height: 1,
-		background: `linear-gradient(90deg, transparent, ${alpha("#fff", 0.25)}, transparent)`,
-		pointerEvents: "none",
-	},
+const ContentInner = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3),
+  width: "100%",
+  [theme.breakpoints.up("xl")]: {
+    padding: theme.spacing(4),
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+  },
 }));
 
-const QuickActionCard = styled(Card)(({ theme }) => ({
-	borderRadius: 12,
-	border: `1px solid ${theme.palette.divider}`,
-	cursor: "pointer",
-	transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
-	"&:hover": {
-		boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
-		borderColor: alpha(theme.palette.primary.main, 0.3),
-		transform: "translateY(-2px)",
-	},
+const KpiGrid = styled(Box)(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",
+  gap: theme.spacing(2.5),
+  marginBottom: theme.spacing(3),
+  [theme.breakpoints.down("md")]: {
+    gridTemplateColumns: "repeat(2, 1fr)",
+  },
+  [theme.breakpoints.down("sm")]: {
+    gridTemplateColumns: "1fr 1fr",
+    gap: theme.spacing(1.5),
+  },
 }));
 
-const QuickActionIcon = styled(Box, {
-	shouldForwardProp: (prop) => prop !== "iconColor",
-})<{ iconColor: string }>(({ iconColor }) => ({
-	width: 44,
-	height: 44,
-	borderRadius: 12,
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	backgroundColor: alpha(iconColor, 0.12),
-	color: iconColor,
-	flexShrink: 0,
+const MainGrid = styled(Box)(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "1fr 360px",
+  gap: theme.spacing(3),
+  animation: `${fadeInUp} 0.5s ease 0.2s both`,
+  [theme.breakpoints.up("xl")]: {
+    gridTemplateColumns: "1fr 400px",
+  },
+  [theme.breakpoints.down("lg")]: {
+    gridTemplateColumns: "1fr",
+  },
 }));
 
-const ActivityItem = styled(Box)(({ theme }) => ({
-	display: "flex",
-	alignItems: "flex-start",
-	gap: theme.spacing(2),
-	padding: theme.spacing(1.5, 2),
-	borderRadius: 10,
-	transition: "background-color 0.15s ease",
-	"&:hover": {
-		backgroundColor: alpha(theme.palette.primary.main, 0.04),
-	},
+const SectionHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: theme.spacing(2),
 }));
 
-const ActivityDot = styled(Box, {
-	shouldForwardProp: (prop) => prop !== "status",
-})<{ status: "success" | "warning" | "error" | "info" }>(
-	({ theme, status }) => ({
-		width: 8,
-		height: 8,
-		borderRadius: "50%",
-		marginTop: 6,
-		flexShrink: 0,
-		backgroundColor:
-			status === "success"
-				? theme.palette.success.main
-				: status === "warning"
-					? theme.palette.warning.main
-					: status === "error"
-						? theme.palette.error.main
-						: theme.palette.info.main,
-	}),
-);
+const SectionTitle = styled(Typography)({
+  fontFamily: '"Plus Jakarta Sans", sans-serif',
+  fontWeight: 600,
+  fontSize: "1.125rem",
+  letterSpacing: "-0.02em",
+});
 
-const ProgressCard = styled(Card)(({ theme }) => ({
-	borderRadius: 12,
-	border: `1px solid ${theme.palette.divider}`,
-	padding: theme.spacing(2.5),
+const SectionAction = styled(Typography)(({ theme }) => ({
+  fontSize: "0.8125rem",
+  fontWeight: 500,
+  color: theme.palette.primary.main,
+  cursor: "pointer",
+  "&:hover": { opacity: 0.7 },
+}));
+
+const AsideColumn = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(3),
+  [theme.breakpoints.down("lg")]: {
+    flexDirection: "row",
+    "& > *": { flex: 1 },
+  },
+  [theme.breakpoints.down("md")]: {
+    flexDirection: "column",
+    "& > *": { flex: "none" },
+  },
+}));
+
+const TaskList = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1.5),
+  marginBottom: theme.spacing(4),
 }));
 
 // ============================================================================
 // MOCK DATA
 // ============================================================================
-
-const quickActions = [
-	{
-		icon: FileText,
-		label: "Nuevo Documento",
-		description: "Crear oficio o decreto",
-		paletteKey: "primary" as const,
-	},
-	{
-		icon: Users,
-		label: "Gestión Personal",
-		description: "Administrar funcionarios",
-		paletteKey: "secondary" as const,
-	},
-	{
-		icon: DollarSign,
-		label: "Presupuesto",
-		description: "Ver estado financiero",
-		paletteKey: "success" as const,
-	},
-	{
-		icon: Calendar,
-		label: "Agenda",
-		description: "Programar reuniones",
-		paletteKey: "warning" as const,
-	},
+const mockTasks = [
+  {
+    id: "1",
+    title: "Revisar decreto N-2024-0145",
+    module: "Contabilidad",
+    statusLabel: "Urgente",
+    statusVariant: "urgente" as const,
+    time: "María G. - hace 10 min",
+    due: "Vence hoy",
+    dueVariant: "urgent" as const,
+    dotColor: "error" as const,
+  },
+  {
+    id: "2",
+    title: "Aprobar liquidación de remuneraciones - Marzo 2026",
+    module: "Remuneraciones",
+    statusLabel: "Pendiente",
+    statusVariant: "pendiente" as const,
+    time: "Ana M. - hace 1 hora",
+    due: "Vence mañana",
+    dueVariant: "today" as const,
+    dotColor: "warning" as const,
+  },
+  {
+    id: "3",
+    title: "Verificar conciliación bancaria febrero",
+    module: "Contabilidad",
+    statusLabel: "En revisión",
+    statusVariant: "en-revision" as const,
+    time: "Sistema - hace 3 horas",
+    dotColor: "info" as const,
+  },
 ];
 
-const recentActivity = [
-	{
-		id: 1,
-		user: "María González",
-		action: "aprobó el decreto",
-		target: "N°2024-0145",
-		time: "Hace 5 min",
-		status: "success" as const,
-	},
-	{
-		id: 2,
-		user: "Carlos Pérez",
-		action: "subió documento a",
-		target: "Licitaciones",
-		time: "Hace 15 min",
-		status: "info" as const,
-	},
-	{
-		id: 3,
-		user: "Sistema",
-		action: "alerta de vencimiento",
-		target: "Contrato #789",
-		time: "Hace 1 hora",
-		status: "warning" as const,
-	},
-	{
-		id: 4,
-		user: "Ana Martínez",
-		action: "completó solicitud",
-		target: "Permiso de edificación",
-		time: "Hace 2 horas",
-		status: "success" as const,
-	},
+const mockActivities: ActivityItemType[] = [
+  {
+    id: "1",
+    user: "María González",
+    action: "aprobó el decreto",
+    target: "N-2024-0145",
+    time: "Hace 10 min",
+    dotColor: "success",
+  },
+  {
+    id: "2",
+    user: "Carlos Pérez",
+    action: "subió documento a",
+    target: "Licitaciones",
+    time: "Hace 1 hora",
+    dotColor: "info",
+  },
+  {
+    id: "3",
+    user: "Sistema",
+    action: "alerta de vencimiento",
+    target: "Contrato #789",
+    time: "Hace 3 horas",
+    dotColor: "warning",
+  },
+  {
+    id: "4",
+    user: "Ana Martínez",
+    action: "completó solicitud",
+    target: "Permiso edificación",
+    time: "Hace 5 horas",
+    dotColor: "success",
+  },
+  {
+    id: "5",
+    user: "Sistema",
+    action: "respaldo automático",
+    target: "completado",
+    time: "Hace 6 horas",
+    dotColor: "info",
+  },
 ];
 
-const progressItems = [
-	{
-		label: "Documentos procesados",
-		value: 78,
-		total: 100,
-		paletteKey: "primary" as const,
-	},
-	{ label: "Solicitudes atendidas", value: 45, total: 60, paletteKey: "secondary" as const },
-	{ label: "Presupuesto ejecutado", value: 65, total: 100, paletteKey: "success" as const },
+const mockChartData = [
+  { label: "Ene", budget: 85, executed: 78 },
+  { label: "Feb", budget: 90, executed: 72 },
+  { label: "Mar", budget: 100, executed: 68 },
+  { label: "Abr", budget: 75, executed: 55 },
+  { label: "May", budget: 80, executed: 62 },
+  { label: "Jun", budget: 95, executed: 45 },
+];
+
+const mockQuickStats = [
+  { label: "UF", value: "$38.726,05" },
+  { label: "UTM", value: "$67.294" },
+  { label: "Dólar", value: "$923,50" },
+  { label: "Euro", value: "$1.012,30" },
 ];
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
-
 export default function DashboardPage() {
-	const muiTheme = useTheme();
-	const { isDarkMode } = useAppTheme();
-	const [loading, setLoading] = useState(true);
-	const [currentTime, setCurrentTime] = useState(new Date());
+  const theme = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-	// Nombre real del usuario autenticado
-	const nombreCompleto = useAppSelector(selectNombreCompleto);
-	const displayName = nombreCompleto
-		? nombreCompleto.split(" ").slice(0, 2).join(" ")
-		: "Usuario";
+  const nombreCompleto = useAppSelector(selectNombreCompleto);
+  const displayName = nombreCompleto
+    ? nombreCompleto.split(" ")[0]
+    : "Usuario";
 
-	// Simular carga de datos
-	useEffect(() => {
-		const timer = setTimeout(() => setLoading(false), 1200);
-		return () => clearTimeout(timer);
-	}, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
-	// Actualizar hora cada minuto
-	useEffect(() => {
-		const interval = setInterval(() => setCurrentTime(new Date()), 60000);
-		return () => clearInterval(interval);
-	}, []);
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
 
-	const greeting = () => {
-		const hour = currentTime.getHours();
-		if (hour < 12) return "Buenos días";
-		if (hour < 18) return "Buenas tardes";
-		return "Buenas noches";
-	};
+  const greeting = useMemo(() => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Buenos días";
+    if (hour < 18) return "Buenas tardes";
+    return "Buenas noches";
+  }, [currentTime]);
 
-	if (loading) {
-		return <SkeletonPage variant="dashboard" />;
-	}
+  const timeStr = currentTime.toLocaleTimeString("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-	return (
-		<Box>
-			{/* Welcome Card */}
-			<WelcomeCard sx={{ mb: 4 }}>
-				<CardContent sx={{ p: { xs: 3, md: 4 } }}>
-					<Grid container spacing={3} alignItems="center">
-						<Grid size={{ xs: 12, md: 8 }}>
-							<Typography
-								variant="h4"
-								fontWeight={700}
-								sx={{ mb: 1, textWrap: "balance" }}
-							>
-								{greeting()}, {displayName}
-							</Typography>
-							<Typography
-								variant="body1"
-								sx={{ opacity: 0.9, maxWidth: 500, mb: 2 }}
-							>
-								Tienes 5 tareas pendientes y 3 documentos por revisar. El
-								sistema ha procesado 156 transacciones hoy.
-							</Typography>
-							<Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-								<Badge color="success" size="small">
-									Sistema operativo
-								</Badge>
-								<Badge color="info" size="small">
-									Última sincronización:{"\u00A0"}
-									{currentTime.toLocaleTimeString("es-CL", {
-										hour: "2-digit",
-										minute: "2-digit",
-									})}
-								</Badge>
-							</Stack>
-						</Grid>
-						<Grid
-							size={{ xs: 12, md: 4 }}
-							sx={{
-								display: "flex",
-								justifyContent: { xs: "flex-start", md: "flex-end" },
-							}}
-						>
-							<Stack alignItems={{ xs: "flex-start", md: "flex-end" }}>
-								<Typography
-									variant="h3"
-									fontWeight={700}
-									sx={{
-										lineHeight: 1,
-										fontVariantNumeric: "tabular-nums",
-									}}
-								>
-									{currentTime.toLocaleTimeString("es-CL", {
-										hour: "2-digit",
-										minute: "2-digit",
-									})}
-								</Typography>
-								<Typography variant="body2" sx={{ opacity: 0.8, textTransform: "capitalize" }}>
-									{currentTime.toLocaleDateString("es-CL", {
-										weekday: "long",
-										day: "numeric",
-										month: "long",
-									})}
-								</Typography>
-							</Stack>
-						</Grid>
-					</Grid>
-				</CardContent>
-			</WelcomeCard>
+  const dateStr = currentTime.toLocaleDateString("es-CL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
-			{/* Stats Grid — stagger animado */}
-			<motion.div
-				variants={listContainer}
-				initial="hidden"
-				animate="show"
-				style={{ marginBottom: muiTheme.spacing(4) }}
-			>
-				<Grid container spacing={3}>
-					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-						<motion.div variants={listItem} style={{ height: "100%" }}>
-							<StatCard
-								label="Documentos Hoy"
-								value="156"
-								icon={<FileText strokeWidth={1.5} />}
-								trend="up"
-								trendValue="+12%"
-								trendLabel="vs. ayer"
-								color="primary"
-							/>
-						</motion.div>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-						<motion.div variants={listItem} style={{ height: "100%" }}>
-							<StatCard
-								label="Solicitudes Pendientes"
-								value="23"
-								icon={<ClipboardList strokeWidth={1.5} />}
-								trend="down"
-								trendValue="-5%"
-								trendLabel="esta semana"
-								color="secondary"
-							/>
-						</motion.div>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-						<motion.div variants={listItem} style={{ height: "100%" }}>
-							<StatCard
-								label="Ingresos del Mes"
-								value="$12.4M"
-								icon={<DollarSign strokeWidth={1.5} />}
-								trend="up"
-								trendValue="+8.5%"
-								trendLabel="vs. mes anterior"
-								color="success"
-							/>
-						</motion.div>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-						<motion.div variants={listItem} style={{ height: "100%" }}>
-							<StatCard
-								label="Usuarios Activos"
-								value="48"
-								icon={<Users strokeWidth={1.5} />}
-								trend="neutral"
-								trendValue="0%"
-								trendLabel="sin cambios"
-								color="info"
-							/>
-						</motion.div>
-					</Grid>
-				</Grid>
-			</motion.div>
+  if (loading) {
+    return <SkeletonPage variant="dashboard" />;
+  }
 
-			{/* Main Content Grid */}
-			<Grid container spacing={3}>
-				{/* Quick Actions */}
-				<Grid size={{ xs: 12, lg: 8 }}>
-					<Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-						Acciones Rápidas
-					</Typography>
-					<Grid container spacing={2}>
-						{quickActions.map((action) => {
-						const actionColor = muiTheme.palette[action.paletteKey].main;
-						return (
-							<Grid key={action.label} size={{ xs: 12, sm: 6 }}>
-								<QuickActionCard elevation={0}>
-									<CardContent sx={{ p: 2.5 }}>
-										<Stack direction="row" spacing={2} alignItems="center">
-											<QuickActionIcon iconColor={actionColor}>
-												<action.icon size={22} strokeWidth={1.5} />
-											</QuickActionIcon>
-											<Box sx={{ flex: 1, minWidth: 0 }}>
-												<Typography variant="subtitle2" fontWeight={600} noWrap>
-													{action.label}
-												</Typography>
-												<Typography variant="caption" color="text.secondary" noWrap>
-													{action.description}
-												</Typography>
-											</Box>
-											<ArrowUpRight
-												size={18}
-												strokeWidth={1.5}
-												style={{ opacity: 0.35, flexShrink: 0 }}
-											/>
-										</Stack>
-									</CardContent>
-								</QuickActionCard>
-							</Grid>
-						);
-					})}
-					</Grid>
+  return (
+    <ContentInner>
+      {/* Welcome Card */}
+      <Box sx={{ mb: 3 }}>
+        <WelcomeCard
+          greeting={`${greeting}, ${displayName}`}
+          message="Tienes 5 tareas pendientes y 3 documentos por revisar. El sistema ha procesado 156 transacciones hoy."
+          badges={[
+            { label: "Sistema operativo", dot: true },
+            { label: `Sync: ${timeStr}` },
+          ]}
+          time={timeStr}
+          date={dateStr}
+        />
+      </Box>
 
-					{/* Progress Section */}
-					<Typography variant="h6" fontWeight={600} sx={{ mt: 4, mb: 2 }}>
-						Progreso del Mes
-					</Typography>
-					<Grid container spacing={2}>
-						{progressItems.map((item) => {
-						const itemColor = muiTheme.palette[item.paletteKey].main;
-						return (
-							<Grid key={item.label} size={{ xs: 12, sm: 4 }}>
-								<ProgressCard elevation={0}>
-									<Stack spacing={1.5}>
-										<Stack
-											direction="row"
-											justifyContent="space-between"
-											alignItems="center"
-										>
-											<Typography variant="body2" fontWeight={500}>
-												{item.label}
-											</Typography>
-											<Typography
-												variant="body2"
-												fontWeight={700}
-												sx={{
-													color: itemColor,
-													fontVariantNumeric: "tabular-nums",
-												}}
-											>
-												{item.value}%
-											</Typography>
-										</Stack>
-										<LinearProgress
-											variant="determinate"
-											value={item.value}
-											sx={{
-												height: 6,
-												borderRadius: 3,
-												bgcolor: alpha(itemColor, 0.12),
-												"& .MuiLinearProgress-bar": {
-													bgcolor: itemColor,
-													borderRadius: 3,
-												},
-											}}
-										/>
-										<Typography variant="caption" color="text.secondary">
-											{item.value} de {item.total} completado
-										</Typography>
-									</Stack>
-								</ProgressCard>
-							</Grid>
-						);
-					})}
-					</Grid>
-				</Grid>
+      {/* KPI Grid */}
+      <KpiGrid>
+        <KpiCard
+          label="Presupuesto Ejecutado"
+          value="$2.847M"
+          icon={<TrendingUp size={20} />}
+          iconColor="jade"
+          trend={{ value: "+12.4%", direction: "up" }}
+          trendLabel="vs mes anterior"
+          progress={{ value: 73, label: "del total asignado" }}
+          featured
+          animationDelay="0.04s"
+        />
+        <KpiCard
+          label="Ingresos del Mes"
+          value="$1.200M"
+          icon={<ArrowDownLeft size={20} />}
+          iconColor="green"
+          trend={{ value: "+8.5%", direction: "up" }}
+          trendLabel="vs mes anterior"
+          animationDelay="0.08s"
+        />
+        <KpiCard
+          label="Egresos del Mes"
+          value="$890K"
+          icon={<ArrowUpRight size={20} />}
+          iconColor="red"
+          trend={{ value: "-5.2%", direction: "down" }}
+          trendLabel="vs mes anterior"
+          animationDelay="0.12s"
+        />
+        <KpiCard
+          label="Documentos Hoy"
+          value="156"
+          icon={<FileText size={20} />}
+          iconColor="blue"
+          trend={{ value: "+8", direction: "up" }}
+          trendLabel="vs ayer"
+          animationDelay="0.16s"
+        />
+      </KpiGrid>
 
-				{/* Activity Feed */}
-				<Grid size={{ xs: 12, lg: 4 }}>
-					<Card
-						elevation={0}
-						sx={{
-							borderRadius: 3,
-							border: 1,
-							borderColor: "divider",
-							height: "100%",
-						}}
-					>
-						<CardContent sx={{ p: 0 }}>
-							<Stack
-								direction="row"
-								justifyContent="space-between"
-								alignItems="center"
-								sx={{ p: 2.5, pb: 2 }}
-							>
-								<Typography variant="h6" fontWeight={600}>
-									Actividad Reciente
-								</Typography>
-								<Activity size={20} strokeWidth={1.5} style={{ opacity: 0.5 }} />
-							</Stack>
+      {/* Main Grid: Content + Aside */}
+      <MainGrid>
+        {/* Left Column */}
+        <Box>
+          {/* Tareas Pendientes */}
+          <SectionHeader>
+            <SectionTitle>Tareas Pendientes</SectionTitle>
+            <SectionAction>Ver todas</SectionAction>
+          </SectionHeader>
 
-							<Box sx={{ px: 1 }}>
-								{recentActivity.map((activity) => (
-									<ActivityItem key={activity.id}>
-										<ActivityDot status={activity.status} />
-										<Box sx={{ flex: 1, minWidth: 0 }}>
-											<Typography variant="body2" sx={{ mb: 0.5 }}>
-												<Box component="span" sx={{ fontWeight: 600 }}>
-													{activity.user}
-												</Box>{" "}
-												{activity.action}{" "}
-												<Box
-													component="span"
-													sx={{ color: "primary.main", fontWeight: 500 }}
-												>
-													{activity.target}
-												</Box>
-											</Typography>
-											<Stack
-												direction="row"
-												alignItems="center"
-												spacing={0.5}
-											>
-												<Clock
-													size={12}
-													strokeWidth={1.5}
-													style={{ opacity: 0.5 }}
-												/>
-												<Typography variant="caption" color="text.secondary">
-													{activity.time}
-												</Typography>
-											</Stack>
-										</Box>
-									</ActivityItem>
-								))}
-							</Box>
+          <TaskList>
+            {mockTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                title={task.title}
+                module={task.module}
+                status={
+                  <StatusChip
+                    variant={task.statusVariant}
+                    label={task.statusLabel}
+                  />
+                }
+                time={task.time}
+                due={task.due}
+                dueVariant={task.dueVariant}
+                dotColor={task.dotColor}
+              />
+            ))}
+          </TaskList>
 
-							<Box sx={{ p: 2, pt: 1 }}>
-								<Typography
-									variant="body2"
-									color="primary.main"
-									sx={{
-										fontWeight: 500,
-										cursor: "pointer",
-										textAlign: "center",
-										"&:hover": { textDecoration: "underline" },
-									}}
-								>
-									Ver toda la actividad
-								</Typography>
-							</Box>
-						</CardContent>
-					</Card>
-				</Grid>
-			</Grid>
-		</Box>
-	);
+          {/* Ejecución Presupuestaria */}
+          <BudgetChart
+            title="Ejecución Presupuestaria 2026"
+            subtitle="Presupuestado vs Ejecutado por mes"
+            data={mockChartData}
+            summary={{
+              budgeted: "$15.200M",
+              executed: "$11.100M",
+              percentage: "73%",
+            }}
+          />
+        </Box>
+
+        {/* Aside Column */}
+        <AsideColumn>
+          <ActivityFeed items={mockActivities} />
+          <QuickStatsCard
+            title="Indicadores Económicos"
+            items={mockQuickStats}
+          />
+        </AsideColumn>
+      </MainGrid>
+    </ContentInner>
+  );
 }

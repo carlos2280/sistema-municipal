@@ -1,5 +1,5 @@
 // =============================================================================
-// COMPONENTS - Sistema Municipal CrisCar
+// COMPONENTS — CIVITAS v3
 // =============================================================================
 
 // Componentes existentes
@@ -10,7 +10,7 @@ export { StyledCard } from "./StyledCard";
 export { ThemeCustomizer, ThemeCustomizerButton } from "./ThemeCustomizer";
 
 // =============================================================================
-// ATOMIC DESIGN - Átomos
+// ATOMIC DESIGN — Átomos
 // =============================================================================
 export {
   LoadingSpinner,
@@ -25,10 +25,12 @@ export {
   Logo,
   StatusDot,
   Divider,
+  StatusChip,
 } from "./atoms";
+export type { StatusChipProps } from "./atoms";
 
 // =============================================================================
-// ATOMIC DESIGN - Moléculas
+// ATOMIC DESIGN — Moléculas
 // =============================================================================
 export {
   AppLoader,
@@ -37,13 +39,32 @@ export {
   StatCard,
   SearchInput,
   UserAvatar,
+  WelcomeCard,
+  KpiCard,
+  TaskCard,
+  QuickStatsCard,
+} from "./molecules";
+export type {
+  WelcomeCardProps,
+  KpiCardProps,
+  TaskCardProps,
+  QuickStatsCardProps,
+  QuickStatItem,
 } from "./molecules";
 
 // =============================================================================
-// ATOMIC DESIGN - Organismos
+// ATOMIC DESIGN — Organismos
 // =============================================================================
-export { DataTable } from "./organisms";
-export type { Column, PaginationConfig, DataTableProps } from "./organisms";
+export { DataTable, BudgetChart, ActivityFeed } from "./organisms";
+export type {
+  Column,
+  PaginationConfig,
+  DataTableProps,
+  BudgetChartProps,
+  ChartBarData,
+  ActivityFeedProps,
+  ActivityItem,
+} from "./organisms";
 
 // =============================================================================
 // FORMULARIOS

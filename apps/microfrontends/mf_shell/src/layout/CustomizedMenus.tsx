@@ -92,7 +92,38 @@ const SistemaButton = styled(Button)(({ theme }) => ({
 // COMPONENT
 // ============================================================================
 
-export default function CustomizedMenus() {
+// Botón estilo sidebar (dentro del drawer)
+const SidebarSystemBtn = styled(Button)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
+  fontFamily: '"Inter", sans-serif',
+  fontSize: "0.875rem",
+  fontWeight: 600,
+  textTransform: "none",
+  justifyContent: "flex-start",
+  transition: "background-color 100ms ease, border-color 100ms ease",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+    borderColor: alpha(theme.palette.primary.main, 0.3),
+  },
+  "& .MuiButton-endIcon": {
+    marginLeft: "auto",
+    color: theme.palette.text.disabled,
+  },
+}));
+
+interface CustomizedMenusProps {
+  variant?: "appbar" | "sidebar";
+}
+
+export default function CustomizedMenus({ variant = "appbar" }: CustomizedMenusProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
@@ -116,9 +147,11 @@ export default function CustomizedMenus() {
     }
   };
 
+  const TriggerButton = variant === "sidebar" ? SidebarSystemBtn : SistemaButton;
+
   return (
     <>
-      <SistemaButton
+      <TriggerButton
         id="sistemas-button"
         aria-controls={open ? "sistemas-menu" : undefined}
         aria-haspopup="true"
@@ -126,55 +159,55 @@ export default function CustomizedMenus() {
         onClick={handleClick}
         disabled={isLoading}
         startIcon={
-          <Box
-            sx={{
-              color: "primary.main",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <LayoutGrid size={16} strokeWidth={1.5} />
-          </Box>
+          variant === "sidebar" ? (
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                bgcolor: "success.main",
+                boxShadow: "0 0 0 2px rgba(5,150,105,0.2)",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <Box
+              sx={{
+                color: "primary.main",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <LayoutGrid size={16} strokeWidth={1.5} />
+            </Box>
+          )
         }
         endIcon={
           isLoading ? (
             <CircularProgress size={14} />
           ) : (
-            <ChevronDown size={16} strokeWidth={1.5} />
+            <ChevronDown size={variant === "sidebar" ? 14 : 16} strokeWidth={1.5} style={variant === "sidebar" ? { opacity: 0.5 } : undefined} />
           )
         }
       >
-        {/* Nombre del sistema con animación de cambio */}
-        <Box
-          sx={{
-            position: "relative",
-            overflow: "hidden",
-            height: "1.4em",
-            minWidth: 120,
-            maxWidth: 180,
-          }}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={sistemaId ?? "default"}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              style={{
-                position: "absolute",
-                left: 0,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "100%",
-              }}
-            >
-              {sistemaActual?.nombre ?? "Seleccionar sistema"}
-            </motion.span>
-          </AnimatePresence>
-        </Box>
-      </SistemaButton>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={sistemaId ?? "default"}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              ...(variant === "appbar" ? { position: "absolute", left: 0, maxWidth: "100%" } : {}),
+            }}
+          >
+            {sistemaActual?.nombre ?? "Seleccionar sistema"}
+          </motion.span>
+        </AnimatePresence>
+      </TriggerButton>
 
       <StyledMenu
         id="sistemas-menu"

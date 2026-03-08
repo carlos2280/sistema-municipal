@@ -1,6 +1,6 @@
 import type { DbClient } from "@/db/client";
 import { type NewPlanesCuentas, planesCuentas } from "@/db/schemas";
-import { and, eq } from "drizzle-orm";
+import { and, eq, like } from "drizzle-orm";
 import * as csService from "./cuentasSubgrupos.service";
 
 export const crearPlanesCuenta = async (db: DbClient, data: NewPlanesCuentas) => {
@@ -27,6 +27,7 @@ export const actualizarPlanesCuenta = async (
     anoContable: number;
     codigo: string;
     nombre: string;
+    contraCuenta: string;
     subgrupoId: number;
     parentId?: number;
     codigoIni?: string;
@@ -110,6 +111,28 @@ export const obtenerArbolCompleto = async (db: DbClient) => {
   }
 
   return subgrTree;
+};
+
+/**
+ * Busca cuentas cuyo codigo empieza con el prefijo dado (para selector de contraCuenta).
+ * Retorna subgrupos cuyos codigos coinciden con el prefijo.
+ */
+export const buscarCuentasPorPrefijo = async (
+  db: DbClient,
+  prefijo: string,
+): Promise<{ id: number; codigo: string; nombre: string }[]> => {
+  const rows = await db
+    .select({
+      id: planesCuentas.id,
+      codigo: planesCuentas.codigo,
+      nombre: planesCuentas.nombre,
+    })
+    .from(planesCuentas)
+    .where(like(planesCuentas.codigo, `${prefijo}%`))
+    .orderBy(planesCuentas.codigo)
+    .limit(50);
+
+  return rows;
 };
 
 /**

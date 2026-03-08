@@ -74,7 +74,8 @@ export const shadows = {
 // TYPOGRAPHY SCALE
 // ============================================================================
 export const fontFamily = {
-  sans: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  display: '"Plus Jakarta Sans", "Inter", sans-serif',
+  sans: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   mono: '"JetBrains Mono", "Fira Code", "SF Mono", Monaco, "Cascadia Code", monospace',
 } as const;
 
@@ -170,6 +171,50 @@ export const breakpoints = {
 } as const;
 
 // ============================================================================
+// COLOR PALETTE — CIVITAS v3
+// ============================================================================
+export const palette = {
+  jade: {
+    50: "#f0fdf9",
+    100: "#ccfbf1",
+    200: "#99f6e4",
+    300: "#5eead4",
+    400: "#2dd4bf",
+    500: "#14b8a6",
+    600: "#0d6b5e",
+    700: "#0a5249",
+    800: "#073b35",
+    900: "#052e2a",
+  },
+  indigo: {
+    400: "#4f46c9",
+    500: "#3730a3",
+    600: "#2b2890",
+    700: "#1e1b6b",
+  },
+  gold: {
+    400: "#d97706",
+    500: "#b45309",
+    600: "#92400e",
+  },
+} as const;
+
+export const semanticColors = {
+  success: "#059669",
+  successLight: "#10b981",
+  error: "#dc2626",
+  errorLight: "#ef4444",
+  warning: "#d97706",
+  warningLight: "#f59e0b",
+  info: "#2563eb",
+  infoLight: "#3b82f6",
+  ingreso: "#059669",
+  egreso: "#dc2626",
+  presupuestado: "#3730a3",
+  ejecutado: "#0d6b5e",
+} as const;
+
+// ============================================================================
 // PRESET COLOR PALETTES (Temas predefinidos)
 // ============================================================================
 export interface ColorPreset {
@@ -182,11 +227,11 @@ export interface ColorPreset {
 
 export const colorPresets: ColorPreset[] = [
   {
-    name: "criscar",
-    label: "CrisCar (Predeterminado)",
-    primary: "#7928ca",
-    secondary: "#0891b2",
-    accent: "#f59e0b",
+    name: "civitas",
+    label: "CIVITAS (Predeterminado)",
+    primary: "#0d6b5e",
+    secondary: "#3730a3",
+    accent: "#d97706",
   },
   {
     name: "ocean",
@@ -309,6 +354,8 @@ export default {
   transitions,
   zIndex,
   breakpoints,
+  palette,
+  semanticColors,
   colorPresets,
   generateColorVariants,
   createTransition,

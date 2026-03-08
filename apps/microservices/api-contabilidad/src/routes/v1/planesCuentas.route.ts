@@ -19,6 +19,9 @@ router.get("/arbol-completo", extractUser, controller.obtenerArbolCompleto);
 // Verificar si un código de cuenta existe
 router.get("/verificar-codigo", controller.verificarCodigoExiste);
 
+// Buscar cuentas por prefijo (para selector de contraCuenta)
+router.get("/buscar-por-prefijo", controller.buscarCuentasPorPrefijo);
+
 // Operaciones CRUD por ID de cuenta de plan
 router.get("/:id", controller.obtenerPlanesCuentaPorId);
 router.patch("/:id", controller.actualizarPlanesCuenta);

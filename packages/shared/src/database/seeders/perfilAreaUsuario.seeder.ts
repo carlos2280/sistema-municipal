@@ -1,4 +1,4 @@
-import { areas, perfilAreaUsuario } from "../";
+import { perfilAreaUsuario } from "../";
 import type { DbExecutor } from "../../types/db";
 
 export async function seedPerfilAreaUsuario(db: DbExecutor) {
@@ -10,7 +10,7 @@ export async function seedPerfilAreaUsuario(db: DbExecutor) {
 
     try {
         console.log("🌱 Insertando areas...");
-        await db.insert(perfilAreaUsuario).values(datos);
+        await db.insert(perfilAreaUsuario).values(datos).onConflictDoNothing();
         console.log("✅ seedPerfilAreaUsuario insertados correctamente");
     } catch (error) {
         console.error("❌ Error insertando seedPerfilAreaUsuario:", error);

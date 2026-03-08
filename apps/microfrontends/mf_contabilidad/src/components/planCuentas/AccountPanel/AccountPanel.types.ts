@@ -55,3 +55,20 @@ export const requiresContraCuenta = (codigo: string): boolean => {
 
   return false;
 };
+
+/**
+ * Retorna el prefijo del titulo opuesto para filtrar cuentas de contraCuenta.
+ * - 115-xx (Deudores Presupuestarios) -> Titulo 4 (Ingresos)
+ * - 215-xx (Acreedores Presupuestarios) -> Titulo 5 (Gastos)
+ * - 11405 (Anticipos a Proveedores) -> Titulo 5 (Gastos)
+ */
+export const getContraCuentaPrefijo = (codigo: string): string => {
+  if (!codigo) return '';
+  const cleanCode = codigo.replace(/-/g, '');
+
+  if (cleanCode.startsWith('115')) return '4';
+  if (cleanCode.startsWith('215')) return '5';
+  if (cleanCode.startsWith('11405')) return '5';
+
+  return '';
+};

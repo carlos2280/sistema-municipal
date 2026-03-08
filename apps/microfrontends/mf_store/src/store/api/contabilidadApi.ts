@@ -5,6 +5,7 @@ interface DataPlanCuenta {
 	anoContable?: number;
 	codigo: string;
 	nombre: string;
+	contraCuenta?: string;
 	tipoCuentaId: number;
 	subgrupoId?: number;
 	parentId?: number;
@@ -35,11 +36,17 @@ interface ApiNodo {
 interface CrearPlanesCuentaRequest {
 	anoContable: number;
 	codigo: string;
-	Contracuenta: string;
+	contraCuenta: string;
 	nombre: string;
 	tipoCuentaId: number;
 	subgrupoId?: number | null;
 	parentId?: number | null;
+}
+
+interface CuentaResumen {
+	id: number;
+	codigo: string;
+	nombre: string;
 }
 
 interface VerificarCodigoRequest {
@@ -85,6 +92,12 @@ export const contabilidadApi = baseApi.injectEndpoints({
 				`contabilidad/plan-cuentas/verificar-codigo?anoContable=${anoContable}&codigo=${codigo}`,
 			providesTags: ["PlanCuentas"],
 		}),
+		// Buscar cuentas por prefijo (para selector de contraCuenta)
+		buscarCuentasPorPrefijo: builder.query<CuentaResumen[], string>({
+			query: (prefijo) =>
+				`contabilidad/plan-cuentas/buscar-por-prefijo?prefijo=${prefijo}`,
+			providesTags: ["PlanCuentas"],
+		}),
 	}),
 	overrideExisting: false,
 });
@@ -95,7 +108,8 @@ export const {
 	useObtenerArbolCompletoQuery,
 	useCrearPlanesCuentaMutation,
 	useLazyVerificarCodigoExisteQuery,
+	useLazyBuscarCuentasPorPrefijoQuery,
 } = contabilidadApi;
 
 // Exportar tipos para uso externo
-export type { VerificarCodigoResponse };
+export type { VerificarCodigoResponse, CuentaResumen };

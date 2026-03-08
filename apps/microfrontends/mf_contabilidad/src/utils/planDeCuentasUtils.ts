@@ -6,6 +6,7 @@ export interface DataPlanCuenta {
   anoContable?: number;
   codigo: string;
   nombre: string;
+  contraCuenta?: string;
   tipoCuentaId: number;
   subgrupoId?: number;
   parentId?: number;

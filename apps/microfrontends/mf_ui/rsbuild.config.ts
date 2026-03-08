@@ -24,6 +24,7 @@ export default defineConfig(() => {
           './components': './src/components/index.ts',
           './atoms': './src/components/atoms/index.ts',
           './molecules': './src/components/molecules/index.ts',
+          './organisms': './src/components/organisms/index.ts',
           './motion': './src/motion/index.ts',
         },
         shared: {

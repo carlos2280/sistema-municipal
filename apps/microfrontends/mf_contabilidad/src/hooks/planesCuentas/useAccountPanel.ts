@@ -214,7 +214,7 @@ export function useAccountPanel(): UseAccountPanelReturn {
           valorPadre: item.data.codigo,
           nombre: item.data.nombre,
           codigo: codigo.split('-').pop() || '',
-          contraCuenta: '', // TODO: cargar desde API si existe
+          contraCuenta: item.data.contraCuenta || '',
         },
         { keepErrors: false, keepDirty: false },
       );

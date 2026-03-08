@@ -73,8 +73,8 @@ export function createCustomTheme(config: CustomThemeConfig): Theme {
           paper: "#ffffff",
         }
       : {
-          default: "#0f172a",
-          paper: "#1e293b",
+          default: "#0d1117",
+          paper: "#161b22",
         },
     text: isLight
       ? {
@@ -83,11 +83,11 @@ export function createCustomTheme(config: CustomThemeConfig): Theme {
           disabled: "#94a3b8",
         }
       : {
-          primary: "#f1f5f9",
-          secondary: "#94a3b8",
-          disabled: "#64748b",
+          primary: "#e6edf3",
+          secondary: "#8b949e",
+          disabled: "#484f58",
         },
-    divider: isLight ? "#e2e8f0" : "#334155",
+    divider: isLight ? "#e2e8f0" : "#21262d",
     action: isLight
       ? {
           active: alpha(primaryColor, 0.54),
@@ -122,9 +122,9 @@ export function createCustomTheme(config: CustomThemeConfig): Theme {
       contrastText: "#ffffff",
     },
     info: {
-      main: "#0284c7",
-      light: "#0ea5e9",
-      dark: "#0369a1",
+      main: "#2563eb",
+      light: "#3b82f6",
+      dark: "#1d4ed8",
       contrastText: "#ffffff",
     },
   };
@@ -138,33 +138,41 @@ export function createCustomTheme(config: CustomThemeConfig): Theme {
       fontFamily: fontFamily.sans,
       fontSize: 14 * scale,
       h1: {
+        fontFamily: fontFamily.display,
         fontSize: `${2 * scale}rem`,
         fontWeight: 700,
         lineHeight: 1.2,
-        letterSpacing: "-0.02em",
+        letterSpacing: "-0.03em",
       },
       h2: {
-        fontSize: `${1.5 * scale}rem`,
-        fontWeight: 600,
+        fontFamily: fontFamily.display,
+        fontSize: `${1.625 * scale}rem`,
+        fontWeight: 700,
         lineHeight: 1.3,
-        letterSpacing: "-0.01em",
+        letterSpacing: "-0.03em",
       },
       h3: {
+        fontFamily: fontFamily.display,
         fontSize: `${1.25 * scale}rem`,
         fontWeight: 600,
         lineHeight: 1.4,
+        letterSpacing: "-0.02em",
       },
       h4: {
+        fontFamily: fontFamily.display,
         fontSize: `${1.125 * scale}rem`,
         fontWeight: 600,
         lineHeight: 1.4,
+        letterSpacing: "-0.01em",
       },
       h5: {
+        fontFamily: fontFamily.display,
         fontSize: `${1 * scale}rem`,
         fontWeight: 600,
         lineHeight: 1.5,
       },
       h6: {
+        fontFamily: fontFamily.display,
         fontSize: `${0.9375 * scale}rem`,
         fontWeight: 600,
         lineHeight: 1.5,
@@ -254,14 +262,18 @@ export function createCustomTheme(config: CustomThemeConfig): Theme {
             height: "8px",
           },
           "::-webkit-scrollbar-track": {
-            background: isLight ? "#f1f5f9" : "#1e293b",
+            background: isLight ? "#f1f5f9" : "#161b22",
             borderRadius: "4px",
           },
           "::-webkit-scrollbar-thumb": {
-            background: isLight ? "#cbd5e1" : "#475569",
+            background: isLight
+              ? "rgba(15, 23, 42, 0.15)"
+              : "rgba(230, 237, 243, 0.12)",
             borderRadius: "4px",
             "&:hover": {
-              background: isLight ? "#94a3b8" : "#64748b",
+              background: isLight
+                ? "rgba(15, 23, 42, 0.3)"
+                : "rgba(230, 237, 243, 0.25)",
             },
           },
         },
