@@ -1,56 +1,96 @@
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import Menu, { type MenuProps } from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import { alpha, styled } from '@mui/material/styles';
-import { AnimatePresence, motion } from 'framer-motion';
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+/**
+ * CustomizedMenus — Selector de Sistema
+ *
+ * Botón compacto del AppBar para cambiar entre sistemas.
+ * Estilo: text button con nombre animado + ChevronDown.
+ */
+
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Menu, { type MenuProps } from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { alpha, styled } from "@mui/material/styles";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, LayoutGrid } from "lucide-react";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useAppSelector,
   selectSistemaId,
   useMisSistemasQuery,
   useCambiarSistemaMutation,
-} from 'mf_store/store';
+} from "mf_store/store";
+import { Box, Typography } from "@mui/material";
+
+// ============================================================================
+// STYLED
+// ============================================================================
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
     elevation={0}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'right',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'right',
-    }}
+    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+    transformOrigin={{ vertical: "top", horizontal: "left" }}
     {...props}
   />
 ))(({ theme }) => ({
-  '& .MuiPaper-root': {
-    borderRadius: 6,
+  "& .MuiPaper-root": {
+    borderRadius: theme.shape.borderRadius + 4,
     marginTop: theme.spacing(1),
     minWidth: 220,
-    color: 'rgb(55, 65, 81)',
-    boxShadow:
-      'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-    '& .MuiMenu-list': {
-      padding: '4px 0',
-    },
-    '& .MuiMenuItem-root': {
-      '&:active': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          theme.palette.action.selectedOpacity,
-        ),
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.12)}, 0 2px 8px ${alpha(theme.palette.common.black, 0.06)}`,
+    backdropFilter: "blur(12px)",
+    "& .MuiMenu-list": { padding: "6px" },
+    "& .MuiMenuItem-root": {
+      borderRadius: theme.shape.borderRadius,
+      margin: "1px 0",
+      padding: theme.spacing(1, 1.5),
+      fontSize: "0.875rem",
+      fontWeight: 500,
+      transition: "background-color 0.15s ease",
+      "&.Mui-selected": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        color: theme.palette.primary.main,
+        fontWeight: 600,
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.primary.main, 0.15),
+        },
+      },
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.action.hover, 1),
       },
     },
-    ...theme.applyStyles('dark', {
-      color: theme.palette.grey[300],
-    }),
   },
 }));
+
+const SistemaButton = styled(Button)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius + 2,
+  padding: theme.spacing(0.75, 1.5),
+  color: theme.palette.text.primary,
+  fontWeight: 600,
+  fontSize: "0.875rem",
+  letterSpacing: "-0.01em",
+  textTransform: "none",
+  gap: theme.spacing(1),
+  transition: "background-color 0.15s ease",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+  },
+  "& .MuiButton-endIcon": {
+    marginLeft: 2,
+    color: theme.palette.text.secondary,
+    transition: "transform 0.2s ease",
+  },
+  "&[aria-expanded='true'] .MuiButton-endIcon": {
+    transform: "rotate(180deg)",
+  },
+}));
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 export default function CustomizedMenus() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -63,71 +103,104 @@ export default function CustomizedMenus() {
 
   const sistemaActual = sistemas.find((s) => s.id === sistemaId);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(event.currentTarget);
-  };
   const handleClose = () => setAnchorEl(null);
 
   const handleSelectSistema = async (id: number) => {
     handleClose();
     if (id === sistemaId) return;
     const result = await cambiarSistema({ sistemaId: id });
-    if (!('error' in result)) {
-      navigate('/');
+    if (!("error" in result)) {
+      navigate("/");
     }
   };
 
   return (
-    <div>
-      <Button
+    <>
+      <SistemaButton
         id="sistemas-button"
-        aria-controls={open ? 'sistemas-menu' : undefined}
+        aria-controls={open ? "sistemas-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        disableElevation
+        aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        endIcon={isLoading ? <CircularProgress size={14} /> : <KeyboardArrowDownIcon />}
         disabled={isLoading}
-        sx={{ minWidth: 260, justifyContent: 'space-between' }}
+        startIcon={
+          <Box
+            sx={{
+              color: "primary.main",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <LayoutGrid size={16} strokeWidth={1.5} />
+          </Box>
+        }
+        endIcon={
+          isLoading ? (
+            <CircularProgress size={14} />
+          ) : (
+            <ChevronDown size={16} strokeWidth={1.5} />
+          )
+        }
       >
-        <span style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', minWidth: 210, height: '1.5em' }}>
+        {/* Nombre del sistema con animación de cambio */}
+        <Box
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            height: "1.4em",
+            minWidth: 120,
+            maxWidth: 180,
+          }}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
-              key={sistemaId ?? 'default'}
-              initial={{ opacity: 0, y: 8 }}
+              key={sistemaId ?? "default"}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              style={{ position: 'absolute', left: 0, whiteSpace: 'nowrap' }}
+              style={{
+                position: "absolute",
+                left: 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "100%",
+              }}
             >
-              {sistemaActual?.nombre ?? 'Sistemas'}
+              {sistemaActual?.nombre ?? "Seleccionar sistema"}
             </motion.span>
           </AnimatePresence>
-        </span>
-      </Button>
+        </Box>
+      </SistemaButton>
+
       <StyledMenu
         id="sistemas-menu"
-        slotProps={{
-          list: {
-            'aria-labelledby': 'sistemas-button',
-          },
-        }}
+        slotProps={{ list: { "aria-labelledby": "sistemas-button" } }}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
       >
-        {sistemas.map((sistema) => (
-          <MenuItem
-            key={sistema.id}
-            onClick={() => handleSelectSistema(sistema.id)}
-            disableRipple
-            selected={sistema.id === sistemaId}
-          >
-            {sistema.nombre}
+        {sistemas.length === 0 ? (
+          <MenuItem disabled>
+            <Typography variant="body2" color="text.disabled">
+              Sin sistemas asignados
+            </Typography>
           </MenuItem>
-        ))}
+        ) : (
+          sistemas.map((sistema) => (
+            <MenuItem
+              key={sistema.id}
+              onClick={() => handleSelectSistema(sistema.id)}
+              selected={sistema.id === sistemaId}
+            >
+              {sistema.nombre}
+            </MenuItem>
+          ))
+        )}
       </StyledMenu>
-    </div>
+    </>
   );
 }

@@ -172,17 +172,18 @@ export function SearchInput({
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <Search size={18} />
+            <Search size={18} strokeWidth={1.5} />
           </InputAdornment>
         ),
         endAdornment: (loading || showClearButton) && (
           <InputAdornment position="end">
             {loading ? (
-              <SpinnerIcon size={18} />
+              <SpinnerIcon size={18} strokeWidth={1.5} />
             ) : (
               <IconButton
                 size="small"
                 onClick={handleClear}
+                aria-label="Limpiar búsqueda"
                 sx={{
                   p: 0.5,
                   "&:hover": {
@@ -190,7 +191,7 @@ export function SearchInput({
                   },
                 }}
               >
-                <X size={16} />
+                <X size={16} strokeWidth={1.5} />
               </IconButton>
             )}
           </InputAdornment>

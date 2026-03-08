@@ -7,9 +7,6 @@
  * - Botón de personalización de tema integrado
  */
 
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MenuIcon from "@mui/icons-material/Menu";
 import {
 	Stack,
 	Tooltip,
@@ -32,7 +29,7 @@ import {
 	useTheme,
 } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import { Network, Palette } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, Network } from "lucide-react";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useAppSelector, selectSistemaId } from "mf_store/store";
@@ -116,10 +113,15 @@ interface AppBarProps extends MuiAppBarProps {
 const AppBar = styled(MuiAppBar, {
 	shouldForwardProp: (prop) => prop !== "open",
 })<AppBarProps>(({ theme }) => ({
-	backgroundColor: theme.palette.background.paper,
+	backgroundColor:
+		theme.palette.mode === "light"
+			? "rgba(255,255,255,0.85)"
+			: "rgba(15,23,42,0.9)",
+	backdropFilter: "blur(12px)",
+	WebkitBackdropFilter: "blur(12px)",
 	color: theme.palette.text.primary,
 	boxShadow: "none",
-	borderBottom: `1px solid ${theme.palette.divider}`,
+	borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
 	transition: theme.transitions.create(["width", "margin"], {
 		easing: theme.transitions.easing.sharp,
 		duration: theme.transitions.duration.leavingScreen,
@@ -244,9 +246,6 @@ const AppBarIconButton = styled(IconButton)(({ theme }) => ({
 	},
 }));
 
-// Alias semántico para el botón de tema
-const ThemeCustomizerButton = AppBarIconButton;
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -345,37 +344,50 @@ export default function AppLayout() {
 							edge="start"
 							sx={{ mr: 1 }}
 						>
-							<MenuIcon />
+							<Menu size={20} strokeWidth={1.5} />
 						</IconButton>
 					)}
 
-					<Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1 }}>
+					{/* Zona izquierda: contexto del sistema */}
+					<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
 						<CustomizedMenus />
-						<Tooltip title="Organigrama" arrow>
+						<Tooltip title="Ver organigrama" arrow>
 							<AppBarIconButton
 								onClick={() => setOrgOpen(true)}
 								aria-label="Abrir organigrama"
 							>
-								<Network size={20} />
+								<Network size={18} strokeWidth={1.5} />
 							</AppBarIconButton>
 						</Tooltip>
 					</Box>
 
-					<Stack direction="row" alignItems="center" spacing={1}>
-						<EconomicIndicatorsExamples />
+					{/* Spacer */}
+					<Box sx={{ flexGrow: 1 }} />
+
+					{/* Zona derecha: indicadores + acciones de usuario */}
+					<Stack direction="row" alignItems="center" spacing={0.5}>
+						{/* Indicadores económicos — inline */}
+						<Box sx={{ display: { xs: "none", md: "flex" } }}>
+							<EconomicIndicatorsExamples />
+						</Box>
+
+						{/* Separador sutil */}
+						<Box
+							sx={{
+								width: 1,
+								height: 24,
+								bgcolor: "divider",
+								mx: 0.5,
+								display: { xs: "none", md: "block" },
+							}}
+						/>
 
 						<HeaderChatButton onClick={handleChatToggle} unreadCount={3} />
 
-						<Tooltip title="Personalizar tema" arrow>
-							<ThemeCustomizerButton
-								onClick={() => setCustomizerOpen(true)}
-								aria-label="Personalizar tema"
-							>
-								<Palette size={20} />
-							</ThemeCustomizerButton>
-						</Tooltip>
+						{/* Separador sutil */}
+						<Box sx={{ width: 1, height: 24, bgcolor: "divider", mx: 0.5 }} />
 
-						<AccountMenu />
+						<AccountMenu onOpenCustomizer={() => setCustomizerOpen(true)} />
 					</Stack>
 				</Toolbar>
 			</AppBar>
@@ -424,7 +436,10 @@ export default function AppLayout() {
 					onClick={handleDrawerToggle}
 					aria-label={drawerOpen ? "Colapsar menú" : "Expandir menú"}
 				>
-					{drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+					{drawerOpen
+						? <ChevronLeft size={18} strokeWidth={1.5} />
+						: <ChevronRight size={18} strokeWidth={1.5} />
+					}
 				</CollapseToggleButton>
 			)}
 

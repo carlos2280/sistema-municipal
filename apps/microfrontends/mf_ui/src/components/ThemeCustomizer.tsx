@@ -189,13 +189,13 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
       {/* Header */}
       <DrawerHeader>
         <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Palette size={20} />
+          <Palette size={20} strokeWidth={1.5} />
           <Typography variant="h6" fontWeight={600}>
             Personalizar
           </Typography>
         </Stack>
         <IconButton onClick={onClose} size="small">
-          <X size={20} />
+          <X size={20} strokeWidth={1.5} />
         </IconButton>
       </DrawerHeader>
 
@@ -208,7 +208,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
               selected={preferences.mode === "light"}
               onClick={() => setMode("light")}
             >
-              <Sun size={24} />
+              <Sun size={24} strokeWidth={1.5} />
               <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
                 Claro
               </Typography>
@@ -217,7 +217,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
               selected={preferences.mode === "dark"}
               onClick={() => setMode("dark")}
             >
-              <Moon size={24} />
+              <Moon size={24} strokeWidth={1.5} />
               <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
                 Oscuro
               </Typography>
@@ -226,7 +226,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
               selected={preferences.mode === "system"}
               onClick={() => setMode("system")}
             >
-              <Monitor size={24} />
+              <Monitor size={24} strokeWidth={1.5} />
               <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
                 Sistema
               </Typography>
@@ -270,7 +270,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
                     {preset.label}
                   </Typography>
                   {preferences.presetName === preset.name && (
-                    <Check size={16} style={{ marginLeft: "auto" }} />
+                    <Check size={16} strokeWidth={1.5} style={{ marginLeft: "auto" }} />
                   )}
                 </Stack>
               </PresetCard>
@@ -509,7 +509,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
         <Button
           fullWidth
           variant="outlined"
-          startIcon={<RotateCcw size={18} />}
+          startIcon={<RotateCcw size={18} strokeWidth={1.5} />}
           onClick={resetToDefaults}
           sx={{ textTransform: "none" }}
         >
@@ -540,7 +540,7 @@ export function ThemeCustomizerButton({ onClick }: ThemeCustomizerButtonProps) {
           },
         })}
       >
-        <Palette size={20} />
+        <Palette size={20} strokeWidth={1.5} />
       </IconButton>
     </Tooltip>
   );

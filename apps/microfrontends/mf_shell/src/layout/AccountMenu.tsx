@@ -1,134 +1,270 @@
-import Logout from "@mui/icons-material/Logout";
-import { Stack, Typography } from "@mui/material";
-import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Tooltip from "@mui/material/Tooltip";
-import { useLogoutMutation, useAppSelector, selectEmail, selectNombreCompleto } from "mf_store/store";
+/**
+ * AccountMenu — Menú de Cuenta del Usuario
+ *
+ * Trigger compacto en AppBar: Avatar + primer nombre + chevron.
+ * Dropdown: user card completo + acciones + Personalizar tema.
+ */
+
+import {
+  Avatar,
+  Box,
+  Divider,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+  alpha,
+  styled,
+} from "@mui/material";
+import { ChevronDown, LogOut, Palette, User } from "lucide-react";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  useLogoutMutation,
+  useAppSelector,
+  selectEmail,
+  selectNombreCompleto,
+} from "mf_store/store";
 import { usePersistor } from "../context/PersistorContext";
 
-export default function AccountMenu() {
-	const navigate = useNavigate();
-	const persistor = usePersistor();
-	const [logout] = useLogoutMutation();
-	const email = useAppSelector(selectEmail);
-	const nombreCompleto = useAppSelector(selectNombreCompleto);
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const open = Boolean(anchorEl);
-	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorEl(event.currentTarget);
-	};
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
+// ============================================================================
+// TYPES
+// ============================================================================
 
-	const handleLogout = async () => {
-		// 1. El backend borra las cookies httpOnly (espera confirmación)
-		// 2. La mutation despacha loggedOut() en el finally
-		await logout();
-		// 3. Purgar sessionStorage persist para garantizar slate limpio
-		await persistor.purge();
-		navigate("/login", { replace: true });
-	};
-	return (
-		<React.Fragment>
-			<Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-				<Tooltip title="Configuraciones de la cuenta">
-					<IconButton
-						onClick={handleClick}
-						size="large"
-						sx={{ ml: 2 }}
-						aria-controls={open ? "account-menu" : undefined}
-						aria-haspopup="true"
-						aria-expanded={open ? "true" : undefined}
-					>
-						<Avatar
-							sx={{
-								width: 32,
-								height: 32,
-								bgcolor: (theme) => theme.palette.primary.main,
-							}}
-						>
-							{nombreCompleto?.charAt(0).toUpperCase() ?? "U"}
-						</Avatar>
-					</IconButton>
-				</Tooltip>
-				<Stack
-					direction="column"
-					spacing={0}
-					sx={{
-						justifyContent: "center",
-						alignItems: "flex-start",
-					}}
-				>
-					{nombreCompleto && (
-						<Typography variant="body2" fontWeight={600}>
-							{nombreCompleto}
-						</Typography>
-					)}
-					<Typography variant="body2" color="text.secondary">
-						{email ?? ""}
-					</Typography>
-				</Stack>
-			</Box>
-			<Menu
-				anchorEl={anchorEl}
-				id="account-menu"
-				open={open}
-				onClose={handleClose}
-				onClick={handleClose}
-				slotProps={{
-					paper: {
-						elevation: 0,
-						sx: {
-							overflow: "visible",
-							filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-							mt: 1.5,
-							minWidth: 180,
-							px: 0,
-							"& .MuiAvatar-root": {
-								width: 32,
-								height: 32,
-								ml: -0.5,
-								mr: 1,
-							},
-							"&::before": {
-								content: '""',
-								display: "block",
-								position: "absolute",
-								top: 0,
-								right: 14,
-								width: 10,
-								height: 10,
-								bgcolor: "background.paper",
-								transform: "translateY(-50%) rotate(45deg)",
-								zIndex: 0,
-							},
-						},
-					},
-				}}
-				transformOrigin={{ horizontal: "right", vertical: "top" }}
-				anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-			>
-				<MenuItem onClick={handleClose}>
-					<Avatar /> Perfil
-				</MenuItem>
+interface AccountMenuProps {
+  onOpenCustomizer?: () => void;
+}
 
-				<Divider />
+// ============================================================================
+// STYLED
+// ============================================================================
 
-				<MenuItem onClick={handleLogout}>
-					<ListItemIcon>
-						<Logout fontSize="small" />
-					</ListItemIcon>
-					Salir
-				</MenuItem>
-			</Menu>
-		</React.Fragment>
-	);
+const StyledMenu = styled(Menu)(({ theme }) => ({
+  "& .MuiPaper-root": {
+    borderRadius: theme.shape.borderRadius + 4,
+    marginTop: theme.spacing(1),
+    minWidth: 240,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.12)}, 0 2px 8px ${alpha(theme.palette.common.black, 0.06)}`,
+    backdropFilter: "blur(12px)",
+    "& .MuiMenu-list": { padding: 0 },
+  },
+}));
+
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  margin: "1px 6px",
+  padding: theme.spacing(1, 1.5),
+  fontSize: "0.875rem",
+  fontWeight: 500,
+  gap: theme.spacing(1.5),
+  "& .MuiListItemIcon-root": {
+    minWidth: "auto",
+    color: theme.palette.text.secondary,
+  },
+  "&:hover .MuiListItemIcon-root": {
+    color: theme.palette.primary.main,
+  },
+}));
+
+const TriggerButton = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(0.75),
+  padding: theme.spacing(0.5, 1),
+  borderRadius: theme.shape.borderRadius + 4,
+  cursor: "pointer",
+  transition: "background-color 0.15s ease",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+  },
+}));
+
+const UserCard = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2, 2, 1.5),
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+}));
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function getInitials(name: string | null): string {
+  if (!name) return "U";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+}
+
+function getFirstName(name: string | null): string {
+  if (!name) return "Usuario";
+  return name.trim().split(/\s+/)[0];
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export default function AccountMenu({ onOpenCustomizer }: AccountMenuProps) {
+  const navigate = useNavigate();
+  const persistor = usePersistor();
+  const [logout] = useLogoutMutation();
+  const email = useAppSelector(selectEmail);
+  const nombreCompleto = useAppSelector(selectNombreCompleto);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  const handleLogout = async () => {
+    handleClose();
+    await logout();
+    await persistor.purge();
+    navigate("/login", { replace: true });
+  };
+
+  const handleOpenCustomizer = () => {
+    handleClose();
+    onOpenCustomizer?.();
+  };
+
+  const initials = getInitials(nombreCompleto);
+  const firstName = getFirstName(nombreCompleto);
+
+  return (
+    <>
+      {/* Trigger compacto: Avatar + primer nombre + chevron */}
+      <Tooltip title="Opciones de cuenta" arrow>
+        <TriggerButton
+          onClick={handleOpen}
+          role="button"
+          aria-label="Abrir menú de cuenta"
+          aria-controls={open ? "account-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+        >
+          <Avatar
+            sx={{
+              width: 32,
+              height: 32,
+              bgcolor: "primary.main",
+              fontSize: "0.8125rem",
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            {initials}
+          </Avatar>
+
+          <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              noWrap
+              sx={{ lineHeight: 1.2, maxWidth: 110 }}
+            >
+              {firstName}
+            </Typography>
+          </Box>
+
+          <ChevronDown
+            size={14}
+            strokeWidth={1.5}
+            style={{
+              opacity: 0.5,
+              flexShrink: 0,
+              transition: "transform 0.2s ease",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            }}
+          />
+        </TriggerButton>
+      </Tooltip>
+
+      {/* Dropdown */}
+      <StyledMenu
+        id="account-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {/* User Card — nombre completo + email */}
+        <UserCard>
+          <Avatar
+            sx={{
+              width: 40,
+              height: 40,
+              bgcolor: "primary.main",
+              fontSize: "0.9375rem",
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            {initials}
+          </Avatar>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              variant="body2"
+              fontWeight={700}
+              noWrap
+              sx={{ lineHeight: 1.3 }}
+            >
+              {nombreCompleto ?? "Usuario"}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              noWrap
+              display="block"
+            >
+              {email ?? ""}
+            </Typography>
+          </Box>
+        </UserCard>
+
+        <Box sx={{ px: 0.75, pb: 0.75 }}>
+          <Divider sx={{ mb: 0.75 }} />
+
+          <StyledMenuItem onClick={handleClose}>
+            <ListItemIcon>
+              <User size={16} strokeWidth={1.5} />
+            </ListItemIcon>
+            Mi perfil
+          </StyledMenuItem>
+
+          <StyledMenuItem onClick={handleOpenCustomizer}>
+            <ListItemIcon>
+              <Palette size={16} strokeWidth={1.5} />
+            </ListItemIcon>
+            Personalizar tema
+          </StyledMenuItem>
+
+          <Divider sx={{ my: 0.75 }} />
+
+          <StyledMenuItem
+            onClick={handleLogout}
+            sx={{
+              color: "error.main",
+              "&:hover": { bgcolor: (t) => alpha(t.palette.error.main, 0.08) },
+              "& .MuiListItemIcon-root": { color: "error.main" },
+              "&:hover .MuiListItemIcon-root": { color: "error.main" },
+            }}
+          >
+            <ListItemIcon>
+              <LogOut size={16} strokeWidth={1.5} />
+            </ListItemIcon>
+            Cerrar sesión
+          </StyledMenuItem>
+        </Box>
+      </StyledMenu>
+    </>
+  );
 }

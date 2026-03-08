@@ -4,7 +4,7 @@
  * Tarjeta de estadística elegante con tendencia y animaciones
  */
 
-import { Box, Paper, Stack, Typography, alpha, styled, keyframes } from "@mui/material";
+import { Box, Paper, Stack, Typography, alpha, styled, keyframes, useTheme } from "@mui/material";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -132,16 +132,6 @@ const TrendBadge = styled(Box, {
 // COMPONENT
 // ============================================================================
 
-// Mapa de colores para el icono
-const colorMap: Record<string, string> = {
-  primary: "#7928ca",
-  secondary: "#0891b2",
-  success: "#059669",
-  warning: "#d97706",
-  error: "#dc2626",
-  info: "#0284c7",
-};
-
 export function StatCard({
   label,
   value,
@@ -152,10 +142,15 @@ export function StatCard({
   color = "primary",
   loading = false,
 }: StatCardProps) {
+  const theme = useTheme();
   const TrendIcon =
     trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
 
-  const iconColor = colorMap[color] || colorMap.primary;
+  const paletteColor = theme.palette[color as keyof typeof theme.palette];
+  const iconColor =
+    paletteColor && typeof paletteColor === "object" && "main" in paletteColor
+      ? (paletteColor as { main: string }).main
+      : theme.palette.primary.main;
 
   return (
     <StyledPaper elevation={0}>
@@ -198,7 +193,7 @@ export function StatCard({
         {(trendValue || trendLabel) && !loading && (
           <Stack direction="row" alignItems="center" spacing={1}>
             <TrendBadge trendDirection={trend}>
-              <TrendIcon size={14} />
+              <TrendIcon size={14} strokeWidth={1.5} />
               {trendValue}
             </TrendBadge>
 

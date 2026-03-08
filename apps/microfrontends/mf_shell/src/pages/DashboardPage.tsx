@@ -14,30 +14,29 @@ import {
 	Typography,
 	alpha,
 	styled,
+	useTheme,
 } from "@mui/material";
 import {
 	Activity,
-	BarChart3,
 	Calendar,
 	ClipboardList,
 	DollarSign,
 	FileText,
-	TrendingUp,
 	Users,
 	Clock,
-	CheckCircle2,
-	AlertCircle,
 	ArrowUpRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
 	PageHeader,
 	StatCard,
 	SkeletonPage,
-	UserAvatar,
 	Badge,
 } from "mf_ui/components";
+import { listContainer, listItem } from "mf_ui/motion";
 import { useTheme as useAppTheme } from "mf_ui/theme";
+import { useAppSelector, selectNombreCompleto } from "mf_store/store";
 
 // ============================================================================
 // STYLED COMPONENTS
@@ -59,23 +58,33 @@ const WelcomeCard = styled(Card)(({ theme }) => ({
 		background: `radial-gradient(circle at 70% 50%, ${alpha("#fff", 0.1)} 0%, transparent 60%)`,
 		pointerEvents: "none",
 	},
+	"&::after": {
+		content: '""',
+		position: "absolute",
+		top: 0,
+		left: 0,
+		right: 0,
+		height: 1,
+		background: `linear-gradient(90deg, transparent, ${alpha("#fff", 0.25)}, transparent)`,
+		pointerEvents: "none",
+	},
 }));
 
 const QuickActionCard = styled(Card)(({ theme }) => ({
 	borderRadius: 12,
 	border: `1px solid ${theme.palette.divider}`,
 	cursor: "pointer",
-	transition: "all 0.2s ease-in-out",
+	transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
 	"&:hover": {
-		boxShadow: theme.shadows[4],
-		borderColor: theme.palette.primary.main,
-		transform: "translateY(-4px)",
+		boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
+		borderColor: alpha(theme.palette.primary.main, 0.3),
+		transform: "translateY(-2px)",
 	},
 }));
 
 const QuickActionIcon = styled(Box, {
 	shouldForwardProp: (prop) => prop !== "iconColor",
-})<{ iconColor: string }>(({ theme, iconColor }) => ({
+})<{ iconColor: string }>(({ iconColor }) => ({
 	width: 44,
 	height: 44,
 	borderRadius: 12,
@@ -84,19 +93,16 @@ const QuickActionIcon = styled(Box, {
 	justifyContent: "center",
 	backgroundColor: alpha(iconColor, 0.12),
 	color: iconColor,
-	transition: "transform 0.2s ease-in-out",
-	"$:hover &": {
-		transform: "scale(1.1)",
-	},
+	flexShrink: 0,
 }));
 
 const ActivityItem = styled(Box)(({ theme }) => ({
 	display: "flex",
 	alignItems: "flex-start",
 	gap: theme.spacing(2),
-	padding: theme.spacing(2),
-	borderRadius: 12,
-	transition: "background-color 0.2s ease-in-out",
+	padding: theme.spacing(1.5, 2),
+	borderRadius: 10,
+	transition: "background-color 0.15s ease",
 	"&:hover": {
 		backgroundColor: alpha(theme.palette.primary.main, 0.04),
 	},
@@ -137,25 +143,25 @@ const quickActions = [
 		icon: FileText,
 		label: "Nuevo Documento",
 		description: "Crear oficio o decreto",
-		color: "#7928ca",
+		paletteKey: "primary" as const,
 	},
 	{
 		icon: Users,
 		label: "Gestión Personal",
 		description: "Administrar funcionarios",
-		color: "#0891b2",
+		paletteKey: "secondary" as const,
 	},
 	{
 		icon: DollarSign,
 		label: "Presupuesto",
 		description: "Ver estado financiero",
-		color: "#059669",
+		paletteKey: "success" as const,
 	},
 	{
 		icon: Calendar,
 		label: "Agenda",
 		description: "Programar reuniones",
-		color: "#d97706",
+		paletteKey: "warning" as const,
 	},
 ];
 
@@ -199,10 +205,10 @@ const progressItems = [
 		label: "Documentos procesados",
 		value: 78,
 		total: 100,
-		color: "#7928ca",
+		paletteKey: "primary" as const,
 	},
-	{ label: "Solicitudes atendidas", value: 45, total: 60, color: "#0891b2" },
-	{ label: "Presupuesto ejecutado", value: 65, total: 100, color: "#059669" },
+	{ label: "Solicitudes atendidas", value: 45, total: 60, paletteKey: "secondary" as const },
+	{ label: "Presupuesto ejecutado", value: 65, total: 100, paletteKey: "success" as const },
 ];
 
 // ============================================================================
@@ -210,9 +216,16 @@ const progressItems = [
 // ============================================================================
 
 export default function DashboardPage() {
+	const muiTheme = useTheme();
 	const { isDarkMode } = useAppTheme();
 	const [loading, setLoading] = useState(true);
 	const [currentTime, setCurrentTime] = useState(new Date());
+
+	// Nombre real del usuario autenticado
+	const nombreCompleto = useAppSelector(selectNombreCompleto);
+	const displayName = nombreCompleto
+		? nombreCompleto.split(" ").slice(0, 2).join(" ")
+		: "Usuario";
 
 	// Simular carga de datos
 	useEffect(() => {
@@ -220,7 +233,7 @@ export default function DashboardPage() {
 		return () => clearTimeout(timer);
 	}, []);
 
-	// Actualizar hora
+	// Actualizar hora cada minuto
 	useEffect(() => {
 		const interval = setInterval(() => setCurrentTime(new Date()), 60000);
 		return () => clearInterval(interval);
@@ -241,11 +254,15 @@ export default function DashboardPage() {
 		<Box>
 			{/* Welcome Card */}
 			<WelcomeCard sx={{ mb: 4 }}>
-				<CardContent sx={{ p: 4 }}>
+				<CardContent sx={{ p: { xs: 3, md: 4 } }}>
 					<Grid container spacing={3} alignItems="center">
 						<Grid size={{ xs: 12, md: 8 }}>
-							<Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-								{greeting()}, Administrador
+							<Typography
+								variant="h4"
+								fontWeight={700}
+								sx={{ mb: 1, textWrap: "balance" }}
+							>
+								{greeting()}, {displayName}
 							</Typography>
 							<Typography
 								variant="body1"
@@ -259,7 +276,11 @@ export default function DashboardPage() {
 									Sistema operativo
 								</Badge>
 								<Badge color="info" size="small">
-									Última sincronización: 10:45 AM
+									Última sincronización:{"\u00A0"}
+									{currentTime.toLocaleTimeString("es-CL", {
+										hour: "2-digit",
+										minute: "2-digit",
+									})}
 								</Badge>
 							</Stack>
 						</Grid>
@@ -274,14 +295,17 @@ export default function DashboardPage() {
 								<Typography
 									variant="h3"
 									fontWeight={700}
-									sx={{ lineHeight: 1 }}
+									sx={{
+										lineHeight: 1,
+										fontVariantNumeric: "tabular-nums",
+									}}
 								>
 									{currentTime.toLocaleTimeString("es-CL", {
 										hour: "2-digit",
 										minute: "2-digit",
 									})}
 								</Typography>
-								<Typography variant="body2" sx={{ opacity: 0.8 }}>
+								<Typography variant="body2" sx={{ opacity: 0.8, textTransform: "capitalize" }}>
 									{currentTime.toLocaleDateString("es-CL", {
 										weekday: "long",
 										day: "numeric",
@@ -294,53 +318,68 @@ export default function DashboardPage() {
 				</CardContent>
 			</WelcomeCard>
 
-			{/* Stats Grid */}
-			<Grid container spacing={3} sx={{ mb: 4 }}>
-				<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-					<StatCard
-						label="Documentos Hoy"
-						value="156"
-						icon={<FileText />}
-						trend="up"
-						trendValue="+12%"
-						trendLabel="vs. ayer"
-						color="primary"
-					/>
+			{/* Stats Grid — stagger animado */}
+			<motion.div
+				variants={listContainer}
+				initial="hidden"
+				animate="show"
+				style={{ marginBottom: muiTheme.spacing(4) }}
+			>
+				<Grid container spacing={3}>
+					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+						<motion.div variants={listItem} style={{ height: "100%" }}>
+							<StatCard
+								label="Documentos Hoy"
+								value="156"
+								icon={<FileText strokeWidth={1.5} />}
+								trend="up"
+								trendValue="+12%"
+								trendLabel="vs. ayer"
+								color="primary"
+							/>
+						</motion.div>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+						<motion.div variants={listItem} style={{ height: "100%" }}>
+							<StatCard
+								label="Solicitudes Pendientes"
+								value="23"
+								icon={<ClipboardList strokeWidth={1.5} />}
+								trend="down"
+								trendValue="-5%"
+								trendLabel="esta semana"
+								color="secondary"
+							/>
+						</motion.div>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+						<motion.div variants={listItem} style={{ height: "100%" }}>
+							<StatCard
+								label="Ingresos del Mes"
+								value="$12.4M"
+								icon={<DollarSign strokeWidth={1.5} />}
+								trend="up"
+								trendValue="+8.5%"
+								trendLabel="vs. mes anterior"
+								color="success"
+							/>
+						</motion.div>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+						<motion.div variants={listItem} style={{ height: "100%" }}>
+							<StatCard
+								label="Usuarios Activos"
+								value="48"
+								icon={<Users strokeWidth={1.5} />}
+								trend="neutral"
+								trendValue="0%"
+								trendLabel="sin cambios"
+								color="info"
+							/>
+						</motion.div>
+					</Grid>
 				</Grid>
-				<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-					<StatCard
-						label="Solicitudes Pendientes"
-						value="23"
-						icon={<ClipboardList />}
-						trend="down"
-						trendValue="-5%"
-						trendLabel="esta semana"
-						color="secondary"
-					/>
-				</Grid>
-				<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-					<StatCard
-						label="Ingresos del Mes"
-						value="$12.4M"
-						icon={<DollarSign />}
-						trend="up"
-						trendValue="+8.5%"
-						trendLabel="vs. mes anterior"
-						color="success"
-					/>
-				</Grid>
-				<Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-					<StatCard
-						label="Usuarios Activos"
-						value="48"
-						icon={<Users />}
-						trend="neutral"
-						trendValue="0%"
-						trendLabel="sin cambios"
-						color="info"
-					/>
-				</Grid>
-			</Grid>
+			</motion.div>
 
 			{/* Main Content Grid */}
 			<Grid container spacing={3}>
@@ -350,31 +389,35 @@ export default function DashboardPage() {
 						Acciones Rápidas
 					</Typography>
 					<Grid container spacing={2}>
-						{quickActions.map((action) => (
+						{quickActions.map((action) => {
+						const actionColor = muiTheme.palette[action.paletteKey].main;
+						return (
 							<Grid key={action.label} size={{ xs: 12, sm: 6 }}>
 								<QuickActionCard elevation={0}>
 									<CardContent sx={{ p: 2.5 }}>
 										<Stack direction="row" spacing={2} alignItems="center">
-											<QuickActionIcon iconColor={action.color}>
-												<action.icon size={22} />
+											<QuickActionIcon iconColor={actionColor}>
+												<action.icon size={22} strokeWidth={1.5} />
 											</QuickActionIcon>
-											<Box sx={{ flex: 1 }}>
-												<Typography variant="subtitle2" fontWeight={600}>
+											<Box sx={{ flex: 1, minWidth: 0 }}>
+												<Typography variant="subtitle2" fontWeight={600} noWrap>
 													{action.label}
 												</Typography>
-												<Typography variant="caption" color="text.secondary">
+												<Typography variant="caption" color="text.secondary" noWrap>
 													{action.description}
 												</Typography>
 											</Box>
 											<ArrowUpRight
 												size={18}
-												style={{ opacity: 0.4 }}
+												strokeWidth={1.5}
+												style={{ opacity: 0.35, flexShrink: 0 }}
 											/>
 										</Stack>
 									</CardContent>
 								</QuickActionCard>
 							</Grid>
-						))}
+						);
+					})}
 					</Grid>
 
 					{/* Progress Section */}
@@ -382,7 +425,9 @@ export default function DashboardPage() {
 						Progreso del Mes
 					</Typography>
 					<Grid container spacing={2}>
-						{progressItems.map((item) => (
+						{progressItems.map((item) => {
+						const itemColor = muiTheme.palette[item.paletteKey].main;
+						return (
 							<Grid key={item.label} size={{ xs: 12, sm: 4 }}>
 								<ProgressCard elevation={0}>
 									<Stack spacing={1.5}>
@@ -397,7 +442,10 @@ export default function DashboardPage() {
 											<Typography
 												variant="body2"
 												fontWeight={700}
-												sx={{ color: item.color }}
+												sx={{
+													color: itemColor,
+													fontVariantNumeric: "tabular-nums",
+												}}
 											>
 												{item.value}%
 											</Typography>
@@ -406,12 +454,12 @@ export default function DashboardPage() {
 											variant="determinate"
 											value={item.value}
 											sx={{
-												height: 8,
-												borderRadius: 4,
-												bgcolor: alpha(item.color, 0.12),
+												height: 6,
+												borderRadius: 3,
+												bgcolor: alpha(itemColor, 0.12),
 												"& .MuiLinearProgress-bar": {
-													bgcolor: item.color,
-													borderRadius: 4,
+													bgcolor: itemColor,
+													borderRadius: 3,
 												},
 											}}
 										/>
@@ -421,7 +469,8 @@ export default function DashboardPage() {
 									</Stack>
 								</ProgressCard>
 							</Grid>
-						))}
+						);
+					})}
 					</Grid>
 				</Grid>
 
@@ -446,28 +495,22 @@ export default function DashboardPage() {
 								<Typography variant="h6" fontWeight={600}>
 									Actividad Reciente
 								</Typography>
-								<Activity size={20} style={{ opacity: 0.5 }} />
+								<Activity size={20} strokeWidth={1.5} style={{ opacity: 0.5 }} />
 							</Stack>
 
 							<Box sx={{ px: 1 }}>
-								{recentActivity.map((activity, index) => (
+								{recentActivity.map((activity) => (
 									<ActivityItem key={activity.id}>
 										<ActivityDot status={activity.status} />
 										<Box sx={{ flex: 1, minWidth: 0 }}>
 											<Typography variant="body2" sx={{ mb: 0.5 }}>
-												<Box
-													component="span"
-													sx={{ fontWeight: 600 }}
-												>
+												<Box component="span" sx={{ fontWeight: 600 }}>
 													{activity.user}
 												</Box>{" "}
 												{activity.action}{" "}
 												<Box
 													component="span"
-													sx={{
-														color: "primary.main",
-														fontWeight: 500,
-													}}
+													sx={{ color: "primary.main", fontWeight: 500 }}
 												>
 													{activity.target}
 												</Box>
@@ -477,11 +520,12 @@ export default function DashboardPage() {
 												alignItems="center"
 												spacing={0.5}
 											>
-												<Clock size={12} style={{ opacity: 0.5 }} />
-												<Typography
-													variant="caption"
-													color="text.secondary"
-												>
+												<Clock
+													size={12}
+													strokeWidth={1.5}
+													style={{ opacity: 0.5 }}
+												/>
+												<Typography variant="caption" color="text.secondary">
 													{activity.time}
 												</Typography>
 											</Stack>

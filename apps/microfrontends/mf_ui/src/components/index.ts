@@ -38,3 +38,15 @@ export {
   SearchInput,
   UserAvatar,
 } from "./molecules";
+
+// =============================================================================
+// ATOMIC DESIGN - Organismos
+// =============================================================================
+export { DataTable } from "./organisms";
+export type { Column, PaginationConfig, DataTableProps } from "./organisms";
+
+// =============================================================================
+// FORMULARIOS
+// =============================================================================
+export { FormField, SelectField } from "./forms";
+export type { FormFieldProps, SelectFieldProps, SelectOption } from "./forms";

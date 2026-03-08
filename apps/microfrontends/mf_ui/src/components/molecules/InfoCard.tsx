@@ -49,10 +49,10 @@ const variantConfig: Record<
   InfoCardVariant,
   { icon: ReactNode; colorKey: "info" | "success" | "warning" | "error" }
 > = {
-  info: { icon: <Info size={20} />, colorKey: "info" },
-  success: { icon: <CheckCircle size={20} />, colorKey: "success" },
-  warning: { icon: <AlertTriangle size={20} />, colorKey: "warning" },
-  error: { icon: <AlertCircle size={20} />, colorKey: "error" },
+  info: { icon: <Info size={20} strokeWidth={1.5} />, colorKey: "info" },
+  success: { icon: <CheckCircle size={20} strokeWidth={1.5} />, colorKey: "success" },
+  warning: { icon: <AlertTriangle size={20} strokeWidth={1.5} />, colorKey: "warning" },
+  error: { icon: <AlertCircle size={20} strokeWidth={1.5} />, colorKey: "error" },
 };
 
 // ============================================================================
@@ -160,7 +160,7 @@ export function InfoCard({
             },
           }}
         >
-          <X size={16} />
+          <X size={16} strokeWidth={1.5} />
         </IconButton>
       )}
     </StyledPaper>

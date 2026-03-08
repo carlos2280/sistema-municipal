@@ -44,22 +44,22 @@ const presetConfig: Record<
   { icon: ReactNode; title: string; description: string }
 > = {
   default: {
-    icon: <Inbox />,
+    icon: <Inbox strokeWidth={1.5} />,
     title: "Sin contenido",
     description: "No hay elementos para mostrar en este momento.",
   },
   search: {
-    icon: <Search />,
+    icon: <Search strokeWidth={1.5} />,
     title: "Sin resultados",
     description: "No encontramos resultados para tu búsqueda. Intenta con otros términos.",
   },
   error: {
-    icon: <FileQuestion />,
+    icon: <FileQuestion strokeWidth={1.5} />,
     title: "Algo salió mal",
     description: "Ocurrió un error al cargar los datos. Por favor, intenta de nuevo.",
   },
   noData: {
-    icon: <Inbox />,
+    icon: <Inbox strokeWidth={1.5} />,
     title: "Comienza aquí",
     description: "Aún no hay datos registrados. Crea el primero para empezar.",
   },
@@ -179,7 +179,7 @@ export function EmptyState({
             <Button
               variant="contained"
               onClick={onAction}
-              startIcon={variant === "noData" ? <Plus size={18} /> : undefined}
+              startIcon={variant === "noData" ? <Plus size={18} strokeWidth={1.5} /> : undefined}
               sx={{ textTransform: "none" }}
             >
               {actionLabel}
