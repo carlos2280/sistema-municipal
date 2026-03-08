@@ -262,8 +262,8 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   const isExpanded = expandedItems.includes(item.id);
   const isSelected = selectedId === item.id;
   const tipoCuentaId = item.tipoCuentaId ?? 0;
-  // Titulos, Grupos y Subgrupos siempre se muestran como carpeta aunque no tengan hijos cargados
-  const isFolder = hasChildren || tipoCuentaId <= 3;
+  // Carpeta solo si realmente tiene hijos — así cuentas sin subcuentas muestran ícono de archivo
+  const isFolder = hasChildren;
 
   // Split label into code and name
   const [codigo, ...nombreParts] = item.label.split(' – ');

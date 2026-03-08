@@ -12,7 +12,8 @@ import {
 import { alpha } from '@mui/material/styles';
 import { FilePlus, Pencil, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormProvider, useFormState } from 'react-hook-form';
+import { FormProvider, useFormState, useWatch } from 'react-hook-form';
+import { formatCodigo } from '../../../utils/planDeCuentasUtils';
 
 import type { AccountPanelProps } from './AccountPanel.types';
 import { requiresContraCuenta } from './AccountPanel.types';
@@ -45,8 +46,9 @@ export const AccountPanel = memo(function AccountPanel({
   // Suscribirse a formState para que el componente se actualice cuando cambie isValid
   const { isValid } = useFormState({ control: methods.control });
 
-  const codigoPadre = methods.watch('valorPadre') || '';
-  const codigoField = methods.watch('codigo') || '';
+  // valorPadre y tipoCuentaId no cambian durante la edición (se fijan al abrir el panel)
+  const codigoPadre = useWatch({ control: methods.control, name: 'valorPadre' }) || '';
+  const tipoCuentaId = useWatch({ control: methods.control, name: 'tipoCuentaId' }) || 0;
 
   // El botón está deshabilitado si el código ya existe
   const codigoYaExiste = codigoStatus === 'exists';
@@ -121,10 +123,10 @@ export const AccountPanel = memo(function AccountPanel({
 
   const isCreateMode = mode === 'crear';
 
-  // Code preview value
-  const codePreviewValue = codigoField
-    ? `${codigoPadre}-${codigoField}`
-    : `${codigoPadre}-__`;
+  // Formato del código padre para mostrar en badges
+  const codigoPadreFormateado = codigoPadre
+    ? formatCodigo(codigoPadre, tipoCuentaId)
+    : '';
 
   // Panel content
   const panelContent = (
@@ -248,7 +250,7 @@ export const AccountPanel = memo(function AccountPanel({
                       fontSize: '0.6875rem',
                     }}
                   >
-                    {codigoPadre}
+                    {codigoPadreFormateado}
                   </Box>
                 </>
               )}
@@ -313,42 +315,7 @@ export const AccountPanel = memo(function AccountPanel({
         >
           {/* Code preview bar — only in create mode */}
           {isCreateMode && (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                p: '8px 12px',
-                borderRadius: '8px',
-                bgcolor:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(13,107,94,0.06)'
-                    : '#f0fdf9',
-                border: '1px solid rgba(13,107,94,0.12)',
-                mb: 2,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: '0.6875rem',
-                  fontWeight: 600,
-                  color: 'text.secondary',
-                }}
-              >
-                Codigo completo:
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.9375rem',
-                  fontWeight: 700,
-                  color: '#0d6b5e',
-                  letterSpacing: '0.03em',
-                }}
-              >
-                {codePreviewValue}
-              </Typography>
-            </Box>
+            <CodePreview control={methods.control} tipoCuentaId={tipoCuentaId} />
           )}
 
           <FormProvider {...methods}>
@@ -510,6 +477,64 @@ export const AccountPanel = memo(function AccountPanel({
       }}
     >
       {panelContent}
+    </Box>
+  );
+});
+
+// ============================================================================
+// Sub-componente aislado para el preview del código completo.
+// Usa useWatch para que solo este componente se re-renderice al escribir.
+// ============================================================================
+const CodePreview = memo(function CodePreview({
+  control,
+  tipoCuentaId,
+}: {
+  // biome-ignore lint/suspicious/noExplicitAny: control genérico de react-hook-form
+  control: any;
+  tipoCuentaId: number;
+}) {
+  const valorPadre = useWatch({ control, name: 'valorPadre' }) || '';
+  const codigo = useWatch({ control, name: 'codigo' }) || '';
+
+  const fullCode = codigo ? `${valorPadre}${codigo}` : `${valorPadre}__`;
+  const formatted = formatCodigo(fullCode, tipoCuentaId + 1);
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        p: '8px 12px',
+        borderRadius: '8px',
+        bgcolor: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'rgba(13,107,94,0.06)'
+            : '#f0fdf9',
+        border: '1px solid rgba(13,107,94,0.12)',
+        mb: 2,
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: '0.6875rem',
+          fontWeight: 600,
+          color: 'text.secondary',
+        }}
+      >
+        Código completo:
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: 'monospace',
+          fontSize: '0.9375rem',
+          fontWeight: 700,
+          color: '#0d6b5e',
+          letterSpacing: '0.03em',
+        }}
+      >
+        {formatted}
+      </Typography>
     </Box>
   );
 });

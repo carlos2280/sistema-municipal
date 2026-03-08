@@ -1,10 +1,10 @@
-import { useCrearPlanesCuentaMutation } from 'mf_store/store';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCrearPlanesCuentaMutation, useActualizarPlanesCuentaMutation } from 'mf_store/store';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import type { PanelMode } from '../../components/planCuentas/AccountPanel';
-import type { TreeItemData } from '../../utils/planDeCuentasUtils';
+import { formatCodigo, type TreeItemData } from '../../utils/planDeCuentasUtils';
 import useHookFormSchema from '../useHookFormSchema';
 import { useVerificarCodigo, type CodigoStatus } from './useVerificarCodigo';
 
@@ -113,6 +113,7 @@ export function useAccountPanel(): UseAccountPanelReturn {
   });
 
   const [crearPlanesCuenta] = useCrearPlanesCuentaMutation();
+  const [actualizarPlanesCuenta] = useActualizarPlanesCuentaMutation();
 
   // Hook para verificar si el código ya existe
   const {
@@ -123,35 +124,44 @@ export function useAccountPanel(): UseAccountPanelReturn {
     isExisting: codigoYaExiste,
   } = useVerificarCodigo();
 
-  // Observar cambios en código y valorPadre para verificar existencia
-  const codigoActual = methods.watch('codigo');
-  const valorPadreActual = methods.watch('valorPadre');
-  const anoContableActual = methods.watch('anoContable');
-  const tipoCuentaIdActual = methods.watch('tipoCuentaId');
+  // Verificar código mediante subscription (no causa re-renders del componente padre)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Verificar código cuando cambie y tenga la longitud esperada
   useEffect(() => {
-    if (mode !== 'crear' || !codigoActual || !valorPadreActual) {
-      resetVerificacion();
-      return;
-    }
+    const subscription = methods.watch((values, { name }) => {
+      // Solo reaccionar a cambios en 'codigo'
+      if (name !== 'codigo') return;
+      if (mode !== 'crear') return;
 
-    const expectedLength = tipoCuentaIdActual <= 4 ? 2 : 3;
-    if (codigoActual.length === expectedLength) {
-      const codigoCompleto = `${valorPadreActual}${codigoActual}`;
-      verificarCodigo(anoContableActual, codigoCompleto);
-    } else {
-      resetVerificacion();
-    }
-  }, [
-    mode,
-    codigoActual,
-    valorPadreActual,
-    anoContableActual,
-    tipoCuentaIdActual,
-    verificarCodigo,
-    resetVerificacion,
-  ]);
+      clearTimeout(debounceRef.current);
+
+      const codigo = values.codigo as string;
+      const valorPadre = values.valorPadre as string;
+      const anoContable = values.anoContable as number;
+      const tipoCuentaId = values.tipoCuentaId as number;
+
+      if (!codigo || !valorPadre) {
+        resetVerificacion();
+        return;
+      }
+
+      const expectedLength = tipoCuentaId <= 4 ? 2 : 3;
+      if (codigo.length === expectedLength) {
+        // Debounce 300ms para evitar llamadas excesivas
+        debounceRef.current = setTimeout(() => {
+          const codigoCompleto = `${valorPadre}${codigo}`;
+          verificarCodigo(anoContable, codigoCompleto);
+        }, 300);
+      } else {
+        resetVerificacion();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(debounceRef.current);
+    };
+  }, [mode, methods, verificarCodigo, resetVerificacion]);
   // -------------------------------------------------------------------------
   // Abrir panel en modo CREAR
   // -------------------------------------------------------------------------
@@ -252,18 +262,22 @@ export function useAccountPanel(): UseAccountPanelReturn {
       try {
         if (mode === 'crear') {
           // tipoCuentaId + 1 porque la nueva cuenta es un nivel más profundo
+          const nuevoTipo = data.tipoCuentaId + 1;
           const nuevaCuenta = {
             anoContable: data.anoContable,
             codigo: `${data.valorPadre}${data.codigo}`,
             contraCuenta: data.contraCuenta || '',
             nombre: data.nombre,
-            tipoCuentaId: data.tipoCuentaId + 1,
+            tipoCuentaId: nuevoTipo,
             subgrupoId: data.subgrupoId,
             parentId: data.parentId ?? null,
           };
 
           await crearPlanesCuenta(nuevaCuenta).unwrap();
-          toast.success(`Cuenta ${nuevaCuenta.codigo} creada correctamente`);
+          const codigoFmt = formatCodigo(nuevaCuenta.codigo, nuevoTipo);
+          toast.success(`Cuenta ${codigoFmt} creada`, {
+            description: data.nombre,
+          });
 
           // Mantener el panel abierto para crear más cuentas del mismo padre
           methods.reset(
@@ -277,18 +291,33 @@ export function useAccountPanel(): UseAccountPanelReturn {
           );
           resetVerificacion();
         } else if (mode === 'editar') {
-          // TODO: Implementar actualización
-          toast.info('Actualización de cuenta (pendiente de implementar)');
+          if (!data.id) return;
+
+          await actualizarPlanesCuenta({
+            id: data.id,
+            nombre: data.nombre,
+            contraCuenta: data.contraCuenta || '',
+          }).unwrap();
+
+          const codigoFmt = formatCodigo(data.valorPadre, data.tipoCuentaId);
+          toast.success(`Cuenta ${codigoFmt} actualizada`, {
+            description: data.nombre,
+          });
           closePanel();
         }
       } catch (error) {
         console.error('Error en operación de cuenta:', error);
-        toast.error('Ocurrió un error. Por favor contacte al administrador.');
+        toast.error(
+          mode === 'crear'
+            ? 'No se pudo crear la cuenta'
+            : 'No se pudo actualizar la cuenta',
+          { description: 'Revise los datos e intente nuevamente' },
+        );
       } finally {
         setIsLoading(false);
       }
     },
-    [mode, crearPlanesCuenta, methods, closePanel, codigoYaExiste, codigoExistente, resetVerificacion],
+    [mode, crearPlanesCuenta, actualizarPlanesCuenta, methods, closePanel, codigoYaExiste, codigoExistente, resetVerificacion],
   );
 
   return useMemo(

@@ -44,6 +44,7 @@ export default defineConfig(() => {
           'react-redux': { singleton: true, eager: true, requiredVersion: false },
           '@reduxjs/toolkit': { singleton: true, eager: true, requiredVersion: false },
           'socket.io-client': { singleton: true, requiredVersion: false },
+          sonner: { singleton: true, eager: true, requiredVersion: false },
         },
       }),
     ],

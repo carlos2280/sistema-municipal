@@ -43,6 +43,12 @@ interface CrearPlanesCuentaRequest {
 	parentId?: number | null;
 }
 
+interface ActualizarPlanesCuentaRequest {
+	id: number;
+	nombre?: string;
+	contraCuenta?: string;
+}
+
 interface CuentaResumen {
 	id: number;
 	codigo: string;
@@ -83,6 +89,21 @@ export const contabilidadApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["PlanCuentas"],
 		}),
+		actualizarPlanesCuenta: builder.mutation<void, ActualizarPlanesCuentaRequest>({
+			query: ({ id, ...body }) => ({
+				url: `contabilidad/plan-cuentas/${id}`,
+				method: "PATCH",
+				body,
+			}),
+			invalidatesTags: ["PlanCuentas"],
+		}),
+		eliminarPlanesCuenta: builder.mutation<void, number>({
+			query: (id) => ({
+				url: `contabilidad/plan-cuentas/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["PlanCuentas"],
+		}),
 		// Verificar si un código de cuenta ya existe
 		verificarCodigoExiste: builder.query<
 			VerificarCodigoResponse,
@@ -107,6 +128,8 @@ export const {
 	useGetLibroMayorQuery,
 	useObtenerArbolCompletoQuery,
 	useCrearPlanesCuentaMutation,
+	useActualizarPlanesCuentaMutation,
+	useEliminarPlanesCuentaMutation,
 	useLazyVerificarCodigoExisteQuery,
 	useLazyBuscarCuentasPorPrefijoQuery,
 } = contabilidadApi;

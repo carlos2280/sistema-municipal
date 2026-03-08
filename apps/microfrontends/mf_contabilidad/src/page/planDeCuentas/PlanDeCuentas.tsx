@@ -276,13 +276,11 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   );
 
   const handleSelectNode = useCallback(
-    (item: TreeItemData) => {
-      // Solo abrir panel de edicion para cuentas editables (tipoCuentaId >= 4)
-      if (item.tipoCuentaId >= 4) {
-        panel.openEditPanel(item);
-      }
+    (_item: TreeItemData) => {
+      // Solo seleccionar visualmente el nodo, no abrir panel.
+      // La edición se activa exclusivamente desde el botón de editar (lápiz).
     },
-    [panel],
+    [],
   );
 
   const handleDelete = useCallback((item: TreeItemData) => {
