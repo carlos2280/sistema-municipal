@@ -1,8 +1,11 @@
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import type { Mensaje } from 'mf_store/store'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { MessageBubble } from './MessageBubble'
+
+const MESSAGES_PER_PAGE = 50
 
 interface MessageListProps {
   mensajes: Mensaje[]
@@ -59,13 +62,31 @@ export function MessageList({
   typingUsers = [],
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const [visibleCount, setVisibleCount] = useState(MESSAGES_PER_PAGE)
+
+  // Resetear visible count cuando cambia la conversación (mensajes se vacían)
+  const prevLengthRef = useRef(mensajes.length)
+  useEffect(() => {
+    if (mensajes.length < prevLengthRef.current) {
+      setVisibleCount(MESSAGES_PER_PAGE)
+    }
+    prevLengthRef.current = mensajes.length
+  }, [mensajes.length])
 
   // Scroll al final cuando llegan nuevos mensajes
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes.length])
 
-  const messagesByDate = groupMessagesByDate(mensajes)
+  // Solo renderizar los últimos N mensajes para evitar degradación del DOM
+  const visibleMensajes = useMemo(() => {
+    if (mensajes.length <= visibleCount) return mensajes
+    return mensajes.slice(mensajes.length - visibleCount)
+  }, [mensajes, visibleCount])
+
+  const hasHiddenMessages = mensajes.length > visibleCount
+
+  const messagesByDate = groupMessagesByDate(visibleMensajes)
 
   if (mensajes.length === 0) {
     return (
@@ -98,6 +119,19 @@ export function MessageList({
         gap: 1,
       }}
     >
+      {hasHiddenMessages && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => setVisibleCount((prev) => prev + MESSAGES_PER_PAGE)}
+            sx={{ fontSize: 12, textTransform: 'none' }}
+          >
+            Cargar mensajes anteriores
+          </Button>
+        </Box>
+      )}
+
       {Object.entries(messagesByDate).map(([fecha, msgs]) => (
         <Box key={fecha}>
           {/* Date Divider */}

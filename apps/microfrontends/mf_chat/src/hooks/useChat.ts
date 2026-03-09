@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   type Mensaje,
   useObtenerMensajesQuery,
   useCrearMensajeMutation,
 } from 'mf_store/store'
 import { useSocket } from './useSocket'
+
+const SEND_RATE_LIMIT_MS = 1_000
+const TYPING_AUTO_CLEAR_MS = 5_000
 
 interface UseChatOptions {
   conversacionId: number
@@ -33,11 +36,26 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
   const [isTyping, setIsTypingState] = useState<TypingState>({})
   const [cursor, setCursor] = useState<string | undefined>(undefined)
 
+  // Rate limiting refs
+  const lastSendTimeRef = useRef(0)
+  // Typing auto-clear timeouts per user
+  const typingTimeoutsRef = useRef(new Map<number, ReturnType<typeof setTimeout>>())
+
   // Resetear cursor cuando cambia la conversación
   useEffect(() => {
     setCursor(undefined)
     setLocalMensajes([])
+    setIsTypingState({})
   }, [conversacionId])
+
+  // Cleanup typing timeouts on unmount
+  useEffect(() => {
+    const timeouts = typingTimeoutsRef.current
+    return () => {
+      for (const t of timeouts.values()) clearTimeout(t)
+      timeouts.clear()
+    }
+  }, [])
 
   // RTK Query para obtener mensajes
   const {
@@ -57,11 +75,16 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
   const [crearMensaje] = useCrearMensajeMutation()
 
   // Sincronizar mensajes del query con estado local
-  // Los mensajes vienen en orden DESC (más reciente primero), invertimos para mostrar cronológicamente
+  // Los mensajes vienen en orden DESC (más reciente primero), invertimos para mostrar cronológicamente.
+  // Merge: RTK Query es la fuente de verdad; mensajes real-time que aún no están en el query se conservan al final.
   useEffect(() => {
-    if (mensajesData?.mensajes) {
-      setLocalMensajes([...mensajesData.mensajes].reverse())
-    }
+    if (!mensajesData?.mensajes) return
+    const queryMensajes = [...mensajesData.mensajes].reverse()
+    setLocalMensajes((prev) => {
+      const queryIds = new Set(queryMensajes.map((m) => m.id))
+      const realTimeOnly = prev.filter((m) => !queryIds.has(m.id))
+      return [...queryMensajes, ...realTimeOnly]
+    })
   }, [mensajesData])
 
   // Unirse a la sala de conversación
@@ -94,12 +117,33 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
     const handleTyping = ({
       userId,
       isTyping: typing,
+      conversacionId: convId,
     }: {
       conversacionId: number
       userId: number
       isTyping: boolean
     }) => {
+      if (convId !== conversacionId) return
+
       setIsTypingState((prev) => ({ ...prev, [userId]: typing }))
+
+      // Auto-clear: si el usuario cierra pestaña sin emitir typing=false,
+      // limpiamos automáticamente después de TYPING_AUTO_CLEAR_MS
+      const timeouts = typingTimeoutsRef.current
+      const existing = timeouts.get(userId)
+      if (existing) clearTimeout(existing)
+
+      if (typing) {
+        timeouts.set(
+          userId,
+          setTimeout(() => {
+            setIsTypingState((prev) => ({ ...prev, [userId]: false }))
+            timeouts.delete(userId)
+          }, TYPING_AUTO_CLEAR_MS)
+        )
+      } else {
+        timeouts.delete(userId)
+      }
     }
 
     on('chat:message', handleNewMessage)
@@ -111,20 +155,22 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
     }
   }, [isConnected, conversacionId, enabled, on, off])
 
-  // Enviar mensaje
+  // Enviar mensaje (con rate limiting para prevenir spam)
   const sendMessage = useCallback(
     async (contenido: string, tipo: Mensaje['tipo'] = 'texto') => {
       if (!contenido.trim()) return
 
+      const now = Date.now()
+      if (now - lastSendTimeRef.current < SEND_RATE_LIMIT_MS) return
+      lastSendTimeRef.current = now
+
       if (isConnected) {
-        // Enviar via Socket.IO (tiempo real)
         emit('chat:message', {
           conversacionId,
           contenido,
           tipo,
         })
       } else {
-        // Fallback: enviar via REST API
         await crearMensaje({
           conversacionId,
           contenido,

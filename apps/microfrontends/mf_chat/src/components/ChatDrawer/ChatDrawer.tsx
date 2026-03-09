@@ -20,6 +20,7 @@ import { ChatPanel } from '../ChatPanel/ChatPanel'
 import { ChatWindow } from '../ChatWindow/ChatWindow'
 import { MembersPanel } from '../ChatWindow/MembersPanel'
 import { NewChatPanel, NewGroupPanel } from '../NewChat'
+import { ChatErrorBoundary } from '../shared/ChatErrorBoundary'
 
 type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup' | 'members'
 
@@ -298,7 +299,9 @@ export function ChatDrawer({
         },
       }}
     >
-      <ThemeProvider theme={theme}>{drawerContent}</ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <ChatErrorBoundary>{drawerContent}</ChatErrorBoundary>
+      </ThemeProvider>
     </Drawer>
   )
 }

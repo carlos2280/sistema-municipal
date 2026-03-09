@@ -1,7 +1,14 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
+import { memo } from 'react'
 import { FileText } from 'lucide-react'
+
+/** Elimina caracteres de control invisibles (excepto newline/tab) y null bytes */
+function sanitizeContent(text: string): string {
+  // biome-ignore lint: regex is intentional for security — strip C0/C1 control chars except \n \t
+  return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '').trim()
+}
 
 interface MessageBubbleProps {
   contenido: string
@@ -14,7 +21,7 @@ interface MessageBubbleProps {
   }
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   contenido,
   esPropio,
   hora,
@@ -22,6 +29,7 @@ export function MessageBubble({
   archivo,
 }: MessageBubbleProps) {
   const theme = useTheme()
+  const displayContent = sanitizeContent(contenido)
 
   return (
     <Box
@@ -44,8 +52,8 @@ export function MessageBubble({
             : '0 1px 2px rgba(0,0,0,0.08)',
         }}
       >
-        <Typography sx={{ fontSize: 14, lineHeight: 1.5 }}>
-          {contenido}
+        <Typography sx={{ fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {displayContent}
         </Typography>
 
         {/* Archivo adjunto */}
@@ -118,4 +126,4 @@ export function MessageBubble({
       </Box>
     </Box>
   )
-}
+})
