@@ -1,14 +1,48 @@
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { loadEnv } from "@/config/env";
 
-function createTransporter() {
+/**
+ * Envía un email usando Resend (producción) o Nodemailer/Mailhog (desarrollo).
+ */
+async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<void> {
   const env = loadEnv();
-  const isMailhog = !env.SMTP_USER;
-  return nodemailer.createTransport({
+
+  if (env.RESEND_API_KEY) {
+    const resend = new Resend(env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: `Sistema Municipal <${env.SMTP_FROM}>`,
+      to,
+      subject,
+      html,
+      text,
+    });
+    return;
+  }
+
+  // Fallback: Nodemailer (Mailhog en dev)
+  const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
-    ...(isMailhog ? {} : { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }),
+    secure: false,
+  });
+
+  await transporter.sendMail({
+    from: `"Sistema Municipal" <${env.SMTP_FROM}>`,
+    to,
+    subject,
+    html,
+    text,
   });
 }
 
@@ -23,10 +57,8 @@ export async function enviarEmailEnrollmentMfa({
 }): Promise<void> {
   const env = loadEnv();
   const enlace = `${env.APP_URL}/mfa-setup?token=${setupToken}`;
-  const transporter = createTransporter();
 
-  await transporter.sendMail({
-    from: `"Sistema Municipal" <${env.SMTP_FROM}>`,
+  await sendEmail({
     to: email,
     subject: "Configura tu autenticación de dos factores (MFA)",
     html: buildEnrollmentTemplate({ nombreCompleto, enlace }),
@@ -41,11 +73,7 @@ export async function enviarEmailMfaActivado({
   email: string;
   nombreCompleto: string;
 }): Promise<void> {
-  const env = loadEnv();
-  const transporter = createTransporter();
-
-  await transporter.sendMail({
-    from: `"Sistema Municipal" <${env.SMTP_FROM}>`,
+  await sendEmail({
     to: email,
     subject: "Autenticación de dos factores activada",
     html: buildActivacionTemplate({ nombreCompleto }),
