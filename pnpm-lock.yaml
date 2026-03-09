@@ -50,6 +50,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.75.5
         version: 5.90.21(react@19.2.3)
+      express:
+        specifier: ^5.1.0
+        version: 5.2.1
       react:
         specifier: ^19.1.0
         version: 19.2.3
@@ -530,6 +533,9 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.22.1
+      framer-motion:
+        specifier: ^12.34.5
+        version: 12.34.5(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.2.3)
