@@ -125,7 +125,11 @@ export default function AccountMenu({ onOpenCustomizer }: AccountMenuProps) {
 
   const handleLogout = async () => {
     handleClose();
-    await logout();
+    try {
+      await logout();
+    } catch {
+      // Si el backend falla, continuar con la limpieza local
+    }
     await persistor.purge();
     navigate("/login", { replace: true });
   };

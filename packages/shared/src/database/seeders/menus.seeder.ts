@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { menus } from "../";
 import type { DbExecutor } from "../../types/db";
 
@@ -238,6 +239,8 @@ export async function seedMenus(db: DbExecutor) {
 
     try {
         console.log("🌱 Insertando menu...");
+        // Limpiar menús existentes del sistema antes de insertar para evitar duplicados
+        await db.delete(menus).where(eq(menus.idSistema, 1));
         await db.insert(menus).values(datos);
         console.log("✅ seedMenus insertados correctamente");
     } catch (error) {

@@ -199,8 +199,13 @@ export const obtenerMenuporSistema: RequestHandler = async (req, res, next) => {
 };
 
 export const logout: RequestHandler = async (_req, res, _next) => {
-  res.clearCookie("token"); // Elimina la cookie de access token
-  res.clearCookie("refreshToken"); // Elimina la cookie de refresh token
+  const cookieOpts = {
+    httpOnly: true,
+    secure: NODE_ENV === "production",
+    sameSite: (NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
+  };
+  res.clearCookie("token", cookieOpts);
+  res.clearCookie("refreshToken", cookieOpts);
   res.status(200).json({ mensaje: "Sesión cerrada" });
 };
 
