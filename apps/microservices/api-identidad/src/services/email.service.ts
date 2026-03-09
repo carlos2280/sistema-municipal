@@ -4,13 +4,12 @@ import nodemailer from "nodemailer";
 import { generarTokenTemporal } from "../libs/utils/jwt.tokenTemoral";
 // Configuración del transportador de email
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number.parseInt(process.env.SMTP_PORT || "587"),
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: "cfuentesfuentes@gmail.com", // Tu dirección de correo electrónico
-    pass: "dbdq ehfj ywfn viuw", // Tu contraseña o token de aplicación
-  },
+  host: process.env.SMTP_HOST || "localhost",
+  port: Number.parseInt(process.env.SMTP_PORT || "1025"),
+  secure: false,
+  ...(process.env.SMTP_USER
+    ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } }
+    : {}),
 });
 
 // Función para enviar email de bienvenida

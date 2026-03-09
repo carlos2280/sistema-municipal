@@ -46,6 +46,8 @@ export const envSchema = z.object({
   SMTP_HOST: z.string().default("localhost"),
   SMTP_PORT: z.coerce.number().int().positive().default(1025),
   SMTP_FROM: z.string().default("no-reply@sistema-municipal.cl"),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
 
   // URL pública del frontend (para armar links en emails)
   APP_URL: z.string().url().default("http://localhost:5030"),

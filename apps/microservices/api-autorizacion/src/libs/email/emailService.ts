@@ -3,11 +3,12 @@ import { loadEnv } from "@/config/env";
 
 function createTransporter() {
   const env = loadEnv();
+  const isMailhog = !env.SMTP_USER;
   return nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: false,
-    // Sin auth — Mailhog en dev, relay autenticado en prod
+    ...(isMailhog ? {} : { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }),
   });
 }
 
