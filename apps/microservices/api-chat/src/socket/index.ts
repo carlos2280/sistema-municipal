@@ -1,7 +1,9 @@
 import type { Server as HttpServer } from 'node:http'
+import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
 import { env } from '../config/env.js'
+import { createRedisClient, getRedisClient } from '../libs/redis.js'
 import { setupCallHandlers } from './handlers/callHandler.js'
 import { setupChatHandlers } from './handlers/chatHandler.js'
 import { setupPresenceHandlers } from './handlers/presenceHandler.js'
@@ -13,17 +15,14 @@ interface TokenPayload {
 }
 
 // ---------------------------------------------------------------------------
-// Cache de suscripción al módulo chat (igual que en gateway, TTL 5 min)
+// Cache de suscripción al módulo chat (TTL 5 min)
 // ---------------------------------------------------------------------------
 const CACHE_TTL_MS = 5 * 60 * 1000
 
 const chatSubscriptionCache = new Map<string, { allowed: boolean; expiresAt: number }>()
 
 async function isChatModuleActive(tenantSlug: string): Promise<boolean> {
-  if (!env.PLATFORM_URL) {
-    // Si no hay PLATFORM_URL configurada, permitir (backward compat)
-    return true
-  }
+  if (!env.PLATFORM_URL) return true
 
   const now = Date.now()
   const cached = chatSubscriptionCache.get(tenantSlug)
@@ -38,10 +37,7 @@ async function isChatModuleActive(tenantSlug: string): Promise<boolean> {
       signal: AbortSignal.timeout(3000),
     })
 
-    if (!res.ok) {
-      // Fail-open: si no se puede verificar, permitir
-      return true
-    }
+    if (!res.ok) return true
 
     const modules = (await res.json()) as { codigo: string }[]
     const allowed = modules.some((m) => m.codigo === 'chat')
@@ -53,12 +49,27 @@ async function isChatModuleActive(tenantSlug: string): Promise<boolean> {
 
     return allowed
   } catch {
-    // Fail-open ante errores de red
     return true
   }
 }
 
-export function initializeSocket(httpServer: HttpServer): Server {
+// ---------------------------------------------------------------------------
+// Inicialización del servidor Socket.IO con Redis adapter
+// ---------------------------------------------------------------------------
+export async function initializeSocket(httpServer: HttpServer): Promise<Server> {
+  const redis = getRedisClient()
+
+  // Socket.IO Redis adapter necesita 2 clientes dedicados: pub y sub
+  const pubClient = createRedisClient()
+  const subClient = createRedisClient()
+
+  pubClient.on('error', (err) => {
+    console.error('[Redis:pub] Error:', err.message)
+  })
+  subClient.on('error', (err) => {
+    console.error('[Redis:sub] Error:', err.message)
+  })
+
   const io = new Server(httpServer, {
     cors: {
       origin: env.CORS_ORIGIN,
@@ -68,16 +79,20 @@ export function initializeSocket(httpServer: HttpServer): Server {
     transports: ['websocket', 'polling'],
   })
 
-  // Middleware de autenticación + verificación de suscripción
+  // Configurar Redis adapter para comunicación entre instancias
+  io.adapter(createAdapter(pubClient, subClient))
+  console.log('[Socket.IO] Redis adapter configurado')
+
+  // -----------------------------------------------------------------------
+  // Middleware: autenticación JWT + verificación de suscripción al módulo
+  // -----------------------------------------------------------------------
   io.use(async (socket, next) => {
-    // Intentar obtener token de auth o de cookies
     let token = socket.handshake.auth.token as string | undefined
 
-    // Si no hay token en auth, buscar en cookies
     if (!token) {
       const cookies = socket.handshake.headers.cookie
       if (cookies) {
-        const tokenCookie = cookies.split(';').find(c => c.trim().startsWith('token='))
+        const tokenCookie = cookies.split(';').find((c) => c.trim().startsWith('token='))
         if (tokenCookie) {
           token = tokenCookie.split('=')[1]?.trim()
         }
@@ -94,7 +109,6 @@ export function initializeSocket(httpServer: HttpServer): Server {
       socket.data.email = decoded.email
       socket.data.tenantSlug = decoded.tenantSlug || 'default'
 
-      // Verificar que el tenant tiene el módulo chat contratado
       const tenantSlug = decoded.tenantSlug || 'default'
       const chatActive = await isChatModuleActive(tenantSlug)
 
@@ -114,24 +128,22 @@ export function initializeSocket(httpServer: HttpServer): Server {
     }
   })
 
+  // -----------------------------------------------------------------------
   // Manejo de conexiones
+  // -----------------------------------------------------------------------
   io.on('connection', (socket) => {
-    console.log(
-      `[Socket] Nueva conexión: ${socket.id} (Usuario: ${socket.data.userId})`
-    )
-
-    // Configurar handlers
-    setupChatHandlers(io, socket)
-    setupPresenceHandlers(io, socket)
-    setupCallHandlers(io, socket)
+    console.log(`[Socket] Nueva conexión: ${socket.id} (Usuario: ${socket.data.userId})`)
 
     // Unirse a sala personal del usuario
     socket.join(`user:${socket.data.userId}`)
 
+    // Configurar handlers (el orden no importa, cada uno es independiente)
+    setupChatHandlers(io, socket)
+    setupPresenceHandlers(io, socket, redis)
+    setupCallHandlers(io, socket, redis)
+
     socket.on('disconnect', (reason) => {
-      console.log(
-        `[Socket] Desconexión: ${socket.id} (Razón: ${reason})`
-      )
+      console.log(`[Socket] Desconexión: ${socket.id} (Razón: ${reason})`)
     })
 
     socket.on('error', (error) => {

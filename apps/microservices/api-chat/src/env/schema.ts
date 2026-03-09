@@ -12,6 +12,7 @@ export const envSchema = z.object({
   LIVEKIT_API_KEY: z.string().default(''),
   LIVEKIT_API_SECRET: z.string().default(''),
   PLATFORM_URL: z.string().url().optional(),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
 })
 
 export type Env = z.infer<typeof envSchema>

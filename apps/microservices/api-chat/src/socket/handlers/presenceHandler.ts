@@ -1,16 +1,22 @@
 import { eq } from 'drizzle-orm'
+import type { RedisClient as Redis } from '../../libs/redis.js'
 import type { Server, Socket } from 'socket.io'
 import { db } from '../../db/client.js'
 import { estadoUsuarios } from '../../db/schemas/estadoUsuarios.schema.js'
+import { connectionTracker } from '../connectionTracker.js'
 
-export function setupPresenceHandlers(io: Server, socket: Socket) {
+export function setupPresenceHandlers(_io: Server, socket: Socket, redis: Redis) {
   const userId = socket.data.userId as number
-  // Para sockets se usa la DB por defecto como fallback
   const socketDb = db
 
-  // Marcar usuario como online al conectar
-  const setOnline = async () => {
+  // -----------------------------------------------------------------------
+  // Registrar conexión
+  // -----------------------------------------------------------------------
+  const registerConnection = async () => {
     try {
+      const totalSockets = await connectionTracker.addSocket(redis, userId, socket.id)
+
+      // Actualizar estado en DB (siempre online mientras haya al menos 1 socket)
       await socketDb
         .insert(estadoUsuarios)
         .values({
@@ -28,35 +34,52 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
           },
         })
 
-      // Notificar a todos que el usuario está online
-      socket.broadcast.emit('user:online', { userId })
-      console.log(`[Socket] Usuario ${userId} está online`)
+      // Solo notificar online si es el primer socket (evita broadcasts redundantes)
+      if (totalSockets === 1) {
+        socket.broadcast.emit('user:online', { userId })
+      }
+
+      console.log(
+        `[Presence] Usuario ${userId} conectado (socket: ${socket.id}, total: ${totalSockets})`
+      )
     } catch (error) {
-      console.error('[Socket] Error actualizando estado online:', error)
+      console.error('[Presence] Error registrando conexión:', error)
     }
   }
 
-  // Marcar usuario como offline al desconectar
-  const setOffline = async () => {
+  // -----------------------------------------------------------------------
+  // Desregistrar conexión
+  // -----------------------------------------------------------------------
+  const unregisterConnection = async () => {
     try {
-      await socketDb
-        .update(estadoUsuarios)
-        .set({
-          estado: 'offline',
-          socketId: null,
-          ultimaConexion: new Date(),
-        })
-        .where(eq(estadoUsuarios.usuarioId, userId))
+      const remainingSockets = await connectionTracker.removeSocket(redis, userId, socket.id)
 
-      // Notificar a todos que el usuario está offline
-      socket.broadcast.emit('user:offline', { userId })
-      console.log(`[Socket] Usuario ${userId} está offline`)
+      if (remainingSockets === 0) {
+        // Último socket desconectado → marcar offline
+        await socketDb
+          .update(estadoUsuarios)
+          .set({
+            estado: 'offline',
+            socketId: null,
+            ultimaConexion: new Date(),
+          })
+          .where(eq(estadoUsuarios.usuarioId, userId))
+
+        socket.broadcast.emit('user:offline', { userId })
+        console.log(`[Presence] Usuario ${userId} offline (último socket desconectado)`)
+      } else {
+        console.log(
+          `[Presence] Socket ${socket.id} desconectado, usuario ${userId} sigue online (restantes: ${remainingSockets})`
+        )
+      }
     } catch (error) {
-      console.error('[Socket] Error actualizando estado offline:', error)
+      console.error('[Presence] Error desregistrando conexión:', error)
     }
   }
 
+  // -----------------------------------------------------------------------
   // Obtener lista de usuarios online
+  // -----------------------------------------------------------------------
   socket.on('presence:get-online', async () => {
     try {
       const onlineUsers = await socketDb
@@ -64,15 +87,19 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
         .from(estadoUsuarios)
         .where(eq(estadoUsuarios.estado, 'online'))
 
-      const userIds = onlineUsers.map((u) => u.usuarioId)
-      socket.emit('presence:online-list', userIds)
+      socket.emit(
+        'presence:online-list',
+        onlineUsers.map((u) => u.usuarioId)
+      )
     } catch (error) {
-      console.error('[Socket] Error obteniendo usuarios online:', error)
+      console.error('[Presence] Error obteniendo usuarios online:', error)
       socket.emit('presence:online-list', [])
     }
   })
 
-  // Cambiar estado manualmente
+  // -----------------------------------------------------------------------
+  // Cambiar estado manualmente (away, busy, online)
+  // -----------------------------------------------------------------------
   socket.on('presence:status', async ({ status }: { status: 'online' | 'away' | 'busy' }) => {
     try {
       await socketDb
@@ -82,13 +109,13 @@ export function setupPresenceHandlers(io: Server, socket: Socket) {
 
       socket.broadcast.emit('user:status', { userId, status })
     } catch (error) {
-      console.error('[Socket] Error cambiando estado:', error)
+      console.error('[Presence] Error cambiando estado:', error)
     }
   })
 
-  // Ejecutar setOnline al inicializar
-  setOnline()
+  // Ejecutar al inicializar
+  registerConnection()
 
   // Registrar handler de desconexión
-  socket.on('disconnect', setOffline)
+  socket.on('disconnect', unregisterConnection)
 }
