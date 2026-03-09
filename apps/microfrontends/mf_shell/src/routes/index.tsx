@@ -5,7 +5,7 @@ import ProtectedRoute from '../component/ProtectedRoute';
 import { useMenu } from '../hook/useMenu';
 import AppLayout from '../layout/AppLayout';
 import DashboardPage from '../pages/DashboardPage';
-import Login from '../pages/login/Login';
+import LoginPage from '../pages/login/LoginPage';
 import { generateRoutesFromMenu } from '../utils/generateRoutesFromMenu';
 
 export const AppRoutes = () => {
@@ -14,7 +14,7 @@ export const AppRoutes = () => {
   const routes = [
     {
       path: '/login',
-      element: <Login />,
+      element: <LoginPage />,
     },
     {
       path: '/',

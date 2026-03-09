@@ -4,7 +4,7 @@ import ProtectedRoute from "../component/ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
-import Login from "../pages/login/Login";
+import LoginPage from "../pages/login/LoginPage";
 import MfaSetupPage from "../pages/mfa-setup/MfaSetupPage";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "../utils/componentsMap";
@@ -73,7 +73,7 @@ export const createAppRouter = async ({
 	return createBrowserRouter([
 		{
 			path: "/login",
-			element: <Login />,
+			element: <LoginPage />,
 		},
 		{
 			path: "/contrasena-temporal",

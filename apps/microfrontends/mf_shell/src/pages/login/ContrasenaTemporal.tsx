@@ -1,115 +1,282 @@
-import { Alert } from '@mui/material';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import MuiCard from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import { FormProvider } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
-import useContrasenaTemporal from '../../hook/useContrasenaTemporal';
-import FormContrasenaTemporal from './form/FormContrasenaTemporal';
+/**
+ * ContrasenaTemporal — Temporary password change page
+ *
+ * URL: /contrasena-temporal?token=<token>
+ * Split-panel layout with branding + form card.
+ */
 
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
-  },
-  boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
+import {
+	Alert,
+	Box,
+	IconButton,
+	InputAdornment,
+	Stack,
+	TextField,
+	styled,
+} from "@mui/material";
+import { Eye, EyeOff, KeyRound, Lock, Mail, ShieldCheck } from "lucide-react";
+import { memo, useCallback, useState } from "react";
+import { Controller, FormProvider } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+import useContrasenaTemporal from "../../hook/useContrasenaTemporal";
+import type { BrandingFeature } from "./components/BrandingPanel";
+import { AuthLayout } from "./components/AuthLayout";
+import { AuthCard } from "./components/AuthCard";
+import { AuthHeader } from "./components/AuthHeader";
+import { AuthFooter } from "./components/AuthFooter";
+
+// ── Branding features ────────────────────────────────────────────────────────
+
+const FEATURES: BrandingFeature[] = [
+	{
+		icon: KeyRound,
+		title: "Cambio de contraseña",
+		description:
+			"Tu contraseña temporal debe ser cambiada para acceder al sistema de forma segura",
+	},
+	{
+		icon: ShieldCheck,
+		title: "Requisitos de seguridad",
+		description:
+			"Mínimo 8 caracteres, mayúscula, minúscula, número y carácter especial",
+	},
+];
+
+// ── Styled ───────────────────────────────────────────────────────────────────
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	"& .MuiOutlinedInput-root": {
+		borderRadius: 8,
+		"&:hover fieldset": {
+			borderColor: theme.palette.primary.main,
+		},
+		"&.Mui-focused fieldset": {
+			borderWidth: 2,
+		},
+	},
 }));
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
-  padding: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(4),
-  },
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
-    ...theme.applyStyles('dark', {
-      backgroundImage:
-        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-    }),
-  },
+const PrimaryButton = styled("button")(({ theme }) => ({
+	width: "100%",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: 8,
+	padding: "12px 20px",
+	border: "none",
+	borderRadius: 8,
+	background: "#0d6b5e",
+	color: "#fff",
+	fontFamily: "inherit",
+	fontSize: "0.875rem",
+	fontWeight: 600,
+	cursor: "pointer",
+	transition: "all 100ms ease",
+	"&:hover:not(:disabled)": {
+		background: "#0a5249",
+		transform: "translateY(-1px)",
+		boxShadow: "0 4px 12px rgba(13, 107, 94, 0.3)",
+	},
+	"&:active:not(:disabled)": { transform: "translateY(0)" },
+	"&:disabled": { opacity: 0.5, cursor: "not-allowed" },
+	"&:focus-visible": { outline: "2px solid #0d6b5e", outlineOffset: 2 },
+	...(theme.palette.mode === "dark" && {
+		"&:hover:not(:disabled)": {
+			background: "#0a5249",
+			transform: "translateY(-1px)",
+			boxShadow: "0 4px 12px rgba(16, 137, 122, 0.35)",
+		},
+	}),
 }));
 
-const ContrasenaTemporal = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') ?? undefined;
+// ── Form fields (isolated to prevent parent re-renders) ──────────────────────
 
-  const { data, isLoading, isError, error, methods, handleSubmit } =
-    useContrasenaTemporal(token);
+const TempPasswordForm = memo(function TempPasswordForm() {
+	const [showTempPwd, setShowTempPwd] = useState(false);
+	const [showNewPwd, setShowNewPwd] = useState(false);
 
-  console.log({
-    data,
-    isError,
-    isLoading,
-    error,
-  });
+	const toggleTempPwd = useCallback(() => setShowTempPwd((p) => !p), []);
+	const toggleNewPwd = useCallback(() => setShowNewPwd((p) => !p), []);
 
-  return (
-    <SignInContainer direction="column" justifyContent="space-between">
-      <FormProvider {...methods}>
-        <Card variant="outlined">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-          >
-            [M]
-          </Typography>
+	return (
+		<Stack spacing={2.5}>
+			<Controller
+				name="correo"
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						label="Correo electrónico"
+						type="email"
+						value={field.value ?? ""}
+						disabled
+						error={invalid}
+						helperText={error?.message}
+						slotProps={{
+							input: {
+								startAdornment: (
+									<InputAdornment position="start">
+										<Mail size={18} style={{ opacity: 0.5 }} />
+									</InputAdornment>
+								),
+							},
+						}}
+					/>
+				)}
+			/>
 
-          <Alert variant="filled" severity="warning">
-            Debe modificar su contraseña.
-          </Alert>
+			<Controller
+				name="contrasenaTemporal"
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						label="Contraseña temporal"
+						type={showTempPwd ? "text" : "password"}
+						value={field.value ?? ""}
+						error={invalid}
+						helperText={error?.message}
+						slotProps={{
+							input: {
+								startAdornment: (
+									<InputAdornment position="start">
+										<KeyRound size={18} style={{ opacity: 0.5 }} />
+									</InputAdornment>
+								),
+								endAdornment: (
+									<InputAdornment position="end">
+										<IconButton
+											size="small"
+											onClick={toggleTempPwd}
+											edge="end"
+											aria-label={
+												showTempPwd
+													? "Ocultar contraseña"
+													: "Mostrar contraseña"
+											}
+										>
+											{showTempPwd ? (
+												<EyeOff size={18} />
+											) : (
+												<Eye size={18} />
+											)}
+										</IconButton>
+									</InputAdornment>
+								),
+							},
+						}}
+					/>
+				)}
+			/>
 
-          {isError && (
-            <Alert variant="filled" severity="error">
-              Tiempo caducado, informe al administrador.
-            </Alert>
-          )}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
-          >
-            <FormContrasenaTemporal />
-            <Button
-              size="large"
-              fullWidth
-              variant="contained"
-              disabled={!methods.formState.isValid}
-              onClick={methods.handleSubmit(handleSubmit)}
-            >
-              Cambiar contraseña
-            </Button>
-          </Box>
-        </Card>
-      </FormProvider>
-    </SignInContainer>
-  );
-};
+			<Controller
+				name="contrasenaNueva"
+				render={({ field, fieldState: { invalid, error } }) => (
+					<StyledTextField
+						{...field}
+						fullWidth
+						label="Nueva contraseña"
+						type={showNewPwd ? "text" : "password"}
+						value={field.value ?? ""}
+						error={invalid}
+						helperText={error?.message}
+						slotProps={{
+							input: {
+								startAdornment: (
+									<InputAdornment position="start">
+										<Lock size={18} style={{ opacity: 0.5 }} />
+									</InputAdornment>
+								),
+								endAdornment: (
+									<InputAdornment position="end">
+										<IconButton
+											size="small"
+											onClick={toggleNewPwd}
+											edge="end"
+											aria-label={
+												showNewPwd
+													? "Ocultar contraseña"
+													: "Mostrar contraseña"
+											}
+										>
+											{showNewPwd ? (
+												<EyeOff size={18} />
+											) : (
+												<Eye size={18} />
+											)}
+										</IconButton>
+									</InputAdornment>
+								),
+							},
+						}}
+					/>
+				)}
+			/>
+		</Stack>
+	);
+});
 
-export default ContrasenaTemporal;
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default function ContrasenaTemporal() {
+	const [searchParams] = useSearchParams();
+	const token = searchParams.get("token") ?? undefined;
+
+	const { isError, methods, handleSubmit } = useContrasenaTemporal(token);
+
+	return (
+		<AuthLayout features={FEATURES}>
+			<AuthCard>
+				<AuthHeader
+					icon={KeyRound}
+					iconVariant="gold"
+					title="Cambiar contraseña temporal"
+					subtitle="Tu cuenta requiere un cambio de contraseña antes de continuar"
+				/>
+
+				<Alert
+					variant="filled"
+					severity="warning"
+					sx={{ mb: 2, borderRadius: 2 }}
+				>
+					Debe modificar su contraseña.
+				</Alert>
+
+				{isError && (
+					<Alert
+						variant="filled"
+						severity="error"
+						sx={{ mb: 2, borderRadius: 2 }}
+					>
+						Tiempo caducado, informe al administrador.
+					</Alert>
+				)}
+
+				<FormProvider {...methods}>
+					<Box sx={{ mb: 3 }}>
+						<TempPasswordForm />
+					</Box>
+
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							gap: 1.5,
+						}}
+					>
+						<PrimaryButton
+							type="button"
+							disabled={!methods.formState.isValid}
+							onClick={methods.handleSubmit(handleSubmit)}
+						>
+							<Lock size={18} />
+							<span>Cambiar contraseña</span>
+						</PrimaryButton>
+					</Box>
+				</FormProvider>
+
+				<AuthFooter />
+			</AuthCard>
+		</AuthLayout>
+	);
+}
