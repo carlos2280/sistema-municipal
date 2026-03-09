@@ -156,7 +156,8 @@ export function ConversationItem({
           <Typography
             sx={{
               fontSize: 13,
-              color: 'text.secondary',
+              color: noLeidos > 0 ? 'text.primary' : 'text.secondary',
+              fontWeight: noLeidos > 0 ? 500 : 400,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',

@@ -1,10 +1,11 @@
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { and, count, desc, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
 import {
   type Conversacion,
   type NewConversacion,
   conversaciones,
 } from '../db/schemas/conversaciones.schema.js'
+import { mensajes } from '../db/schemas/mensajes.schema.js'
 import {
   type NewParticipante,
   participantes,
@@ -13,9 +14,12 @@ import { usuarios } from '../db/schemas/usuarios.schema.js'
 
 export const conversacionesService = {
   async obtenerConversacionesPorUsuario(db: DbClient, usuarioId: number) {
-    // Obtener IDs de conversaciones del usuario
+    // Obtener IDs de conversaciones del usuario con su última lectura
     const conversacionesDelUsuario = await db
-      .select({ id: conversaciones.id })
+      .select({
+        id: conversaciones.id,
+        ultimaLectura: participantes.ultimaLectura,
+      })
       .from(conversaciones)
       .innerJoin(participantes, eq(participantes.conversacionId, conversaciones.id))
       .where(eq(participantes.usuarioId, usuarioId))
@@ -25,6 +29,12 @@ export const conversacionesService = {
 
     if (conversacionIds.length === 0) {
       return []
+    }
+
+    // Mapa de última lectura por conversación
+    const ultimaLecturaPorConv = new Map<number, Date | null>()
+    for (const c of conversacionesDelUsuario) {
+      ultimaLecturaPorConv.set(c.id, c.ultimaLectura)
     }
 
     // Obtener datos completos de las conversaciones
@@ -47,6 +57,79 @@ export const conversacionesService = {
       .innerJoin(usuarios, eq(usuarios.id, participantes.usuarioId))
       .where(inArray(participantes.conversacionId, conversacionIds))
 
+    // Obtener último mensaje de cada conversación (con nombre del remitente)
+    // Usamos una subquery con DISTINCT ON para eficiencia
+    const ultimosMensajes = await db
+      .select({
+        id: mensajes.id,
+        conversacionId: mensajes.conversacionId,
+        contenido: mensajes.contenido,
+        tipo: mensajes.tipo,
+        createdAt: mensajes.createdAt,
+        remitenteId: mensajes.remitenteId,
+        remitente: usuarios.nombreCompleto,
+      })
+      .from(mensajes)
+      .innerJoin(usuarios, eq(usuarios.id, mensajes.remitenteId))
+      .where(
+        and(
+          inArray(mensajes.conversacionId, conversacionIds),
+          eq(mensajes.eliminado, false),
+        )
+      )
+      .orderBy(mensajes.conversacionId, desc(mensajes.createdAt))
+
+    // Agrupar: solo el primer mensaje por conversación (el más reciente)
+    const ultimoMensajePorConv = new Map<number, {
+      id: number
+      contenido: string | null
+      tipo: string | null
+      createdAt: Date | null
+      remitenteId: number
+      remitente: string
+    }>()
+    for (const m of ultimosMensajes) {
+      if (!ultimoMensajePorConv.has(m.conversacionId)) {
+        ultimoMensajePorConv.set(m.conversacionId, {
+          id: m.id,
+          contenido: m.contenido,
+          tipo: m.tipo,
+          createdAt: m.createdAt,
+          remitenteId: m.remitenteId,
+          remitente: m.remitente,
+        })
+      }
+    }
+
+    // Contar mensajes no leídos por conversación
+    const noLeidosCounts = await db
+      .select({
+        conversacionId: mensajes.conversacionId,
+        count: count(),
+      })
+      .from(mensajes)
+      .innerJoin(participantes, and(
+        eq(participantes.conversacionId, mensajes.conversacionId),
+        eq(participantes.usuarioId, usuarioId),
+      ))
+      .where(
+        and(
+          inArray(mensajes.conversacionId, conversacionIds),
+          eq(mensajes.eliminado, false),
+          // Mensajes posteriores a la última lectura del usuario
+          or(
+            isNull(participantes.ultimaLectura),
+            gt(mensajes.createdAt, participantes.ultimaLectura),
+          ),
+        )
+      )
+      .groupBy(mensajes.conversacionId)
+
+    const noLeidosPorConv = new Map<number, number>()
+    for (const n of noLeidosCounts) {
+      noLeidosPorConv.set(n.conversacionId, n.count)
+    }
+
     // Agrupar participantes por conversación
     const participantesPorConversacion = new Map<number, Array<{
       usuarioId: number
@@ -68,22 +151,33 @@ export const conversacionesService = {
     }
 
     // Transformar resultado para el frontend
-    return conversacionesData.map(conv => ({
-      id: conv.id,
-      tipo: conv.tipo,
-      nombre: conv.nombre,
-      descripcion: conv.descripcion,
-      avatarUrl: conv.avatarUrl,
-      creadorId: conv.creadorId,
-      activo: conv.activo,
-      sistema: conv.sistema ?? false,
-      departamentoId: conv.departamentoId,
-      createdAt: conv.createdAt,
-      updatedAt: conv.updatedAt,
-      participantes: participantesPorConversacion.get(conv.id) || [],
-      ultimoMensaje: null,
-      mensajesNoLeidos: 0,
-    }))
+    return conversacionesData.map(conv => {
+      const ultimo = ultimoMensajePorConv.get(conv.id)
+      return {
+        id: conv.id,
+        tipo: conv.tipo,
+        nombre: conv.nombre,
+        descripcion: conv.descripcion,
+        avatarUrl: conv.avatarUrl,
+        creadorId: conv.creadorId,
+        activo: conv.activo,
+        sistema: conv.sistema ?? false,
+        departamentoId: conv.departamentoId,
+        createdAt: conv.createdAt,
+        updatedAt: conv.updatedAt,
+        participantes: participantesPorConversacion.get(conv.id) || [],
+        ultimoMensaje: ultimo
+          ? {
+              id: ultimo.id,
+              contenido: ultimo.contenido ?? '',
+              tipo: ultimo.tipo,
+              createdAt: ultimo.createdAt?.toISOString() ?? '',
+              remitente: { id: ultimo.remitenteId, nombreCompleto: ultimo.remitente },
+            }
+          : null,
+        mensajesNoLeidos: noLeidosPorConv.get(conv.id) ?? 0,
+      }
+    })
   },
 
   async obtenerConversacionPorId(db: DbClient, id: number): Promise<Conversacion | undefined> {

@@ -64,6 +64,8 @@ declare module 'mf_store/store' {
     avatarUrl?: string
     activo: boolean
     creadorId: number
+    sistema?: boolean
+    departamentoId?: number
     createdAt: string
     updatedAt: string
     participantes: Participante[]

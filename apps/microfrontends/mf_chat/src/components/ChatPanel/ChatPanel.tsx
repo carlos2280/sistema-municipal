@@ -83,10 +83,28 @@ export function ChatPanel({
         }
       }
 
+      // Construir preview del último mensaje
+      let ultimoMensajePreview = 'Sin mensajes'
+      if (conv.ultimoMensaje) {
+        const msg = conv.ultimoMensaje
+        let preview = msg.contenido
+        if (msg.tipo === 'imagen') preview = 'Imagen'
+        else if (msg.tipo === 'archivo') preview = 'Archivo'
+        else if (msg.tipo === 'sistema') preview = msg.contenido
+
+        // En grupos, prefijo con nombre del remitente
+        if (conv.tipo === 'grupo' && msg.remitente) {
+          const firstName = msg.remitente.nombreCompleto.split(' ')[0]
+          ultimoMensajePreview = `${firstName}: ${preview}`
+        } else {
+          ultimoMensajePreview = preview
+        }
+      }
+
       return {
         id: conv.id,
         nombre,
-        ultimoMensaje: conv.ultimoMensaje?.contenido || 'Sin mensajes',
+        ultimoMensaje: ultimoMensajePreview,
         hora: conv.ultimoMensaje
           ? formatMessageTime(conv.ultimoMensaje.createdAt)
           : '',

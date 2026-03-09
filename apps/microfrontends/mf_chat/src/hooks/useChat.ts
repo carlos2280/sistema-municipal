@@ -111,6 +111,8 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
           }
           return [...prev, mensaje]
         })
+        // Marcar como leído: el usuario está viendo esta conversación
+        emit('chat:read', { conversacionId })
       }
     }
 

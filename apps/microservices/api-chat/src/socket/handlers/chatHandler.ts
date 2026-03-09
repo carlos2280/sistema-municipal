@@ -1,5 +1,7 @@
+import { and, eq } from 'drizzle-orm'
 import type { Server, Socket } from 'socket.io'
 import { db } from '../../db/client.js'
+import { participantes } from '../../db/schemas/participantes.schema.js'
 import { conversacionesService } from '../../services/conversaciones.service.js'
 import { mensajesService } from '../../services/mensajes.service.js'
 
@@ -41,6 +43,18 @@ export function setupChatHandlers(io: Server, socket: Socket) {
 
       const room = `conversation:${conversacionId}`
       socket.join(room)
+
+      // Marcar como leído al unirse a la conversación
+      await socketDb
+        .update(participantes)
+        .set({ ultimaLectura: new Date() })
+        .where(
+          and(
+            eq(participantes.conversacionId, conversacionId),
+            eq(participantes.usuarioId, userId),
+          )
+        )
+
       console.log(`[Socket] Usuario ${userId} se unió a ${room}`)
     } catch (error) {
       console.error('[Socket] Error en chat:join:', error)
@@ -78,14 +92,40 @@ export function setupChatHandlers(io: Server, socket: Socket) {
         tipo,
       })
 
-      // Emitir a todos en la sala (incluyendo al remitente)
+      // Emitir a la sala de conversación (quienes la tienen abierta)
       const room = `conversation:${conversacionId}`
       io.to(room).emit('chat:message', mensaje)
+
+      // Emitir a las salas personales de TODOS los participantes
+      // para que actualicen su lista de conversaciones (preview, no leídos, orden)
+      const participantesConv = await conversacionesService.obtenerParticipantes(socketDb, conversacionId)
+      for (const p of participantesConv) {
+        if (p.usuarioId !== userId) {
+          io.to(`user:${p.usuarioId}`).emit('chat:message', mensaje)
+        }
+      }
 
       console.log(`[Socket] Mensaje enviado en conversación ${conversacionId}`)
     } catch (error) {
       console.error('[Socket] Error en chat:message:', error)
       socket.emit('error', { message: 'Error al enviar mensaje' })
+    }
+  })
+
+  // Marcar conversación como leída (cuando el usuario está viendo y llegan mensajes)
+  socket.on('chat:read', async ({ conversacionId }: ChatJoinPayload) => {
+    try {
+      await socketDb
+        .update(participantes)
+        .set({ ultimaLectura: new Date() })
+        .where(
+          and(
+            eq(participantes.conversacionId, conversacionId),
+            eq(participantes.usuarioId, userId),
+          )
+        )
+    } catch (error) {
+      console.error('[Socket] Error en chat:read:', error)
     }
   })
 
@@ -95,6 +135,7 @@ export function setupChatHandlers(io: Server, socket: Socket) {
     socket.to(room).emit('chat:typing', {
       userId,
       isTyping,
+      conversacionId,
     })
   })
 }
