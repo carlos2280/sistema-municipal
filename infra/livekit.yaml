@@ -7,6 +7,6 @@ rtc:
 redis:
   address: municipal-redis:6379
 keys:
-  APImunic1palLK: secret_municipal_lk_2024
+  APImunic1palLK: MSQ5qqV5LchTak6KR9n6F1iRTgEW8kszoFbr1ird
 logging:
   level: info
