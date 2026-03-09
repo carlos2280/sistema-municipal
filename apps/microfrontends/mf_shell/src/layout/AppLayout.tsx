@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { useAppSelector, selectSistemaId } from "mf_store/store";
+import { useAppSelector, selectSistemaId, useObtenerConversacionesQuery } from "mf_store/store";
 import MainMenu from "../component/mainMenu/MainMenu";
 import AccountMenu from "./AccountMenu";
 import CustomizedMenus from "./CustomizedMenus";
@@ -53,7 +53,6 @@ import { EconomicIndicatorsExamples } from "./EconomicIndicatorsExamples";
 import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
 import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
-import { useTheme as useAppTheme } from "mf_ui/theme";
 import { useModuleSync } from "../hooks/useModuleSync";
 import { StatusBar } from "./StatusBar";
 
@@ -289,6 +288,12 @@ export default function AppLayout() {
   const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
   const [orgOpen, setOrgOpen] = useState(false);
 
+  // Total de mensajes no leídos para el badge del botón de chat
+  const { data: conversaciones } = useObtenerConversacionesQuery() as {
+    data?: { mensajesNoLeidos: number }[]
+  }
+  const totalUnread = conversaciones?.reduce((acc, c) => acc + (c.mensajesNoLeidos || 0), 0) ?? 0;
+
   const handleDrawerToggle = () => setDrawerOpen((prev) => !prev);
 
   const isCollapsed = !isMobile && !drawerOpen;
@@ -330,7 +335,7 @@ export default function AppLayout() {
               lineHeight: 1.2,
             }}
           >
-            Muni de Maipu
+            Muni de Pelarco
           </Typography>
           <Typography
             sx={{
@@ -519,7 +524,7 @@ export default function AppLayout() {
                   sx={{ position: "relative" }}
                 >
                   <MessageSquare size={18} />
-                  <NotifBadge>5</NotifBadge>
+                  {totalUnread > 0 && <NotifBadge>{totalUnread}</NotifBadge>}
                 </AppBarIconBtn>
               </Tooltip>
 

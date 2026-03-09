@@ -1,15 +1,28 @@
 declare module "mf_ui/theme" {
 	import type { ReactNode, ComponentType } from "react";
+	import type { Theme } from "@mui/material/styles";
 
 	export const ThemeProvider: ComponentType<{ children: ReactNode }>;
 	export const ThemeContext: React.Context<{
 		toggleTheme: () => void;
 		isDarkTheme: boolean;
 	}>;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	export const lightTheme: any; // Puedes tipar esto mejor
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	export const darkTheme: any; // Puedes tipar esto mejor
+	export const useTheme: () => {
+		isDarkMode: boolean;
+		toggleTheme: () => void;
+		theme: Theme;
+	};
+	export const lightTheme: Theme;
+	export const darkTheme: Theme;
+}
+
+declare module "mf_ui/components" {
+	import type { FC, ReactNode } from "react";
+
+	export const ThemeCustomizer: FC<{ open: boolean; onClose: () => void }>;
+	export const PageHeader: FC<{ title: string; subtitle?: string }>;
+	export const AppLoader: FC;
+	export const EmptyState: FC<{ message: string; icon?: ReactNode }>;
 }
 
 declare module "mf_contabilidad/routes" {
