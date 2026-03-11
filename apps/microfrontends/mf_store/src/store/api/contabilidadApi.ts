@@ -43,6 +43,17 @@ interface CrearPlanesCuentaRequest {
 	parentId?: number | null;
 }
 
+interface PlanesCuentaResponse {
+	id: number;
+	anoContable: number;
+	codigo: string;
+	nombre: string;
+	contraCuenta?: string;
+	tipoCuentaId: number;
+	subgrupoId?: number | null;
+	parentId?: number | null;
+}
+
 interface ActualizarPlanesCuentaRequest {
 	id: number;
 	nombre?: string;
@@ -81,7 +92,7 @@ export const contabilidadApi = baseApi.injectEndpoints({
 			query: () => "contabilidad/plan-cuentas/arbol-completo",
 			providesTags: ["PlanCuentas"],
 		}),
-		crearPlanesCuenta: builder.mutation<void, CrearPlanesCuentaRequest>({
+		crearPlanesCuenta: builder.mutation<PlanesCuentaResponse, CrearPlanesCuentaRequest>({
 			query: (data) => ({
 				url: "contabilidad/plan-cuentas",
 				method: "POST",
@@ -135,4 +146,4 @@ export const {
 } = contabilidadApi;
 
 // Exportar tipos para uso externo
-export type { VerificarCodigoResponse, CuentaResumen };
+export type { VerificarCodigoResponse, CuentaResumen, PlanesCuentaResponse };

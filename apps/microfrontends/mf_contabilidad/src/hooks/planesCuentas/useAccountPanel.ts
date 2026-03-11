@@ -8,6 +8,8 @@ import { formatCodigo, type TreeItemData } from '../../utils/planDeCuentasUtils'
 import useHookFormSchema from '../useHookFormSchema';
 import { useVerificarCodigo, type CodigoStatus } from './useVerificarCodigo';
 
+const MAX_NIVEL_CUENTA = 8;
+
 // Tipo del formulario de cuenta
 interface AccountFormData {
   id?: number;
@@ -89,11 +91,16 @@ interface UseAccountPanelReturn {
   handleSubmit: (data: AccountFormData) => Promise<void>;
 }
 
+interface UseAccountPanelOptions {
+  onExpandNode?: (id: string) => void;
+}
+
 /**
  * Hook unificado para manejar el panel de crear/editar cuentas.
  * Consolida la lógica de useCreatePlanCuenta y usePlanDeCuentas.
  */
-export function useAccountPanel(): UseAccountPanelReturn {
+export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPanelReturn {
+  const { onExpandNode } = options ?? {};
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<PanelMode>(null);
   const [selectedItem, setSelectedItem] = useState<TreeItemData | null>(null);
@@ -273,23 +280,44 @@ export function useAccountPanel(): UseAccountPanelReturn {
             parentId: data.parentId ?? null,
           };
 
-          await crearPlanesCuenta(nuevaCuenta).unwrap();
+          const cuentaCreada = await crearPlanesCuenta(nuevaCuenta).unwrap();
           const codigoFmt = formatCodigo(nuevaCuenta.codigo, nuevoTipo);
-          toast.success(`Cuenta ${codigoFmt} creada`, {
-            description: data.nombre,
-          });
 
-          // Mantener el panel abierto para crear más cuentas del mismo padre
-          methods.reset(
-            {
-              ...data,
-              codigo: '',
-              nombre: '',
-              contraCuenta: '',
-            },
-            { keepErrors: false, keepDirty: false },
-          );
-          resetVerificacion();
+          // Expandir el nodo padre en el árbol
+          if (selectedItem) {
+            onExpandNode?.(selectedItem.id);
+          }
+
+          if (nuevoTipo >= MAX_NIVEL_CUENTA) {
+            // Nivel máximo alcanzado — cerrar panel
+            toast.success(`Cuenta ${codigoFmt} creada`, {
+              description: data.nombre,
+            });
+            toast.info('Nivel máximo alcanzado. No se pueden crear más subcuentas.');
+            closePanel();
+          } else {
+            // Reposicionar panel en la cuenta recién creada como nuevo padre
+            toast.success(`Cuenta ${codigoFmt} creada`, {
+              description: data.nombre,
+            });
+            resetVerificacion();
+            const nuevaCuentaItem: TreeItemData = {
+              id: `cuenta-${cuentaCreada.id}`,
+              label: `${codigoFmt} – ${data.nombre}`,
+              tipoCuentaId: nuevoTipo,
+              idPlanCuenta: cuentaCreada.id,
+              data: {
+                id: cuentaCreada.id,
+                codigo: nuevaCuenta.codigo,
+                nombre: data.nombre,
+                tipoCuentaId: nuevoTipo,
+                subgrupoId: data.subgrupoId ?? undefined,
+                parentId: cuentaCreada.parentId ?? undefined,
+                anoContable: data.anoContable,
+              },
+            };
+            openCreatePanel(nuevaCuentaItem);
+          }
         } else if (mode === 'editar') {
           if (!data.id) return;
 
@@ -317,7 +345,7 @@ export function useAccountPanel(): UseAccountPanelReturn {
         setIsLoading(false);
       }
     },
-    [mode, crearPlanesCuenta, actualizarPlanesCuenta, methods, closePanel, codigoYaExiste, codigoExistente, resetVerificacion],
+    [mode, crearPlanesCuenta, actualizarPlanesCuenta, methods, closePanel, openCreatePanel, selectedItem, onExpandNode, codigoYaExiste, codigoExistente, resetVerificacion],
   );
 
   return useMemo(

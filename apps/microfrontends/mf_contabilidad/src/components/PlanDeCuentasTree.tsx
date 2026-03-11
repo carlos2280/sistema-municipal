@@ -7,6 +7,7 @@ interface Props {
   treeData: TreeItemData[];
   expandedItems: string[];
   selectedId: string | null;
+  contextId: string | null;
   searchTerm: string;
   isMobile?: boolean;
   onToggle: (id: string) => void;
@@ -21,6 +22,7 @@ export const PlanDeCuentasTree = memo(function PlanDeCuentasTree({
   treeData,
   expandedItems,
   selectedId,
+  contextId,
   searchTerm,
   isMobile = false,
   onToggle,
@@ -51,6 +53,7 @@ export const PlanDeCuentasTree = memo(function PlanDeCuentasTree({
               level={0}
               expandedItems={expandedItems}
               selectedId={selectedId}
+              contextId={contextId}
               searchTerm={searchTerm}
               isMobile={isMobile}
               onToggle={onToggle}

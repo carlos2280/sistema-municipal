@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { alpha, styled, useTheme } from '@mui/material/styles';
 import {
   ChevronRight,
+  Crosshair,
   FileText,
   Folder,
   FolderOpen,
@@ -17,6 +18,7 @@ export interface TreeNodeProps {
   level: number;
   expandedItems: string[];
   selectedId: string | null;
+  contextId?: string | null;
   searchTerm: string;
   isMobile?: boolean;
   onToggle: (id: string) => void;
@@ -57,8 +59,8 @@ function getMobileBorderWidth(level: number): number {
 /* ── Styled components ── */
 
 const NodeRow = styled(Box, {
-  shouldForwardProp: (p) => p !== 'isSelected',
-})<{ isSelected?: boolean }>(({ theme, isSelected }) => ({
+  shouldForwardProp: (p) => p !== 'isSelected' && p !== 'isContext',
+})<{ isSelected?: boolean; isContext?: boolean }>(({ theme, isSelected, isContext }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: '6px 12px',
@@ -69,7 +71,23 @@ const NodeRow = styled(Box, {
   position: 'relative',
   transition: 'background-color 150ms ease',
 
-  ...(isSelected && {
+  // Context state (creando aquí) — prioridad sobre selected
+  ...(isContext && {
+    backgroundColor: alpha(theme.palette.success.main, 0.07),
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: 3,
+      top: 4,
+      bottom: 4,
+      width: 3,
+      borderRadius: 2,
+      backgroundColor: theme.palette.success.main,
+    },
+  }),
+
+  // Selected state — solo cuando NO es contexto activo
+  ...(!isContext && isSelected && {
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
     '&::before': {
       content: '""',
@@ -84,9 +102,11 @@ const NodeRow = styled(Box, {
   }),
 
   '&:hover': {
-    backgroundColor: isSelected
-      ? alpha(theme.palette.primary.main, 0.12)
-      : alpha(theme.palette.primary.main, 0.05),
+    backgroundColor: isContext
+      ? alpha(theme.palette.success.main, 0.11)
+      : isSelected
+        ? alpha(theme.palette.primary.main, 0.12)
+        : alpha(theme.palette.primary.main, 0.05),
     '& .tree-actions': {
       opacity: 1,
     },
@@ -248,6 +268,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   level,
   expandedItems,
   selectedId,
+  contextId,
   searchTerm,
   isMobile = false,
   onToggle,
@@ -261,6 +282,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   const hasChildren = !!(item.children && item.children.length > 0);
   const isExpanded = expandedItems.includes(item.id);
   const isSelected = selectedId === item.id;
+  const isContext = !!contextId && contextId === String(item.idPlanCuenta);
   const tipoCuentaId = item.tipoCuentaId ?? 0;
   // Carpeta solo si realmente tiene hijos — así cuentas sin subcuentas muestran ícono de archivo
   const isFolder = hasChildren;
@@ -322,6 +344,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
     <Box>
       <NodeRow
         isSelected={isSelected}
+        isContext={isContext}
         onClick={handleRowClick}
         sx={
           isMobile
@@ -331,19 +354,28 @@ export const CustomTreeItem = memo(function CustomTreeItem({
                 minHeight: level === 0 ? 52 : 48,
                 padding:
                   level === 0 ? '16px 12px 16px 16px' : '12px 12px 12px 16px',
-                borderLeft: `${mobileBorderWidth}px solid ${isSelected ? theme.palette.primary.main : mobileBorderColor}`,
+                borderLeft: `${mobileBorderWidth}px solid ${
+                  isContext
+                    ? theme.palette.success.main
+                    : isSelected
+                      ? theme.palette.primary.main
+                      : mobileBorderColor
+                }`,
                 borderTop: '1px solid rgba(226, 232, 240, 0.3)',
-                background:
-                  isSelected
+                background: isContext
+                  ? alpha(theme.palette.success.main, 0.07)
+                  : isSelected
                     ? `rgba(13, 107, 94, 0.06)`
                     : level === 0
                       ? 'rgba(13, 107, 94, 0.03)'
                       : 'transparent',
                 '&::before': { display: 'none' },
                 '&:hover': {
-                  background: isSelected
-                    ? 'rgba(13, 107, 94, 0.08)'
-                    : 'rgba(13, 107, 94, 0.03)',
+                  background: isContext
+                    ? alpha(theme.palette.success.main, 0.11)
+                    : isSelected
+                      ? 'rgba(13, 107, 94, 0.08)'
+                      : 'rgba(13, 107, 94, 0.03)',
                   '& .tree-actions': { opacity: 1 },
                 },
               }
@@ -473,6 +505,34 @@ export const CustomTreeItem = memo(function CustomTreeItem({
           )}
         </LabelWrap>
 
+        {/* Indicador de contexto activo: "Creando aquí" */}
+        {isContext && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              px: '7px',
+              py: '2px',
+              mr: 0.5,
+              borderRadius: '20px',
+              bgcolor: (t) => alpha(t.palette.success.main, 0.1),
+              border: (t) => `1px solid ${alpha(t.palette.success.main, 0.3)}`,
+              color: 'success.main',
+              fontSize: '0.5625rem',
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              textTransform: 'uppercase',
+              userSelect: 'none',
+            }}
+          >
+            <Crosshair size={9} style={{ flexShrink: 0 }} />
+            {!isMobile && '\u00a0Creando aquí'}
+          </Box>
+        )}
+
         {/* Hover/touch actions */}
         <ActionsWrap
           className="tree-actions"
@@ -536,6 +596,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
               level={level + 1}
               expandedItems={expandedItems}
               selectedId={selectedId}
+              contextId={contextId}
               searchTerm={searchTerm}
               isMobile={isMobile}
               onToggle={onToggle}

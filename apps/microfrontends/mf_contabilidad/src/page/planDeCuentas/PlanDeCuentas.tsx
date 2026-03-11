@@ -250,7 +250,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   const isSmallPhone = useMediaQuery(theme.breakpoints.down(380));
 
   const tree = usePlanDeCuentasTree();
-  const panel = useAccountPanel();
+  const panel = useAccountPanel({ onExpandNode: tree.expandNode });
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [deleteTarget, setDeleteTarget] = useState<{ item: TreeItemData } | null>(null);
@@ -553,6 +553,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
             tree.searchTerm.trim() ? tree.autoExpandedItems : tree.expandedItems
           }
           selectedId={panel.selectedItem?.id || null}
+          contextId={panel.mode === 'crear' ? (panel.selectedItem?.idPlanCuenta?.toString() ?? null) : null}
           searchTerm={tree.searchTerm}
           isMobile={isMobile}
           onToggle={handleToggleNode}

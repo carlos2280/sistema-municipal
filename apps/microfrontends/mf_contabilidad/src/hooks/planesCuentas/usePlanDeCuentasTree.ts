@@ -71,6 +71,10 @@ export function usePlanDeCuentasTree() {
     setExpandedItems([]);
   }, []);
 
+  const expandNode = useCallback((id: string) => {
+    setExpandedItems((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }, []);
+
   // Buscar item por ID en el árbol
   const findItemById = useCallback(
     (id: string): TreeItemData | null => {
@@ -107,6 +111,7 @@ export function usePlanDeCuentasTree() {
     clearSearch,
     expandAll,
     collapseAll,
+    expandNode,
     findItemById,
   };
 }
