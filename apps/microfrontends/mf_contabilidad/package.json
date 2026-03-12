@@ -38,6 +38,7 @@
     "react-router-dom": "^7.6.1",
     "serve": "^14.2.4",
     "sonner": "^2.0.6",
+    "uuid": "^9.0.1",
     "xlsx": "^0.18.5",
     "zod": "^3.25.67"
   },
@@ -50,6 +51,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@types/react-input-mask": "^3.0.6",
+    "@types/uuid": "^9.0.8",
     "globals": "^16.0.0",
     "typescript": "^5.8.3"
   }
