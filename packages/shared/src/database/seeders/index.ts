@@ -7,6 +7,8 @@ import { seedMenus } from "./menus.seeder";
 import { seedCuentasSubgrupos } from "./mod_contabilidad/cuentasSubgrupos.seeder";
 import { seedPlanesCuentas } from "./mod_contabilidad/planesCuentas.seeder";
 import { seedTitulosCuentas } from "./mod_contabilidad/titulosCuentas.seeder";
+import { seedCentrosCosto } from "./mod_contabilidad/seedCentrosCosto";
+import { seedPresupuestoCuentas2026 } from "./mod_contabilidad/seedPresupuestoCuentas2026";
 import { seedConfiguracion } from "./mod_configuracion/configuracion.seeder";
 import { seedOficinas } from "./oficinas.seeder";
 import { seedPerfilAreaUsuario } from "./perfilAreaUsuario.seeder";
@@ -39,6 +41,8 @@ export async function runAllSeeders() {
             await seedTitulosCuentas(tx);
             await seedCuentasSubgrupos(tx);
             await seedPlanesCuentas(tx);
+            await seedCentrosCosto(tx);
+            await seedPresupuestoCuentas2026(tx);
 
             console.log("🎉 Todos los seeders ejecutados correctamente");
         });

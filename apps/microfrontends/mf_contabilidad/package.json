@@ -24,6 +24,7 @@
     "@mui/material": "^7.1.2",
     "@mui/x-tree-view": "^7.29.1",
     "@reduxjs/toolkit": "^2.8.2",
+    "@tanstack/react-virtual": "^3.13.21",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
@@ -37,6 +38,7 @@
     "react-router-dom": "^7.6.1",
     "serve": "^14.2.4",
     "sonner": "^2.0.6",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.67"
   },
   "devDependencies": {
