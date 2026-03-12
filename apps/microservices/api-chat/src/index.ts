@@ -2,6 +2,7 @@ import { createServer } from 'node:http'
 import app from './app.js'
 import { env } from './config/env.js'
 import { db } from './db/client.js'
+import { startReminderScheduler, stopReminderScheduler } from './jobs/reminderScheduler.js'
 import { disconnectRedis } from './libs/redis.js'
 import { gruposSistemaService } from './services/gruposSistema.service.js'
 import { initializeSocket } from './socket/index.js'
@@ -14,6 +15,9 @@ async function bootstrap() {
 
   // Hacer io disponible en la app si es necesario
   app.set('io', io)
+
+  // Iniciar scheduler de recordatorios de reuniones
+  startReminderScheduler(io)
 
   httpServer.listen(Number(env.PORT), () => {
     console.log(`
@@ -52,6 +56,7 @@ bootstrap().catch((err) => {
 process.on('SIGTERM', () => {
   console.log('[Server] SIGTERM recibido, cerrando servidor...')
   httpServer.close(async () => {
+    stopReminderScheduler()
     await disconnectRedis()
     console.log('[Server] Servidor cerrado')
     process.exit(0)

@@ -5,6 +5,7 @@ import Popper from '@mui/material/Popper'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { Image, Paperclip, Send, Smile } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
@@ -23,6 +24,7 @@ export function MessageInput({
   disabled = false,
 }: MessageInputProps) {
   const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [mensaje, setMensaje] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
@@ -124,7 +126,7 @@ export function MessageInput({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 3,
+          gap: { xs: 1.5, sm: 3 },
           mt: 1.5,
         }}
       >
@@ -140,7 +142,7 @@ export function MessageInput({
           }}
         >
           <Paperclip size={16} />
-          <Typography sx={{ fontSize: 12 }}>Adjuntar</Typography>
+          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Adjuntar</Typography>
         </Box>
         <Box
           sx={{
@@ -153,7 +155,7 @@ export function MessageInput({
           }}
         >
           <Image size={16} />
-          <Typography sx={{ fontSize: 12 }}>Imagen</Typography>
+          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Imagen</Typography>
         </Box>
         <Box
           ref={emojiAnchorRef}
@@ -168,7 +170,7 @@ export function MessageInput({
           }}
         >
           <Smile size={16} />
-          <Typography sx={{ fontSize: 12 }}>Emoji</Typography>
+          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Emoji</Typography>
         </Box>
       </Box>
 
@@ -176,7 +178,7 @@ export function MessageInput({
       <Popper
         open={showEmojiPicker}
         anchorEl={emojiAnchorRef.current}
-        placement="top-end"
+        placement={isMobile ? 'top' : 'top-end'}
         sx={{ zIndex: 1400 }}
       >
         <ClickAwayListener onClickAway={() => setShowEmojiPicker(false)}>
@@ -185,8 +187,8 @@ export function MessageInput({
               theme={emojiTheme}
               onEmojiClick={handleEmojiClick}
               searchPlaceHolder="Buscar emoji..."
-              width={350}
-              height={400}
+              width={isMobile ? Math.min(window.innerWidth - 16, 320) : 350}
+              height={isMobile ? 320 : 400}
               previewConfig={{ showPreview: false }}
               lazyLoadEmojis
             />

@@ -6,6 +6,7 @@ import { env } from '../config/env.js'
 import { createRedisClient, getRedisClient } from '../libs/redis.js'
 import { setupCallHandlers } from './handlers/callHandler.js'
 import { setupChatHandlers } from './handlers/chatHandler.js'
+import { setupMeetingHandlers } from './handlers/meetingHandler.js'
 import { setupPresenceHandlers } from './handlers/presenceHandler.js'
 
 interface TokenPayload {
@@ -141,6 +142,7 @@ export async function initializeSocket(httpServer: HttpServer): Promise<Server> 
     setupChatHandlers(io, socket)
     setupPresenceHandlers(io, socket, redis)
     setupCallHandlers(io, socket, redis)
+    setupMeetingHandlers(io, socket)
 
     socket.on('disconnect', (reason) => {
       console.log(`[Socket] Desconexión: ${socket.id} (Razón: ${reason})`)

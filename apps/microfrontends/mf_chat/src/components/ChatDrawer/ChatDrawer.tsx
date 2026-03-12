@@ -11,18 +11,21 @@ import {
   useBuscarUsuariosQuery,
   useCrearConversacionDirectaMutation,
   useCrearGrupoMutation,
+  useIniciarReunionMutation,
+  useLazyObtenerTokenLlamadaQuery,
   selectUsuarioId,
   useAppSelector,
 } from 'mf_store/store'
 import { useCall, useConversaciones, useOnlineUsers } from '../../hooks'
 import { CallModal, IncomingCallDialog } from '../Call'
+import { MeetingDetail, MeetingList } from '../Meeting'
 import { ChatPanel } from '../ChatPanel/ChatPanel'
 import { ChatWindow } from '../ChatWindow/ChatWindow'
 import { MembersPanel } from '../ChatWindow/MembersPanel'
 import { NewChatPanel, NewGroupPanel } from '../NewChat'
 import { ChatErrorBoundary } from '../shared/ChatErrorBoundary'
 
-type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup' | 'members'
+type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup' | 'members' | 'meetings' | 'meetingDetail'
 
 interface ChatDrawerProps {
   open: boolean
@@ -45,6 +48,7 @@ export function ChatDrawer({
   const [activeConversationId, setActiveConversationId] = useState<
     number | undefined
   >()
+  const [activeReunionId, setActiveReunionId] = useState<number | undefined>()
   const [searchTerm, setSearchTerm] = useState('')
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
 
@@ -58,11 +62,13 @@ export function ChatDrawer({
   const onlineUsersArray = useMemo(() => Array.from(onlineUsers), [onlineUsers])
 
   // Hook de llamadas
-  const { callState, initiateCall, acceptCall, rejectCall, endCall } = useCall()
+  const { callState, initiateCall, acceptCall, rejectCall, endCall, joinCallDirect } = useCall()
+  const [fetchToken] = useLazyObtenerTokenLlamadaQuery()
 
   const [crearConversacionDirecta, { isLoading: isCreatingDirecta }] =
     useCrearConversacionDirectaMutation()
   const [crearGrupo, { isLoading: isCreatingGrupo }] = useCrearGrupoMutation()
+  const [iniciarReunionMutation] = useIniciarReunionMutation()
 
   const isCreating = isCreatingDirecta || isCreatingGrupo
 
@@ -90,6 +96,12 @@ export function ChatDrawer({
   const handleBack = () => {
     if (view === 'members') {
       setView('chat')
+    } else if (view === 'meetingDetail') {
+      setActiveReunionId(undefined)
+      // Si hay conversación activa, volver a su lista de reuniones; si no, al panel principal
+      setView(activeConversationId ? 'meetings' : 'conversations')
+    } else if (view === 'meetings') {
+      setView('chat')
     } else if (view === 'chat') {
       setActiveConversationId(undefined)
       setView('conversations')
@@ -97,6 +109,25 @@ export function ChatDrawer({
       setView('conversations')
     }
   }
+
+  const handleShowMeetings = useCallback(() => {
+    setView('meetings')
+  }, [])
+
+  const handleSelectReunion = useCallback((reunionId: number) => {
+    setActiveReunionId(reunionId)
+    setView('meetingDetail')
+  }, [])
+
+  const handleIniciarReunion = useCallback(async (reunionId: number) => {
+    try {
+      const result = await iniciarReunionMutation(reunionId).unwrap()
+      const { llamada } = result
+      joinCallDirect(llamada.id, llamada.token, llamada.livekitUrl, llamada.roomName)
+    } catch (err) {
+      console.error('[Meeting] Error al iniciar reunión:', err)
+    }
+  }, [iniciarReunionMutation, joinCallDirect])
 
   const handleShowMembers = () => {
     setView('members')
@@ -168,8 +199,43 @@ export function ChatDrawer({
     [initiateCall]
   )
 
+  const handleJoinCall = useCallback(
+    async (llamadaId: number, _token?: string) => {
+      try {
+        const data = await fetchToken(llamadaId).unwrap()
+        joinCallDirect(llamadaId, data.token, data.livekitUrl, data.roomName)
+      } catch (err) {
+        console.error('[Call] Error al obtener token para unirse:', err)
+      }
+    },
+    [fetchToken, joinCallDirect]
+  )
+
   const renderContent = () => {
     switch (view) {
+      case 'meetingDetail':
+        return activeReunionId ? (
+          <MeetingDetail
+            reunionId={activeReunionId}
+            currentUserId={currentUserId ?? undefined}
+            onBack={handleBack}
+            onClose={onClose}
+            onIniciar={handleIniciarReunion}
+            onJoin={handleJoinCall}
+          />
+        ) : null
+
+      case 'meetings':
+        return activeConversationId ? (
+          <MeetingList
+            conversacionId={activeConversationId}
+            currentUserId={currentUserId ?? undefined}
+            onSelectReunion={handleSelectReunion}
+            onBack={handleBack}
+            onClose={onClose}
+          />
+        ) : null
+
       case 'members':
         return activeConversationId ? (
           <MembersPanel
@@ -193,6 +259,8 @@ export function ChatDrawer({
             onShowMembers={handleShowMembers}
             onVoiceCall={handleVoiceCall}
             onVideoCall={handleVideoCall}
+            onShowMeetings={handleShowMeetings}
+            onJoinCall={handleJoinCall}
           />
         ) : null
 
@@ -227,6 +295,7 @@ export function ChatDrawer({
           <ChatPanel
             activeConversationId={activeConversationId}
             onSelectConversation={handleSelectConversation}
+            onSelectReunion={handleSelectReunion}
             onClose={onClose}
             onNewChat={handleOpenMenu}
             currentUserId={currentUserId ?? undefined}
@@ -238,7 +307,7 @@ export function ChatDrawer({
   const drawerContent = (
     <Box
       sx={{
-        width: DRAWER_WIDTH,
+        width: { xs: '100vw', sm: DRAWER_WIDTH },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -291,7 +360,7 @@ export function ChatDrawer({
       slotProps={{
         paper: {
           sx: {
-            width: DRAWER_WIDTH,
+            width: { xs: '100vw', sm: DRAWER_WIDTH },
             boxSizing: 'border-box',
             bgcolor: theme.palette.background.paper,
             color: theme.palette.text.primary,

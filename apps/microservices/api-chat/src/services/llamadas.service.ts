@@ -7,6 +7,7 @@ import {
   type NewLlamada,
   llamadas,
 } from '../db/schemas/llamadas.schema.js'
+import { reuniones } from '../db/schemas/index.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
 import { usuarios } from '../db/schemas/usuarios.schema.js'
 import { mensajesService } from './mensajes.service.js'
@@ -193,5 +194,19 @@ export const llamadasService = {
     const hrs = Math.floor(mins / 60)
     const remainMins = mins % 60
     return `${hrs}:${String(remainMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  },
+
+  /**
+   * Devuelve true si la llamada está vinculada a una reunión activa.
+   * Usado para distinguir llamadas de reunión (donde "salir" ≠ "finalizar")
+   * de llamadas directas (donde "colgar" = finalizar para todos).
+   */
+  async esLlamadaDeReunionActiva(db: DbClient, llamadaId: number): Promise<boolean> {
+    const [result] = await db
+      .select({ id: reuniones.id })
+      .from(reuniones)
+      .where(and(eq(reuniones.llamadaId, llamadaId), eq(reuniones.estado, 'activa')))
+      .limit(1)
+    return !!result
   },
 }

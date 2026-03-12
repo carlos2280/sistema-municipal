@@ -1,8 +1,11 @@
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import { useMemo } from 'react'
-import { useChat, useConversaciones, useOnlineUsers } from '../../hooks'
+import { useCallback, useMemo, useState } from 'react'
+import { useIniciarReunionMutation, useLazyObtenerTokenLlamadaQuery } from 'mf_store/store'
+import { useChat, useConversaciones, useMeetings, useOnlineUsers } from '../../hooks'
+import type { Reunion } from '../../types/meeting.types'
+import { CreateMeetingDialog, MeetingReminder } from '../Meeting'
 import { ChatHeader } from './ChatHeader'
 import { MessageInput } from './MessageInput'
 import { MessageList } from './MessageList'
@@ -15,6 +18,8 @@ interface ChatWindowProps {
   onShowMembers?: () => void
   onVoiceCall?: (conversacionId: number) => void
   onVideoCall?: (conversacionId: number) => void
+  onShowMeetings?: () => void
+  onJoinCall?: (llamadaId: number, token?: string) => void
 }
 
 export function ChatWindow({
@@ -25,6 +30,7 @@ export function ChatWindow({
   onShowMembers,
   onVoiceCall,
   onVideoCall,
+  onJoinCall,
 }: ChatWindowProps) {
   const {
     mensajes,
@@ -36,8 +42,65 @@ export function ChatWindow({
     setTyping,
   } = useChat({ conversacionId })
 
+  // ─── Reuniones ─────────────────────────────────────────────────────────────
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [reminder, setReminder] = useState<{ reunion: Reunion; minutos: number } | null>(null)
+  const [iniciarMutation] = useIniciarReunionMutation()
+  const [obtenerToken] = useLazyObtenerTokenLlamadaQuery()
+
+  const handleReminder = useCallback((reunion: Reunion, minutosRestantes: number) => {
+    setReminder({ reunion, minutos: minutosRestantes })
+  }, [])
+
+  const handleStarting = useCallback((reunion: Reunion, llamadaId: number) => {
+    // Si es activa y tiene llamadaId podemos notificar al usuario
+    console.log('[Meeting] Reunión iniciada:', reunion.id, 'llamadaId:', llamadaId)
+  }, [])
+
+  const { crearReunion } = useMeetings({
+    conversacionId,
+    onReminder: handleReminder,
+    onStarting: handleStarting,
+  })
+
+  const handleIniciarMeeting = useCallback(async (reunionId: number) => {
+    try {
+      const response = await iniciarMutation(reunionId).unwrap()
+      onJoinCall?.(response.llamada.id, response.llamada.token)
+    } catch (err) {
+      console.error('[Meeting] Error al iniciar reunión:', err)
+    }
+  }, [iniciarMutation, onJoinCall])
+
+  // BUG-02: obtener token LiveKit antes de unirse como participante
+  const handleJoinMeeting = useCallback(async (llamadaId: number) => {
+    try {
+      const result = await obtenerToken(llamadaId).unwrap()
+      onJoinCall?.(llamadaId, result.token)
+    } catch (err) {
+      console.error('[Meeting] Error al obtener token para unirse:', err)
+    }
+  }, [obtenerToken, onJoinCall])
+
   const { conversaciones } = useConversaciones()
   const { isUserOnline } = useOnlineUsers()
+
+  // Grupos del usuario con sus miembros para el ParticipantSelector
+  const gruposParaSelector = useMemo(() => {
+    return conversaciones
+      .filter((c) => c.tipo === 'grupo')
+      .map((c) => ({
+        id: c.id,
+        nombre: c.nombre ?? `Grupo ${c.id}`,
+        miembros: (c.participantes ?? [])
+          .filter((p) => p.usuarioId !== currentUserId)
+          .map((p) => ({
+            id: p.usuarioId,
+            nombre: p.usuario?.nombreCompleto ?? `Usuario ${p.usuarioId}`,
+          })),
+      }))
+      .filter((g) => g.miembros.length > 0)
+  }, [conversaciones, currentUserId])
 
   // Obtener información de la conversación activa
   const conversacionInfo = useMemo(() => {
@@ -112,6 +175,7 @@ export function ChatWindow({
         onShowMembers={conversacionInfo?.esGrupo ? onShowMembers : undefined}
         onVoiceCall={() => onVoiceCall?.(conversacionId)}
         onVideoCall={() => onVideoCall?.(conversacionId)}
+        onScheduleMeeting={() => setCreateDialogOpen(true)}
       />
 
       {isLoading ? (
@@ -142,6 +206,8 @@ export function ChatWindow({
           mensajes={mensajes}
           currentUserId={currentUserId}
           typingUsers={typingUsers}
+          onJoinMeeting={handleJoinMeeting}
+          onIniciarMeeting={handleIniciarMeeting}
         />
       )}
 
@@ -150,6 +216,21 @@ export function ChatWindow({
         onAttachFile={handleAttachFile}
         onTyping={handleTyping}
         disabled={!isConnected}
+      />
+
+      <CreateMeetingDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onConfirm={async (data) => { await crearReunion(data) }}
+        organizadorId={currentUserId}
+        grupos={gruposParaSelector}
+      />
+
+      <MeetingReminder
+        open={!!reminder}
+        reunion={reminder?.reunion ?? null}
+        minutosRestantes={reminder?.minutos ?? 0}
+        onClose={() => setReminder(null)}
       />
     </Box>
   )

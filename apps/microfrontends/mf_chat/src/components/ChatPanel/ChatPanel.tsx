@@ -10,14 +10,16 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { MessageSquare, Plus, Search, Users, X } from 'lucide-react'
+import { Calendar, MessageSquare, Plus, Search, Users, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useConversaciones, useOnlineUsers } from '../../hooks'
 import { ConversationItem } from './ConversationItem'
+import { MeetingsPanel } from './MeetingsPanel'
 
 interface ChatPanelProps {
   activeConversationId?: number
   onSelectConversation?: (id: number) => void
+  onSelectReunion?: (reunionId: number) => void
   onClose?: () => void
   currentUserId?: number
   onNewChat?: (event: React.MouseEvent<HTMLElement>) => void
@@ -53,6 +55,7 @@ function formatMessageTime(dateStr: string): string {
 export function ChatPanel({
   activeConversationId,
   onSelectConversation,
+  onSelectReunion,
   onClose,
   currentUserId,
   onNewChat,
@@ -225,11 +228,19 @@ export function ChatPanel({
               </Box>
             }
           />
+          <Tab
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Calendar size={16} />
+                <span>Reuniones</span>
+              </Box>
+            }
+          />
         </Tabs>
       </Box>
 
-      {/* Search */}
-      <Box sx={{ p: 2 }}>
+      {/* Search — oculto en tab Reuniones */}
+      {tabValue !== 3 && <Box sx={{ p: 2 }}>
         <TextField
           fullWidth
           size="small"
@@ -252,11 +263,17 @@ export function ChatPanel({
             },
           }}
         />
-      </Box>
+      </Box>}
 
-      {/* Conversation List */}
+      {/* Contenido principal */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {isLoading ? (
+        {tabValue === 3 ? (
+          <MeetingsPanel
+            currentUserId={currentUserId}
+            onSelectConversation={onSelectConversation}
+            onSelectReunion={onSelectReunion}
+          />
+        ) : isLoading ? (
           <Box
             sx={{
               display: 'flex',

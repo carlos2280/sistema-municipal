@@ -3,6 +3,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import type { Mensaje } from 'mf_store/store'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { MeetingCard } from '../Meeting'
 import { MessageBubble } from './MessageBubble'
 
 const MESSAGES_PER_PAGE = 50
@@ -11,6 +12,8 @@ interface MessageListProps {
   mensajes: Mensaje[]
   currentUserId?: number
   typingUsers?: string[]
+  onJoinMeeting?: (llamadaId: number) => void
+  onIniciarMeeting?: (reunionId: number) => void
 }
 
 // Función para formatear fecha
@@ -60,8 +63,10 @@ export function MessageList({
   mensajes,
   currentUserId,
   typingUsers = [],
+  onJoinMeeting,
+  onIniciarMeeting,
 }: MessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [visibleCount, setVisibleCount] = useState(MESSAGES_PER_PAGE)
 
   // Resetear visible count cuando cambia la conversación (mensajes se vacían)
@@ -73,9 +78,16 @@ export function MessageList({
     prevLengthRef.current = mensajes.length
   }, [mensajes.length])
 
-  // Scroll al final cuando llegan nuevos mensajes
+  // Scroll al final cuando llegan nuevos mensajes.
+  // Se hace scroll inmediato + diferido para capturar contenido async (ej: MeetingCard).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = containerRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
+    const timer = setTimeout(() => {
+      el.scrollTop = el.scrollHeight
+    }, 250)
+    return () => clearTimeout(timer)
   }, [mensajes.length])
 
   // Solo renderizar los últimos N mensajes para evitar degradación del DOM
@@ -108,10 +120,11 @@ export function MessageList({
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         flex: 1,
         overflow: 'auto',
-        px: 2.5,
+        px: { xs: 1.5, sm: 2.5 },
         py: 2,
         bgcolor: 'background.default',
         display: 'flex',
@@ -159,23 +172,37 @@ export function MessageList({
           </Box>
 
           {/* Messages */}
-          {msgs.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              contenido={msg.contenido}
-              esPropio={msg.remitenteId === currentUserId}
-              hora={formatTime(msg.createdAt)}
-              remitente={msg.remitente?.nombreCompleto}
-              archivo={
-                msg.archivos?.[0]
-                  ? {
-                      nombre: msg.archivos[0].nombre,
-                      tamanio: `${(msg.archivos[0].tamanio / 1024 / 1024).toFixed(1)} MB`,
-                    }
-                  : undefined
-              }
-            />
-          ))}
+          {msgs.map((msg) =>
+            msg.tipo === 'reunion' && msg.contenido ? (
+              <Box
+                key={msg.id}
+                sx={{ display: 'flex', justifyContent: msg.remitenteId === currentUserId ? 'flex-end' : 'flex-start' }}
+              >
+                <MeetingCard
+                  reunionId={Number(msg.contenido)}
+                  currentUserId={currentUserId}
+                  onJoin={onJoinMeeting}
+                  onIniciar={onIniciarMeeting}
+                />
+              </Box>
+            ) : (
+              <MessageBubble
+                key={msg.id}
+                contenido={msg.contenido}
+                esPropio={msg.remitenteId === currentUserId}
+                hora={formatTime(msg.createdAt)}
+                remitente={msg.remitente?.nombreCompleto}
+                archivo={
+                  msg.archivos?.[0]
+                    ? {
+                        nombre: msg.archivos[0].nombre,
+                        tamanio: `${(msg.archivos[0].tamanio / 1024 / 1024).toFixed(1)} MB`,
+                      }
+                    : undefined
+                }
+              />
+            )
+          )}
         </Box>
       ))}
 
@@ -194,7 +221,6 @@ export function MessageList({
         </Box>
       )}
 
-      <div ref={bottomRef} />
     </Box>
   )
 }

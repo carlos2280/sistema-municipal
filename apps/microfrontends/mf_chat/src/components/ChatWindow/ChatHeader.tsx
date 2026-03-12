@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import { ArrowLeft, MoreVertical, Phone, Users, Video, X } from 'lucide-react'
+import { ArrowLeft, CalendarPlus, MoreVertical, Phone, Users, Video, X } from 'lucide-react'
 import { SystemGroupBadge } from '../shared'
 
 interface ChatHeaderProps {
@@ -17,6 +17,7 @@ interface ChatHeaderProps {
   onShowMembers?: () => void
   onVoiceCall?: () => void
   onVideoCall?: () => void
+  onScheduleMeeting?: () => void
 }
 
 function getAvatarColor(name: string): string {
@@ -44,6 +45,7 @@ export function ChatHeader({
   onShowMembers,
   onVoiceCall,
   onVideoCall,
+  onScheduleMeeting,
 }: ChatHeaderProps) {
   const displayName = nombre || `Conversación ${conversacionId}`
   const isOnline = online ?? false
@@ -72,6 +74,8 @@ export function ChatHeader({
           sx={{
             width: 44,
             height: 44,
+            minWidth: 44,
+            flexShrink: 0,
             borderRadius: esGrupo ? 2 : '50%',
             bgcolor: getAvatarColor(displayName),
             display: 'flex',
@@ -148,6 +152,16 @@ export function ChatHeader({
             title="Miembros"
           >
             <Users size={20} />
+          </IconButton>
+        )}
+        {onScheduleMeeting && (
+          <IconButton
+            size="small"
+            sx={{ color: 'text.secondary' }}
+            title="Programar reunión"
+            onClick={onScheduleMeeting}
+          >
+            <CalendarPlus size={20} />
           </IconButton>
         )}
         <IconButton

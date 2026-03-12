@@ -15,7 +15,7 @@ export const mensajes = mensajeriaSchema.table('mensajes', {
     .notNull(),
   remitenteId: integer('remitente_id').notNull(),
   contenido: text('contenido'),
-  tipo: text('tipo').default('texto').$type<'texto' | 'archivo' | 'imagen' | 'sistema'>(),
+  tipo: text('tipo').default('texto').$type<'texto' | 'archivo' | 'imagen' | 'sistema' | 'reunion'>(),
   replyToId: integer('reply_to_id'),
   editado: boolean('editado').default(false),
   eliminado: boolean('eliminado').default(false),

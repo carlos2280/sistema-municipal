@@ -7,3 +7,15 @@ export * from './usuarios.schema.js'
 export * from './departamentos.schema.js'
 export * from './oficinas.schema.js'
 export * from './llamadas.schema.js'
+export {
+  reuniones,
+  invitacionesReunion,
+  recordatoriosReunion,
+  type Reunion,
+  type NewReunion,
+  type ReunionUpdate,
+  type InvitacionReunion,
+  type NewInvitacionReunion,
+  type RecordatorioReunion,
+  type NewRecordatorioReunion,
+} from '@municipal/shared/database/mensajeria'

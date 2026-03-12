@@ -16,6 +16,7 @@ interface UseCallReturn {
   rejectCall: () => void
   endCall: () => void
   joinCall: (llamadaId: number) => void
+  joinCallDirect: (llamadaId: number, token: string, livekitUrl: string, roomName: string, tipo?: 'voz' | 'video') => void
 }
 
 export function useCall(): UseCallReturn {
@@ -151,6 +152,22 @@ export function useCall(): UseCallReturn {
     [isConnected, emit]
   )
 
+  const joinCallDirect = useCallback(
+    (llamadaId: number, token: string, livekitUrl: string, roomName: string, tipo: 'voz' | 'video' = 'video') => {
+      setCallState({
+        llamadaId,
+        conversacionId: null,
+        tipo,
+        estado: 'connecting',
+        token,
+        livekitUrl,
+        roomName,
+        isIncoming: false,
+      })
+    },
+    []
+  )
+
   return {
     callState,
     initiateCall,
@@ -158,5 +175,6 @@ export function useCall(): UseCallReturn {
     rejectCall,
     endCall,
     joinCall,
+    joinCallDirect,
   }
 }

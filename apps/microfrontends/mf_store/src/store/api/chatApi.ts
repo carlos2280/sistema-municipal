@@ -61,7 +61,7 @@ export interface Mensaje {
 	conversacionId: number;
 	remitenteId: number;
 	contenido: string;
-	tipo: "texto" | "archivo" | "imagen" | "sistema";
+	tipo: "texto" | "archivo" | "imagen" | "sistema" | "reunion";
 	replyToId?: number;
 	editado: boolean;
 	eliminado: boolean;
@@ -96,6 +96,73 @@ export interface CallTokenResponse {
 	token: string;
 	livekitUrl: string;
 	roomName: string;
+}
+
+// ============ REUNIONES TIPOS ============
+
+export type TipoReunion = "video" | "voz" | "presencial";
+export type EstadoReunion = "programada" | "activa" | "completada" | "cancelada";
+export type EstadoInvitacion = "pendiente" | "aceptada" | "rechazada" | "tentativa";
+
+export interface InvitacionReunion {
+	id: number;
+	reunionId: number;
+	usuarioId: number;
+	estado: EstadoInvitacion;
+	respondidoEn?: string;
+	createdAt: string;
+	updatedAt: string;
+	nombreUsuario?: string;
+}
+
+export interface Reunion {
+	id: number;
+	conversacionId: number;
+	organizadorId: number;
+	titulo: string;
+	descripcion?: string;
+	tipo: TipoReunion;
+	estado: EstadoReunion;
+	fechaInicio: string;
+	fechaFin: string;
+	llamadaId?: number;
+	mensajeId?: number;
+	ubicacion?: string;
+	notas?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ReunionConInvitaciones extends Reunion {
+	invitaciones: InvitacionReunion[];
+}
+
+export interface CreateReunionRequest {
+	conversacionId: number;
+	titulo: string;
+	descripcion?: string;
+	tipo?: TipoReunion;
+	fechaInicio: string;
+	fechaFin: string;
+	ubicacion?: string;
+	notas?: string;
+	participantesIds?: number[];
+}
+
+export interface UpdateReunionRequest {
+	id: number;
+	titulo?: string;
+	descripcion?: string;
+	tipo?: TipoReunion;
+	fechaInicio?: string;
+	fechaFin?: string;
+	ubicacion?: string;
+	notas?: string;
+}
+
+export interface IniciarReunionResponse {
+	reunion: Reunion;
+	llamada: { id: number; token: string; livekitUrl: string; roomName: string };
 }
 
 // ============ REQUESTS ============
@@ -370,6 +437,113 @@ export const chatApi = baseApi.injectEndpoints({
 				data: CallTokenResponse;
 			}) => response.data,
 		}),
+
+		// ── Reuniones ──────────────────────────────────────────────────────────
+
+		listarReuniones: builder.query<Reunion[], number>({
+			query: (conversacionId) =>
+				`chat/conversaciones/${conversacionId}/reuniones`,
+			transformResponse: (response: { success: boolean; data: Reunion[] }) =>
+				response.data,
+			providesTags: (_result, _error, conversacionId) => [
+				{ type: "Reuniones" as const, id: conversacionId },
+			],
+		}),
+
+		obtenerReunion: builder.query<ReunionConInvitaciones, number>({
+			query: (id) => `chat/reuniones/${id}`,
+			transformResponse: (response: {
+				success: boolean;
+				data: ReunionConInvitaciones;
+			}) => response.data,
+			providesTags: (_result, _error, id) => [
+				{ type: "Reuniones" as const, id },
+			],
+		}),
+
+		proximasReuniones: builder.query<Reunion[], void>({
+			query: () => "chat/reuniones/proximas",
+			transformResponse: (response: { success: boolean; data: Reunion[] }) =>
+				response.data,
+			providesTags: [{ type: "Reuniones" as const, id: "PROXIMAS" }],
+		}),
+
+		crearReunion: builder.mutation<
+			ReunionConInvitaciones,
+			CreateReunionRequest
+		>({
+			query: ({ conversacionId, ...body }) => ({
+				url: `chat/conversaciones/${conversacionId}/reuniones`,
+				method: "POST",
+				body,
+			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: ReunionConInvitaciones;
+			}) => response.data,
+			invalidatesTags: (_result, _error, { conversacionId }) => [
+				{ type: "Reuniones" as const, id: conversacionId },
+				{ type: "Reuniones" as const, id: "PROXIMAS" },
+			],
+		}),
+
+		editarReunion: builder.mutation<Reunion, UpdateReunionRequest>({
+			query: ({ id, ...body }) => ({
+				url: `chat/reuniones/${id}`,
+				method: "PATCH",
+				body,
+			}),
+			transformResponse: (response: { success: boolean; data: Reunion }) =>
+				response.data,
+			invalidatesTags: (_result, _error, { id }) => [
+				{ type: "Reuniones" as const, id },
+				{ type: "Reuniones" as const, id: "PROXIMAS" },
+			],
+		}),
+
+		cancelarReunion: builder.mutation<{ id: number }, number>({
+			query: (id) => ({
+				url: `chat/reuniones/${id}`,
+				method: "DELETE",
+			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: { id: number };
+			}) => response.data,
+			invalidatesTags: [{ type: "Reuniones" as const, id: "PROXIMAS" }],
+		}),
+
+		rsvpReunion: builder.mutation<
+			InvitacionReunion,
+			{ id: number; estado: EstadoInvitacion }
+		>({
+			query: ({ id, estado }) => ({
+				url: `chat/reuniones/${id}/rsvp`,
+				method: "PATCH",
+				body: { estado },
+			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: InvitacionReunion;
+			}) => response.data,
+			invalidatesTags: (_result, _error, { id }) => [
+				{ type: "Reuniones" as const, id },
+			],
+		}),
+
+		iniciarReunion: builder.mutation<IniciarReunionResponse, number>({
+			query: (id) => ({
+				url: `chat/reuniones/${id}/iniciar`,
+				method: "POST",
+			}),
+			transformResponse: (response: {
+				success: boolean;
+				data: IniciarReunionResponse;
+			}) => response.data,
+			invalidatesTags: (_result, _error, id) => [
+				{ type: "Reuniones" as const, id },
+			],
+		}),
 	}),
 	overrideExisting: false,
 });
@@ -402,4 +576,13 @@ export const {
 	// Llamadas
 	useObtenerHistorialLlamadasQuery,
 	useLazyObtenerTokenLlamadaQuery,
+	// Reuniones
+	useListarReunionesQuery,
+	useObtenerReunionQuery,
+	useProximasReunionesQuery,
+	useCrearReunionMutation,
+	useEditarReunionMutation,
+	useCancelarReunionMutation,
+	useRsvpReunionMutation,
+	useIniciarReunionMutation,
 } = chatApi;

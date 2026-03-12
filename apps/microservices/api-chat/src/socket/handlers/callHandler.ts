@@ -257,13 +257,32 @@ export function setupCallHandlers(io: Server, socket: Socket, redis: Redis) {
   })
 
   // -----------------------------------------------------------------------
-  // Finalizar llamada
+  // Finalizar / salir de llamada
+  // Para llamadas de reunión: "call:end" significa "salir" (no finaliza para todos).
+  // Para llamadas directas: finaliza para todos.
   // -----------------------------------------------------------------------
   socket.on('call:end', async ({ llamadaId }: EndCallPayload) => {
     try {
       const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
       if (!llamada) return
 
+      const esMeeting = await llamadasService.esLlamadaDeReunionActiva(socketDb, llamadaId)
+
+      if (esMeeting) {
+        // Solo "salir" — la reunión sigue activa para los demás
+        await callTracker.removeSocket(redis, llamadaId, userId, socket.id)
+        const participanteIds = await llamadasService.obtenerParticipanteIds(
+          socketDb,
+          llamada.conversacionId
+        )
+        for (const pid of participanteIds) {
+          io.to(`user:${pid}`).emit('call:participant-left', { llamadaId, userId })
+        }
+        console.log(`[Call] Usuario ${userId} salió de la reunión (llamada ${llamadaId})`)
+        return
+      }
+
+      // Llamada directa: finalizar para todos
       const participantUserIds = await callTracker.getParticipantUserIds(redis, llamadaId)
 
       await llamadasService.finalizarLlamada(socketDb, llamadaId, participantUserIds)
@@ -300,18 +319,24 @@ export function setupCallHandlers(io: Server, socket: Socket, redis: Redis) {
         )
 
         if (totalRemaining === 0) {
-          // Ningún socket en la llamada → finalizar
+          // Ningún socket en la llamada → finalizar (solo si no es reunión activa)
           const llamada = await llamadasService.obtenerPorId(socketDb, llamadaId)
           if (llamada && (llamada.estado === 'activa' || llamada.estado === 'sonando')) {
-            await llamadasService.finalizarLlamada(socketDb, llamadaId, [])
-            const participanteIds = await llamadasService.obtenerParticipanteIds(
-              socketDb,
-              llamada.conversacionId
-            )
-            for (const pid of participanteIds) {
-              io.to(`user:${pid}`).emit('call:ended', { llamadaId, reason: 'finalizada' })
+            const esMeeting = await llamadasService.esLlamadaDeReunionActiva(socketDb, llamadaId)
+            if (esMeeting) {
+              // Todos salieron de la reunión, pero la reunión sigue activa → no finalizar
+              await callTracker.clearCall(redis, llamadaId)
+            } else {
+              await llamadasService.finalizarLlamada(socketDb, llamadaId, [])
+              const participanteIds = await llamadasService.obtenerParticipanteIds(
+                socketDb,
+                llamada.conversacionId
+              )
+              for (const pid of participanteIds) {
+                io.to(`user:${pid}`).emit('call:ended', { llamadaId, reason: 'finalizada' })
+              }
+              await callTracker.clearCall(redis, llamadaId)
             }
-            await callTracker.clearCall(redis, llamadaId)
           }
         } else if (!userHasOtherSockets) {
           // Este usuario ya no tiene sockets en la llamada, pero otros usuarios sí

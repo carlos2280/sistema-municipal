@@ -87,7 +87,7 @@ declare module 'mf_store/store' {
     conversacionId: number
     remitenteId: number
     contenido: string
-    tipo: 'texto' | 'archivo' | 'imagen' | 'sistema'
+    tipo: 'texto' | 'archivo' | 'imagen' | 'sistema' | 'reunion'
     replyToId?: number
     editado: boolean
     eliminado: boolean
@@ -173,6 +173,133 @@ declare module 'mf_store/store' {
   export function useCrearMensajeMutation(): [
     (params: CrearMensajeRequest) => { unwrap: () => Promise<Mensaje> },
     { isLoading: boolean; error: unknown }
+  ]
+
+  // ============ LLAMADAS ============
+
+  export interface CallTokenResponse {
+    token: string
+    livekitUrl: string
+    roomName: string
+  }
+
+  export function useLazyObtenerTokenLlamadaQuery(): [
+    (llamadaId: number) => { unwrap: () => Promise<CallTokenResponse> },
+    { data: CallTokenResponse | undefined; isLoading: boolean }
+  ]
+
+  // ============ REUNIONES ============
+
+  export type TipoReunion = 'video' | 'voz' | 'presencial'
+  export type EstadoReunion = 'programada' | 'activa' | 'completada' | 'cancelada'
+  export type EstadoInvitacion = 'pendiente' | 'aceptada' | 'rechazada' | 'tentativa'
+
+  export interface InvitacionReunion {
+    id: number
+    reunionId: number
+    usuarioId: number
+    estado: EstadoInvitacion
+  }
+
+  export interface Reunion {
+    id: number
+    conversacionId: number
+    organizadorId: number
+    titulo: string
+    descripcion?: string
+    tipo: TipoReunion
+    estado: EstadoReunion
+    fechaInicio: string
+    fechaFin: string
+    llamadaId?: number
+    mensajeId?: number
+    ubicacion?: string
+    notas?: string
+    createdAt: string
+    updatedAt: string
+  }
+
+  export interface ReunionConInvitaciones extends Reunion {
+    invitaciones: InvitacionReunion[]
+  }
+
+  export interface CreateReunionRequest {
+    conversacionId: number
+    titulo: string
+    descripcion?: string
+    tipo?: TipoReunion
+    fechaInicio: string
+    fechaFin: string
+    ubicacion?: string
+  }
+
+  export interface UpdateReunionRequest {
+    id: number
+    titulo?: string
+    descripcion?: string
+    tipo?: TipoReunion
+    fechaInicio?: string
+    fechaFin?: string
+    ubicacion?: string
+  }
+
+  export interface IniciarReunionResponse {
+    reunion: ReunionConInvitaciones
+    llamada: { id: number; token: string; livekitUrl: string; roomName: string }
+  }
+
+  export function useListarReunionesQuery(
+    conversacionId: number
+  ): { data: Reunion[] | undefined; isLoading: boolean }
+
+  export function useObtenerReunionQuery(
+    id: number
+  ): { data: ReunionConInvitaciones | undefined; isLoading: boolean }
+
+  export function useProximasReunionesQuery(): {
+    data: Reunion[] | undefined
+    isLoading: boolean
+  }
+
+  export function useCrearReunionMutation(): [
+    (params: CreateReunionRequest) => { unwrap: () => Promise<ReunionConInvitaciones> },
+    { isLoading: boolean }
+  ]
+
+  export function useEditarReunionMutation(): [
+    (params: UpdateReunionRequest) => { unwrap: () => Promise<Reunion> },
+    { isLoading: boolean }
+  ]
+
+  export function useCancelarReunionMutation(): [
+    (id: number) => { unwrap: () => Promise<void> },
+    { isLoading: boolean }
+  ]
+
+  export function useRsvpReunionMutation(): [
+    (params: { id: number; estado: EstadoInvitacion }) => { unwrap: () => Promise<InvitacionReunion> },
+    { isLoading: boolean }
+  ]
+
+  export function useIniciarReunionMutation(): [
+    (id: number) => { unwrap: () => Promise<IniciarReunionResponse> },
+    { isLoading: boolean }
+  ]
+
+  // ============ PARTICIPANTES ============
+
+  export function useObtenerParticipantesQuery(
+    conversacionId: number
+  ): { data: Participante[] | undefined; isLoading: boolean }
+
+  export function useEliminarParticipanteMutation(): [
+    (params: { conversacionId: number; usuarioId: number }) => { unwrap: () => Promise<void> },
+    { isLoading: boolean }
+  ]
+
+  export function useRenombrarGrupoMutation(): [
+    (params: { conversacionId: number; nombre: string }) => { unwrap: () => Promise<Conversacion> },
+    { isLoading: boolean }
   ]
 }
 
