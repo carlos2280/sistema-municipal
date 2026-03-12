@@ -43,8 +43,8 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
   const form = useForm<SchemaPresupuestoHeader>({
     resolver: zodResolver(schemaPresupuestoHeader),
     defaultValues: {
-      anoContable: anoActual + 1,
-      glosa: `Presupuesto Inicial ${anoActual + 1}`,
+      anoContable: anoActual,
+      glosa: `Presupuesto Inicial ${anoActual}`,
       actaDecreto: "",
     },
   });
