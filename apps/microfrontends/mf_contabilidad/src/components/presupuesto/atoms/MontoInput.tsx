@@ -116,8 +116,8 @@ const MontoInput = ({
         borderRadius: 0.5,
         color: hasError ? "error.main" : value === 0 ? "text.disabled" : "text.primary",
         "&:hover": readOnly ? {} : {
-          bgcolor: "rgba(13, 107, 94, 0.06)",
-          boxShadow: "0 0 0 2px rgba(13, 107, 94, 0.12)",
+          bgcolor: "action.hover",
+          boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}20`,
         },
         userSelect: "none",
         whiteSpace: "nowrap",

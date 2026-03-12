@@ -135,7 +135,8 @@ const ResumenCard = ({
             alignItems: "center",
             justifyContent: "space-between",
             py: 0.875,
-            borderTop: i === 0 ? "none" : "1px solid rgba(226, 232, 240, 0.5)",
+            borderTop: i === 0 ? "none" : "1px solid",
+            borderColor: "divider",
           }}
         >
           <Typography
@@ -172,7 +173,7 @@ const ResumenCard = ({
         justifyContent: "space-between",
         px: 2,
         py: 1.5,
-        bgcolor: "grey.50",
+        bgcolor: "background.default",
         borderTop: "2px solid",
         borderColor: "divider",
       }}
@@ -229,8 +230,8 @@ const PresupuestoResumen = ({
       {/* Card Ingresos */}
       <ResumenCard
         icon={<ArrowDownwardIcon sx={{ fontSize: "1rem" }} />}
-        iconBg="rgba(5, 150, 105, 0.1)"
-        iconColor="#059669"
+        iconBg="action.selected"
+        iconColor="success.main"
         title="Ingresos"
         rows={gruposIngresos}
         totalLabel="Total Ingresos"
@@ -241,8 +242,8 @@ const PresupuestoResumen = ({
       {/* Card Gastos */}
       <ResumenCard
         icon={<ArrowUpwardIcon sx={{ fontSize: "1rem" }} />}
-        iconBg="rgba(220, 38, 38, 0.1)"
-        iconColor="#dc2626"
+        iconBg="action.selected"
+        iconColor="error.main"
         title="Gastos"
         rows={gruposGastos}
         totalLabel="Total Gastos"
@@ -263,7 +264,7 @@ const PresupuestoResumen = ({
       >
         {/* Header */}
         <Box sx={{ px: 2, py: 1.25, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 1 }}>
-          <Box sx={{ width: 28, height: 28, borderRadius: 0.75, bgcolor: "rgba(13, 107, 94, 0.1)", color: "primary.main", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Box sx={{ width: 28, height: 28, borderRadius: 0.75, bgcolor: "action.selected", color: "primary.main", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <BalanceIcon sx={{ fontSize: "1rem" }} />
           </Box>
           <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: "text.primary" }}>
@@ -327,8 +328,8 @@ const PresupuestoResumen = ({
                 px: 3,
                 py: 1,
                 borderRadius: 2,
-                bgcolor: isOk ? "rgba(5, 150, 105, 0.06)" : isWarning ? "rgba(234, 179, 8, 0.06)" : "rgba(220, 38, 38, 0.06)",
-                color: isOk ? "success.main" : isWarning ? "#b45309" : "error.main",
+                bgcolor: "action.selected",
+                color: isOk ? "success.main" : isWarning ? "warning.dark" : "error.main",
               }}
             >
               {isOk ? (
@@ -364,7 +365,7 @@ const PresupuestoResumen = ({
       >
         {/* Header */}
         <Box sx={{ px: 2, py: 1.25, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 1 }}>
-          <Box sx={{ width: 28, height: 28, borderRadius: 0.75, bgcolor: "rgba(37, 99, 235, 0.1)", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Box sx={{ width: 28, height: 28, borderRadius: 0.75, bgcolor: "action.selected", color: "info.main", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <BusinessIcon sx={{ fontSize: "1rem" }} />
           </Box>
           <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: "text.primary" }}>
@@ -403,7 +404,7 @@ const PresupuestoResumen = ({
               <Box
                 key={cc.codigo}
                 component="tr"
-                sx={{ "&:hover": { bgcolor: "rgba(13, 107, 94, 0.03)" }, "& td": { borderBottom: "1px solid", borderColor: "divider" } }}
+                sx={{ "&:hover": { bgcolor: "action.hover" }, "& td": { borderBottom: "1px solid", borderColor: "divider" } }}
               >
                 <Box component="td" sx={{ px: 2, py: 1, color: "text.primary", verticalAlign: "middle" }}>
                   <Box
@@ -414,7 +415,7 @@ const PresupuestoResumen = ({
                       py: 0.25,
                       mr: 1,
                       borderRadius: 0.5,
-                      bgcolor: "grey.100",
+                      bgcolor: "action.selected",
                       fontFamily: "monospace",
                       fontSize: "0.6875rem",
                       fontWeight: 600,

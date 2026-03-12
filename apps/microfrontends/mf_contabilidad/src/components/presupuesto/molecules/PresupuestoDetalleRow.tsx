@@ -83,15 +83,17 @@ const PresupuestoDetalleRow = ({
   return (
     <TableRow
       sx={{
-        bgcolor: hasDiscrepancia ? "rgba(220, 38, 38, 0.03)" : isChild ? "transparent" : "background.paper",
+        bgcolor: (theme) => hasDiscrepancia
+          ? (theme.palette.mode === "dark" ? "rgba(239, 68, 68, 0.06)" : "rgba(220, 38, 38, 0.03)")
+          : isChild ? "transparent" : "background.paper",
         fontWeight: isChild ? 400 : 600,
         borderLeft: hasDiscrepancia ? "3px solid" : "3px solid transparent",
         borderLeftColor: hasDiscrepancia ? "error.main" : "transparent",
         "& td": {
-          borderBottomColor: isChild ? "divider" : "rgba(0,0,0,0.15)",
+          borderBottomColor: isChild ? "divider" : "divider",
           color: isChild ? "text.secondary" : "text.primary",
         },
-        "&:hover": { bgcolor: hasDiscrepancia ? "rgba(220, 38, 38, 0.05)" : "rgba(13, 107, 94, 0.03)" },
+        "&:hover": { bgcolor: "action.hover" },
         "& .delete-btn": { opacity: 0 },
         "&:hover .delete-btn": { opacity: 1 },
         transition: "background-color 0.1s",
@@ -162,7 +164,7 @@ const PresupuestoDetalleRow = ({
               px: 1,
               py: 0.25,
               borderRadius: 0.5,
-              bgcolor: "grey.100",
+              bgcolor: "action.selected",
               fontFamily: "monospace",
               fontSize: "0.6875rem",
               fontWeight: 600,
@@ -219,7 +221,7 @@ const PresupuestoDetalleRow = ({
                   "&:hover": {
                     borderColor: "primary.main",
                     color: "primary.main",
-                    bgcolor: "rgba(13, 107, 94, 0.06)",
+                    bgcolor: "action.hover",
                     animation: "none",
                   },
                 }}
@@ -261,7 +263,7 @@ const PresupuestoDetalleRow = ({
               color: "error.light",
               borderRadius: "4px",
               transition: "all 0.1s",
-              "&:hover": { bgcolor: "rgba(220, 38, 38, 0.08)" },
+              "&:hover": { bgcolor: "action.hover" },
             }}
           >
             <DeleteOutlineIcon sx={{ fontSize: "0.8125rem" }} />

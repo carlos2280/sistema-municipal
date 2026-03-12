@@ -96,7 +96,7 @@ const PresupuestoGrid = ({
           py: 8,
           textAlign: "center",
           color: "text.disabled",
-          bgcolor: "grey.50",
+          bgcolor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
         }}
@@ -121,7 +121,7 @@ const PresupuestoGrid = ({
           maxHeight: "clamp(320px, 55vh, 640px)",
           borderBottom: "1px solid",
           borderColor: "divider",
-          bgcolor: "grey.50",
+          bgcolor: "background.default",
           overflow: "auto",
         }}
       >
@@ -208,7 +208,7 @@ const PresupuestoGrid = ({
           py: 1.5,
           bgcolor: "background.paper",
           borderTop: "2px solid",
-          borderColor: "rgba(0,0,0,0.12)",
+          borderColor: "divider",
           flexShrink: 0,
         }}
       >

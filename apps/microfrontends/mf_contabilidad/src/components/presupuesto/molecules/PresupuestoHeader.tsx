@@ -58,7 +58,7 @@ const PresupuestoHeader = ({
               width: 40,
               height: 40,
               borderRadius: 1.5,
-              bgcolor: "rgba(13, 107, 94, 0.08)",
+              bgcolor: "action.selected",
               color: "primary.main",
               display: "flex",
               alignItems: "center",
@@ -98,7 +98,7 @@ const PresupuestoHeader = ({
               variant="caption"
               sx={{ display: "block", mb: 0.5, color: "text.secondary", fontWeight: 500 }}
             >
-              Año Contable <span style={{ color: "#e53935" }}>*</span>
+              Año Contable <span style={{ color: "inherit", opacity: 0.6 }}>*</span>
             </Typography>
             <Controller
               name="anoContable"
@@ -171,7 +171,7 @@ const PresupuestoHeader = ({
               variant="caption"
               sx={{ display: "block", mb: 0.5, color: "text.secondary", fontWeight: 500 }}
             >
-              Glosa <span style={{ color: "#e53935" }}>*</span>
+              Glosa <span style={{ color: "inherit", opacity: 0.6 }}>*</span>
             </Typography>
             <Controller
               name="glosa"
