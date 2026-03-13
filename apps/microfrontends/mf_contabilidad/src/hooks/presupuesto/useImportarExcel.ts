@@ -93,10 +93,6 @@ function parseSheet(sheetData: unknown[][]): ExcelRow[] {
     const denominacion = String(row[6] ?? "").trim();
     if (!denominacion) continue;
 
-    // Columna 0 puede ser N/No/S/Si o número — ignorar filas sin indicador
-    const col0 = String(row[0] ?? "").trim().toUpperCase();
-    if (!col0 || col0 === "NONE" || col0 === "NULL") continue;
-
     const nivel = inferNivel(row);
     if (nivel === 0) continue;
 
