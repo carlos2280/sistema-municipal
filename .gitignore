@@ -19,10 +19,12 @@ out/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.infra
 
 # Excepciones - Templates y configs compartidas (SÍ commitear)
 !.env.example
-!.env.infra
+!.env.development.example
 !**/.env.example
 
 # IDE
