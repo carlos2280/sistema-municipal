@@ -51,15 +51,12 @@ const authSlice = createSlice({
 			state.mfaPendingUserId = null;
 			if (action.payload.sistemaId) {
 				state.sistemaId = action.payload.sistemaId;
-				localStorage.setItem("sistemaId", String(action.payload.sistemaId));
 			}
 			if (action.payload.areaId) {
 				state.areaId = action.payload.areaId;
-				localStorage.setItem("areaId", String(action.payload.areaId));
 			}
 			if (action.payload.usuarioId) {
 				state.usuarioId = action.payload.usuarioId;
-				localStorage.setItem("usuarioId", String(action.payload.usuarioId));
 			}
 			if (action.payload.tenantId) {
 				state.tenantId = action.payload.tenantId;
@@ -90,9 +87,6 @@ const authSlice = createSlice({
 			state.nombreCompleto = null;
 			state.mfaPending = false;
 			state.mfaPendingUserId = null;
-			localStorage.removeItem("sistemaId");
-			localStorage.removeItem("areaId");
-			localStorage.removeItem("usuarioId");
 		},
 	},
 });

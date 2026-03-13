@@ -3,6 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import { env } from './config/env.js'
 import { errorHandler } from './libs/middleware/error.middleware.js'
+import { requireGateway } from './libs/middleware/requireGateway.js'
 import { tenantDbMiddleware } from './middleware/tenantDb.js'
 import apiRoutes from './routes/index.js'
 
@@ -17,6 +18,7 @@ app.use(
 )
 app.use(express.json())
 app.use(cookieParser())
+app.use(requireGateway)
 
 // Middleware multi-tenant: inyecta req.tenantDb si llega x-tenant-db-name
 app.use(tenantDbMiddleware)

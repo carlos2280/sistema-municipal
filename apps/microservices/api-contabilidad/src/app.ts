@@ -2,6 +2,7 @@ import { loadEnv } from "@/config/env";
 
 import { type DbClient, initializeDB } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
+import { requireGateway } from "@/libs/middleware/requireGateway";
 import { tenantDbMiddleware } from "@/libs/middleware/tenantDb";
 import router from "@/routes";
 import cookieParser from 'cookie-parser';
@@ -27,6 +28,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(requireGateway);
 app.use(tenantDbMiddleware);
 
 app.use("/api", router);

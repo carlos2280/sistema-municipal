@@ -5,7 +5,9 @@ import {
   eliminarMensaje,
   obtenerMensajes,
 } from '../../controllers/mensajes.controller.js'
+import { validate } from '../../libs/middleware/validate.js'
 import { extractUser } from '../../libs/middleware/extractUser.js'
+import { crearMensajeSchema, editarMensajeSchema } from '../../libs/schemas/mensajes.schemas.js'
 
 const router = Router()
 
@@ -16,10 +18,10 @@ router.use(extractUser)
 router.get('/conversaciones/:conversacionId/mensajes', obtenerMensajes)
 
 // POST /api/chat/v1/conversaciones/:conversacionId/mensajes
-router.post('/conversaciones/:conversacionId/mensajes', crearMensaje)
+router.post('/conversaciones/:conversacionId/mensajes', validate(crearMensajeSchema), crearMensaje)
 
 // PUT /api/chat/v1/mensajes/:id
-router.put('/mensajes/:id', editarMensaje)
+router.put('/mensajes/:id', validate(editarMensajeSchema), editarMensaje)
 
 // DELETE /api/chat/v1/mensajes/:id
 router.delete('/mensajes/:id', eliminarMensaje)

@@ -7,7 +7,7 @@ import {
   presupuestos,
   presupuestosDetalle,
 } from "@/db/schemas";
-import { and, eq, like, sql } from "drizzle-orm";
+import { and, eq, inArray, like, sql } from "drizzle-orm";
 
 // ─── Tipos de respuesta enriquecidos ────────────────────────────────────────
 
@@ -122,7 +122,9 @@ export const obtenerPresupuestoConDetalle = async (
   // Limpiar null de leftJoin en centroCosto
   const detalle: DetalleConCuenta[] = rows.map((r) => ({
     ...r,
-    centroCosto: r.centroCosto.id ? r.centroCosto as DetalleConCuenta["centroCosto"] : null,
+    centroCosto: r.centroCosto?.id != null
+      ? { id: r.centroCosto.id, codigo: r.centroCosto.codigo!, nombre: r.centroCosto.nombre! }
+      : null,
   }));
 
   return { presupuesto, detalle };
@@ -263,7 +265,7 @@ export const calcularEquilibrio = async (
     const cuentasPadre = await db
       .select({ id: planesCuentas.id, codigo: planesCuentas.codigo, nombre: planesCuentas.nombre })
       .from(planesCuentas)
-      .where(sql`${planesCuentas.id} = ANY(${sql.raw(`ARRAY[${padresIds.join(",")}]`)})`);
+      .where(inArray(planesCuentas.id, padresIds));
 
     const nombreMap = new Map(cuentasPadre.map((c) => [c.id, c]));
 

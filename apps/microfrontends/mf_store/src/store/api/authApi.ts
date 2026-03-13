@@ -95,19 +95,8 @@ export const authApi = createApi({
 			async onQueryStarted(_, { dispatch, queryFulfilled }) {
 				try {
 					await queryFulfilled;
-					// Recuperar datos del localStorage
-					const sistemaId = localStorage.getItem("sistemaId");
-					const areaId = localStorage.getItem("areaId");
-					const usuarioId = localStorage.getItem("usuarioId");
-
-					dispatch(
-						tokenReceived({
-							accessToken: "cookie",
-							sistemaId: sistemaId ? Number(sistemaId) : undefined,
-							areaId: areaId ? Number(areaId) : undefined,
-							usuarioId: usuarioId ? Number(usuarioId) : undefined,
-						}),
-					);
+					// sistemaId/areaId/usuarioId ya están rehydratados por Redux Persist (sessionStorage)
+					dispatch(tokenReceived({ accessToken: "cookie" }));
 				} catch {
 					dispatch(loggedOut());
 				}

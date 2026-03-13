@@ -3,6 +3,7 @@ import express from "express";
 import { loadEnv } from "@/config/env";
 import { initializeDB, type DbClient } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
+import { requireGateway } from "@/libs/middleware/requireGateway";
 import apiRouter from "@/routes";
 
 // 1. Load environment
@@ -17,6 +18,7 @@ const app = express();
 // 4. Middleware
 app.use(cors());
 app.use(express.json());
+app.use(requireGateway);
 
 // 5. Routes
 app.use("/api", apiRouter);

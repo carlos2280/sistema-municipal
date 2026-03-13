@@ -4,7 +4,11 @@ import express, { type Express } from "express";
 import { env } from "./config/env";
 import { logger } from "./logger";
 import { authenticateToken, stripUserHeaders } from "./middleware/auth";
-import { applySecurityMiddleware } from "./middleware/security";
+import {
+  applySecurityMiddleware,
+  authenticatedLimiter,
+  loginLimiter,
+} from "./middleware/security";
 import {
   clearSubscriptionCache,
   invalidateSubscriptionCache,
@@ -45,8 +49,21 @@ export const createApp = (): Express => {
 
   applySecurityMiddleware(app);
 
+  // RATE LIMIT: Login — 5 intentos / 15 min por IP
+  app.use(
+    [
+      "/api/v1/autorizacion/login",
+      "/api/v1/autorizacion/areas",
+      "/api/v1/autorizacion/sistemas",
+    ],
+    loginLimiter,
+  );
+
   // AUTH: Validar JWT y almacenar datos del usuario en req.__gatewayUser
   app.use(authenticateToken);
+
+  // RATE LIMIT: Usuarios autenticados — 200 req / min por userId
+  app.use(authenticatedLimiter);
 
   // SUBSCRIPTION: Bloquear acceso a módulos no contratados por el tenant
   app.use(subscriptionGuard);
