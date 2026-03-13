@@ -591,9 +591,15 @@ importers:
 
   apps/microservices/api-autorizacion:
     dependencies:
-      '@municipal/shared':
+      '@municipal/core':
         specifier: workspace:*
-        version: link:../../../packages/shared
+        version: link:../../../packages/core
+      '@municipal/db-identidad':
+        specifier: workspace:*
+        version: link:../../../packages/db-identidad
+      '@municipal/db-platform':
+        specifier: workspace:*
+        version: link:../../../packages/db-platform
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -685,9 +691,12 @@ importers:
 
   apps/microservices/api-chat:
     dependencies:
-      '@municipal/shared':
+      '@municipal/core':
         specifier: workspace:*
-        version: link:../../../packages/shared
+        version: link:../../../packages/core
+      '@municipal/db-mensajeria':
+        specifier: workspace:*
+        version: link:../../../packages/db-mensajeria
       '@socket.io/redis-adapter':
         specifier: ^8.3.0
         version: 8.3.0(socket.io-adapter@2.5.6)
@@ -782,9 +791,12 @@ importers:
 
   apps/microservices/api-contabilidad:
     dependencies:
-      '@municipal/shared':
+      '@municipal/core':
         specifier: workspace:*
-        version: link:../../../packages/shared
+        version: link:../../../packages/core
+      '@municipal/db-contabilidad':
+        specifier: workspace:*
+        version: link:../../../packages/db-contabilidad
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.3
@@ -879,9 +891,9 @@ importers:
 
   apps/microservices/api-gateway:
     dependencies:
-      '@municipal/shared':
+      '@municipal/core':
         specifier: workspace:*
-        version: link:../../../packages/shared
+        version: link:../../../packages/core
       compression:
         specifier: ^1.8.0
         version: 1.8.1
@@ -961,6 +973,12 @@ importers:
 
   apps/microservices/api-identidad:
     dependencies:
+      '@municipal/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
+      '@municipal/db-identidad':
+        specifier: workspace:*
+        version: link:../../../packages/db-identidad
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.3
@@ -1061,9 +1079,12 @@ importers:
 
   apps/microservices/api-platform:
     dependencies:
-      '@municipal/shared':
+      '@municipal/core':
         specifier: workspace:*
-        version: link:../../../packages/shared
+        version: link:../../../packages/core
+      '@municipal/db-platform':
+        specifier: workspace:*
+        version: link:../../../packages/db-platform
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1111,14 +1132,8 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  packages/shared:
+  packages/core:
     dependencies:
-      dotenv:
-        specifier: ^16.5.0
-        version: 16.6.1
-      drizzle-orm:
-        specifier: ^0.43.1
-        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
       pg:
         specifier: ^8.16.0
         version: 8.16.3
@@ -1128,13 +1143,114 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.1.3
+    devDependencies:
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      '@types/pg':
+        specifier: ^8.15.2
+        version: 8.16.0
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/db-contabilidad:
+    dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/db-identidad:
+    dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/db-mensajeria:
+    dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/db-platform:
+    dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.18.12
+        version: 22.19.5
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/seeders:
+    dependencies:
+      '@municipal/core':
+        specifier: workspace:*
+        version: link:../core
+      '@municipal/db-contabilidad':
+        specifier: workspace:*
+        version: link:../db-contabilidad
+      '@municipal/db-identidad':
+        specifier: workspace:*
+        version: link:../db-identidad
+      '@municipal/db-mensajeria':
+        specifier: workspace:*
+        version: link:../db-mensajeria
+      '@municipal/db-platform':
+        specifier: workspace:*
+        version: link:../db-platform
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@types/pg@8.16.0)(pg@8.16.3)
+      pg:
+        specifier: ^8.16.0
+        version: 8.16.3
       zod:
         specifier: ^3.25.67
         version: 3.25.76
     devDependencies:
-      '@types/express':
-        specifier: ^5.0.0
-        version: 5.0.6
       '@types/node':
         specifier: ^22.18.12
         version: 22.19.5
@@ -1144,12 +1260,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.1
         version: 0.31.8
-      express:
-        specifier: ^5.0.0
-        version: 5.2.1
-      tsup:
-        specifier: ^8.5.0
-        version: 8.5.1(@microsoft/api-extractor@7.55.2(@types/node@22.19.5))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.8.3)(yaml@2.8.2)
       tsx:
         specifier: ^4.19.4
         version: 4.21.0

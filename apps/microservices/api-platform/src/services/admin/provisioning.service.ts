@@ -4,12 +4,12 @@ import { Pool } from "pg";
 import { getEnv } from "@/config/env";
 
 /**
- * Base path to the shared drizzle migration folder.
- * In monorepo: packages/shared/drizzle/
+ * Base path to the seeders drizzle migration folder.
+ * In monorepo: packages/seeders/drizzle/
  */
 const MIGRATIONS_DIR = resolve(
   import.meta.dirname ?? __dirname,
-  "../../../../../../packages/shared/drizzle",
+  "../../../../../../packages/seeders/drizzle",
 );
 
 /**

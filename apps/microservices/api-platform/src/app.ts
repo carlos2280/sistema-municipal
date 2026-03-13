@@ -5,7 +5,7 @@ import { loadEnv } from "@/config/env";
 import { initializeDB, type DbClient } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
 import { requireGateway } from "@/libs/middleware/requireGateway";
-import { requestIdMiddleware } from "@municipal/shared/logger";
+import { requestIdMiddleware } from "@municipal/core/logger";
 import apiRouter from "@/routes";
 
 // 1. Load environment

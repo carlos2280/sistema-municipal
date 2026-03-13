@@ -1,4 +1,4 @@
-import { extractUserFromHeaders } from "@municipal/shared/auth";
+import { extractUserFromHeaders } from "@municipal/core/auth";
 import { getEnv } from "@/config/env";
 import type { CustomJwtPayload } from "@/types/express/auth";
 import type { NextFunction, Request, Response } from "express";

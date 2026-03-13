@@ -1,5 +1,5 @@
 import type { DbClient } from "@/db/client";
-import { centrosCosto, type NewCentrosCosto } from "@/db/schemas";
+import { centrosCosto, type NewCentrosCosto } from "@municipal/db-contabilidad";
 import { eq } from "drizzle-orm";
 
 export const obtenerCentrosCosto = async (db: DbClient, soloActivos = true) => {

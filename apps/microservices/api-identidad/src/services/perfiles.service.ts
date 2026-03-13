@@ -4,7 +4,7 @@ import {
   type Perfil,
   type PerfilUpdate,
   perfiles,
-} from "@/db/schemas";
+} from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
 export const createPerfil = async (db: DbClient, data: NewPerfil): Promise<Perfil> => {

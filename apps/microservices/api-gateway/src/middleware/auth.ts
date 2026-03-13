@@ -1,4 +1,4 @@
-import { ALL_USER_HEADERS } from "@municipal/shared/auth";
+import { ALL_USER_HEADERS } from "@municipal/core/auth";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";

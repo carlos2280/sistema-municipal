@@ -6,7 +6,7 @@ import { errorHandler } from './libs/middleware/error.middleware.js'
 import { requireGateway } from './libs/middleware/requireGateway.js'
 import { tenantDbMiddleware } from './middleware/tenantDb.js'
 import apiRoutes from './routes/index.js'
-import { requestIdMiddleware } from '@municipal/shared/logger'
+import { requestIdMiddleware } from '@municipal/core/logger'
 
 const app = express()
 

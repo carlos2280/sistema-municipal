@@ -11,7 +11,7 @@ import {
   sistemas,
   tokensContrasenaTemporal,
   usuarios,
-} from "@/db/schemas";
+} from "@municipal/db-identidad";
 import { generarTokens, generarTokenSetup, verificarToken } from "@/libs/utils/jwt.utils";
 import type { TokenPayload } from "@/libs/utils/jwt.utils";
 import { decryptSecret, encryptSecret } from "@/libs/utils/crypto.utils";
@@ -21,7 +21,7 @@ import {
   modulos,
   municipalidades,
   suscripciones,
-} from "@municipal/shared/database/platform";
+} from "@municipal/db-platform";
 import bcrypt from "bcryptjs";
 import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { authenticator } from "otplib";

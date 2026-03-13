@@ -1,0 +1,27 @@
+{
+  "name": "@municipal/db-identidad",
+  "version": "1.0.0",
+  "description": "Schemas Drizzle para el dominio identidad",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.43.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.12",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

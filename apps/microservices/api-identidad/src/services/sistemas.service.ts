@@ -4,7 +4,7 @@ import {
   type Sistema,
   type SistemaUpdate,
   sistemas,
-} from "@/db/schemas";
+} from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
 export const createSistema = async (db: DbClient, data: NewSistema): Promise<Sistema> => {

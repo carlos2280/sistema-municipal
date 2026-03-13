@@ -1,5 +1,5 @@
 import type { DbClient } from "@/db/client";
-import { type NewPlanesCuentas, planesCuentas } from "@/db/schemas";
+import { type NewPlanesCuentas, planesCuentas } from "@municipal/db-contabilidad";
 import { and, eq, like } from "drizzle-orm";
 import * as csService from "./cuentasSubgrupos.service";
 

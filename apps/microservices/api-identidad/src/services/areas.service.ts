@@ -1,5 +1,5 @@
 import type { DbClient } from "@/db/client";
-import { type Area, type AreaUpdate, type NewArea, areas } from "@/db/schemas";
+import { type Area, type AreaUpdate, type NewArea, areas } from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
 export const createArea = async (db: DbClient, data: NewArea): Promise<Area> => {

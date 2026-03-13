@@ -5,7 +5,7 @@
     "buildCommand": "npm install && npm run build",
     "watchPatterns": [
       "apps/microfrontends/mf_store/**",
-      "packages/shared/**"
+      "packages/seeders/**", "packages/core/**", "packages/db-identidad/**", "packages/db-platform/**", "packages/db-contabilidad/**", "packages/db-mensajeria/**"
     ]
   },
   "deploy": {

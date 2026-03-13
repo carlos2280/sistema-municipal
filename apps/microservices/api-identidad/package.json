@@ -23,6 +23,8 @@
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
   "dependencies": {
+    "@municipal/core": "workspace:*",
+    "@municipal/db-identidad": "workspace:*",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

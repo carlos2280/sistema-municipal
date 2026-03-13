@@ -3,4 +3,4 @@ export {
   type Conversacion,
   type NewConversacion,
   type ConversacionUpdate,
-} from '@municipal/shared/database/mensajeria'
+} from '@municipal/db-mensajeria'

@@ -1,4 +1,4 @@
-import { GATEWAY_SIGNATURE, X_USER_HEADERS } from "@municipal/shared/auth";
+import { GATEWAY_SIGNATURE, X_USER_HEADERS } from "@municipal/core/auth";
 import type { NextFunction, Request, Response } from "express";
 
 /**

@@ -5,7 +5,7 @@
     "dockerfilePath": "apps/microservices/api-gateway/Dockerfile",
     "watchPatterns": [
       "apps/microservices/api-gateway/**",
-      "packages/shared/**"
+      "packages/seeders/**", "packages/core/**", "packages/db-identidad/**", "packages/db-platform/**", "packages/db-contabilidad/**", "packages/db-mensajeria/**"
     ]
   },
   "deploy": {

@@ -1,5 +1,5 @@
 import { loadEnv } from "@/config/env";
-import type { Usuario } from "@/db/schemas";
+import type { Usuario } from "@municipal/db-identidad";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 

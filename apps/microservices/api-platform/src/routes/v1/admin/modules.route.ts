@@ -1,5 +1,5 @@
 import { db } from "@/app";
-import { modulos } from "@municipal/shared/database/platform";
+import { modulos } from "@municipal/db-platform";
 import { asc } from "drizzle-orm";
 import { Router } from "express";
 

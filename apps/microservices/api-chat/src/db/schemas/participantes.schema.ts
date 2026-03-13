@@ -2,4 +2,4 @@ export {
   participantes,
   type Participante,
   type NewParticipante,
-} from '@municipal/shared/database/mensajeria'
+} from '@municipal/db-mensajeria'

@@ -6,7 +6,7 @@ import {
   planesCuentas,
   presupuestos,
   presupuestosDetalle,
-} from "@/db/schemas";
+} from "@municipal/db-contabilidad";
 import { and, eq, inArray, like, sql } from "drizzle-orm";
 
 // ─── Tipos de respuesta enriquecidos ────────────────────────────────────────

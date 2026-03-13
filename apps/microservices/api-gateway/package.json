@@ -19,7 +19,7 @@
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",
   "dependencies": {
-    "@municipal/shared": "workspace:*",
+    "@municipal/core": "workspace:*",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

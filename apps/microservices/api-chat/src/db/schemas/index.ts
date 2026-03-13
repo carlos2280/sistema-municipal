@@ -18,4 +18,4 @@ export {
   type NewInvitacionReunion,
   type RecordatorioReunion,
   type NewRecordatorioReunion,
-} from '@municipal/shared/database/mensajeria'
+} from '@municipal/db-mensajeria'

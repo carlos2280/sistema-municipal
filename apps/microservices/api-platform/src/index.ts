@@ -1,6 +1,6 @@
 import app from "@/app";
 import { loadEnv } from "@/config/env";
-import { createLogger } from "@municipal/shared/logger";
+import { createLogger } from "@municipal/core/logger";
 
 const logger = createLogger("api-platform");
 const { PORT: PORT_DEFAULT } = loadEnv();

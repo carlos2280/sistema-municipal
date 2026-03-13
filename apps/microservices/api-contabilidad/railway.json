@@ -5,7 +5,7 @@
     "dockerfilePath": "apps/microservices/api-contabilidad/Dockerfile",
     "watchPatterns": [
       "apps/microservices/api-contabilidad/**",
-      "packages/shared/**"
+      "packages/seeders/**", "packages/core/**", "packages/db-identidad/**", "packages/db-platform/**", "packages/db-contabilidad/**", "packages/db-mensajeria/**"
     ]
   },
   "deploy": {

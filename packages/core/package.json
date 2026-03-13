@@ -1,0 +1,46 @@
+{
+  "name": "@municipal/core",
+  "version": "1.0.0",
+  "description": "Core utilities: auth, logger, errors, tenant DB pools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
+    },
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "import": "./dist/errors/index.js"
+    },
+    "./database": {
+      "types": "./dist/database/index.d.ts",
+      "import": "./dist/database/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/auth/index.ts src/logger/index.ts src/errors/index.ts src/database/index.ts --format esm --dts --clean",
+    "dev": "tsup src/auth/index.ts src/logger/index.ts src/errors/index.ts src/database/index.ts --format esm --dts --watch"
+  },
+  "dependencies": {
+    "pg": "^8.16.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.12",
+    "@types/pg": "^8.15.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,5 +1,5 @@
 import { db } from "@/app";
-import { municipalidades } from "@municipal/shared/database/platform";
+import { municipalidades } from "@municipal/db-platform";
 import { eq, or, sql } from "drizzle-orm";
 
 export interface ResolveResult {

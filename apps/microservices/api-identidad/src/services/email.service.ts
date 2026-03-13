@@ -1,5 +1,5 @@
 import type { DbClient } from "@/db/client";
-import { tokensContrasenaTemporal } from "@/db/schemas";
+import { tokensContrasenaTemporal } from "@municipal/db-identidad";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 import { generarTokenTemporal } from "../libs/utils/jwt.tokenTemoral";

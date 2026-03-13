@@ -1,4 +1,4 @@
-import { extractUserFromHeaders } from "@municipal/shared/auth";
+import { extractUserFromHeaders } from "@municipal/core/auth";
 import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env.js";

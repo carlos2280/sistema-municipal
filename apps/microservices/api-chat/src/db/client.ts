@@ -1,4 +1,4 @@
-import { getTenantPool } from '@municipal/shared/database'
+import { getTenantPool } from '@municipal/core/database'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
 import { env } from '../config/env.js'

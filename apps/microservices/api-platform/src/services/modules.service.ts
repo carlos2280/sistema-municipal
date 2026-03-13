@@ -3,7 +3,7 @@ import {
   modulos,
   municipalidades,
   suscripciones,
-} from "@municipal/shared/database/platform";
+} from "@municipal/db-platform";
 import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 
 export interface ActiveModule {

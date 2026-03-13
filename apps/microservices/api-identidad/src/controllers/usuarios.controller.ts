@@ -1,6 +1,6 @@
 import { db } from "@/app";
 import type { DbClient } from "@/db/client";
-import type { NewUsuario } from "@/db/schema/usuarios.schema";
+import type { NewUsuario } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
 import * as usuarioService from "@services/usuarios.service";
 import type { RequestHandler } from "express";

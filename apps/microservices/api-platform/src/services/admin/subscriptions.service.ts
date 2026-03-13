@@ -5,7 +5,7 @@ import {
   municipalidades,
   suscripcionHistorial,
   suscripciones,
-} from "@municipal/shared/database/platform";
+} from "@municipal/db-platform";
 import { eq } from "drizzle-orm";
 import { invalidateTenantCache } from "./cacheInvalidation.service";
 

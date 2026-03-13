@@ -1,6 +1,6 @@
 import { db } from "@/app";
 import { AppError } from "@/libs/middleware/AppError";
-import { municipalidades } from "@municipal/shared/database/platform";
+import { municipalidades } from "@municipal/db-platform";
 import { desc, eq } from "drizzle-orm";
 import {
   createTenantDatabase,

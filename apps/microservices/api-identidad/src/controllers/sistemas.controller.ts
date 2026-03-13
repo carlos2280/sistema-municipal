@@ -1,6 +1,6 @@
 import { db } from "@/app";
 import type { DbClient } from "@/db/client";
-import type { NewSistema } from "@/db/schema";
+import type { NewSistema } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
 import * as sistemaService from "@services/sistemas.service";
 import type { RequestHandler } from "express";

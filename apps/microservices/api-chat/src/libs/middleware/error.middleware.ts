@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import { createLogger } from '@municipal/shared/logger'
+import { createLogger } from '@municipal/core/logger'
 import { AppError } from './AppError.js'
 
 const logger = createLogger('api-chat:error')

@@ -1,6 +1,6 @@
 import { db } from "@/app";
 import type { DbClient } from "@/db/client";
-import type { NewArea } from "@/db/schema";
+import type { NewArea } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
 import * as areasService from "@services/areas.service";
 import type { RequestHandler } from "express";

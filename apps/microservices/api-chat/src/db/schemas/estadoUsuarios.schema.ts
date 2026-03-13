@@ -1,4 +1,4 @@
 export {
   estadoUsuarios,
   type EstadoUsuario,
-} from '@municipal/shared/database/mensajeria'
+} from '@municipal/db-mensajeria'

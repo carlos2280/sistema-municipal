@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ClientRequest } from "node:http";
 import type http from "node:http";
-import { X_USER_HEADERS } from "@municipal/shared/auth";
+import { X_USER_HEADERS } from "@municipal/core/auth";
 import type { Express } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import type { GatewayUserPayload } from "../middleware/auth";

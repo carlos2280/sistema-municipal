@@ -9,7 +9,7 @@ import { requireGateway } from "./libs/middleware/requireGateway";
 import { tenantDbMiddleware } from "./libs/middleware/tenantDb";
 import cookieParser from 'cookie-parser';
 import { sql } from "drizzle-orm";
-import { requestIdMiddleware } from "@municipal/shared/logger";
+import { requestIdMiddleware } from "@municipal/core/logger";
 const app = express();
 
 

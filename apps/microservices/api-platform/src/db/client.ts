@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { EnvConfig } from "@/env/schema";
-import * as schema from "@municipal/shared/database/platform";
+import * as schema from "@municipal/db-platform";
 
 let dbInstance: ReturnType<typeof createDbClient> | null = null;
 

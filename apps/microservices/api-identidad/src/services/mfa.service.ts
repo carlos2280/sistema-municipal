@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { DbClient } from "@/db/client";
-import { usuarios } from "@/db/schemas";
+import { usuarios } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
 import { decryptSecret, encryptSecret } from "@/libs/utils/crypto.utils";
 import bcrypt from "bcryptjs";

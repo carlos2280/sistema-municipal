@@ -1,6 +1,6 @@
 import IoRedis from 'ioredis'
 import { env } from '../config/env.js'
-import { createLogger } from '@municipal/shared/logger'
+import { createLogger } from '@municipal/core/logger'
 
 const logger = createLogger('api-chat:redis')
 

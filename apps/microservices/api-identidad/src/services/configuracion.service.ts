@@ -1,6 +1,6 @@
 import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
-import { usuarios } from "@/db/schemas";
+import { usuarios } from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
 export interface UsuarioMfaStatus {

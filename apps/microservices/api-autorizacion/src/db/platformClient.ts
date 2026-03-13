@@ -1,5 +1,5 @@
 import type { EnvConfig } from "@/env/schema";
-import * as platformSchema from "@municipal/shared/database/platform";
+import * as platformSchema from "@municipal/db-platform";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 

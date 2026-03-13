@@ -1,6 +1,6 @@
 import { platformDb } from "@/app";
 import { AppError } from "@/libs/middleware/AppError";
-import { municipalidades } from "@municipal/shared/database/platform";
+import { municipalidades } from "@municipal/db-platform";
 import { eq } from "drizzle-orm";
 
 export type MfaPolicy = "required" | "optional" | "disabled";

@@ -1,5 +1,5 @@
 import type { DbClient } from "@/db/client";
-import { type Menu, type MenuUpdate, type NewMenu, menus } from "@/db/schemas";
+import { type Menu, type MenuUpdate, type NewMenu, menus } from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
 export const createMenu = async (db: DbClient, data: NewMenu): Promise<Menu> => {

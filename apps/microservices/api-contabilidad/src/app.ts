@@ -11,7 +11,7 @@ import express, { type Express } from "express";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { sql } from "drizzle-orm";
-import { requestIdMiddleware } from "@municipal/shared/logger";
+import { requestIdMiddleware } from "@municipal/core/logger";
 // Cargar y validar variables de entorno
 const env = loadEnv();
 

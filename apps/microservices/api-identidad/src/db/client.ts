@@ -1,8 +1,8 @@
 import type { EnvConfig } from "@/env/schema";
-import { getTenantPool } from "@municipal/shared/database";
+import { getTenantPool } from "@municipal/core/database";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "./schemas";
+import * as schema from "@municipal/db-identidad";
 
 let dbInstance: ReturnType<typeof createDbClient> | null = null;
 
