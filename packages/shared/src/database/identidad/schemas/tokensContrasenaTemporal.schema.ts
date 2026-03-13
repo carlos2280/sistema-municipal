@@ -15,8 +15,8 @@ export const tokensContrasenaTemporal = identidadSchema.table("tokens_contrasena
         onDelete: "cascade",
     }),
     usado: boolean("usado").default(false),
-    expiraEn: timestamp("expira_en").notNull(),
-    creadoEn: timestamp("creado_en").defaultNow(),
+    expiraEn: timestamp("expira_en", { withTimezone: true }).notNull(),
+    creadoEn: timestamp("creado_en", { withTimezone: true }).defaultNow(),
 });
 
 // Tipos útiles

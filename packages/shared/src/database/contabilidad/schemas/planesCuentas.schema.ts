@@ -29,8 +29,8 @@ export const planesCuentas = contabilidadSchema.table(
       (): AnyPgColumn => planesCuentas.id,
     ),
     codigoIni: text("codigo_ini"),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => ({
     // Índice único: código de cuenta es único por año contable
@@ -44,6 +44,8 @@ export const planesCuentas = contabilidadSchema.table(
     anoIdx: index("idx_planes_ano").on(table.anoContable),
     // Índice para FK tipo_cuenta
     tipoCuentaIdx: index("idx_planes_tipo_cuenta").on(table.tipoCuentaId),
+    // Índice para FK parent (árbol jerárquico)
+    parentIdx: index("idx_planes_parent").on(table.parentId),
   }),
 );
 

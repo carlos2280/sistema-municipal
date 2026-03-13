@@ -18,8 +18,8 @@ export const cuentasSubgrupos = contabilidadSchema
             .references((): AnyPgColumn => tiposCuentas.id),
         parentId: integer("parent_id")
             .references((): AnyPgColumn => cuentasSubgrupos.id),
-        createdAt: timestamp("created_at").defaultNow(),
-        updatedAt: timestamp("updated_at").defaultNow(),
+        createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     });
 
 export type CuentasSubgrupos = typeof cuentasSubgrupos.$inferSelect;

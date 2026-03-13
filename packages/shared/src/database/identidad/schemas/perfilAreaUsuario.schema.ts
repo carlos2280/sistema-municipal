@@ -17,8 +17,8 @@ export const perfilAreaUsuario = identidadSchema.table(
     usuarioId: integer("usuario_id")
       .notNull()
       .references(() => usuarios.id),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => ({
     // Constraint único compuesto

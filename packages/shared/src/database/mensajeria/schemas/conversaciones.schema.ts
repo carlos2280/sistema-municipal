@@ -17,8 +17,8 @@ export const conversaciones = mensajeriaSchema.table('conversaciones', {
   activo: boolean('activo').default(true),
   sistema: boolean('sistema').default(false),
   departamentoId: integer('departamento_id'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 })
 
 export type Conversacion = typeof conversaciones.$inferSelect

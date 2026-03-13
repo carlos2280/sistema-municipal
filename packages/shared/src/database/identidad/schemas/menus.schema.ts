@@ -24,8 +24,8 @@ export const menus = identidadSchema.table(
 		visible: boolean("visible").notNull().default(true),
 		nivel: integer("nivel").notNull(),
 		orden: integer("orden").notNull(),
-		createdAt: timestamp("created_at").defaultNow(),
-		updatedAt: timestamp("updated_at").defaultNow(),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 	},
 	(table) => ({
 		// Índice para consultas por sistema

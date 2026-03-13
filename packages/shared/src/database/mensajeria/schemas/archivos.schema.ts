@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   serial,
   text,
@@ -17,8 +18,10 @@ export const archivos = mensajeriaSchema.table('archivos', {
   tamanio: integer('tamanio').notNull(),
   url: text('url').notNull(),
   thumbnailUrl: text('thumbnail_url'),
-  createdAt: timestamp('created_at').defaultNow(),
-})
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  mensajeIdx: index('idx_archivos_mensaje').on(table.mensajeId),
+}))
 
 export type Archivo = typeof archivos.$inferSelect
 export type NewArchivo = typeof archivos.$inferInsert

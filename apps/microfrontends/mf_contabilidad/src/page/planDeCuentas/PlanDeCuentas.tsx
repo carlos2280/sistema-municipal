@@ -290,7 +290,6 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   const handleConfirmDelete = useCallback(() => {
     if (!deleteTarget) return;
     // TODO: implementar eliminacion real via API
-    console.log('Confirmar eliminacion:', deleteTarget.item.id);
     setDeleteTarget(null);
   }, [deleteTarget]);
 

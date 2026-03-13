@@ -19,8 +19,8 @@ export const modulos = pgTable("modulos", {
   requiere: text("requiere").array().default([]),
   activo: boolean("activo").default(true),
   orden: integer("orden").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 export type Modulo = typeof modulos.$inferSelect;

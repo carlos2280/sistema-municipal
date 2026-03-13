@@ -22,7 +22,6 @@ type Props = {
   onSubmit: (data: TSchemaPlanesCuentasCreate) => Promise<void>;
 };
 const FormularioBase = ({ methods, onSubmit, open, onClose }: Props) => {
-  console.log(methods.getValues());
   const combreCuenta = methods.getValues('valorPadre');
   return (
     <Collapse

@@ -21,13 +21,13 @@ export const suscripciones = pgTable(
       .notNull()
       .references(() => modulos.id),
     estado: text("estado").notNull().default("activa"),
-    fechaInicio: timestamp("fecha_inicio").notNull().defaultNow(),
-    fechaFin: timestamp("fecha_fin"),
+    fechaInicio: timestamp("fecha_inicio", { withTimezone: true }).notNull().defaultNow(),
+    fechaFin: timestamp("fecha_fin", { withTimezone: true }),
     precioMensual: decimal("precio_mensual", { precision: 10, scale: 2 }),
     notas: text("notas"),
     activadoPor: text("activado_por"),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [unique("uq_muni_modulo").on(table.municipalidadId, table.moduloId)],
 );

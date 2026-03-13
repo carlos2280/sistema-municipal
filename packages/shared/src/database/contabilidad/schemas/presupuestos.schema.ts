@@ -12,8 +12,8 @@ export const presupuestos = contabilidadSchema.table(
     // No FK cross-schema a identidad.usuarios — se usa integer simple
     usuarioCreacion: integer("usuario_creacion").notNull(),
     usuarioModificacion: integer("usuario_modificacion"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     uqAnoContable: unique("uq_presupuesto_ano").on(table.anoContable),

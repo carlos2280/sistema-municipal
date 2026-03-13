@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   serial,
   text,
@@ -20,10 +21,12 @@ export const llamadas = mensajeriaSchema.table('llamadas', {
   livekitRoom: text('livekit_room').notNull(),
   duracionSegundos: integer('duracion_segundos'),
   participantesIds: text('participantes_ids'),
-  iniciadaEn: timestamp('iniciada_en').defaultNow(),
-  finalizadaEn: timestamp('finalizada_en'),
-  createdAt: timestamp('created_at').defaultNow(),
-})
+  iniciadaEn: timestamp('iniciada_en', { withTimezone: true }).defaultNow(),
+  finalizadaEn: timestamp('finalizada_en', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  conversacionIdx: index('idx_llamadas_conv').on(table.conversacionId),
+}))
 
 export type Llamada = typeof llamadas.$inferSelect
 export type NewLlamada = typeof llamadas.$inferInsert

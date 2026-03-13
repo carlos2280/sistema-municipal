@@ -2,6 +2,7 @@ import { contabilidadSchema } from "../../schemas";
 import {
   type AnyPgColumn,
   bigint,
+  index,
   integer,
   serial,
   text,
@@ -28,8 +29,8 @@ export const presupuestosDetalle = contabilidadSchema.table(
     // Pesos chilenos enteros (sin decimales). bigint mode:"number" cabe en JS Number hasta 2^53
     montoAnual: bigint("monto_anual", { mode: "number" }).notNull(),
     observacion: text("observacion"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     uqLinea: unique("uq_presupuesto_detalle").on(
@@ -37,6 +38,8 @@ export const presupuestosDetalle = contabilidadSchema.table(
       table.cuentaId,
       table.centroCostoId,
     ),
+    cuentaIdx: index("idx_presup_det_cuenta").on(table.cuentaId),
+    centroCostoIdx: index("idx_presup_det_centro").on(table.centroCostoId),
   }),
 );
 

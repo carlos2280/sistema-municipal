@@ -8,6 +8,8 @@ import { errorHandler } from "./libs/middleware/error.middleware";
 import { requireGateway } from "./libs/middleware/requireGateway";
 import { tenantDbMiddleware } from "./libs/middleware/tenantDb";
 import cookieParser from 'cookie-parser';
+import { sql } from "drizzle-orm";
+import { requestIdMiddleware } from "@municipal/shared/logger";
 const app = express();
 
 
@@ -22,6 +24,7 @@ const platformDb: PlatformDbClient = initializePlatformDB(env);
 
 
 app.use(express.json());
+app.use(requestIdMiddleware);
 
 app.use(cookieParser());
 app.use(requireGateway);
@@ -55,16 +58,13 @@ app.use("/api", router);
 
 
 
-app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
-});
-
-// Middleware para manejar conexiones abortadas
-app.use((req, res, next) => {
-  req.on('aborted', () => {
-    console.log('Request aborted by client:', req.method, req.url);
-  });
-  next();
+app.get("/api/health", async (_req, res) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.json({ status: "ok", service: "api-autorizacion", timestamp: new Date().toISOString() });
+  } catch {
+    res.status(503).json({ status: "unhealthy", service: "api-autorizacion", timestamp: new Date().toISOString() });
+  }
 });
 
 

@@ -66,13 +66,11 @@ function getOrCreateSocket(token?: string): Socket {
     })
 
     g.socket.on('connect', () => {
-      console.log('[Socket] Conectado:', g.socket?.id)
       g.authErrorCount = 0
       notifyListeners()
     })
 
-    g.socket.on('disconnect', (reason) => {
-      console.log('[Socket] Desconectado:', reason)
+    g.socket.on('disconnect', (_reason) => {
       notifyListeners()
     })
 

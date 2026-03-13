@@ -4,8 +4,8 @@ import { serial, text, timestamp } from "drizzle-orm/pg-core";
 export const areas = identidadSchema.table("areas", {
   id: serial("id").primaryKey(),
   nombre: text("nombre").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 // Tipos

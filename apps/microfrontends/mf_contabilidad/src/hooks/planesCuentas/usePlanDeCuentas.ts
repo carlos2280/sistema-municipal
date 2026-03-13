@@ -61,7 +61,6 @@ export const usePlanDeCuentas = () => {
   const handleCreate = (item: TreeItemData, e?: MouseEvent) => {
     e?.stopPropagation();
 
-    console.log('onCreate', item);
     setSelectedItem(item.id);
     setFormType('crear');
     setFormData({ name: '', code: '', description: '' });
@@ -81,7 +80,6 @@ export const usePlanDeCuentas = () => {
   };
   const handleDelete = (id: string, e?: MouseEvent) => {
     e?.stopPropagation();
-    console.log('Eliminar', id);
   };
   const handleCloseForm = () => {
     setShowForm(false);
@@ -90,7 +88,6 @@ export const usePlanDeCuentas = () => {
   };
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ formType, selectedItem, formData });
     handleCloseForm();
   };
   const handleInputChange =

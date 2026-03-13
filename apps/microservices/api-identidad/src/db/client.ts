@@ -17,7 +17,7 @@ export function createDbClient(config: EnvConfig) {
 
   // Manejo de errores del pool
   pool.on("error", (err) => {
-    console.error("Unexpected error on idle client", err);
+    process.stderr.write(`[api-identidad:db] Error inesperado en pool: ${err.message}\n`);
     process.exit(-1);
   });
 

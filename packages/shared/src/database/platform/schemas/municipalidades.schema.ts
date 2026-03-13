@@ -27,8 +27,8 @@ export const municipalidades = pgTable("municipalidades", {
     .$type<"required" | "optional" | "disabled">()
     .notNull()
     .default("optional"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 export type Municipalidad = typeof municipalidades.$inferSelect;

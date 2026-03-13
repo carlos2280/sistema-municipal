@@ -1,5 +1,8 @@
 import IoRedis from 'ioredis'
 import { env } from '../config/env.js'
+import { createLogger } from '@municipal/shared/logger'
+
+const logger = createLogger('api-chat:redis')
 
 // ioredis con moduleResolution NodeNext: el default import es el namespace,
 // pero .default es la clase Redis. Extraemos la clase correctamente.
@@ -22,11 +25,11 @@ export function getRedisClient(): RedisInstance {
     })
 
     redis.on('connect', () => {
-      console.log('[Redis] Conectado correctamente')
+      logger.info('[Redis] Conectado correctamente')
     })
 
     redis.on('error', (err: Error) => {
-      console.error('[Redis] Error de conexión:', err.message)
+      logger.error(err, '[Redis] Error de conexión')
     })
   }
 
@@ -51,6 +54,6 @@ export async function disconnectRedis(): Promise<void> {
   if (redis) {
     await redis.quit()
     redis = null
-    console.log('[Redis] Desconectado')
+    logger.info('[Redis] Desconectado')
   }
 }

@@ -4,61 +4,52 @@ import { env } from './config/env.js'
 import { db } from './db/client.js'
 import { startReminderScheduler, stopReminderScheduler } from './jobs/reminderScheduler.js'
 import { disconnectRedis } from './libs/redis.js'
+import { createLogger } from '@municipal/shared/logger'
 import { gruposSistemaService } from './services/gruposSistema.service.js'
 import { initializeSocket } from './socket/index.js'
 
+const logger = createLogger('api-chat')
 const httpServer = createServer(app)
 
 async function bootstrap() {
-  // Inicializar Socket.IO con Redis adapter
   const io = await initializeSocket(httpServer)
-
-  // Hacer io disponible en la app si es necesario
   app.set('io', io)
-
-  // Iniciar scheduler de recordatorios de reuniones
   startReminderScheduler(io)
 
   httpServer.listen(Number(env.PORT), () => {
-    console.log(`
-╔══════════════════════════════════════════════════╗
-║       API Chat - Sistema Municipal               ║
-╠══════════════════════════════════════════════════╣
-║  REST API:    http://localhost:${env.PORT}/api/chat    ║
-║  WebSocket:   http://localhost:${env.PORT}             ║
-║  Health:      http://localhost:${env.PORT}/health      ║
-║  Environment: ${env.NODE_ENV.padEnd(30)}   ║
-╚══════════════════════════════════════════════════╝
-    `)
+    logger.info(`[api-chat] Servidor iniciado en puerto ${env.PORT}`)
 
-    // Sincronizar grupos del sistema por departamento al arrancar
     gruposSistemaService
       .sincronizarGrupos(db)
       .then((result) => {
         if (result.created.length > 0 || result.updated.length > 0) {
-          console.log(
-            `[Sync] Grupos del sistema: ${result.created.length} creados, ${result.updated.length} actualizados`
-          )
+          logger.info(`[Sync] Grupos del sistema: ${result.created.length} creados, ${result.updated.length} actualizados`)
         }
       })
       .catch((err) => {
-        console.error('[Sync] Error al sincronizar grupos del sistema:', err)
+        logger.error(err, '[Sync] Error al sincronizar grupos del sistema')
       })
   })
 }
 
 bootstrap().catch((err) => {
-  console.error('[Server] Error fatal al iniciar:', err)
+  logger.error(err, '[Server] Error fatal al iniciar')
   process.exit(1)
 })
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('[Server] SIGTERM recibido, cerrando servidor...')
+function shutdown(signal: string) {
+  logger.info(`${signal} recibido, iniciando graceful shutdown...`)
   httpServer.close(async () => {
     stopReminderScheduler()
     await disconnectRedis()
-    console.log('[Server] Servidor cerrado')
+    logger.info('Servidor cerrado correctamente')
     process.exit(0)
   })
-})
+  setTimeout(() => {
+    logger.error('Shutdown forzado por timeout')
+    process.exit(1)
+  }, 10_000).unref()
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))

@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   serial,
   text,
@@ -19,9 +20,13 @@ export const mensajes = mensajeriaSchema.table('mensajes', {
   replyToId: integer('reply_to_id'),
   editado: boolean('editado').default(false),
   eliminado: boolean('eliminado').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-})
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  conversacionIdx: index('idx_mensajes_conversacion').on(table.conversacionId),
+  remitenteIdx: index('idx_mensajes_remitente').on(table.remitenteId),
+  convCreatedIdx: index('idx_mensajes_created').on(table.conversacionId, table.createdAt),
+}))
 
 export type Mensaje = typeof mensajes.$inferSelect
 export type NewMensaje = typeof mensajes.$inferInsert

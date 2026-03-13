@@ -9,6 +9,8 @@ import cors from "cors";
 import express, { type Express } from "express";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import { sql } from "drizzle-orm";
+import { requestIdMiddleware } from "@municipal/shared/logger";
 
 // Cargar y validar variables de entorno
 const env = loadEnv();
@@ -20,6 +22,7 @@ const app: Express = express();
 // Configuración de Swagger
 const specs = swaggerJSDoc(swaggerOptions);
 app.use(cors());
+app.use(requestIdMiddleware);
 app.use(express.json());
 app.use(requireGateway);
 app.use(tenantDbMiddleware);
@@ -27,8 +30,13 @@ app.use(tenantDbMiddleware);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/api", router);
 // Ruta de prueba
-app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
+app.get("/api/health", async (_req, res) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.json({ status: "ok", service: "api-identidad", timestamp: new Date().toISOString() });
+  } catch {
+    res.status(503).json({ status: "unhealthy", service: "api-identidad", timestamp: new Date().toISOString() });
+  }
 });
 
 // 👇 Este debe ir al final

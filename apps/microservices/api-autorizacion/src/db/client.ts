@@ -9,10 +9,6 @@ let dbInstance: ReturnType<typeof createDbClient> | null = null;
 export function createDbClient(config: EnvConfig) {
   const connectionString = `postgres://${config.DB_USER}:${config.DB_PASSWORD}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_NAME}`;
 
-  console.log(
-    `[DB] SSL config: ${config.DB_SSL} (type: ${typeof config.DB_SSL})`,
-  );
-
   const pool = new Pool({
     connectionString,
     ssl: config.DB_SSL === true ? { rejectUnauthorized: false } : false,
@@ -21,7 +17,7 @@ export function createDbClient(config: EnvConfig) {
 
   // Manejo de errores del pool
   pool.on("error", (err) => {
-    console.error("Unexpected error on idle client", err);
+    process.stderr.write(`[api-autorizacion:db] Error inesperado en pool: ${err.message}\n`);
     process.exit(-1);
   });
 

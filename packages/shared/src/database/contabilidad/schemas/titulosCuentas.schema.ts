@@ -5,8 +5,8 @@ export const titulosCuentas = contabilidadSchema.table("titulos_cuentas", {
   id: serial("id").primaryKey(),
   codigo: text("codigo").notNull(),
   nombre: text("nombre").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 // Tipos

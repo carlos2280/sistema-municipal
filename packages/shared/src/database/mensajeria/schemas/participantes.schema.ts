@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   serial,
   text,
@@ -16,9 +17,12 @@ export const participantes = mensajeriaSchema.table('participantes', {
   usuarioId: integer('usuario_id').notNull(),
   rol: text('rol').default('miembro').$type<'admin' | 'miembro'>(),
   silenciado: boolean('silenciado').default(false),
-  ultimaLectura: timestamp('ultima_lectura'),
-  createdAt: timestamp('created_at').defaultNow(),
-})
+  ultimaLectura: timestamp('ultima_lectura', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  conversacionIdx: index('idx_participantes_conv').on(table.conversacionId),
+  usuarioIdx: index('idx_participantes_usuario').on(table.usuarioId),
+}))
 
 export type Participante = typeof participantes.$inferSelect
 export type NewParticipante = typeof participantes.$inferInsert

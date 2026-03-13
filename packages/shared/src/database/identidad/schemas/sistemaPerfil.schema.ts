@@ -13,8 +13,8 @@ export const sistemaPerfil = identidadSchema.table(
         perfilId: integer("perfil_id")
             .notNull()
             .references(() => perfiles.id),
-        createdAt: timestamp("created_at").defaultNow(),
-        updatedAt: timestamp("updated_at").defaultNow(),
+        createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     },
     (table) => ({
         // Índice compuesto para consultas de acceso

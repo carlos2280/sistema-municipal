@@ -54,7 +54,6 @@ export function ChatWindow({
 
   const handleStarting = useCallback((reunion: Reunion, llamadaId: number) => {
     // Si es activa y tiene llamadaId podemos notificar al usuario
-    console.log('[Meeting] Reunión iniciada:', reunion.id, 'llamadaId:', llamadaId)
   }, [])
 
   const { crearReunion } = useMeetings({
@@ -139,7 +138,6 @@ export function ChatWindow({
   }
 
   const handleAttachFile = () => {
-    console.log('Adjuntar archivo')
     // TODO: Implementar selector de archivos
   }
 
