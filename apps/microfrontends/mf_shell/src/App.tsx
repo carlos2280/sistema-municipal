@@ -33,7 +33,7 @@ function App() {
 	// cuando un módulo se desactiva y useMenu retorna null.
 	// Además esperamos a que menu tenga items reales si hay módulo con menú activo,
 	// evitando crear el router con dynamicRoutes=[] por condición de carrera.
-	const hasMenuModule = modulosActivos.some((m) => m.mfName === "mf_contabilidad");
+	const hasMenuModule = modulosActivos.some((m) => !!m.mfName);
 	const isWaitingForAuthData =
 		isAuthenticated && (!sistemaId || !menuLoaded || (hasMenuModule && !menu));
 
@@ -61,11 +61,10 @@ function App() {
 				// Crear el router
 				// - Si NO está autenticado: crea router básico (solo login)
 				// - Si SÍ está autenticado: crea router con microfrontends
-				const activeModuleCodes = modulosActivos.map((m) => m.codigo);
 				const routerInstance = await createAppRouter({
 					menuData: isAuthenticated && menu ? menu : undefined,
 					sistemaId: isAuthenticated && sistemaId ? sistemaId : undefined,
-					activeModuleCodes: isAuthenticated ? activeModuleCodes : [],
+					modulosActivos: isAuthenticated ? modulosActivos : [],
 				});
 				setRouter(routerInstance);
 			} catch (err) {

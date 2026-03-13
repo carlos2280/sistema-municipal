@@ -2,67 +2,55 @@ import { loadRemote } from "@module-federation/enhanced/runtime";
 import type { FC } from "react";
 import {
 	loadWithRetry,
-	getCachedModule,
-	setCachedModule,
-	type MicrofrontModule,
+	type LoadedManifest,
+	type RouteManifest,
 } from "../utils/mfLoader";
 import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 
-// Clave de caché fija para configuracion (no varía por sistemaId)
-const CONFIGURACION_CACHE_KEY = 9999;
+// Cache por mfName
+const manifestCache = new Map<string, LoadedManifest>();
 
 /**
- * Registry de Microfrontends — versión dinámica
+ * Loader genérico — carga el RouteManifest de cualquier MF registrado.
  *
- * Los módulos ya no se mapean estáticamente por sistemaId.
- * Se cargan dinámicamente según los remotes registrados por
- * dynamicModuleLoader (basado en suscripciones del tenant).
- *
- * Usa loadRemote() en vez de import() porque los remotes no están
- * declarados en rsbuild.config.ts (son dinámicos).
+ * Usa cache + retry con backoff exponencial.
+ * El shell NO necesita conocer el nombre de cada MF; simplemente
+ * itera `modulosActivos` y llama `loadManifest(mod.mfName)`.
  */
-
-export async function loadMicrofrontComponents(
-	sistemaId: number,
-): Promise<MicrofrontModule> {
-	const cached = getCachedModule(sistemaId);
-	if (cached && cached.status === "loaded") {
-		console.info(
-			`[MF Registry] Usando módulo cacheado para sistemaId: ${sistemaId}`,
-		);
+export async function loadManifest(mfName: string): Promise<LoadedManifest> {
+	const cached = manifestCache.get(mfName);
+	if (cached?.status === "loaded") {
+		console.info(`[MF Registry] Usando manifest cacheado para ${mfName}`);
 		return cached;
 	}
 
-	if (!isRemoteRegistered("mf_contabilidad")) {
-		console.warn(
-			"[MF Registry] mf_contabilidad no registrado, omitiendo carga",
-		);
-		return { sistemaId, components: {}, status: "fallback" };
+	if (!isRemoteRegistered(mfName)) {
+		console.warn(`[MF Registry] ${mfName} no registrado, omitiendo carga`);
+		return { sistemaId: 0, components: {}, status: "fallback" };
 	}
 
 	try {
-		const startTime = performance.now();
+		const start = performance.now();
 
-		const moduleData = await loadWithRetry(
+		const manifest = await loadWithRetry(
 			() =>
-				loadRemote<{ default: MicrofrontModule }>("mf_contabilidad/routes").then(
+				loadRemote<{ default: RouteManifest }>(`${mfName}/routes`).then(
 					(mod) => mod!.default,
 				),
-			{ attempts: 3, delay: 1000, moduleName: "mf_contabilidad" },
+			{ attempts: 3, delay: 1000, moduleName: mfName },
 		);
 
-		const loadTime = performance.now() - startTime;
+		const loadTime = performance.now() - start;
 
-		const result: MicrofrontModule = {
-			...moduleData,
+		const result: LoadedManifest = {
+			...manifest,
 			status: "loaded",
 			loadTime,
 		};
 
-		setCachedModule(sistemaId, result);
-
+		manifestCache.set(mfName, result);
 		console.info(
-			`[MF Registry] mf_contabilidad cargado (${loadTime.toFixed(0)}ms)`,
+			`[MF Registry] ${mfName} cargado (${loadTime.toFixed(0)}ms)`,
 		);
 
 		return result;
@@ -70,94 +58,25 @@ export async function loadMicrofrontComponents(
 		const errorMessage =
 			error instanceof Error ? error.message : String(error);
 
-		console.error(
-			"[MF Registry] Error cargando mf_contabilidad:",
-			errorMessage,
-		);
+		console.error(`[MF Registry] Error cargando ${mfName}:`, errorMessage);
 
-		const failedModule: MicrofrontModule = {
-			sistemaId,
+		const failed: LoadedManifest = {
+			sistemaId: 0,
 			components: {},
 			status: "failed",
 			error: errorMessage,
 		};
 
-		setCachedModule(sistemaId, failedModule);
-		return failedModule;
+		manifestCache.set(mfName, failed);
+		return failed;
 	}
 }
 
-// ─── Loader para módulo de configuracion ──────────────────────────────────────
-
-/**
- * Carga los componentes de mf_configuracion.
- * No depende del sistemaId activo porque el sistema Configuración
- * siempre expone el mismo mapa de componentes.
- */
-export async function loadConfiguracionComponents(): Promise<MicrofrontModule> {
-	const cached = getCachedModule(CONFIGURACION_CACHE_KEY);
-	if (cached?.status === "loaded") {
-		return cached;
-	}
-
-	if (!isRemoteRegistered("mf_configuracion")) {
-		console.warn("[MF Registry] mf_configuracion no registrado, omitiendo carga");
-		return { sistemaId: CONFIGURACION_CACHE_KEY, components: {}, status: "fallback" };
-	}
-
-	try {
-		const startTime = performance.now();
-
-		const moduleData = await loadWithRetry(
-			() =>
-				loadRemote<{ default: MicrofrontModule }>("mf_configuracion/routes").then(
-					(mod) => mod!.default,
-				),
-			{ attempts: 3, delay: 1000, moduleName: "mf_configuracion" },
-		);
-
-		const loadTime = performance.now() - startTime;
-
-		const result: MicrofrontModule = {
-			...moduleData,
-			status: "loaded",
-			loadTime,
-		};
-
-		setCachedModule(CONFIGURACION_CACHE_KEY, result);
-
-		console.info(`[MF Registry] mf_configuracion cargado (${loadTime.toFixed(0)}ms)`);
-
-		return result;
-	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : String(error);
-
-		console.error("[MF Registry] Error cargando mf_configuracion:", errorMessage);
-
-		const failedModule: MicrofrontModule = {
-			sistemaId: CONFIGURACION_CACHE_KEY,
-			components: {},
-			status: "failed",
-			error: errorMessage,
-		};
-
-		setCachedModule(CONFIGURACION_CACHE_KEY, failedModule);
-		return failedModule;
-	}
+export function clearManifestCache(): void {
+	manifestCache.clear();
 }
 
-// Loaders para módulo de chat (solo si el remote está registrado)
-
-export async function loadChatModule() {
-	if (!isRemoteRegistered("mf_chat")) return null;
-	try {
-		const mod = await loadRemote<{ default: unknown }>("mf_chat/routes");
-		return mod?.default ?? null;
-	} catch (error) {
-		console.error("[MF Registry] Error cargando mf_chat:", error);
-		return null;
-	}
-}
+// ─── Loaders específicos de chat (exposes individuales, no ./routes) ─────────
 
 export async function loadChatPanel() {
 	if (!isRemoteRegistered("mf_chat")) return null;

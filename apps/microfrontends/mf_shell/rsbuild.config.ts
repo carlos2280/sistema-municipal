@@ -17,6 +17,20 @@ export default defineConfig(() => {
     }
   }
 
+  // Mapa genérico de URLs de MFs: VITE_MF_XXX_URL → { mf_xxx: "http://..." }
+  // Permite acceso dinámico en runtime sin hardcodear nombres de MFs.
+  const allEnv: Record<string, string | undefined> = { ...parsed };
+  for (const [k, v] of Object.entries(process.env)) {
+    if (k.startsWith('VITE_MF_') && k.endsWith('_URL') && v) allEnv[k] = v;
+  }
+  const mfUrlMap: Record<string, string> = {};
+  for (const [key, val] of Object.entries(allEnv)) {
+    const match = key.match(/^VITE_(MF_.+)_URL$/);
+    if (match && val) {
+      mfUrlMap[match[1].toLowerCase()] = val;
+    }
+  }
+
   return {
     plugins: [
       pluginReact(),
@@ -48,7 +62,7 @@ export default defineConfig(() => {
         },
       }),
     ],
-    source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines } },
+    source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines, __MF_URL_MAP__: JSON.stringify(mfUrlMap) } },
     resolve: { alias: { '@': './src' } },
     server: { port: 5030, strictPort: true, host: '0.0.0.0' },
     output: { distPath: { root: 'dist' }, assetPrefix: 'auto' },

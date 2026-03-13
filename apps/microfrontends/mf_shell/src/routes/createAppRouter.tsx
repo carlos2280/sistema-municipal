@@ -9,50 +9,44 @@ import MfaSetupPage from "../pages/mfa-setup/MfaSetupPage";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "../utils/componentsMap";
 import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
+import { loadManifest } from "./microfrontRegistry";
 import {
-	loadConfiguracionComponents,
-	loadMicrofrontComponents,
-} from "./microfrontRegistry";
-import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
+	isRemoteRegistered,
+	type ModuleInfo,
+} from "../modules/dynamicModuleLoader";
 import ModuleUnavailablePage from "../pages/ModuleUnavailablePage";
 
 interface Props {
 	menuData?: MenuItem[];
 	sistemaId?: number;
-	activeModuleCodes?: string[];
+	modulosActivos?: ModuleInfo[];
 }
 
 export const createAppRouter = async ({
 	menuData,
 	sistemaId,
-	activeModuleCodes = [],
+	modulosActivos = [],
 }: Props) => {
-	// ── Cargar componentes de microfrontends activos ───────────────────────────
-	// Se acumulan en un mapa común; generateRoutesFromMenu solo matchea las
-	// claves presentes en el menú activo, así que no hay conflicto entre MFs.
+	// ── Cargar componentes de TODOS los MFs activos ─────────────────────────
+	// Loop genérico: el shell NO conoce los nombres de los MFs.
+	// Solo itera modulosActivos (datos de BD) y carga cada uno que tenga mfName.
+	// generateRoutesFromMenu solo matchea las claves presentes en el menú,
+	// así que no hay conflicto entre componentes de distintos MFs.
 
 	if (sistemaId && menuData) {
 		const mergedComponents: Record<string, JSX.Element> = {};
 
-		// mf_contabilidad — cargado solo si el módulo está suscripto y registrado
-		if (
-			activeModuleCodes.includes("contabilidad") &&
-			isRemoteRegistered("mf_contabilidad")
-		) {
-			const mf = await loadMicrofrontComponents(sistemaId);
-			if (mf.status !== "failed") {
-				Object.assign(mergedComponents, mf.components);
-			}
-		}
+		for (const mod of modulosActivos) {
+			if (!mod.mfName || !isRemoteRegistered(mod.mfName)) continue;
 
-		// mf_configuracion — cargado si el módulo está suscripto y registrado
-		if (
-			activeModuleCodes.includes("configuracion") &&
-			isRemoteRegistered("mf_configuracion")
-		) {
-			const mf = await loadConfiguracionComponents();
-			if (mf.status !== "failed") {
-				Object.assign(mergedComponents, mf.components);
+			// Chat usa exposes individuales (ChatButton, ChatDrawer), no ./routes.
+			// Intentar loadRemote("mf_chat/routes") falla y corrompe el runtime
+			// de Module Federation, bloqueando los loadRemote posteriores.
+			if (mod.codigo === "chat") continue;
+
+			const manifest = await loadManifest(mod.mfName);
+			if (manifest.status !== "failed") {
+				Object.assign(mergedComponents, manifest.components);
 			}
 		}
 
@@ -65,10 +59,10 @@ export const createAppRouter = async ({
 			: [];
 
 	// Rutas de chat solo si el módulo está contratado y el remote registrado
-	const chatRoutes =
-		activeModuleCodes.includes("chat") && isRemoteRegistered("mf_chat")
-			? await buildChatRoutes()
-			: [];
+	const chatActive =
+		modulosActivos.some((m) => m.codigo === "chat") &&
+		isRemoteRegistered("mf_chat");
+	const chatRoutes = chatActive ? await buildChatRoutes() : [];
 
 	return createBrowserRouter([
 		{

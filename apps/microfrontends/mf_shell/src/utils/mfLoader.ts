@@ -1,28 +1,30 @@
 /**
  * Microfrontend Loader Utilities
- * Maneja la carga de módulos remotos con retry logic y health checks
+ * Tipos y retry logic para carga de módulos remotos
  */
 
-export interface MicrofrontModule {
+/**
+ * Contrato que cada MF expone desde `./routes` via Module Federation.
+ * Las claves de `components` deben coincidir con el campo `componente`
+ * de la tabla `identidad.menu` en BD.
+ */
+export interface RouteManifest {
   sistemaId: number;
   components: Record<string, React.ReactNode>;
+}
+
+/**
+ * RouteManifest enriquecido con metadata de carga (uso interno del shell).
+ */
+export interface LoadedManifest extends RouteManifest {
   status: "loaded" | "failed" | "fallback";
   loadTime?: number;
   error?: string;
 }
 
-export interface MFHealth {
-  name: string;
-  url: string;
-  status: "healthy" | "unhealthy" | "checking";
-  lastCheck: number;
-  responseTime?: number;
-}
-
 // Configuración de retry
 const DEFAULT_RETRY_ATTEMPTS = 3;
 const DEFAULT_RETRY_DELAY = 1000;
-const HEALTH_CHECK_TIMEOUT = 5000;
 
 /**
  * Carga un módulo con retry automático y backoff exponencial
@@ -65,7 +67,6 @@ export async function loadWithRetry<T>(
       );
 
       if (!isLastAttempt) {
-        // Backoff exponencial: 1s, 2s, 4s...
         const backoffDelay = delay * Math.pow(2, i);
         console.info(
           `[MF Loader] 🔄 Reintentando ${moduleName} en ${backoffDelay}ms...`
@@ -76,90 +77,4 @@ export async function loadWithRetry<T>(
   }
 
   throw lastError || new Error(`Failed to load ${moduleName} after ${attempts} attempts`);
-}
-
-/**
- * Verifica el health de un endpoint de microfrontend
- */
-export async function checkMFHealth(
-  name: string,
-  url: string
-): Promise<MFHealth> {
-  const startTime = performance.now();
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT);
-
-    const response = await fetch(url, {
-      method: "HEAD",
-      mode: "cors",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    const responseTime = performance.now() - startTime;
-
-    return {
-      name,
-      url,
-      status: response.ok ? "healthy" : "unhealthy",
-      lastCheck: Date.now(),
-      responseTime,
-    };
-  } catch (error) {
-    return {
-      name,
-      url,
-      status: "unhealthy",
-      lastCheck: Date.now(),
-      responseTime: performance.now() - startTime,
-    };
-  }
-}
-
-/**
- * Verifica el health de todos los microfrontends configurados
- */
-export async function checkAllMFHealth(): Promise<Record<string, MFHealth>> {
-  const endpoints: Record<string, string> = {
-    mf_store: import.meta.env.VITE_MF_STORE_URL || "http://localhost:5010/mf-manifest.json",
-    mf_ui: import.meta.env.VITE_MF_UI_URL || "http://localhost:5011/mf-manifest.json",
-    mf_contabilidad: import.meta.env.VITE_MF_CONTABILIDAD_URL || "http://localhost:5020/mf-manifest.json",
-  };
-
-  const healthChecks = await Promise.all(
-    Object.entries(endpoints).map(([name, url]) => checkMFHealth(name, url))
-  );
-
-  return Object.fromEntries(healthChecks.map((check) => [check.name, check]));
-}
-
-/**
- * Genera un componente de fallback para cuando un MF no está disponible
- */
-export function createFallbackComponent(
-  moduleName: string,
-  errorMessage?: string
-): React.ReactNode {
-  // Este es un placeholder, el componente real se implementa con JSX
-  return null;
-}
-
-/**
- * Cache simple para módulos cargados
- */
-const moduleCache = new Map<number, MicrofrontModule>();
-
-export function getCachedModule(sistemaId: number): MicrofrontModule | undefined {
-  return moduleCache.get(sistemaId);
-}
-
-export function setCachedModule(sistemaId: number, module: MicrofrontModule): void {
-  moduleCache.set(sistemaId, module);
-}
-
-export function clearModuleCache(): void {
-  moduleCache.clear();
 }

@@ -9,25 +9,25 @@ export interface ModuleInfo {
 	apiPrefix: string;
 }
 
-// Mapa de mfName → variable de entorno VITE (fallback cuando la DB no tiene URL)
-const ENV_MANIFEST_MAP: Record<string, string | undefined> = {
-	mf_contabilidad: import.meta.env.VITE_MF_CONTABILIDAD_URL,
-	mf_chat: import.meta.env.VITE_MF_CHAT_URL,
-	mf_configuracion: import.meta.env.VITE_MF_CONFIGURACION_URL,
-};
+// Mapa de URLs inyectado en build-time por rsbuild (define: { __MF_URL_MAP__ }).
+// Se construye automáticamente desde las env vars VITE_MF_*_URL.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+declare const __MF_URL_MAP__: Record<string, string>;
+const MF_URL_MAP: Record<string, string> =
+	typeof __MF_URL_MAP__ !== "undefined" ? __MF_URL_MAP__ : {};
 
 // Registro de remotes ya registrados para evitar duplicados
 const registeredRemotes = new Set<string>();
 
 /**
  * Resuelve la URL del manifest de un módulo.
- * Prioridad: env var VITE_* > mfManifestUrlTpl de la DB
+ * Prioridad: mapa build-time (env vars VITE_MF_*_URL) > mfManifestUrlTpl de la DB
  */
 function resolveManifestUrl(
 	mfName: string,
 	mfManifestUrlTpl: string | null,
 ): string | null {
-	return ENV_MANIFEST_MAP[mfName] || mfManifestUrlTpl || null;
+	return MF_URL_MAP[mfName] || mfManifestUrlTpl || null;
 }
 
 /**

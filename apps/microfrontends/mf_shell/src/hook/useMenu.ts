@@ -1,4 +1,5 @@
 import { selectModulosActivos, useAppSelector } from "mf_store/store";
+import type { ModuleInfo } from "../modules/dynamicModuleLoader";
 import type { MenuItem } from "../types/menu";
 
 export const useMenu = () => {
@@ -7,13 +8,11 @@ export const useMenu = () => {
 		nombreSistema?: string;
 	} | null;
 
-	const modulosActivos = useAppSelector(selectModulosActivos);
-	const hasContabilidad = modulosActivos.some(
-		(m) => m.mfName === "mf_contabilidad",
-	);
+	const modulosActivos = useAppSelector(selectModulosActivos) as ModuleInfo[];
+	const hasAnyMf = modulosActivos.some((m) => !!m.mfName);
 
 	return {
-		menu: hasContabilidad ? menuData?.menuRaiz || null : null,
+		menu: hasAnyMf ? menuData?.menuRaiz || null : null,
 		nombreSistema: menuData?.nombreSistema || "",
 	};
 };

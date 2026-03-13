@@ -4,14 +4,12 @@ import UsuariosPerfilesPage from "../pages/organizacion/UsuariosPerfilesPage";
 import MfaPolicyPage from "../pages/seguridad/MfaPolicyPage";
 import PoliticaContrasenaPage from "../pages/seguridad/PoliticaContrasenaPage";
 import SesionesActivasPage from "../pages/seguridad/SesionesActivasPage";
-import type { MicrofrontModule } from "../types/mf";
-
 /**
  * Mapa de componentes para el sistema Configuración.
  * Las claves deben coincidir exactamente con el campo `componente`
  * de la tabla `identidad.menu` en la base de datos.
  */
-const configuracionRoutes: MicrofrontModule = {
+const configuracionRoutes = {
 	sistemaId: 0, // Resuelto dinámicamente desde la DB
 	components: {
 		// Seguridad
