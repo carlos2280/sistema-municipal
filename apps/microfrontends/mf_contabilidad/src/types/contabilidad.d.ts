@@ -22,7 +22,6 @@ declare module 'contabilidad/components' {
   export default components;
 }
 
-declare module 'mf_store/store';
 declare module '@reduxjs/toolkit/query/react' {
   // Extensiones o sobrescrituras personalizadas aquí
 }

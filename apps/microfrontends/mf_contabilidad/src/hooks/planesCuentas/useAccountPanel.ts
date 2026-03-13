@@ -333,8 +333,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
           });
           closePanel();
         }
-      } catch (error) {
-        console.error('Error en operación de cuenta:', error);
+      } catch {
         toast.error(
           mode === 'crear'
             ? 'No se pudo crear la cuenta'

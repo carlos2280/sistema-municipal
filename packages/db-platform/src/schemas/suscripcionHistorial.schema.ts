@@ -19,7 +19,7 @@ export const suscripcionHistorial = pgTable("suscripcion_historial", {
   motivo: text("motivo"),
   ejecutadoPor: text("ejecutado_por").notNull(),
   metadata: jsonb("metadata").default({}),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type SuscripcionHistorialRecord =

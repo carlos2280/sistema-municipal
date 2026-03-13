@@ -19,8 +19,8 @@ export class ChatErrorBoundary extends Component<Props, State> {
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[ChatErrorBoundary]', error, info.componentStack)
+  componentDidCatch(_error: Error, _info: ErrorInfo) {
+    // En producción: enviar a servicio de error reporting (ej: Sentry)
   }
 
   handleRetry = () => {

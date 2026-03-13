@@ -113,8 +113,8 @@ export function MembersPanel({
         conversacionId,
         usuarioId: confirmDialog.usuarioId,
       }).unwrap()
-    } catch (error) {
-      console.error('Error al eliminar participante:', error)
+    } catch {
+      // error manejado por RTK Query
     }
     setConfirmDialog({ open: false, usuarioId: 0, nombre: '' })
   }, [conversacionId, confirmDialog.usuarioId, eliminarParticipante])
@@ -129,8 +129,8 @@ export function MembersPanel({
     try {
       await renombrarGrupo({ conversacionId, nombre: trimmed }).unwrap()
       setIsEditingName(false)
-    } catch (error) {
-      console.error('Error al renombrar grupo:', error)
+    } catch {
+      // error manejado por RTK Query
     }
   }, [conversacionId, editedName, nombreGrupo, renombrarGrupo])
 

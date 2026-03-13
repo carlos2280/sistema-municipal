@@ -124,8 +124,8 @@ export function ChatDrawer({
       const result = await iniciarReunionMutation(reunionId).unwrap()
       const { llamada } = result
       joinCallDirect(llamada.id, llamada.token, llamada.livekitUrl, llamada.roomName)
-    } catch (err) {
-      console.error('[Meeting] Error al iniciar reunión:', err)
+    } catch {
+      // error manejado por RTK Query
     }
   }, [iniciarReunionMutation, joinCallDirect])
 
@@ -161,8 +161,8 @@ export function ChatDrawer({
         }).unwrap()
         setActiveConversationId(result.id)
         setView('chat')
-      } catch (error) {
-        console.error('Error al crear conversación:', error)
+      } catch {
+        // error manejado por RTK Query
       }
     },
     [crearConversacionDirecta]
@@ -174,8 +174,8 @@ export function ChatDrawer({
         const result = await crearGrupo({ nombre, participantes }).unwrap()
         setActiveConversationId(result.id)
         setView('chat')
-      } catch (error) {
-        console.error('Error al crear grupo:', error)
+      } catch {
+        // error manejado por RTK Query
       }
     },
     [crearGrupo]
@@ -204,8 +204,8 @@ export function ChatDrawer({
       try {
         const data = await fetchToken(llamadaId).unwrap()
         joinCallDirect(llamadaId, data.token, data.livekitUrl, data.roomName)
-      } catch (err) {
-        console.error('[Call] Error al obtener token para unirse:', err)
+      } catch {
+        // error manejado por RTK Query
       }
     },
     [fetchToken, joinCallDirect]

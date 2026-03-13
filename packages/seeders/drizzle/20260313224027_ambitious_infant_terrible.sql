@@ -1,0 +1,1 @@
+ALTER TABLE "mensajeria"."estado_usuarios" ALTER COLUMN "ultima_conexion" SET DATA TYPE timestamp with time zone;

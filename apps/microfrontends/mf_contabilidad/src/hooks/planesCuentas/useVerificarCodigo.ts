@@ -92,7 +92,6 @@ export function useVerificarCodigo(debounceMs = 500): UseVerificarCodigoReturn {
             return;
           }
 
-          console.error('Error verificando código:', error);
           // En caso de error de red, asumir disponible para no bloquear UX
           // La validación final se hará en el backend al crear
           setStatus('available');

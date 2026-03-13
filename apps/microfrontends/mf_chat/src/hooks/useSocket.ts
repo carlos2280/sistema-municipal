@@ -75,16 +75,12 @@ function getOrCreateSocket(token?: string): Socket {
     })
 
     g.socket.on('connect_error', (error) => {
-      console.error('[Socket] Error de conexión:', error.message)
-
       if (isAuthError(error)) {
         g.authErrorCount++
-        console.warn(`[Socket] Error de autenticación (${g.authErrorCount}/${MAX_AUTH_RETRIES})`)
 
         if (g.authErrorCount >= MAX_AUTH_RETRIES) {
           // Detener reconexión automática — la sesión expiró
           g.socket?.disconnect()
-          console.error('[Socket] Sesión expirada. Se requiere re-autenticación.')
           notifyListeners()
         }
       }

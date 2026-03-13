@@ -15,6 +15,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Module Federation type resolution */
+    "paths": {
+      "mf_store/store": ["../mf_store/src/store/index.ts"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

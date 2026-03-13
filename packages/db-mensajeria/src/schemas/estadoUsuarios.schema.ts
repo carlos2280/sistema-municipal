@@ -8,7 +8,7 @@ import { mensajeriaSchema } from '../schemas'
 export const estadoUsuarios = mensajeriaSchema.table('estado_usuarios', {
   usuarioId: integer('usuario_id').primaryKey(),
   estado: text('estado').default('offline').$type<'online' | 'away' | 'busy' | 'offline'>(),
-  ultimaConexion: timestamp('ultima_conexion'),
+  ultimaConexion: timestamp('ultima_conexion', { withTimezone: true }),
   socketId: text('socket_id'),
 })
 

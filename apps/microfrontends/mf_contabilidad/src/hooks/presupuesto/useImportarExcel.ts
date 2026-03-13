@@ -271,15 +271,13 @@ export const useImportarExcel = (
         }
 
         if (totalNoEncontradas.length > 0) {
-          console.warn("Cuentas no encontradas en el plan de cuentas:", totalNoEncontradas);
           toast.warning(
-            `${totalNoEncontradas.length} cuenta(s) del Excel no coinciden con el plan de cuentas. Ver consola para detalles.`,
+            `${totalNoEncontradas.length} cuenta(s) del Excel no coinciden con el plan de cuentas.`,
             { duration: 8000 },
           );
         }
       } catch (err) {
         toast.dismiss(toastId);
-        console.error("Error al importar Excel:", err);
         toast.error(
           err instanceof Error ? err.message : "Error al leer el archivo Excel.",
         );

@@ -252,8 +252,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
       }
 
       toast.success("Presupuesto guardado correctamente.");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Error al guardar el presupuesto.");
     } finally {
       setIsSaving(false);

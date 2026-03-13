@@ -63,11 +63,10 @@ dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
 
 dev: dev-infra dev-kill-ports ## Inicia entorno de desarrollo (infra + apps en orden)
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
-	@echo "$(CYAN)Orden: 1) shared  2) gateway + APIs (esperan postgres)  3) MFs remotos  4) Shell (espera remotes)$(NC)"
+	@echo "$(CYAN)Orden: 1) gateway + APIs (esperan postgres)  2) MFs remotos  3) Shell (espera remotes)$(NC)"
 	@npx concurrently -k \
-		-n "shared,gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,mf-conf,shell" \
-		-c "gray,blue,blue,blue,blue,magenta,blue,green,green,green,cyan,magenta,yellow" \
-		"pnpm --filter @municipal/shared dev" \
+		-n "gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,mf-conf,shell" \
+		-c "blue,blue,blue,blue,magenta,blue,green,green,green,cyan,magenta,yellow" \
 		"npx wait-on tcp:5434 && pnpm --filter gateway dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-identidad dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-autorizacion dev" \
@@ -105,19 +104,19 @@ dev-logs: ## Muestra logs de infraestructura
 # ============================================
 db-migrate: ## Ejecuta migraciones de base de datos
 	@echo "$(GREEN)Ejecutando migraciones...$(NC)"
-	pnpm --filter @municipal/shared migrate
+	pnpm --filter @municipal/seeders migrate
 
 db-generate: ## Genera migraciones desde los schemas
 	@echo "$(GREEN)Generando migraciones...$(NC)"
-	pnpm --filter @municipal/shared generate
+	pnpm --filter @municipal/seeders generate
 
 db-seed: ## Ejecuta seeders de base de datos
 	@echo "$(GREEN)Ejecutando seeders...$(NC)"
-	pnpm --filter @municipal/shared seed
+	pnpm --filter @municipal/seeders seed
 
 db-studio: ## Abre Drizzle Studio
 	@echo "$(GREEN)Abriendo Drizzle Studio...$(NC)"
-	pnpm --filter @municipal/shared drizzle-kit studio
+	pnpm --filter @municipal/seeders db:studio
 
 db-reset: ## Resetea la base de datos (DROP + CREATE + MIGRATE + SEED)
 	@echo "$(RED)⚠️  Esto eliminará todos los datos. ¿Continuar? [y/N]$(NC)"

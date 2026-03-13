@@ -86,8 +86,7 @@ export function useCall(): UseCallReturn {
       })
     }
 
-    const handleCallError = ({ message }: { message: string }) => {
-      console.error('[Call] Error:', message)
+    const handleCallError = (_: { message: string }) => {
       setCallState(INITIAL_CALL_STATE)
     }
 

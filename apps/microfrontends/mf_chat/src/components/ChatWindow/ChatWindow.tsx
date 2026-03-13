@@ -66,8 +66,8 @@ export function ChatWindow({
     try {
       const response = await iniciarMutation(reunionId).unwrap()
       onJoinCall?.(response.llamada.id, response.llamada.token)
-    } catch (err) {
-      console.error('[Meeting] Error al iniciar reunión:', err)
+    } catch {
+      // error manejado por RTK Query
     }
   }, [iniciarMutation, onJoinCall])
 
@@ -76,8 +76,8 @@ export function ChatWindow({
     try {
       const result = await obtenerToken(llamadaId).unwrap()
       onJoinCall?.(llamadaId, result.token)
-    } catch (err) {
-      console.error('[Meeting] Error al obtener token para unirse:', err)
+    } catch {
+      // error manejado por RTK Query
     }
   }, [obtenerToken, onJoinCall])
 
