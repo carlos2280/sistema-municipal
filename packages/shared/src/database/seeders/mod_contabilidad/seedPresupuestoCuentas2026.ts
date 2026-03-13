@@ -1,3 +1,4 @@
+import { and, eq, inArray } from "drizzle-orm";
 import { planesCuentas } from "../../";
 import type { DbExecutor } from "../../../types/db";
 
@@ -409,15 +410,27 @@ export async function seedPresupuestoCuentas2026(db: DbExecutor) {
       codigoIni: d.codigo.slice(-3).replace(/^0+/, "") || "0",
     }));
 
-    const inserted = await db
+    await db
       .insert(planesCuentas)
       .values(values)
-      .returning({ id: planesCuentas.id, codigo: planesCuentas.codigo });
+      .onConflictDoNothing();
 
-    for (const row of inserted) {
+    // Recuperar IDs de todas las cuentas de este nivel (insertadas o preexistentes)
+    const codigos = data.map((d) => d.codigo);
+    const existing = await db
+      .select({ id: planesCuentas.id, codigo: planesCuentas.codigo })
+      .from(planesCuentas)
+      .where(
+        and(
+          eq(planesCuentas.anoContable, ANO),
+          inArray(planesCuentas.codigo, codigos),
+        ),
+      );
+
+    for (const row of existing) {
       codeToId.set(row.codigo, row.id);
     }
-    console.log(`  ✅ Nivel ${tipoCuentaId - 3}: ${inserted.length} cuentas`);
+    console.log(`  ✅ Nivel ${tipoCuentaId - 3}: ${existing.length} cuentas`);
   };
 
   await insertLevel(NIVEL_1, 4);
@@ -426,5 +439,5 @@ export async function seedPresupuestoCuentas2026(db: DbExecutor) {
   await insertLevel(NIVEL_4, 7);
   await insertLevel(NIVEL_5, 8);
 
-  console.log(`✅ ${codeToId.size} cuentas presupuestarias 2026 insertadas`);
+  console.log(`✅ ${codeToId.size} cuentas presupuestarias 2026 insertadas/verificadas`);
 }

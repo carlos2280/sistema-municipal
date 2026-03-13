@@ -17,6 +17,7 @@ const {
 
 export default defineConfig({
   schema: [
+    "./src/database/schemas.ts",
     "./src/database/identidad/schemas/*.schema.ts",
     "./src/database/contabilidad/schemas/*.schema.ts",
     "./src/database/mensajeria/schemas/*.schema.ts",
