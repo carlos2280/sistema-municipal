@@ -1,8 +1,12 @@
 /**
- * Theme Customizer - Sistema Municipal CrisCar
+ * ═══════════════════════════════════════════════════════════════
+ *  MERIDIAN — Theme Customizer (Level 1 Personalization)
  *
- * Panel elegante para que el usuario personalice la apariencia
- * de la aplicación: colores, modo oscuro, bordes, etc.
+ *  Panel de preferencias del usuario:
+ *  - Apariencia: Dark / Light / Auto
+ *  - Tamaño de texto: S / M / L
+ *  - Densidad de tabla: Compact / Normal / Relaxed
+ * ═══════════════════════════════════════════════════════════════
  */
 
 import {
@@ -10,39 +14,30 @@ import {
   Button,
   Divider,
   Drawer,
-  FormControl,
-  FormControlLabel,
   IconButton,
-  Radio,
-  RadioGroup,
   Stack,
   Tooltip,
   Typography,
   alpha,
   styled,
-} from "@mui/material";
+} from '@mui/material';
 import {
   X,
-  Palette,
+  Settings2,
   Sun,
   Moon,
   Monitor,
   RotateCcw,
   Check,
-  Circle,
-} from "lucide-react";
-import { useState } from "react";
-import { useTheme, type ThemePreferences } from "../theme/ThemeProvider";
-import { colorPresets } from "../theme/tokens";
+} from 'lucide-react';
+import { useTheme, type TextSize, type TableDensity } from '../theme/ThemeProvider';
 
-// ============================================================================
-// STYLED COMPONENTS
-// ============================================================================
+// ─── Styled Components ───────────────────────────────────────────
 
 const DrawerHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
   padding: theme.spacing(2, 3),
   borderBottom: `1px solid ${theme.palette.divider}`,
 }));
@@ -52,466 +47,234 @@ const Section = styled(Box)(({ theme }) => ({
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: "0.75rem",
+  fontSize: '0.625rem',
   fontWeight: 600,
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
+  textTransform: 'uppercase',
+  letterSpacing: '0.12em',
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(2),
 }));
 
-const ColorSwatch = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "selected" && prop !== "color",
-})<{ selected?: boolean; color: string }>(({ theme, selected, color }) => ({
-  width: 40,
-  height: 40,
-  borderRadius: 8,
-  backgroundColor: color,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: selected
-    ? `2px solid ${theme.palette.text.primary}`
-    : `2px solid transparent`,
-  boxShadow: selected ? `0 0 0 2px ${alpha(color, 0.3)}` : "none",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    transform: "scale(1.1)",
-    boxShadow: `0 4px 12px ${alpha(color, 0.4)}`,
-  },
-}));
-
-const PresetCard = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "selected",
-})<{ selected?: boolean }>(({ theme, selected }) => ({
-  padding: theme.spacing(1.5),
-  borderRadius: 12,
-  cursor: "pointer",
-  border: `2px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
-  backgroundColor: selected
-    ? alpha(theme.palette.primary.main, 0.04)
-    : "transparent",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: alpha(theme.palette.primary.main, 0.04),
-  },
-}));
-
-const ModeButton = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "selected",
+const OptionButton = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'selected',
 })<{ selected?: boolean }>(({ theme, selected }) => ({
   flex: 1,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
   padding: theme.spacing(2),
   borderRadius: 12,
-  cursor: "pointer",
-  border: `2px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
+  cursor: 'pointer',
+  border: `1px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
   backgroundColor: selected
     ? alpha(theme.palette.primary.main, 0.08)
-    : "transparent",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
+    : 'transparent',
+  transition: 'all 150ms cubic-bezier(0, 0, 0.2, 1)',
+  '&:hover': {
     borderColor: theme.palette.primary.main,
     backgroundColor: alpha(theme.palette.primary.main, 0.04),
   },
 }));
 
-// ============================================================================
-// TYPES
-// ============================================================================
+const OptionRow = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'selected',
+})<{ selected?: boolean }>(({ theme, selected }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(1.5, 2),
+  borderRadius: 8,
+  cursor: 'pointer',
+  border: `1px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
+  backgroundColor: selected
+    ? alpha(theme.palette.primary.main, 0.08)
+    : 'transparent',
+  transition: 'all 150ms cubic-bezier(0, 0, 0.2, 1)',
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
+  },
+}));
+
+// ─── Types ───────────────────────────────────────────────────────
 
 interface ThemeCustomizerProps {
   open: boolean;
   onClose: () => void;
 }
 
-// ============================================================================
-// COMPONENT
-// ============================================================================
+// ─── Component ───────────────────────────────────────────────────
 
 export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
   const {
     preferences,
-    isDarkMode,
-    availablePresets,
     setMode,
-    setPrimaryColor,
-    setSecondaryColor,
-    applyPreset,
-    setBorderRadius,
-    setFontScale,
+    setTextSize,
+    setTableDensity,
     resetToDefaults,
   } = useTheme();
-
-  // Color picker state
-  const [customPrimary, setCustomPrimary] = useState(preferences.primaryColor);
-  const [customSecondary, setCustomSecondary] = useState(preferences.secondaryColor);
-
-  const handlePresetSelect = (presetName: string) => {
-    applyPreset(presetName);
-    const preset = colorPresets.find((p) => p.name === presetName);
-    if (preset) {
-      setCustomPrimary(preset.primary);
-      setCustomSecondary(preset.secondary);
-    }
-  };
-
-  const handleCustomColorChange = (
-    type: "primary" | "secondary",
-    color: string
-  ) => {
-    if (type === "primary") {
-      setCustomPrimary(color);
-      setPrimaryColor(color);
-    } else {
-      setCustomSecondary(color);
-      setSecondaryColor(color);
-    }
-  };
 
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: 340,
-          maxWidth: "100%",
-        },
+      slotProps={{
+        paper: { sx: { width: 320, maxWidth: '100%' } },
       }}
     >
       {/* Header */}
       <DrawerHeader>
         <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Palette size={20} strokeWidth={1.5} />
+          <Settings2 size={18} strokeWidth={1.5} />
           <Typography variant="h6" fontWeight={600}>
-            Personalizar
+            Preferencias
           </Typography>
         </Stack>
         <IconButton onClick={onClose} size="small">
-          <X size={20} strokeWidth={1.5} />
+          <X size={18} strokeWidth={1.5} />
         </IconButton>
       </DrawerHeader>
 
-      <Box sx={{ overflow: "auto", flex: 1 }}>
-        {/* Mode Selection */}
+      <Box sx={{ overflow: 'auto', flex: 1 }}>
+        {/* ─── Apariencia ───────────────────────────────── */}
         <Section>
-          <SectionTitle>Modo de Color</SectionTitle>
-          <Stack direction="row" spacing={1.5}>
-            <ModeButton
-              selected={preferences.mode === "light"}
-              onClick={() => setMode("light")}
+          <SectionTitle>Apariencia</SectionTitle>
+          <Stack direction="row" spacing={1}>
+            <OptionButton
+              selected={preferences.mode === 'dark'}
+              onClick={() => setMode('dark')}
             >
-              <Sun size={24} strokeWidth={1.5} />
-              <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
-                Claro
-              </Typography>
-            </ModeButton>
-            <ModeButton
-              selected={preferences.mode === "dark"}
-              onClick={() => setMode("dark")}
-            >
-              <Moon size={24} strokeWidth={1.5} />
-              <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
+              <Moon size={20} strokeWidth={1.5} />
+              <Typography variant="caption" sx={{ mt: 0.75, fontWeight: 500 }}>
                 Oscuro
               </Typography>
-            </ModeButton>
-            <ModeButton
-              selected={preferences.mode === "system"}
-              onClick={() => setMode("system")}
+            </OptionButton>
+            <OptionButton
+              selected={preferences.mode === 'light'}
+              onClick={() => setMode('light')}
             >
-              <Monitor size={24} strokeWidth={1.5} />
-              <Typography variant="caption" sx={{ mt: 1, fontWeight: 500 }}>
-                Sistema
+              <Sun size={20} strokeWidth={1.5} />
+              <Typography variant="caption" sx={{ mt: 0.75, fontWeight: 500 }}>
+                Claro
               </Typography>
-            </ModeButton>
+            </OptionButton>
+            <OptionButton
+              selected={preferences.mode === 'system'}
+              onClick={() => setMode('system')}
+            >
+              <Monitor size={20} strokeWidth={1.5} />
+              <Typography variant="caption" sx={{ mt: 0.75, fontWeight: 500 }}>
+                Auto
+              </Typography>
+            </OptionButton>
           </Stack>
         </Section>
 
         <Divider />
 
-        {/* Color Presets */}
+        {/* ─── Tamaño de Texto ──────────────────────────── */}
         <Section>
-          <SectionTitle>Temas Predefinidos</SectionTitle>
-          <Stack spacing={1.5}>
-            {availablePresets.map((preset) => (
-              <PresetCard
-                key={preset.name}
-                selected={preferences.presetName === preset.name}
-                onClick={() => handlePresetSelect(preset.name)}
+          <SectionTitle>Tamaño de Texto</SectionTitle>
+          <Stack spacing={1}>
+            {([
+              { key: 'small' as TextSize, label: 'Pequeño', preview: '12px' },
+              { key: 'medium' as TextSize, label: 'Normal', preview: '13.5px' },
+              { key: 'large' as TextSize, label: 'Grande', preview: '15px' },
+            ]).map(({ key, label, preview }) => (
+              <OptionRow
+                key={key}
+                selected={preferences.textSize === key}
+                onClick={() => setTextSize(key)}
               >
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Stack direction="row" spacing={0.5}>
-                    <Circle
-                      size={16}
-                      fill={preset.primary}
-                      color={preset.primary}
-                    />
-                    <Circle
-                      size={16}
-                      fill={preset.secondary}
-                      color={preset.secondary}
-                    />
-                    {preset.accent && (
-                      <Circle
-                        size={16}
-                        fill={preset.accent}
-                        color={preset.accent}
-                      />
-                    )}
-                  </Stack>
-                  <Typography variant="body2" fontWeight={500}>
-                    {preset.label}
-                  </Typography>
-                  {preferences.presetName === preset.name && (
-                    <Check size={16} strokeWidth={1.5} style={{ marginLeft: "auto" }} />
-                  )}
-                </Stack>
-              </PresetCard>
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  sx={{ flex: 1 }}
+                >
+                  {label}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: '"DM Mono", monospace',
+                    color: 'text.secondary',
+                  }}
+                >
+                  {preview}
+                </Typography>
+                {preferences.textSize === key && (
+                  <Check size={14} strokeWidth={2} />
+                )}
+              </OptionRow>
             ))}
           </Stack>
         </Section>
 
         <Divider />
 
-        {/* Custom Colors */}
+        {/* ─── Densidad de Tabla ─────────────────────────── */}
         <Section>
-          <SectionTitle>Colores Personalizados</SectionTitle>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                Color Primario
-              </Typography>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box
-                  component="input"
-                  type="color"
-                  value={customPrimary}
-                  onChange={(e) =>
-                    handleCustomColorChange("primary", e.target.value)
-                  }
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    border: "none",
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    "&::-webkit-color-swatch-wrapper": {
-                      padding: 0,
-                    },
-                    "&::-webkit-color-swatch": {
-                      border: "none",
-                      borderRadius: 8,
-                    },
-                  }}
-                />
+          <SectionTitle>Densidad de Tabla</SectionTitle>
+          <Stack spacing={1}>
+            {([
+              { key: 'compact' as TableDensity, label: 'Compacta', h: '36px' },
+              { key: 'normal' as TableDensity, label: 'Normal', h: '44px' },
+              { key: 'relaxed' as TableDensity, label: 'Holgada', h: '52px' },
+            ]).map(({ key, label, h }) => (
+              <OptionRow
+                key={key}
+                selected={preferences.tableDensity === key}
+                onClick={() => setTableDensity(key)}
+              >
+                {/* Mini preview de densidad */}
+                <Stack spacing={0.25} sx={{ width: 28 }}>
+                  {[0, 1, 2].map((i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        height: key === 'compact' ? 3 : key === 'normal' ? 4 : 5,
+                        borderRadius: 0.5,
+                        bgcolor: 'text.disabled',
+                        opacity: 0.4,
+                      }}
+                    />
+                  ))}
+                </Stack>
                 <Typography
                   variant="body2"
-                  sx={{
-                    fontFamily: "monospace",
-                    bgcolor: "action.hover",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 1,
-                  }}
+                  fontWeight={500}
+                  sx={{ flex: 1 }}
                 >
-                  {customPrimary.toUpperCase()}
+                  {label}
                 </Typography>
-              </Stack>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                Color Secundario
-              </Typography>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box
-                  component="input"
-                  type="color"
-                  value={customSecondary}
-                  onChange={(e) =>
-                    handleCustomColorChange("secondary", e.target.value)
-                  }
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    border: "none",
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    "&::-webkit-color-swatch-wrapper": {
-                      padding: 0,
-                    },
-                    "&::-webkit-color-swatch": {
-                      border: "none",
-                      borderRadius: 8,
-                    },
-                  }}
-                />
                 <Typography
-                  variant="body2"
+                  variant="caption"
                   sx={{
-                    fontFamily: "monospace",
-                    bgcolor: "action.hover",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 1,
+                    fontFamily: '"DM Mono", monospace',
+                    color: 'text.secondary',
                   }}
                 >
-                  {customSecondary.toUpperCase()}
+                  {h}
                 </Typography>
-              </Stack>
-            </Box>
+                {preferences.tableDensity === key && (
+                  <Check size={14} strokeWidth={2} />
+                )}
+              </OptionRow>
+            ))}
           </Stack>
-        </Section>
-
-        <Divider />
-
-        {/* Border Radius */}
-        <Section>
-          <SectionTitle>Estilo de Bordes</SectionTitle>
-          <FormControl component="fieldset" fullWidth>
-            <RadioGroup
-              value={preferences.borderRadius}
-              onChange={(e) =>
-                setBorderRadius(
-                  e.target.value as ThemePreferences["borderRadius"]
-                )
-              }
-            >
-              <FormControlLabel
-                value="sharp"
-                control={<Radio size="small" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 16,
-                        bgcolor: "primary.main",
-                        borderRadius: "2px",
-                      }}
-                    />
-                    <Typography variant="body2">Angulares</Typography>
-                  </Stack>
-                }
-              />
-              <FormControlLabel
-                value="default"
-                control={<Radio size="small" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 16,
-                        bgcolor: "primary.main",
-                        borderRadius: "4px",
-                      }}
-                    />
-                    <Typography variant="body2">Predeterminado</Typography>
-                  </Stack>
-                }
-              />
-              <FormControlLabel
-                value="rounded"
-                control={<Radio size="small" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 16,
-                        bgcolor: "primary.main",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Typography variant="body2">Redondeados</Typography>
-                  </Stack>
-                }
-              />
-              <FormControlLabel
-                value="pill"
-                control={<Radio size="small" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box
-                      sx={{
-                        width: 24,
-                        height: 16,
-                        bgcolor: "primary.main",
-                        borderRadius: "12px",
-                      }}
-                    />
-                    <Typography variant="body2">Píldora</Typography>
-                  </Stack>
-                }
-              />
-            </RadioGroup>
-          </FormControl>
-        </Section>
-
-        <Divider />
-
-        {/* Font Scale */}
-        <Section>
-          <SectionTitle>Tamaño de Fuente</SectionTitle>
-          <FormControl component="fieldset" fullWidth>
-            <RadioGroup
-              value={preferences.fontScale}
-              onChange={(e) =>
-                setFontScale(e.target.value as ThemePreferences["fontScale"])
-              }
-            >
-              <FormControlLabel
-                value="compact"
-                control={<Radio size="small" />}
-                label={
-                  <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                    Compacto
-                  </Typography>
-                }
-              />
-              <FormControlLabel
-                value="default"
-                control={<Radio size="small" />}
-                label={
-                  <Typography variant="body2">Predeterminado</Typography>
-                }
-              />
-              <FormControlLabel
-                value="comfortable"
-                control={<Radio size="small" />}
-                label={
-                  <Typography variant="body2" sx={{ fontSize: "1.1rem" }}>
-                    Cómodo
-                  </Typography>
-                }
-              />
-            </RadioGroup>
-          </FormControl>
         </Section>
       </Box>
 
       {/* Footer */}
-      <Box
-        sx={{
-          p: 2,
-          borderTop: 1,
-          borderColor: "divider",
-        }}
-      >
+      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
         <Button
           fullWidth
           variant="outlined"
-          startIcon={<RotateCcw size={18} strokeWidth={1.5} />}
+          size="small"
+          startIcon={<RotateCcw size={14} strokeWidth={1.5} />}
           onClick={resetToDefaults}
-          sx={{ textTransform: "none" }}
         >
           Restaurar Predeterminados
         </Button>
@@ -520,9 +283,7 @@ export function ThemeCustomizer({ open, onClose }: ThemeCustomizerProps) {
   );
 }
 
-// ============================================================================
-// TRIGGER BUTTON
-// ============================================================================
+// ─── Trigger Button ──────────────────────────────────────────────
 
 interface ThemeCustomizerButtonProps {
   onClick: () => void;
@@ -530,17 +291,17 @@ interface ThemeCustomizerButtonProps {
 
 export function ThemeCustomizerButton({ onClick }: ThemeCustomizerButtonProps) {
   return (
-    <Tooltip title="Personalizar tema" arrow>
+    <Tooltip title="Preferencias" arrow>
       <IconButton
         onClick={onClick}
         sx={(theme) => ({
           bgcolor: alpha(theme.palette.primary.main, 0.08),
-          "&:hover": {
+          '&:hover': {
             bgcolor: alpha(theme.palette.primary.main, 0.16),
           },
         })}
       >
-        <Palette size={20} strokeWidth={1.5} />
+        <Settings2 size={18} strokeWidth={1.5} />
       </IconButton>
     </Tooltip>
   );

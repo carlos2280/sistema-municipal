@@ -1,18 +1,22 @@
 /**
- * Theme Provider - Sistema Municipal CrisCar
+ * ═══════════════════════════════════════════════════════════════
+ *  MERIDIAN — Theme Provider
  *
- * Proporciona el tema a toda la aplicación con soporte para:
- * - Modo claro/oscuro
- * - Colores personalizables por el usuario
- * - Presets de temas predefinidos
- * - Persistencia de preferencias
+ *  Proporciona el tema MERIDIAN a toda la aplicación con soporte para:
+ *  - Modo claro/oscuro/system
+ *  - Módulo activo (accent color por módulo)
+ *  - Tamaño de texto (S/M/L)
+ *  - Densidad de tabla (compact/normal/relaxed)
+ *  - Persistencia en localStorage
+ * ═══════════════════════════════════════════════════════════════
  */
 
 import {
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
   type Theme,
-} from "@mui/material";
+} from '@mui/material';
+import { createTheme } from '@mui/material/styles';
 import {
   type PropsWithChildren,
   createContext,
@@ -21,277 +25,242 @@ import {
   useEffect,
   useMemo,
   useState,
-} from "react";
-import { createCustomTheme, type CustomThemeConfig } from "./createCustomTheme";
-import { colorPresets, type ColorPreset } from "./tokens";
+} from 'react';
+import {
+  createMeridianTheme,
+  getMeridianTheme,
+  getModuleThemeOverrides,
+  MODULE_ACCENTS,
+  type ModuleCode,
+} from './theme';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+// ─── Types ───────────────────────────────────────────────────────
 
-export interface ThemePreferences {
-  mode: "light" | "dark" | "system";
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor?: string;
-  presetName?: string;
-  borderRadius: "sharp" | "default" | "rounded" | "pill";
-  fontScale: "compact" | "default" | "comfortable";
+export type TextSize = 'small' | 'medium' | 'large';
+export type TableDensity = 'compact' | 'normal' | 'relaxed';
+
+export interface MeridianPreferences {
+  mode: 'light' | 'dark' | 'system';
+  activeModule: ModuleCode;
+  textSize: TextSize;
+  tableDensity: TableDensity;
 }
 
 interface ThemeContextType {
-  // Estado
   theme: Theme;
-  preferences: ThemePreferences;
+  preferences: MeridianPreferences;
   isDarkMode: boolean;
-  availablePresets: ColorPreset[];
+  activeModule: ModuleCode;
 
   // Acciones
   toggleDarkMode: () => void;
-  setMode: (mode: "light" | "dark" | "system") => void;
-  setPrimaryColor: (color: string) => void;
-  setSecondaryColor: (color: string) => void;
-  setAccentColor: (color: string) => void;
-  applyPreset: (presetName: string) => void;
-  setBorderRadius: (style: ThemePreferences["borderRadius"]) => void;
-  setFontScale: (scale: ThemePreferences["fontScale"]) => void;
+  setMode: (mode: MeridianPreferences['mode']) => void;
+  setActiveModule: (code: ModuleCode) => void;
+  setTextSize: (size: TextSize) => void;
+  setTableDensity: (density: TableDensity) => void;
   resetToDefaults: () => void;
+
+  // Legacy aliases (ToggleThemeButton usa estos via useContext directo)
+  isDarkTheme: boolean;
+  toggleTheme: () => void;
 }
 
-// ============================================================================
-// DEFAULTS
-// ============================================================================
+// ─── Defaults ────────────────────────────────────────────────────
 
-const STORAGE_KEY = "criscar-theme-preferences";
+const STORAGE_KEY = 'meridian-theme-preferences';
 
-const defaultPreset = colorPresets[0]; // CrisCar default
-
-const defaultPreferences: ThemePreferences = {
-  mode: "light",
-  primaryColor: defaultPreset.primary,
-  secondaryColor: defaultPreset.secondary,
-  accentColor: defaultPreset.accent,
-  presetName: defaultPreset.name,
-  borderRadius: "default",
-  fontScale: "default",
+const defaultPreferences: MeridianPreferences = {
+  mode: 'dark',
+  activeModule: 'home',
+  textSize: 'medium',
+  tableDensity: 'normal',
 };
 
-// ============================================================================
-// CONTEXT
-// ============================================================================
+// ─── Context ─────────────────────────────────────────────────────
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-// ============================================================================
-// HOOKS
-// ============================================================================
+// ─── Hooks ───────────────────────────────────────────────────────
 
-/**
- * Hook para acceder al contexto del tema
- */
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error("useTheme debe usarse dentro de un ThemeProvider");
+    throw new Error('useTheme debe usarse dentro de un ThemeProvider');
   }
   return context;
 }
 
-/**
- * Hook legacy para compatibilidad (solo toggle)
- */
+/** Hook legacy para compatibilidad (solo toggle) */
 export function useToggleTheme() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   return { isDarkTheme: isDarkMode, toggleTheme: toggleDarkMode };
 }
 
-// ============================================================================
-// HELPERS
-// ============================================================================
+// ─── Helpers ─────────────────────────────────────────────────────
 
-/**
- * Detecta la preferencia del sistema operativo
- */
-function getSystemPreference(): "light" | "dark" {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+function getSystemPreference(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
-/**
- * Carga las preferencias desde localStorage
- */
-function loadPreferences(): ThemePreferences {
-  if (typeof window === "undefined") return defaultPreferences;
-
+function loadPreferences(): MeridianPreferences {
+  if (typeof window === 'undefined') return defaultPreferences;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...defaultPreferences, ...parsed };
+      return { ...defaultPreferences, ...JSON.parse(saved) };
     }
-  } catch (error) {
-    console.warn("[Theme] Error cargando preferencias:", error);
+  } catch {
+    // silently fall through
   }
-
   return defaultPreferences;
 }
 
-/**
- * Guarda las preferencias en localStorage
- */
-function savePreferences(preferences: ThemePreferences): void {
-  if (typeof window === "undefined") return;
-
+function savePreferences(prefs: MeridianPreferences): void {
+  if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-  } catch (error) {
-    console.warn("[Theme] Error guardando preferencias:", error);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  } catch {
+    // silently ignore
   }
 }
 
-// ============================================================================
-// PROVIDER COMPONENT
-// ============================================================================
+// ─── Text Size multipliers ───────────────────────────────────────
+
+const TEXT_SIZE_MAP: Record<TextSize, number> = {
+  small: 12,
+  medium: 13.5,
+  large: 15,
+};
+
+// ─── Table Density row heights ───────────────────────────────────
+
+const TABLE_DENSITY_MAP: Record<TableDensity, number> = {
+  compact: 36,
+  normal: 44,
+  relaxed: 52,
+};
+
+// ─── Provider Component ──────────────────────────────────────────
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-  // Estado de preferencias
-  const [preferences, setPreferences] = useState<ThemePreferences>(loadPreferences);
+  const [preferences, setPreferences] = useState<MeridianPreferences>(loadPreferences);
+  const [systemPref, setSystemPref] = useState<'light' | 'dark'>(getSystemPreference);
 
-  // Detectar preferencia del sistema
-  const [systemPreference, setSystemPreference] = useState<"light" | "dark">(
-    getSystemPreference
-  );
-
-  // Escuchar cambios en la preferencia del sistema
+  // Escuchar cambios en preferencia del sistema
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setSystemPreference(e.matches ? "dark" : "light");
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemPref(e.matches ? 'dark' : 'light');
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Calcular el modo efectivo
-  const effectiveMode = useMemo(() => {
-    if (preferences.mode === "system") {
-      return systemPreference;
-    }
-    return preferences.mode;
-  }, [preferences.mode, systemPreference]);
+  // Modo efectivo
+  const effectiveMode = preferences.mode === 'system' ? systemPref : preferences.mode;
+  const isDarkMode = effectiveMode === 'dark';
 
-  const isDarkMode = effectiveMode === "dark";
-
-  // Crear tema basado en preferencias
+  // Construir theme
   const theme = useMemo(() => {
-    return createCustomTheme({
-      primaryColor: preferences.primaryColor,
-      secondaryColor: preferences.secondaryColor,
-      accentColor: preferences.accentColor,
-      mode: effectiveMode,
-      borderRadius: preferences.borderRadius,
-      fontScale: preferences.fontScale,
-    });
-  }, [preferences, effectiveMode]);
+    const baseOptions = getMeridianTheme(effectiveMode);
+    const moduleOverrides = getModuleThemeOverrides(preferences.activeModule);
 
-  // Persistir cambios
+    // Merge base + module accent + text size + table density
+    const merged = createTheme({
+      ...baseOptions,
+      palette: {
+        ...baseOptions.palette,
+        ...moduleOverrides.palette,
+      },
+      typography: {
+        ...baseOptions.typography,
+        fontSize: TEXT_SIZE_MAP[preferences.textSize],
+      },
+      meridian: {
+        ...(baseOptions.meridian as object),
+        ...(moduleOverrides.meridian as object),
+      },
+      components: {
+        ...baseOptions.components,
+        MuiTableRow: {
+          ...baseOptions.components?.MuiTableRow,
+          styleOverrides: {
+            root: {
+              height: TABLE_DENSITY_MAP[preferences.tableDensity],
+              '&:last-child td': { borderBottom: 'none' },
+            },
+          },
+        },
+      },
+    });
+
+    return merged;
+  }, [effectiveMode, preferences.activeModule, preferences.textSize, preferences.tableDensity]);
+
+  // Persistir
   useEffect(() => {
     savePreferences(preferences);
   }, [preferences]);
 
-  // ============================================================================
-  // ACTIONS
-  // ============================================================================
+  // Aura — cambiar body background tint según módulo
+  useEffect(() => {
+    document.body.setAttribute('data-module', preferences.activeModule);
+    if (isDarkMode) {
+      const mod = MODULE_ACCENTS[preferences.activeModule];
+      document.body.style.backgroundColor = mod.tint;
+      document.body.style.transition = 'background-color 500ms ease';
+    } else {
+      document.body.style.backgroundColor = '';
+    }
+  }, [preferences.activeModule, isDarkMode]);
+
+  // ─── Actions ─────────────────────────────────────────────────
 
   const toggleDarkMode = useCallback(() => {
-    setPreferences((prev: ThemePreferences) => ({
-      ...prev,
-      mode: prev.mode === "light" ? "dark" : "light",
+    setPreferences(p => ({
+      ...p,
+      mode: p.mode === 'dark' ? 'light' : p.mode === 'light' ? 'dark' : 'dark',
     }));
   }, []);
 
-  const setMode = useCallback((mode: "light" | "dark" | "system") => {
-    setPreferences((prev: ThemePreferences) => ({ ...prev, mode }));
+  const setMode = useCallback((mode: MeridianPreferences['mode']) => {
+    setPreferences(p => ({ ...p, mode }));
   }, []);
 
-  const setPrimaryColor = useCallback((color: string) => {
-    setPreferences((prev: ThemePreferences) => ({
-      ...prev,
-      primaryColor: color,
-      presetName: undefined, // Limpiar preset cuando se personaliza
-    }));
+  const setActiveModule = useCallback((code: ModuleCode) => {
+    setPreferences(p => ({ ...p, activeModule: code }));
   }, []);
 
-  const setSecondaryColor = useCallback((color: string) => {
-    setPreferences((prev: ThemePreferences) => ({
-      ...prev,
-      secondaryColor: color,
-      presetName: undefined,
-    }));
+  const setTextSize = useCallback((size: TextSize) => {
+    setPreferences(p => ({ ...p, textSize: size }));
   }, []);
 
-  const setAccentColor = useCallback((color: string) => {
-    setPreferences((prev: ThemePreferences) => ({
-      ...prev,
-      accentColor: color,
-      presetName: undefined,
-    }));
-  }, []);
-
-  const applyPreset = useCallback((presetName: string) => {
-    const preset = colorPresets.find((p) => p.name === presetName);
-    if (!preset) {
-      console.warn(`[Theme] Preset "${presetName}" no encontrado`);
-      return;
-    }
-
-    setPreferences((prev: ThemePreferences) => ({
-      ...prev,
-      primaryColor: preset.primary,
-      secondaryColor: preset.secondary,
-      accentColor: preset.accent,
-      presetName: preset.name,
-    }));
-  }, []);
-
-  const setBorderRadius = useCallback(
-    (style: ThemePreferences["borderRadius"]) => {
-      setPreferences((prev: ThemePreferences) => ({ ...prev, borderRadius: style }));
-    },
-    []
-  );
-
-  const setFontScale = useCallback((scale: ThemePreferences["fontScale"]) => {
-    setPreferences((prev: ThemePreferences) => ({ ...prev, fontScale: scale }));
+  const setTableDensity = useCallback((density: TableDensity) => {
+    setPreferences(p => ({ ...p, tableDensity: density }));
   }, []);
 
   const resetToDefaults = useCallback(() => {
     setPreferences(defaultPreferences);
   }, []);
 
-  // ============================================================================
-  // CONTEXT VALUE
-  // ============================================================================
+  // ─── Context Value ───────────────────────────────────────────
 
   const contextValue: ThemeContextType = useMemo(
     () => ({
       theme,
       preferences,
       isDarkMode,
-      availablePresets: colorPresets,
+      activeModule: preferences.activeModule,
       toggleDarkMode,
       setMode,
-      setPrimaryColor,
-      setSecondaryColor,
-      setAccentColor,
-      applyPreset,
-      setBorderRadius,
-      setFontScale,
+      setActiveModule,
+      setTextSize,
+      setTableDensity,
       resetToDefaults,
+      // Legacy aliases
+      isDarkTheme: isDarkMode,
+      toggleTheme: toggleDarkMode,
     }),
     [
       theme,
@@ -299,14 +268,11 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       isDarkMode,
       toggleDarkMode,
       setMode,
-      setPrimaryColor,
-      setSecondaryColor,
-      setAccentColor,
-      applyPreset,
-      setBorderRadius,
-      setFontScale,
+      setActiveModule,
+      setTextSize,
+      setTableDensity,
       resetToDefaults,
-    ]
+    ],
   );
 
   return (
@@ -319,7 +285,5 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   );
 }
 
-// Re-export para compatibilidad con código existente
 export { ThemeContext };
-
 export default ThemeProvider;

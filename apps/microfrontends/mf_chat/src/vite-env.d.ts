@@ -319,11 +319,25 @@ declare module 'mf_ui/theme' {
   import type { ReactNode, ComponentType } from 'react'
   import type { Theme } from '@mui/material/styles'
 
+  export type ModuleCode = 'home' | 'contabilidad' | 'tesoreria' | 'rrhh' | 'obras' | 'catastro' | 'config' | 'chat'
+
   export const ThemeProvider: ComponentType<{ children: ReactNode }>
   export const useTheme: () => {
+    theme: Theme
     isDarkMode: boolean
+    isDarkTheme: boolean
+    toggleDarkMode: () => void
     toggleTheme: () => void
+    setMode: (mode: 'light' | 'dark' | 'system') => void
+    setActiveModule: (code: ModuleCode) => void
+    activeModule: ModuleCode
+    preferences: {
+      mode: 'light' | 'dark' | 'system'
+      activeModule: ModuleCode
+      textSize: 'small' | 'medium' | 'large'
+      tableDensity: 'compact' | 'normal' | 'relaxed'
+    }
   }
-  export const lightTheme: Theme
-  export const darkTheme: Theme
+  export const ThemeContext: React.Context<ReturnType<typeof useTheme> | null>
+  export function createMeridianTheme(mode: 'dark' | 'light'): Theme
 }

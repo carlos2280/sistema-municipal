@@ -1,13 +1,40 @@
-// Theme exports
-export * from "./tokens";
-export * from "./createCustomTheme";
-export * from "./ThemeProvider";
+// ═══════════════════════════════════════════════════════════════
+//  MERIDIAN — Theme Exports
+// ═══════════════════════════════════════════════════════════════
 
-// Re-export legacy themes for backwards compatibility
-export { lightTheme, darkTheme } from "./theme";
+// Tokens
+export {
+  spacing,
+  radii,
+  shadowsDark,
+  shadowsLight,
+  fontFamily,
+  fontFeatures,
+  zIndex,
+  breakpoints,
+  transitions,
+  semanticColors,
+} from './tokens';
 
-// Explicit named exports
-export { ThemeContext, ThemeProvider, useTheme, useToggleTheme } from "./ThemeProvider";
-export type { ThemePreferences } from "./ThemeProvider";
-export type { ColorPreset } from "./tokens";
-export type { CustomThemeConfig } from "./createCustomTheme";
+// Theme factory & types
+export {
+  MODULE_ACCENTS,
+  getContrastText,
+  getMeridianTheme,
+  createMeridianTheme,
+  getModuleThemeOverrides,
+} from './theme';
+export type { ModuleCode, MeridianTokens } from './theme';
+
+// Provider & hooks
+export {
+  ThemeContext,
+  ThemeProvider,
+  useTheme,
+  useToggleTheme,
+} from './ThemeProvider';
+export type {
+  MeridianPreferences,
+  TextSize,
+  TableDensity,
+} from './ThemeProvider';

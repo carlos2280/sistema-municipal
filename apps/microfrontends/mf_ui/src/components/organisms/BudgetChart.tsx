@@ -5,7 +5,7 @@
  */
 
 import { Box, Typography, alpha, styled, useTheme } from "@mui/material";
-import { fontFamily } from "../../theme/tokens";
+import { fontFamily } from '../../theme/tokens';
 
 // ============================================================================
 // TYPES

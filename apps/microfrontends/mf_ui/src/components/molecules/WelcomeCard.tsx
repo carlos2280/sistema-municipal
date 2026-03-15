@@ -6,8 +6,6 @@
  */
 
 import { Box, Typography, alpha, styled, keyframes, useTheme } from "@mui/material";
-import { palette } from "../../theme/tokens";
-
 // ============================================================================
 // ANIMATIONS
 // ============================================================================
@@ -55,11 +53,12 @@ export interface WelcomeCardProps {
 
 const CardRoot = styled(Box)(({ theme }) => {
   const isLight = theme.palette.mode === "light";
+  const accent = theme.palette.primary.main;
 
   return {
     background: isLight
-      ? `linear-gradient(135deg, ${palette.jade[600]} 0%, ${palette.indigo[500]} 100%)`
-      : `linear-gradient(135deg, ${palette.jade[700]} 0%, ${palette.indigo[600]} 100%)`,
+      ? `linear-gradient(135deg, ${accent} 0%, ${theme.palette.info.main} 100%)`
+      : `linear-gradient(135deg, ${accent} 0%, ${theme.palette.info.dark} 100%)`,
     borderRadius: 20,
     padding: theme.spacing(4),
     color: "#ffffff",
