@@ -54,7 +54,7 @@ import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
 import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
 import { useModuleSync } from "../hooks/useModuleSync";
-import { StatusBar } from "./StatusBar";
+import StatusLine from "./StatusLine";
 import { Compass } from "./Compass";
 import { NavPanel, useNavPanel } from "./NavPanel";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
@@ -568,8 +568,8 @@ export default function AppLayout() {
           <Compass/>
         </Box>
 
-        {/* StatusBar */}
-        <StatusBar />
+        {/* StatusLine */}
+        <StatusLine />
       </Box>
 
       {/* ── Side Panels ─────────────────────────────────────────── */}
