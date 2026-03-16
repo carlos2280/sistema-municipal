@@ -18,6 +18,7 @@
  */
 
 import { CssBaseline, GlobalStyles } from "@mui/material";
+import { selectDrawerOpen, useAppSelector } from "mf_store/store";
 import { useState, useCallback, useEffect } from "react";
 import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
@@ -99,8 +100,9 @@ export default function AppLayout() {
 		setAvatarMenuOpen((prev) => !prev);
 	}, []);
 
-	// Ocultar Compass cuando NavPanel o CommandPalette están abiertos
-	const compassHidden = navPanel.isOpen || cmdPalette.isOpen;
+	// Ocultar Compass cuando NavPanel, CommandPalette o un drawer de MF están abiertos
+	const drawerOpen = useAppSelector(selectDrawerOpen);
+	const compassHidden = navPanel.isOpen || cmdPalette.isOpen || drawerOpen;
 
 	return (
 		<>

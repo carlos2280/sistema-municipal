@@ -4,9 +4,12 @@ import {
 	selectIsAuthenticated,
 	selectModulosActivos,
 	selectSistemaId,
+	selectCodigoSistema,
 	useAppSelector,
 } from "mf_store/store";
 import { AppLoader } from "mf_ui/components";
+import { useTheme as useMeridianTheme } from "mf_ui/theme";
+import type { ModuleCode } from "mf_ui/theme";
 import { useEffect, useState } from "react";
 import { useMenu } from "./hooks/useMenu";
 import { useTenantResolver } from "./hooks/useTenantResolver";
@@ -20,6 +23,8 @@ function App() {
 	const sistemaId = useAppSelector(selectSistemaId);
 	const isAuthenticated = useAppSelector(selectIsAuthenticated);
 	const modulosActivos = useAppSelector(selectModulosActivos);
+	const codigoSistema = useAppSelector(selectCodigoSistema);
+	const { setActiveModule, activeModule } = useMeridianTheme();
 	// Estado raw del menú para saber si fue cargado (independiente del filtrado por módulos activos)
 	const menuLoaded = useAppSelector((state: { menu: unknown }) => !!state.menu);
 	const [router, setRouter] = useState<RouterProviderProps["router"] | null>(
@@ -27,6 +32,15 @@ function App() {
 	);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// ── Sincronizar color del módulo activo con el theme ──────────
+	useEffect(() => {
+		if (codigoSistema && codigoSistema !== activeModule) {
+			setActiveModule(codigoSistema as ModuleCode);
+		} else if (!codigoSistema && !sistemaId && activeModule !== "home") {
+			setActiveModule("home");
+		}
+	}, [codigoSistema, sistemaId, activeModule, setActiveModule]);
 
 	// Si está autenticado pero aún no tiene menu/sistemaId, seguir esperando.
 	// Usamos menuLoaded (raw) en vez de menu (filtrado) para no bloquear

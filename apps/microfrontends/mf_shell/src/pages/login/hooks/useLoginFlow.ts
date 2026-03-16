@@ -25,6 +25,7 @@ export const useLoginFlow = () => {
 	const [mfaCode, setMfaCode] = useState("");
 	const [mfaSetupPending, setMfaSetupPending] = useState(false);
 	const [loginSuccess, setLoginSuccess] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const { methods } = useHookFormSchema<TSchemaCredenciales>({
 		schema: schemaCredenciales,
@@ -49,6 +50,7 @@ export const useLoginFlow = () => {
 		if (!isValid) return;
 
 		submittingRef.current = true;
+		setIsSubmitting(true);
 		const { correo, contrasena } = methods.getValues();
 		try {
 			const payload = await loginAreas({
@@ -62,6 +64,7 @@ export const useLoginFlow = () => {
 			toast.error("Ocurrió un error con sus credenciales.");
 		} finally {
 			submittingRef.current = false;
+			setIsSubmitting(false);
 		}
 	}, [methods, loginAreas, tenantSlug]);
 
@@ -80,6 +83,7 @@ export const useLoginFlow = () => {
 		if (!areaId || !sistemaId || !correo || !contrasena) return;
 
 		submittingRef.current = true;
+		setIsSubmitting(true);
 		try {
 			const loginData = await login({
 				correo,
@@ -104,26 +108,36 @@ export const useLoginFlow = () => {
 			toast.error("Error al ingresar al sistema.");
 		} finally {
 			submittingRef.current = false;
+			setIsSubmitting(false);
 		}
 	}, [methods, login, tenantSlug, finishLogin]);
 
 	// ── Step 2: MFA verification ──────────────────────────────────────────
+	// Delay mínimo para que "Verificando…" sea visible (match prototipo MERIDIAN)
+	const MFA_MIN_DELAY_MS = 1100;
+
 	const handleMfaStep = useCallback(async () => {
 		if (submittingRef.current) return;
 		if (!mfaCode.trim()) return;
 
 		submittingRef.current = true;
+		setIsSubmitting(true);
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
 
+		const minDelay = new Promise<void>((r) => setTimeout(r, MFA_MIN_DELAY_MS));
+
 		try {
-			const loginData = await login({
-				correo,
-				contrasena,
-				areaId,
-				sistemaId,
-				tenantSlug,
-				mfaCode,
-			}).unwrap();
+			const [loginData] = await Promise.all([
+				login({
+					correo,
+					contrasena,
+					areaId,
+					sistemaId,
+					tenantSlug,
+					mfaCode,
+				}).unwrap(),
+				minDelay,
+			]);
 
 			if ("mfaRequired" in loginData) {
 				toast.error("Código MFA incorrecto. Intente nuevamente.");
@@ -137,6 +151,7 @@ export const useLoginFlow = () => {
 			setMfaCode("");
 		} finally {
 			submittingRef.current = false;
+			setIsSubmitting(false);
 		}
 	}, [mfaCode, methods, login, tenantSlug, finishLogin]);
 
@@ -163,6 +178,7 @@ export const useLoginFlow = () => {
 		areas,
 		sistemas,
 		isLoadingSistemas,
+		isSubmitting,
 		loginSuccess,
 		methods,
 		mfaCode,

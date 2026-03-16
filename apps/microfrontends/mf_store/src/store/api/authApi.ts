@@ -8,11 +8,12 @@ import type {
 	MfaSetupActivarResponse,
 	MfaSetupIniciarResponse,
 	MfaSetupPendingResponse,
+	SistemaLogin,
 	UsuarioConMenuResponse,
 } from "../../types/login";
 import { baseQuery, baseQueryWithReauth } from "../baseQueryWithReauth";
 import { loggedOut, mfaPendingSet, tokenReceived } from "../features/authSlice";
-import { menuReceived } from "../features/menuSlice";
+import { menuReceived, resetMenu } from "../features/menuSlice";
 import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
 
 export type ResponseCambioContrasena = {
@@ -38,7 +39,7 @@ export const authApi = createApi({
 				body,
 			}),
 		}),
-		loginSistemas: builder.mutation<Areas[], Login>({
+		loginSistemas: builder.mutation<SistemaLogin[], Login>({
 			query: (body) => ({
 				url: "/autorizacion/sistemas",
 				method: "POST",
@@ -139,7 +140,11 @@ export const authApi = createApi({
 				try {
 					const { data } = await queryFulfilled;
 					dispatch(tokenReceived({ accessToken: "cookie", sistemaId }));
-					dispatch(menuReceived({ nombreSistema: data.menu.nombreSistema, menuRaiz: data.menu.menuRaiz }));
+					dispatch(menuReceived({
+						nombreSistema: data.menu.nombreSistema,
+						codigoSistema: data.menu.codigoSistema,
+						menuRaiz: data.menu.menuRaiz,
+					}));
 				} catch { /* noop */ }
 			},
 		}),
@@ -178,6 +183,7 @@ export const authApi = createApi({
 					// Si el backend falla (cookie ya expirada, red, etc.) igual limpiamos.
 				} finally {
 					dispatch(loggedOut());
+					dispatch(resetMenu());
 					dispatch(modulosCleared());
 				}
 			},

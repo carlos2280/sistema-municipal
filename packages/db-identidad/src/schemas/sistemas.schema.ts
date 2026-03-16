@@ -3,6 +3,7 @@ import { serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const sistemas = identidadSchema.table("sistemas", {
   id: serial("id").primaryKey(),
+  codigo: text("codigo").notNull().unique(),
   nombre: text("nombre").notNull(),
   icono: text("icono"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

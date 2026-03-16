@@ -1,4 +1,4 @@
-import { useCrearPlanesCuentaMutation, useActualizarPlanesCuentaMutation } from 'mf_store/store';
+import { useCrearPlanesCuentaMutation, useActualizarPlanesCuentaMutation, setDrawerOpen, useAppDispatch } from 'mf_store/store';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -103,6 +103,7 @@ interface UseAccountPanelOptions {
  */
 export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPanelReturn {
   const { onExpandNode, selectedYear = new Date().getFullYear() } = options ?? {};
+  const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<PanelMode>(null);
   const [selectedItem, setSelectedItem] = useState<TreeItemData | null>(null);
@@ -208,8 +209,9 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
       setTimeout(() => methods.trigger(), 0);
 
       setIsOpen(true);
+      dispatch(setDrawerOpen(true));
     },
-    [methods, selectedYear],
+    [methods, selectedYear, dispatch],
   );
 
   // -------------------------------------------------------------------------
@@ -238,8 +240,9 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
         { keepErrors: false, keepDirty: false },
       );
       setIsOpen(true);
+      dispatch(setDrawerOpen(true));
     },
-    [methods, selectedYear],
+    [methods, selectedYear, dispatch],
   );
 
   // -------------------------------------------------------------------------
@@ -251,7 +254,8 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
     setSelectedItem(null);
     methods.reset();
     resetVerificacion();
-  }, [methods, resetVerificacion]);
+    dispatch(setDrawerOpen(false));
+  }, [methods, resetVerificacion, dispatch]);
 
   // -------------------------------------------------------------------------
   // Submit del formulario

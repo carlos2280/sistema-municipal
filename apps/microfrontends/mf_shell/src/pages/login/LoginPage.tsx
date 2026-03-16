@@ -12,7 +12,7 @@
 
 import { Box, styled } from "@mui/material";
 import { Building2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navigate } from "react-router-dom";
@@ -21,6 +21,8 @@ import {
 	selectTenantNombre,
 	useAppSelector,
 } from "mf_store/store";
+import { useTheme as useMeridianTheme } from "mf_ui/theme";
+import type { ModuleCode } from "mf_ui/theme";
 import { MFA_PENDING_CONFIG, STEP_CONFIG } from "./constants";
 import { useLoginFlow } from "./hooks/useLoginFlow";
 import { AuthLayout } from "./components/AuthLayout";
@@ -104,23 +106,27 @@ function LoginFormContent({
 	areas,
 	sistemas,
 	isLoadingSistemas,
+	isSubmitting,
 	loginSuccess,
 	mfaCode,
 	mfaSetupPending,
 	onCodeChange,
 	onNext,
 	onBack,
+	onSistemaSelect,
 }: {
 	readonly activeStep: 0 | 1 | 2;
 	readonly areas: ReadonlyArray<{ readonly id: number; readonly nombre: string; readonly descripcion: string | null }>;
-	readonly sistemas: ReadonlyArray<{ readonly id: number; readonly nombre: string }>;
+	readonly sistemas: ReadonlyArray<{ readonly id: number; readonly nombre: string; readonly codigo: string }>;
 	readonly isLoadingSistemas: boolean;
+	readonly isSubmitting: boolean;
 	readonly loginSuccess: boolean;
 	readonly mfaCode: string;
 	readonly mfaSetupPending: boolean;
 	readonly onCodeChange: (code: string) => void;
 	readonly onNext: () => void;
 	readonly onBack: () => void;
+	readonly onSistemaSelect: (codigo: string) => void;
 }) {
 	const correo = useWatch({ name: "correo" }) as string | undefined;
 	const contrasena = useWatch({ name: "contrasena" }) as string | undefined;
@@ -159,7 +165,7 @@ function LoginFormContent({
 				>
 					{activeStep === 0 && <CredentialsStep />}
 					{activeStep === 1 && (
-						<AreaSystemStep areas={areas} sistemas={sistemas} isLoadingSistemas={isLoadingSistemas} />
+						<AreaSystemStep areas={areas} sistemas={sistemas} isLoadingSistemas={isLoadingSistemas} onSistemaSelect={onSistemaSelect} />
 					)}
 					{activeStep === 2 && (
 						<MfaStep mfaCode={mfaCode} onCodeChange={onCodeChange} onAutoSubmit={onNext} onBack={onBack} />
@@ -170,6 +176,7 @@ function LoginFormContent({
 			<LoginActions
 				activeStep={activeStep}
 				disabled={!isStepValid}
+				isSubmitting={isSubmitting}
 				loginSuccess={loginSuccess}
 				onNext={onNext}
 				onBack={onBack}
@@ -189,6 +196,7 @@ export default function LoginPage() {
 		areas,
 		sistemas,
 		isLoadingSistemas,
+		isSubmitting,
 		loginSuccess,
 		methods,
 		mfaCode,
@@ -197,6 +205,20 @@ export default function LoginPage() {
 		handleNext,
 		handleBack,
 	} = useLoginFlow();
+
+	const { setActiveModule, activeModule } = useMeridianTheme();
+
+	// Resetear al color "home" al llegar al login (limpia residuo de sesión anterior)
+	useEffect(() => {
+		if (activeModule !== "home" && !isAuthenticated) {
+			setActiveModule("home");
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps -- solo al montar
+
+	const handleSistemaSelect = useCallback(
+		(codigo: string) => setActiveModule(codigo as ModuleCode),
+		[setActiveModule],
+	);
 
 	const config = mfaSetupPending ? MFA_PENDING_CONFIG : STEP_CONFIG[activeStep];
 
@@ -249,12 +271,14 @@ export default function LoginPage() {
 							areas={areas}
 							sistemas={sistemas}
 							isLoadingSistemas={isLoadingSistemas}
+							isSubmitting={isSubmitting}
 							loginSuccess={loginSuccess}
 							mfaCode={mfaCode}
 							mfaSetupPending={mfaSetupPending}
 							onCodeChange={setMfaCode}
 							onNext={handleNext}
 							onBack={handleBack}
+							onSistemaSelect={handleSistemaSelect}
 						/>
 					</FormProvider>
 				)}

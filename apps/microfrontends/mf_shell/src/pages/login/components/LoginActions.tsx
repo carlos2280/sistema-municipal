@@ -6,11 +6,31 @@
  * Keyboard hint integrado.
  */
 
-import { Box, alpha, styled } from "@mui/material";
+import { Box, alpha, keyframes, styled } from "@mui/material";
 import { ArrowLeft, ArrowRight, Check, LogIn, ShieldCheck } from "lucide-react";
 import { memo, useMemo } from "react";
 import { STEP_CONFIG } from "../constants";
 import type { LoginStep } from "../types";
+
+// ── Spinner (matches prototype .spin) ────────────────────────────────────────
+
+const spin = keyframes`
+	to { transform: rotate(360deg); }
+`;
+
+const Spinner = styled("span")(({ theme }) => {
+	const contrast = theme.palette.primary.contrastText;
+
+	return {
+		width: 14,
+		height: 14,
+		borderRadius: "50%",
+		border: `1.5px solid ${alpha(contrast, 0.3)}`,
+		borderTopColor: contrast,
+		animation: `${spin} 0.65s linear infinite`,
+		flexShrink: 0,
+	};
+});
 
 // ── Styled ──────────────────────────────────────────────────────────────────
 
@@ -119,6 +139,7 @@ const STEP_ICONS: Readonly<Record<LoginStep, React.ReactNode>> = {
 interface LoginActionsProps {
 	readonly activeStep: LoginStep;
 	readonly disabled: boolean;
+	readonly isSubmitting?: boolean;
 	readonly loginSuccess?: boolean;
 	readonly onNext: () => void;
 	readonly onBack: () => void;
@@ -127,6 +148,7 @@ interface LoginActionsProps {
 export const LoginActions = memo(function LoginActions({
 	activeStep,
 	disabled,
+	isSubmitting,
 	loginSuccess,
 	onNext,
 	onBack,
@@ -137,7 +159,46 @@ export const LoginActions = memo(function LoginActions({
 	// Step 1: row layout (ghost compact + primary flex) matching prototype
 	// Step 0: single primary button
 	// Step 2: single primary button (back link is inline in MfaStep)
-	const showBackButton = activeStep === 1 && !loginSuccess;
+	const showBackButton = activeStep === 1 && !loginSuccess && !isSubmitting;
+
+	// Button content: success > submitting > default (matches prototype flow)
+	const buttonContent = loginSuccess ? (
+		<>
+			<Check size={16} />
+			<span>Acceso concedido</span>
+		</>
+	) : isSubmitting ? (
+		<>
+			<Spinner />
+			<span>Verificando…</span>
+		</>
+	) : (
+		<>
+			{activeStep > 0 && icon}
+			<span>{config.buttonLabel}</span>
+			{activeStep === 0 && icon}
+		</>
+	);
+
+	// Button content for step 1 row layout (icon always before label)
+	const buttonContentRow = loginSuccess ? (
+		<>
+			<Check size={16} />
+			<span>Acceso concedido</span>
+		</>
+	) : isSubmitting ? (
+		<>
+			<Spinner />
+			<span>Verificando…</span>
+		</>
+	) : (
+		<>
+			{icon}
+			<span>{config.buttonLabel}</span>
+		</>
+	);
+
+	const isDisabled = (disabled && !loginSuccess) || isSubmitting;
 
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2.5 }}>
@@ -153,42 +214,21 @@ export const LoginActions = memo(function LoginActions({
 					</GhostButton>
 					<PrimaryButton
 						onClick={onNext}
-						disabled={disabled && !loginSuccess}
+						disabled={isDisabled}
 						type="button"
 						className={loginSuccess ? "success" : undefined}
 					>
-						{loginSuccess ? (
-							<>
-								<Check size={16} />
-								<span>Acceso concedido</span>
-							</>
-						) : (
-							<>
-								{icon}
-								<span>{config.buttonLabel}</span>
-							</>
-						)}
+						{buttonContentRow}
 					</PrimaryButton>
 				</Box>
 			) : (
 				<PrimaryButton
 					onClick={onNext}
-					disabled={disabled && !loginSuccess}
+					disabled={isDisabled}
 					type="button"
 					className={loginSuccess ? "success" : undefined}
 				>
-					{loginSuccess ? (
-						<>
-							<Check size={16} />
-							<span>Acceso concedido</span>
-						</>
-					) : (
-						<>
-							{activeStep > 0 && icon}
-							<span>{config.buttonLabel}</span>
-							{activeStep === 0 && icon}
-						</>
-					)}
+					{buttonContent}
 				</PrimaryButton>
 			)}
 		</Box>

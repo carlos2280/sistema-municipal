@@ -41,12 +41,13 @@ export const useLoginFinish = (onSuccess?: () => void) => {
 				}
 
 				const menuResponse = await dispatch(
-					MenuApi.endpoints.getMenuSistema.initiate(),
+					MenuApi.endpoints.getMenuSistema.initiate(undefined, { forceRefetch: true }),
 				).unwrap();
 
 				dispatch(
 					menuReceived({
 						nombreSistema: menuResponse.nombreSistema,
+						codigoSistema: menuResponse.codigoSistema,
 						menuRaiz: menuResponse.menuRaiz,
 					}),
 				);

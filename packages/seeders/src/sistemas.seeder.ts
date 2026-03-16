@@ -3,9 +3,10 @@ import type { DbExecutor } from "./types/db";
 
 export async function seedSistemas(db: DbExecutor) {
     const datos = [
-        { nombre: "Sisitema Contabilidad", icono: 'TbReportMoney' },
-        { nombre: "Sisitema Remuneraciones", icono: 'TbCreditCard' },
-        { nombre: "Sisitema Tesoreria", icono: 'TbCoin' },
+        { codigo: "contabilidad", nombre: "Sistema Contabilidad", icono: "calculator" },
+        { codigo: "rrhh", nombre: "Sistema Remuneraciones", icono: "credit-card" },
+        { codigo: "tesoreria", nombre: "Sistema Tesoreria", icono: "coins" },
+        { codigo: "config", nombre: "Sistema Configuración", icono: "settings" },
     ];
 
     try {

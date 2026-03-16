@@ -327,6 +327,7 @@ export const obtenerSistemasPorAreaUsuario = async (
       .select({
         id: sistemas.id,
         nombre: sistemas.nombre,
+        codigo: sistemas.codigo,
       })
       .from(sistemaPerfil)
       .innerJoin(sistemas, eq(sistemaPerfil.sistemaId, sistemas.id))
@@ -418,12 +419,13 @@ export const obtenerMenuPorSistema = async (
     // 1. Obtener todos los menús del sistema especificado
 
     const sistema = await db
-      .select({ nombre: sistemas.nombre })
+      .select({ nombre: sistemas.nombre, codigo: sistemas.codigo })
       .from(sistemas)
       .where(eq(sistemas.id, idSistema))
       .limit(1);
 
     const nombreSistema = sistema[0]?.nombre || "Sistema";
+    const codigoSistema = sistema[0]?.codigo || "";
     const todosLosMenus = await db
       .select()
       .from(menus)
@@ -435,7 +437,7 @@ export const obtenerMenuPorSistema = async (
       )
       .orderBy(menus.orden);
 
-    if (todosLosMenus.length === 0) return { nombreSistema, menuRaiz: [] };
+    if (todosLosMenus.length === 0) return { nombreSistema, codigoSistema, menuRaiz: [] };
 
     // 2. Crear mapa de id -> item con hijos
     const menuMap = new Map<number, MenuJerarquico>();
@@ -459,7 +461,7 @@ export const obtenerMenuPorSistema = async (
       }
     }
 
-    return { nombreSistema, menuRaiz };
+    return { nombreSistema, codigoSistema, menuRaiz };
   } catch (error) {
     throw new Error(
       error instanceof Error

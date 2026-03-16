@@ -77,6 +77,12 @@ export type Areas = {
 	descripcion: string | null;
 };
 
+export type SistemaLogin = {
+	id: number;
+	nombre: string;
+	codigo: string;
+};
+
 export type ContrasenaTemporal = {
 	correo: string;
 	contrasenaTemporal: string;
@@ -87,6 +93,7 @@ export type CambiarSistemaResponse = {
 	sistemaId: number;
 	menu: {
 		nombreSistema: string;
+		codigoSistema: string;
 		menuRaiz: MenuItem[];
 	};
 };

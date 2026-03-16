@@ -3,11 +3,13 @@ import type { MenuItem } from "../../types/login";
 
 type MenuState = {
 	nombreSistema: string;
+	codigoSistema: string;
 	menuRaiz: MenuItem[];
 };
 
 const initialState: MenuState = {
 	nombreSistema: "",
+	codigoSistema: "",
 	menuRaiz: [],
 };
 
@@ -17,9 +19,10 @@ const menuSlice = createSlice({
 	reducers: {
 		menuReceived(
 			state,
-			action: PayloadAction<{ nombreSistema: string; menuRaiz: MenuItem[] }>,
+			action: PayloadAction<{ nombreSistema: string; codigoSistema?: string; menuRaiz: MenuItem[] }>,
 		) {
 			state.nombreSistema = action.payload.nombreSistema;
+			state.codigoSistema = action.payload.codigoSistema || "";
 			state.menuRaiz = action.payload.menuRaiz;
 			// localStorage.setItem("menu_nombreSistema", action.payload.nombreSistema);
 			// localStorage.setItem(
@@ -29,10 +32,15 @@ const menuSlice = createSlice({
 		},
 		resetMenu(state) {
 			state.nombreSistema = "";
+			state.codigoSistema = "";
 			state.menuRaiz = [];
 		},
 	},
 });
 
 export const { menuReceived, resetMenu } = menuSlice.actions;
+
+export const selectCodigoSistema = (state: { menu: MenuState }) =>
+	state.menu.codigoSistema;
+
 export default menuSlice.reducer;

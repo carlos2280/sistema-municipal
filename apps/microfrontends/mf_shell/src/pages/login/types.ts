@@ -9,6 +9,7 @@ export interface AreaOption {
 export interface SistemaOption {
 	readonly id: number;
 	readonly nombre: string;
+	readonly codigo: string;
 }
 
 export type LoginStep = 0 | 1 | 2;

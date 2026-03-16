@@ -266,12 +266,14 @@ interface AreaSystemStepProps {
 	readonly areas: ReadonlyArray<AreaOption>;
 	readonly sistemas: ReadonlyArray<SistemaOption>;
 	readonly isLoadingSistemas: boolean;
+	readonly onSistemaSelect?: (codigo: string) => void;
 }
 
 export const AreaSystemStep = memo(function AreaSystemStep({
 	areas,
 	sistemas,
 	isLoadingSistemas,
+	onSistemaSelect,
 }: AreaSystemStepProps) {
 	const { control, watch } = useFormContext<TSchemaCredenciales>();
 	const selectedArea = watch("areaId");
@@ -356,7 +358,10 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 											<SysCard
 												key={sistema.id}
 												ownerState={{ selected: isSelected }}
-												onClick={() => field.onChange(sistema.id)}
+												onClick={() => {
+													field.onChange(sistema.id);
+													onSistemaSelect?.(sistema.codigo);
+												}}
 												role="radio"
 												aria-checked={isSelected}
 												tabIndex={0}

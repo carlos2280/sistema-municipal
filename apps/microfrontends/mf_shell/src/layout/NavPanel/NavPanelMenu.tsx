@@ -34,7 +34,8 @@ function toPascalCase(str: string): string {
 		.join("");
 }
 
-function SafeIcon({ name, size = 18 }: { name: string; size?: number }) {
+function SafeIcon({ name, size = 18 }: { name: string | null; size?: number }) {
+	if (!name) return <icons.LayoutGrid size={size} strokeWidth={1.5} />;
 	const pascalName = toPascalCase(name);
 	const IconComp = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
 	if (!IconComp) return <icons.LayoutGrid size={size} strokeWidth={1.5} />;

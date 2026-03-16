@@ -15,5 +15,6 @@ export type MenuItem = {
 
 export type MenuSistema = {
 	nombreSistema: string;
+	codigoSistema: string;
 	menuRaiz: MenuItem[];
 };

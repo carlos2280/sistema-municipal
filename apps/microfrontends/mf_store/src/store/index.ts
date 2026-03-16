@@ -29,3 +29,4 @@ export * from "./features/authSlice";
 export * from "./features/menuSlice";
 export * from "./features/subscriptionsSlice";
 export * from "./features/tenantSlice";
+export * from "./features/uiSlice";

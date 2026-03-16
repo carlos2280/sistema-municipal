@@ -16,11 +16,12 @@ import authReducer from "./features/authSlice";
 import menuReducer from "./features/menuSlice";
 import subscriptionsReducer from "./features/subscriptionsSlice";
 import tenantReducer from "./features/tenantSlice";
+import uiReducer from "./features/uiSlice";
 
 const menuPersistConfig = {
 	key: "menu",
 	storage: storageSession,
-	whitelist: ["nombreSistema", "menuRaiz"],
+	whitelist: ["nombreSistema", "codigoSistema", "menuRaiz"],
 };
 const authPersistConfig = {
 	key: "autorizacion",
@@ -53,6 +54,7 @@ const rootReducer = combineReducers({
 	menu: persistReducer(menuPersistConfig, menuReducer),
 	subscriptions: persistReducer(subscriptionsPersistConfig, subscriptionsReducer),
 	tenant: persistReducer(tenantPersistConfig, tenantReducer),
+	ui: uiReducer,
 });
 
 export function createStore(
