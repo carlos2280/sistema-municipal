@@ -57,6 +57,7 @@ import { useModuleSync } from "../hooks/useModuleSync";
 import { StatusBar } from "./StatusBar";
 import { Compass } from "./Compass";
 import { NavPanel, useNavPanel } from "./NavPanel";
+import { CommandPalette, useCommandPalette } from "./CommandPalette";
 
 // ============================================================================
 // CONSTANTS
@@ -290,6 +291,7 @@ export default function AppLayout() {
   const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
   const [orgOpen, setOrgOpen] = useState(false);
   const navPanel = useNavPanel();
+  const cmdPalette = useCommandPalette();
 
   // Total de mensajes no leídos para el badge del botón de chat
   const { data: conversaciones } = useObtenerConversacionesQuery() as {
@@ -576,6 +578,14 @@ export default function AppLayout() {
         onClose={navPanel.close}
         onOpenCustomizer={() => {
           navPanel.close();
+          setCustomizerOpen(true);
+        }}
+      />
+      <CommandPalette
+        isOpen={cmdPalette.isOpen}
+        onClose={cmdPalette.close}
+        onOpenCustomizer={() => {
+          cmdPalette.close();
           setCustomizerOpen(true);
         }}
       />
