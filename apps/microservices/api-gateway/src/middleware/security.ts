@@ -15,13 +15,14 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/** Rate limiter para endpoints de login — 5 intentos / 15 min por IP */
+/** Rate limiter para endpoint de login — 5 intentos / 15 min (solo prod) */
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: { error: "Demasiados intentos de login. Intenta en 15 minutos." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => !isProduction,
 });
 
 /** Rate limiter para usuarios autenticados — 200 req / min por userId */
@@ -58,5 +59,5 @@ export const applySecurityMiddleware = (app: Express) => {
   );
 
   app.use(compression());
-  app.use(globalLimiter);
+  if (isProduction) app.use(globalLimiter);
 };

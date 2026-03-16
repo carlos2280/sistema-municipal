@@ -32,8 +32,8 @@ export default defineConfig(() => {
         shared: {
           react: { singleton: true, requiredVersion: false },
           'react-dom': { singleton: true, requiredVersion: false },
-          '@mui/material': { singleton: true, requiredVersion: false },
-          '@mui/icons-material': { singleton: true, requiredVersion: false },
+          '@mui/material': { singleton: true, requiredVersion: false, version: '7.3.7' },
+          '@mui/icons-material': { singleton: true, requiredVersion: false, version: '7.3.7' },
           '@mui/x-tree-view': { singleton: true, requiredVersion: false },
           '@emotion/react': { singleton: true, requiredVersion: false },
           '@emotion/styled': { singleton: true, requiredVersion: false },

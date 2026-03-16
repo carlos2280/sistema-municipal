@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
 	MenuApi,
@@ -7,39 +6,57 @@ import {
 	useAppDispatch,
 } from "mf_store/store";
 
+interface PostLoginData {
+	modulosActivos?: Array<{
+		codigo: string;
+		nombre: string;
+		mfName: string | null;
+		mfManifestUrlTpl: string | null;
+		icono: string | null;
+		apiPrefix: string;
+	}>;
+}
+
 /**
- * Handles post-authentication: register dynamic remotes, fetch menu, navigate.
+ * Handles post-authentication: register dynamic remotes, fetch menu.
  * Single Responsibility: only the "finish login" side effects.
+ *
+ * La navegación a "/" NO se hace aquí. App.tsx recrea el router cuando
+ * isAuthenticated cambia, y LoginPage redirige a "/" vía <Navigate />.
+ * Usar navigate() aquí operaría sobre el router antiguo (pre-recreación).
+ *
+ * @param onSuccess - callback fired after menu is loaded to trigger UI transitions
  */
-export const useLoginFinish = () => {
+export const useLoginFinish = (onSuccess?: () => void) => {
 	const dispatch = useAppDispatch();
-	const navigate = useNavigate();
 
 	const finishLogin = useCallback(
-		// biome-ignore lint/suspicious/noExplicitAny: login data inferred from MF-federated module
-		async (loginData: any) => {
-			if (loginData.modulosActivos) {
-				const { registerDynamicRemotes } = await import(
-					"../../../modules/dynamicModuleLoader"
+		async (loginData: PostLoginData) => {
+			try {
+				if (loginData.modulosActivos) {
+					const { registerDynamicRemotes } = await import(
+						"../../../modules/dynamicModuleLoader"
+					);
+					await registerDynamicRemotes(loginData.modulosActivos);
+				}
+
+				const menuResponse = await dispatch(
+					MenuApi.endpoints.getMenuSistema.initiate(),
+				).unwrap();
+
+				dispatch(
+					menuReceived({
+						nombreSistema: menuResponse.nombreSistema,
+						menuRaiz: menuResponse.menuRaiz,
+					}),
 				);
-				await registerDynamicRemotes(loginData.modulosActivos);
+
+				onSuccess?.();
+			} catch {
+				toast.error("Error al cargar el menú del sistema.");
 			}
-
-			const menuResponse = await dispatch(
-				MenuApi.endpoints.getMenuSistema.initiate(),
-			).unwrap();
-
-			dispatch(
-				menuReceived({
-					nombreSistema: menuResponse.nombreSistema,
-					menuRaiz: menuResponse.menuRaiz,
-				}),
-			);
-
-			toast.success("Login exitoso");
-			navigate("/");
 		},
-		[dispatch, navigate],
+		[dispatch, onSuccess],
 	);
 
 	return finishLogin;

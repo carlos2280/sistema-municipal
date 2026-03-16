@@ -1,3 +1,6 @@
+// ─── Module Federation declarations ──────────────────────────────
+// MUI Theme augmentation (MERIDIAN) → ver mui-theme.d.ts
+
 declare module "mf_ui/theme" {
 	import type { ReactNode, ComponentType } from "react";
 	import type { Theme } from "@mui/material/styles";

@@ -10,7 +10,7 @@ import { loggedOut, tokenReceived } from "./features/authSlice";
 const mutex = new Mutex();
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
-const baseQuery = fetchBaseQuery({
+export const baseQuery = fetchBaseQuery({
 	baseUrl: `${VITE_API_URL}/api/v1`,
 	credentials: "include",
 });

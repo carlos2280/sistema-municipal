@@ -244,6 +244,7 @@ export const obtenerAreasUsuario = async (
       .select({
         id: areas.id,
         nombre: areas.nombre,
+        descripcion: areas.descripcion,
       })
       .from(perfilAreaUsuario)
       .innerJoin(areas, eq(perfilAreaUsuario.areaId, areas.id))

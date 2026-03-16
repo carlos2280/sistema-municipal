@@ -10,7 +10,7 @@ import type {
 	MfaSetupPendingResponse,
 	UsuarioConMenuResponse,
 } from "../../types/login";
-import { baseQueryWithReauth } from "../baseQueryWithReauth";
+import { baseQuery, baseQueryWithReauth } from "../baseQueryWithReauth";
 import { loggedOut, mfaPendingSet, tokenReceived } from "../features/authSlice";
 import { menuReceived } from "../features/menuSlice";
 import { modulosReceived, modulosCleared } from "../features/subscriptionsSlice";
@@ -91,15 +91,16 @@ export const authApi = createApi({
 		}),
 
 		verificarToken: builder.query<void, void>({
-			query: () => "/autorizacion/verificar-token",
-			async onQueryStarted(_, { dispatch, queryFulfilled }) {
-				try {
-					await queryFulfilled;
-					// sistemaId/areaId/usuarioId ya están rehydratados por Redux Persist (sessionStorage)
-					dispatch(tokenReceived({ accessToken: "cookie" }));
-				} catch {
-					dispatch(loggedOut());
+			// Usa baseQuery directo (sin reauth) — si la cookie expiró, no tiene
+			// sentido intentar refresh; simplemente redirigimos al login.
+			queryFn: async (_arg, queryApi, _extraOptions) => {
+				const result = await baseQuery("/autorizacion/verificar-token", queryApi, {});
+				if (result.error) {
+					queryApi.dispatch(loggedOut());
+					return { error: result.error };
 				}
+				queryApi.dispatch(tokenReceived({ accessToken: "cookie" }));
+				return { data: undefined };
 			},
 		}),
 

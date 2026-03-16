@@ -71,15 +71,8 @@ export const createApp = (): Express => {
 
   applySecurityMiddleware(app);
 
-  // RATE LIMIT: Login — 5 intentos / 15 min por IP
-  app.use(
-    [
-      "/api/v1/autorizacion/login",
-      "/api/v1/autorizacion/areas",
-      "/api/v1/autorizacion/sistemas",
-    ],
-    loginLimiter,
-  );
+  // RATE LIMIT: Login — solo al endpoint de autenticación final
+  app.use("/api/v1/autorizacion/login", loginLimiter);
 
   // AUTH: Validar JWT y almacenar datos del usuario en req.__gatewayUser
   app.use(authenticateToken);

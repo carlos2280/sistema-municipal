@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
 	selectResolvedTenantSlug,
@@ -24,6 +24,7 @@ export const useLoginFlow = () => {
 	const [areas, setAreas] = useState<AreaOption[]>([]);
 	const [mfaCode, setMfaCode] = useState("");
 	const [mfaSetupPending, setMfaSetupPending] = useState(false);
+	const [loginSuccess, setLoginSuccess] = useState(false);
 
 	const { methods } = useHookFormSchema<TSchemaCredenciales>({
 		schema: schemaCredenciales,
@@ -34,14 +35,20 @@ export const useLoginFlow = () => {
 	const [loginAreas] = useLoginAreasMutation();
 	const [login] = useLoginMutation();
 
-	const sistemas = useAreaSistemas(methods);
-	const finishLogin = useLoginFinish();
+	// Guard: evita múltiples submisiones concurrentes (ej. auto-submit MFA + click en Verificar)
+	const submittingRef = useRef(false);
+
+	const { sistemas, isLoadingSistemas } = useAreaSistemas(methods);
+	const markSuccess = useCallback(() => setLoginSuccess(true), []);
+	const finishLogin = useLoginFinish(markSuccess);
 
 	// ── Step 0: Validate credentials & fetch areas ────────────────────────
 	const handleCredentialsStep = useCallback(async () => {
+		if (submittingRef.current) return;
 		const isValid = await methods.trigger(["correo", "contrasena"]);
 		if (!isValid) return;
 
+		submittingRef.current = true;
 		const { correo, contrasena } = methods.getValues();
 		try {
 			const payload = await loginAreas({
@@ -53,11 +60,14 @@ export const useLoginFlow = () => {
 			setActiveStep(1);
 		} catch {
 			toast.error("Ocurrió un error con sus credenciales.");
+		} finally {
+			submittingRef.current = false;
 		}
 	}, [methods, loginAreas, tenantSlug]);
 
 	// ── Step 1: Login with area + sistema ─────────────────────────────────
 	const handleLoginStep = useCallback(async () => {
+		if (submittingRef.current) return;
 		const isValid = await methods.trigger([
 			"correo",
 			"contrasena",
@@ -69,6 +79,7 @@ export const useLoginFlow = () => {
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
 		if (!areaId || !sistemaId || !correo || !contrasena) return;
 
+		submittingRef.current = true;
 		try {
 			const loginData = await login({
 				correo,
@@ -91,13 +102,17 @@ export const useLoginFlow = () => {
 			await finishLogin(loginData);
 		} catch {
 			toast.error("Error al ingresar al sistema.");
+		} finally {
+			submittingRef.current = false;
 		}
 	}, [methods, login, tenantSlug, finishLogin]);
 
 	// ── Step 2: MFA verification ──────────────────────────────────────────
 	const handleMfaStep = useCallback(async () => {
+		if (submittingRef.current) return;
 		if (!mfaCode.trim()) return;
 
+		submittingRef.current = true;
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
 
 		try {
@@ -120,6 +135,8 @@ export const useLoginFlow = () => {
 		} catch {
 			toast.error("Código MFA inválido o expirado.");
 			setMfaCode("");
+		} finally {
+			submittingRef.current = false;
 		}
 	}, [mfaCode, methods, login, tenantSlug, finishLogin]);
 
@@ -145,6 +162,8 @@ export const useLoginFlow = () => {
 		activeStep,
 		areas,
 		sistemas,
+		isLoadingSistemas,
+		loginSuccess,
 		methods,
 		mfaCode,
 		setMfaCode,

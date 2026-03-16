@@ -16,6 +16,7 @@ import type { SistemaOption } from "../types";
 export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => {
 	const tenantSlug = useAppSelector(selectResolvedTenantSlug) ?? "default";
 	const [sistemas, setSistemas] = useState<SistemaOption[]>([]);
+	const [isLoadingSistemas, setIsLoadingSistemas] = useState(false);
 	const [loginSistemas] = useLoginSistemasMutation();
 	const previousAreaIdRef = useRef<number | undefined>();
 
@@ -25,6 +26,7 @@ export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => 
 
 			if (areaId && areaId !== previousAreaIdRef.current && correo && contrasena) {
 				previousAreaIdRef.current = areaId;
+				setIsLoadingSistemas(true);
 
 				try {
 					const payload = await loginSistemas({
@@ -45,6 +47,8 @@ export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => 
 						shouldValidate: true,
 						shouldDirty: true,
 					});
+				} finally {
+					setIsLoadingSistemas(false);
 				}
 			}
 		});
@@ -52,5 +56,5 @@ export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => 
 		return () => subscription.unsubscribe();
 	}, [loginSistemas, methods, tenantSlug]);
 
-	return sistemas;
+	return { sistemas, isLoadingSistemas };
 };

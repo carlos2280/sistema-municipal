@@ -1,116 +1,195 @@
-import { Box, styled } from "@mui/material";
-import { ArrowLeft, ArrowRight, LogIn, ShieldCheck } from "lucide-react";
+/**
+ * LoginActions — Botones MERIDIAN
+ *
+ * Primary button usa accent del tema (no hardcoded).
+ * Ghost button para "Volver".
+ * Keyboard hint integrado.
+ */
+
+import { Box, alpha, styled } from "@mui/material";
+import { ArrowLeft, ArrowRight, Check, LogIn, ShieldCheck } from "lucide-react";
 import { memo, useMemo } from "react";
 import { STEP_CONFIG } from "../constants";
 import type { LoginStep } from "../types";
 
-// ── Styled buttons matching prototype ────────────────────────────────────────
+// ── Styled ──────────────────────────────────────────────────────────────────
 
-const PrimaryButton = styled("button")(({ theme }) => ({
-	width: "100%",
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	gap: 8,
-	padding: "12px 20px",
-	border: "none",
-	borderRadius: 8,
-	background: "#0d6b5e",
-	color: "#fff",
-	fontFamily: "inherit",
-	fontSize: "0.875rem",
-	fontWeight: 600,
-	cursor: "pointer",
-	transition: "all 100ms ease",
+const PrimaryButton = styled("button")(({ theme }) => {
+	const accent = theme.palette.primary.main;
+	const accentRgb = theme.meridian.moduleAccent.rgb;
 
-	"&:hover:not(:disabled)": {
-		background: "#0a5249",
-		transform: "translateY(-1px)",
-		boxShadow: "0 4px 12px rgba(13, 107, 94, 0.3)",
-	},
+	return {
+		display: "inline-flex",
+		alignItems: "center",
+		justifyContent: "center",
+		gap: 7,
+		width: "100%",
+		padding: "12px 20px",
+		borderRadius: 8,
+		fontSize: 13.5,
+		fontWeight: 600,
+		fontFamily: theme.typography.fontFamily,
+		cursor: "pointer",
+		border: "none",
+		transition: "all 150ms",
+		letterSpacing: "0.005em",
+		whiteSpace: "nowrap",
+		background: accent,
+		color: "#08081A",
 
-	"&:active:not(:disabled)": {
-		transform: "translateY(0)",
-	},
-
-	"&:disabled": {
-		opacity: 0.5,
-		cursor: "not-allowed",
-	},
-
-	"&:focus-visible": {
-		outline: "2px solid #0d6b5e",
-		outlineOffset: 2,
-	},
-
-	...(theme.palette.mode === "dark" && {
-		"&:hover:not(:disabled)": {
-			background: "#0a5249",
+		"&:not(:disabled):hover": {
+			background: alpha(accent, 0.85),
+			boxShadow: `0 4px 20px rgba(${accentRgb}, 0.35)`,
 			transform: "translateY(-1px)",
-			boxShadow: "0 4px 12px rgba(16, 137, 122, 0.35)",
 		},
-	}),
-}));
 
-const SecondaryButton = styled("button")(({ theme }) => ({
-	width: "100%",
-	display: "flex",
+		"&:active:not(:disabled)": {
+			transform: "scale(0.98)",
+		},
+
+		"&:disabled": {
+			opacity: 0.4,
+			cursor: "not-allowed",
+			transform: "none",
+		},
+
+		"&:focus-visible": {
+			outline: `2px solid ${accent}`,
+			outlineOffset: 2,
+		},
+
+		"& svg": {
+			width: 15,
+			height: 15,
+			strokeWidth: 2,
+			flexShrink: 0,
+		},
+
+		"&.success": {
+			background: theme.palette.success.main,
+			color: "#071810",
+			pointerEvents: "none",
+			opacity: 1,
+		},
+	};
+});
+
+const GhostButton = styled("button")(({ theme }) => ({
+	display: "inline-flex",
 	alignItems: "center",
 	justifyContent: "center",
-	gap: 8,
-	padding: "10px 20px",
-	border: `1px solid ${theme.palette.divider}`,
+	gap: 7,
+	width: "100%",
+	padding: "12px 20px",
 	borderRadius: 8,
-	background: "transparent",
-	color: theme.palette.text.secondary,
-	fontFamily: "inherit",
-	fontSize: "0.8125rem",
-	fontWeight: 500,
+	fontSize: 13.5,
+	fontWeight: 600,
+	fontFamily: theme.typography.fontFamily,
 	cursor: "pointer",
-	transition: "all 100ms ease",
+	transition: "all 150ms",
+	whiteSpace: "nowrap",
+	background: theme.meridian.surfaces.s2,
+	color: theme.palette.text.secondary,
+	border: `1.5px solid ${theme.palette.divider}`,
 
-	"&:hover": {
-		background: theme.palette.background.default,
-		borderColor: theme.palette.mode === "light" ? "#cbd5e1" : "#30363d",
+	"&:not(:disabled):hover": {
+		borderColor: theme.meridian.borders.strong,
 		color: theme.palette.text.primary,
+		background: theme.meridian.surfaces.s3,
+	},
+
+	"& svg": {
+		width: 15,
+		height: 15,
+		strokeWidth: 2,
+		flexShrink: 0,
 	},
 }));
 
-const STEP_ICONS: Record<LoginStep, React.ReactNode> = {
-	0: <ArrowRight size={18} />,
-	1: <LogIn size={18} />,
-	2: <ShieldCheck size={18} />,
+// ── Step → Icon mapping ─────────────────────────────────────────────────────
+
+const STEP_ICONS: Readonly<Record<LoginStep, React.ReactNode>> = {
+	0: <ArrowRight size={15} />,
+	1: <LogIn size={15} />,
+	2: <ShieldCheck size={15} />,
 };
 
+// ── Component ───────────────────────────────────────────────────────────────
+
 interface LoginActionsProps {
-	activeStep: LoginStep;
-	disabled: boolean;
-	onNext: () => void;
-	onBack: () => void;
+	readonly activeStep: LoginStep;
+	readonly disabled: boolean;
+	readonly loginSuccess?: boolean;
+	readonly onNext: () => void;
+	readonly onBack: () => void;
 }
 
 export const LoginActions = memo(function LoginActions({
 	activeStep,
 	disabled,
+	loginSuccess,
 	onNext,
 	onBack,
 }: LoginActionsProps) {
 	const config = useMemo(() => STEP_CONFIG[activeStep], [activeStep]);
 	const icon = STEP_ICONS[activeStep];
 
-	return (
-		<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 3 }}>
-			<PrimaryButton onClick={onNext} disabled={disabled} type="button">
-				{activeStep > 0 && icon}
-				<span>{config.buttonLabel}</span>
-				{activeStep === 0 && icon}
-			</PrimaryButton>
+	// Step 1: row layout (ghost compact + primary flex) matching prototype
+	// Step 0: single primary button
+	// Step 2: single primary button (back link is inline in MfaStep)
+	const showBackButton = activeStep === 1 && !loginSuccess;
 
-			{activeStep > 0 && (
-				<SecondaryButton onClick={onBack} type="button">
-					<ArrowLeft size={16} />
-					<span>Volver</span>
-				</SecondaryButton>
+	return (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2.5 }}>
+			{showBackButton ? (
+				<Box sx={{ display: "flex", gap: 1 }}>
+					<GhostButton
+						onClick={onBack}
+						type="button"
+						style={{ flex: "0 0 auto", padding: "12px 16px", width: "auto" }}
+					>
+						<ArrowLeft size={15} />
+						Volver
+					</GhostButton>
+					<PrimaryButton
+						onClick={onNext}
+						disabled={disabled && !loginSuccess}
+						type="button"
+						className={loginSuccess ? "success" : undefined}
+					>
+						{loginSuccess ? (
+							<>
+								<Check size={16} />
+								<span>Acceso concedido</span>
+							</>
+						) : (
+							<>
+								{icon}
+								<span>{config.buttonLabel}</span>
+							</>
+						)}
+					</PrimaryButton>
+				</Box>
+			) : (
+				<PrimaryButton
+					onClick={onNext}
+					disabled={disabled && !loginSuccess}
+					type="button"
+					className={loginSuccess ? "success" : undefined}
+				>
+					{loginSuccess ? (
+						<>
+							<Check size={16} />
+							<span>Acceso concedido</span>
+						</>
+					) : (
+						<>
+							{activeStep > 0 && icon}
+							<span>{config.buttonLabel}</span>
+							{activeStep === 0 && icon}
+						</>
+					)}
+				</PrimaryButton>
 			)}
 		</Box>
 	);

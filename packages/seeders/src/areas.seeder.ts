@@ -3,9 +3,9 @@ import type { DbExecutor } from "./types/db";
 
 export async function seedAreas(db: DbExecutor) {
     const datos = [
-        { nombre: "municipalidad" },
-        { nombre: "salud" },
-        { nombre: "educación" },
+        { nombre: "municipalidad", descripcion: "Gestión municipal central" },
+        { nombre: "salud", descripcion: "Servicios de salud" },
+        { nombre: "educación", descripcion: "Establecimientos educativos" },
     ];
 
     try {

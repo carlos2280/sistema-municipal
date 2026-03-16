@@ -1,313 +1,495 @@
-import { Box, Typography, styled } from "@mui/material";
-import type { LucideIcon } from "lucide-react";
-import { memo } from "react";
+/**
+ * BrandingPanel — Left panel MERIDIAN
+ *
+ * Void background con orbs ambientales, grain texture,
+ * identidad municipal, quote, módulos disponibles y reloj.
+ */
+
+import { Box, Typography, alpha, keyframes, styled, useTheme } from "@mui/material";
+import { memo, useEffect, useState } from "react";
 import {
-	selectTenantLogoUrl,
 	selectTenantNombre,
 	useAppSelector,
 } from "mf_store/store";
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Animations ──────────────────────────────────────────────────────────────
 
-export interface BrandingFeature {
-	icon: LucideIcon;
-	title: string;
-	description: string;
-}
+const orbPulse = keyframes`
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.0); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.06); }
+`;
 
-interface BrandingPanelProps {
-	features?: BrandingFeature[];
-}
+const orbPulse2 = keyframes`
+  0%, 100% { opacity: 0.5; transform: scale(1.0); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+`;
 
-// ── Styled components ────────────────────────────────────────────────────────
+const dotPulse = keyframes`
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+`;
 
-const Panel = styled(Box)(({ theme }) => ({
-	flex: "0 0 480px",
-	background:
-		"linear-gradient(160deg, #0a5249 0%, #0d6b5e 40%, #3730a3 100%)",
-	color: "#fff",
-	display: "flex",
-	flexDirection: "column",
-	justifyContent: "center",
-	alignItems: "center",
-	padding: "48px 32px",
+// ── Styled Components ───────────────────────────────────────────────────────
+
+const Panel = styled(Box)(({ theme }) => {
+	const m = theme.meridian;
+	const accent = theme.palette.primary.main;
+	const accentRgb = m.moduleAccent.rgb;
+
+	return {
+		position: "relative",
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "space-between",
+		padding: "40px 48px",
+		background: m.surfaces.void,
+		overflow: "hidden",
+
+		// Orb ambiental principal
+		"&::before": {
+			content: '""',
+			position: "absolute",
+			top: "40%",
+			left: "50%",
+			width: 600,
+			height: 600,
+			transform: "translate(-50%, -50%)",
+			borderRadius: "50%",
+			background: `radial-gradient(circle, rgba(${accentRgb}, 0.11) 0%, rgba(${accentRgb}, 0.04) 40%, transparent 70%)`,
+			pointerEvents: "none",
+			animation: `${orbPulse} 7s ease-in-out infinite`,
+		},
+
+		// Segundo orb desplazado
+		"&::after": {
+			content: '""',
+			position: "absolute",
+			bottom: "20%",
+			right: "10%",
+			width: 280,
+			height: 280,
+			borderRadius: "50%",
+			background: `radial-gradient(circle, ${alpha(accent, 0.06)} 0%, transparent 65%)`,
+			pointerEvents: "none",
+			animation: `${orbPulse2} 11s ease-in-out 2s infinite`,
+		},
+
+		// Tablet landscape
+		[theme.breakpoints.down("lg")]: {
+			padding: "32px 32px",
+		},
+
+		// Tablet portrait → top strip
+		[theme.breakpoints.down("md")]: {
+			padding: "20px 24px",
+			flexDirection: "row",
+			alignItems: "center",
+			justifyContent: "space-between",
+			borderBottom: `1px solid ${m.borders.muted}`,
+			minHeight: "auto",
+			"&::before, &::after": { display: "none" },
+		},
+
+		"@media (prefers-reduced-motion: reduce)": {
+			"&::before, &::after": { animation: "none" },
+		},
+	};
+});
+
+const GrainOverlay = styled(Box)(({ theme }) => ({
+	position: "absolute",
+	inset: 0,
+	pointerEvents: "none",
+	backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")`,
+	backgroundSize: 256,
+
+	[theme.breakpoints.down("md")]: { display: "none" },
+}));
+
+const EdgeLine = styled(Box)(({ theme }) => {
+	const accentRgb = theme.meridian.moduleAccent.rgb;
+
+	return {
+		position: "absolute",
+		right: 0,
+		top: 0,
+		bottom: 0,
+		width: 1,
+		background: `linear-gradient(180deg, transparent 0%, rgba(${accentRgb}, 0.12) 30%, rgba(${accentRgb}, 0.18) 55%, rgba(${accentRgb}, 0.10) 75%, transparent 100%)`,
+
+		[theme.breakpoints.down("md")]: { display: "none" },
+	};
+});
+
+// ── Top section: Logo + Wordmark ────────────────────────────────────────────
+
+const BrandTop = styled(Box)(({ theme }) => ({
 	position: "relative",
-	overflow: "hidden",
+	zIndex: 1,
+	display: "flex",
+	alignItems: "center",
+	gap: 10,
 
-	// Decorative radial gradients
-	"&::before": {
-		content: '""',
-		position: "absolute",
-		top: "-20%",
-		right: "-20%",
-		width: "80%",
-		height: "160%",
-		background:
-			"radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 55%)",
-		pointerEvents: "none",
+	[theme.breakpoints.down("md")]: {
+		flexDirection: "column",
+		alignItems: "flex-start",
+		gap: 2,
 	},
-	"&::after": {
-		content: '""',
-		position: "absolute",
-		bottom: "-20%",
-		left: "-15%",
-		width: "60%",
-		height: "120%",
-		background:
-			"radial-gradient(circle, rgba(55, 48, 163, 0.15) 0%, transparent 50%)",
-		pointerEvents: "none",
-	},
-
-	// Dark mode: slightly deeper gradient
-	...(theme.palette.mode === "dark" && {
-		background:
-			"linear-gradient(160deg, #073b35 0%, #0a5249 40%, #2b2890 100%)",
-	}),
-
-	// Large screens
-	"@media (min-width: 1536px)": {
-		flex: "0 0 540px",
-	},
-
-	// Tablet landscape
-	"@media (max-width: 1199px)": {
-		flex: "0 0 400px",
-		padding: "32px 24px",
-	},
-
-	// Tablet portrait — collapse to top bar
-	"@media (max-width: 899px)": {
-		flex: "none",
-		padding: "32px 20px",
-		minHeight: "auto",
-	},
-
-	// Mobile
-	"@media (max-width: 639px)": {
-		padding: "20px 16px",
+	[theme.breakpoints.down("sm")]: {
+		flexDirection: "row",
 	},
 }));
 
-const BrandContent = styled(Box)({
-	position: "relative",
-	zIndex: 1,
-	textAlign: "center",
-	maxWidth: 320,
+const Wordmark = styled(Typography)(({ theme }) => ({
+	fontFamily: theme.meridian ? theme.typography.fontFamily : "monospace",
+	fontSize: 11,
+	letterSpacing: "0.22em",
+	textTransform: "uppercase" as const,
+	fontWeight: 500,
+	color: theme.palette.text.disabled,
+}));
 
-	"@media (max-width: 899px)": {
-		display: "flex",
-		alignItems: "center",
-		gap: 16,
-		textAlign: "left",
-		maxWidth: "none",
-	},
-});
-
-const LogoBox = styled(Box)({
-	width: 96,
-	height: 96,
-	borderRadius: 16,
-	background: "rgba(255, 255, 255, 0.15)",
-	backdropFilter: "blur(12px)",
-	WebkitBackdropFilter: "blur(12px)",
-	border: "1px solid rgba(255, 255, 255, 0.2)",
+const CcAttribution = styled(Box)(({ theme }) => ({
 	display: "flex",
 	alignItems: "center",
-	justifyContent: "center",
-	margin: "0 auto 24px",
-	overflow: "hidden",
+	gap: 6,
+	marginLeft: 4,
 
-	"& img": {
-		width: 64,
-		height: 64,
-		objectFit: "contain",
-	},
+	[theme.breakpoints.down("md")]: { display: "none" },
+}));
 
-	"@media (max-width: 899px)": {
-		width: 56,
-		height: 56,
-		margin: 0,
-		borderRadius: 12,
-		"& img": { width: 38, height: 38 },
-	},
+const CcSeparator = styled(Box)(({ theme }) => ({
+	width: 1,
+	height: 11,
+	background: theme.meridian.borders.strong,
+	opacity: 0.3,
+	flexShrink: 0,
+	margin: "0 3px",
+}));
 
-	"@media (max-width: 639px)": {
-		width: 48,
-		height: 48,
-		borderRadius: 8,
-		"& img": { width: 32, height: 32 },
-	},
-});
-
-const LogoFallback = styled(Typography)({
-	fontWeight: 800,
-	fontSize: "2.5rem",
-	letterSpacing: "-0.04em",
-	color: "#fff",
-
-	"@media (max-width: 899px)": { fontSize: "1.5rem" },
-	"@media (max-width: 639px)": { fontSize: "1.25rem" },
-});
-
-const BrandName = styled(Typography)({
-	fontWeight: 700,
-	fontSize: "1.5rem",
-	letterSpacing: "-0.03em",
-	marginBottom: 4,
-	color: "#fff",
-
-	"@media (max-width: 899px)": { fontSize: "1.125rem", marginBottom: 0 },
-	"@media (max-width: 639px)": { fontSize: "1rem" },
-});
-
-const BrandSubtitle = styled(Typography)({
-	fontSize: "0.8125rem",
+const CcName = styled(Typography)(() => ({
+	fontSize: 9,
+	letterSpacing: "0.13em",
+	textTransform: "uppercase" as const,
 	fontWeight: 500,
-	letterSpacing: "0.12em",
-	textTransform: "uppercase",
-	opacity: 0.7,
-	marginBottom: 32,
-	color: "#fff",
+}));
 
-	"@media (max-width: 899px)": {
-		marginBottom: 0,
-		fontSize: "0.6875rem",
-	},
-	"@media (max-width: 639px)": {
-		fontSize: "0.625rem",
-		letterSpacing: "0.08em",
-	},
-});
+// ── Mid section: Identity + Quote + Modules ─────────────────────────────────
 
-const FeaturesWrapper = styled(Box)({
+const BrandMid = styled(Box)(({ theme }) => ({
+	position: "relative",
+	zIndex: 1,
 	display: "flex",
 	flexDirection: "column",
-	gap: 16,
-	textAlign: "left",
+	gap: 32,
+
+	[theme.breakpoints.down("lg")]: { gap: 20 },
+	[theme.breakpoints.down("md")]: { display: "none" },
+}));
+
+const MuniLabel = styled(Typography)(({ theme }) => ({
+	fontSize: 10,
+	letterSpacing: "0.14em",
+	textTransform: "uppercase" as const,
+	fontWeight: 600,
+	color: theme.meridian.text.tx4,
+	marginBottom: 8,
+}));
+
+const MuniName = styled(Typography)(({ theme }) => ({
+	fontFamily: theme.typography.h1?.fontFamily,
+	fontSize: "clamp(22px, 2.8vw, 34px)",
+	fontWeight: 700,
+	lineHeight: 1.15,
+	letterSpacing: "-0.025em",
+	color: theme.palette.text.primary,
+
+	[theme.breakpoints.down("lg")]: {
+		fontSize: "clamp(18px, 3vw, 26px)",
+	},
+}));
+
+const MuniSub = styled(Typography)(({ theme }) => ({
+	fontSize: 13,
+	color: theme.palette.text.secondary,
+	marginTop: 6,
+	lineHeight: 1.5,
+}));
+
+const QuoteBlock = styled(Box)(({ theme }) => ({
+	borderLeft: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+	paddingLeft: 16,
+}));
+
+const QuoteText = styled(Typography)(({ theme }) => ({
+	fontFamily: theme.typography.h1?.fontFamily,
+	fontSize: 15,
+	fontWeight: 400,
+	lineHeight: 1.55,
+	color: theme.palette.text.secondary,
+	fontStyle: "italic",
+}));
+
+const QuoteAuthor = styled(Typography)(({ theme }) => ({
+	fontSize: 11,
+	color: theme.meridian.text.tx4,
+	marginTop: 6,
+	letterSpacing: "0.04em",
+}));
+
+const ModulesLabel = styled(Typography)(({ theme }) => ({
+	fontSize: 10,
+	letterSpacing: "0.12em",
+	textTransform: "uppercase" as const,
+	color: theme.meridian.text.tx4,
+	fontWeight: 600,
+}));
+
+const ModuleChip = styled(Box)(({ theme }) => {
+	const accentRgb = theme.meridian.moduleAccent.rgb;
+
+	return {
+		display: "inline-flex",
+		alignItems: "center",
+		gap: 6,
+		padding: "5px 10px",
+		background: alpha(theme.palette.common.white, 0.03),
+		border: `1px solid ${theme.meridian.borders.muted}`,
+		borderRadius: 100,
+		fontSize: 11,
+		color: theme.palette.text.disabled,
+		transition: "all 200ms",
+
+		"&:hover": {
+			borderColor: `rgba(${accentRgb}, 0.3)`,
+			color: theme.palette.primary.main,
+		},
+	};
+});
+
+// ── Bottom section: Clock ───────────────────────────────────────────────────
+
+const BrandBot = styled(Box)(({ theme }) => ({
 	position: "relative",
 	zIndex: 1,
-
-	"@media (max-width: 1199px)": { display: "none" },
-});
-
-const FeatureRow = styled(Box)({
 	display: "flex",
-	alignItems: "flex-start",
-	gap: 12,
-});
+	flexDirection: "column",
+	gap: 4,
 
-const FeatureIconBox = styled(Box)({
-	width: 36,
-	height: 36,
-	borderRadius: 8,
-	background: "rgba(255, 255, 255, 0.12)",
+	[theme.breakpoints.down("md")]: { display: "none" },
+}));
+
+const ClockText = styled(Typography)(({ theme }) => ({
+	fontFamily: theme.typography.number?.fontFamily,
+	fontSize: 40,
+	fontWeight: 400,
+	letterSpacing: "-0.03em",
+	color: theme.palette.text.primary,
+	fontFeatureSettings: "'tnum' 1",
+	lineHeight: 1,
+	opacity: 0.9,
+
+	[theme.breakpoints.down("lg")]: { fontSize: 32 },
+	"@media (min-width: 1440px)": { fontSize: 52 },
+}));
+
+const DateText = styled(Typography)(({ theme }) => ({
+	fontSize: 12,
+	color: theme.palette.text.disabled,
+	letterSpacing: "0.02em",
+}));
+
+const StatusRow = styled(Box)(() => ({
 	display: "flex",
 	alignItems: "center",
-	justifyContent: "center",
-	flexShrink: 0,
-});
+	gap: 6,
+	marginTop: 8,
+}));
 
-const DeveloperFooter = styled(Box)({
-	position: "absolute",
-	bottom: 24,
-	left: 0,
-	right: 0,
-	textAlign: "center",
-	zIndex: 1,
+const StatusDot = styled(Box)(({ theme }) => ({
+	width: 6,
+	height: 6,
+	borderRadius: "50%",
+	background: theme.palette.success.main,
+	boxShadow: `0 0 6px ${alpha(theme.palette.success.main, 0.5)}`,
+	animation: `${dotPulse} 3s ease-in-out infinite`,
 
-	"@media (max-width: 899px)": { display: "none" },
-});
+	"@media (prefers-reduced-motion: reduce)": { animation: "none" },
+}));
 
-// ── Component ────────────────────────────────────────────────────────────────
+const StatusText = styled(Typography)(({ theme }) => ({
+	fontSize: 11,
+	color: theme.palette.text.disabled,
+}));
 
-export const BrandingPanel = memo(function BrandingPanel({
-	features = [],
-}: BrandingPanelProps) {
+// ── MeridianLogo SVG ────────────────────────────────────────────────────────
+
+function MeridianLogo({ size = 22 }: { readonly size?: number }) {
+	const theme = useTheme();
+	const accent = theme.palette.primary.main;
+
+	return (
+		<svg
+			viewBox="0 0 16 16"
+			width={size}
+			height={size}
+			fill="none"
+			aria-hidden="true"
+			style={{ color: accent, display: "block", flexShrink: 0 }}
+		>
+			<circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth=".9" opacity=".3" />
+			<ellipse cx="8" cy="8" rx="2.8" ry="6.2" stroke="currentColor" strokeWidth="1.5" />
+			<line x1="1.8" y1="8" x2="14.2" y2="8" stroke="currentColor" strokeWidth=".9" opacity=".3" />
+			<circle cx="8" cy="8" r="1.4" fill="currentColor" />
+		</svg>
+	);
+}
+
+// ── Clock hook ──────────────────────────────────────────────────────────────
+
+function useClock() {
+	const [now, setNow] = useState(new Date());
+
+	useEffect(() => {
+		const id = setInterval(() => setNow(new Date()), 1000);
+		return () => clearInterval(id);
+	}, []);
+
+	const time = now.toLocaleTimeString("es-CL", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: false,
+	});
+
+	const date = now.toLocaleDateString("es-CL", {
+		weekday: "long",
+		day: "numeric",
+		month: "long",
+	});
+
+	return { time, date };
+}
+
+// ── C&C Logo SVG ────────────────────────────────────────────────────────────
+
+function CcLogo() {
+	return (
+		<svg
+			viewBox="0 0 48 48"
+			width={14}
+			height={14}
+			fill="none"
+			aria-hidden="true"
+			style={{ flexShrink: 0, opacity: 0.7 }}
+		>
+			<polygon
+				points="24,3 40.5,12.5 40.5,35.5 24,45 7.5,35.5 7.5,12.5"
+				fill="#1A2840"
+				stroke="rgba(0,188,212,0.4)"
+				strokeWidth="1.2"
+			/>
+			<path
+				d="M23,17 C17,17 14,20 14,24 C14,28 17,31 23,31"
+				fill="none"
+				stroke="#00bcd4"
+				strokeWidth="2.2"
+				strokeLinecap="round"
+			/>
+			<path
+				d="M25,17 C31,17 34,20 34,24 C34,28 31,31 25,31"
+				fill="none"
+				stroke="#eef2f8"
+				strokeWidth="2.2"
+				strokeLinecap="round"
+			/>
+			<circle cx="24" cy="24" r="1.8" fill="#00bcd4" />
+			<circle cx="24" cy="24" r="0.8" fill="#eef2f8" />
+		</svg>
+	);
+}
+
+// ── Módulos estáticos (pre-login, no hay sesión activa) ─────────────────────
+
+const AVAILABLE_MODULES = [
+	"Contabilidad",
+	"Remuneraciones",
+	"Tesorería",
+	"Configuración",
+] as const;
+
+// ── Component ───────────────────────────────────────────────────────────────
+
+export const BrandingPanel = memo(function BrandingPanel() {
+	const theme = useTheme();
 	const tenantNombre = useAppSelector(selectTenantNombre);
-	const tenantLogoUrl = useAppSelector(selectTenantLogoUrl);
-
-	const initials = (tenantNombre || "SM")
-		.split(" ")
-		.map((w) => w[0])
-		.join("")
-		.slice(0, 2)
-		.toUpperCase();
+	const { time, date } = useClock();
 
 	return (
 		<Panel>
-			<BrandContent>
-				<LogoBox>
-					{tenantLogoUrl ? (
-						<img src={tenantLogoUrl} alt={tenantNombre || "Logo"} />
-					) : (
-						<LogoFallback>{initials}</LogoFallback>
-					)}
-				</LogoBox>
+			<GrainOverlay />
+			<EdgeLine />
+
+			{/* Top: Logo + Wordmark + C&C */}
+			<BrandTop>
+				<MeridianLogo />
+				<Wordmark sx={{ fontFamily: theme.typography.number?.fontFamily }}>
+					MERIDIAN
+				</Wordmark>
+				<CcAttribution>
+					<CcSeparator />
+					<CcLogo />
+					<CcName sx={{ color: theme.meridian.text.tx4, fontFamily: theme.typography.number?.fontFamily }}>
+						C&amp;C Systems
+					</CcName>
+				</CcAttribution>
+			</BrandTop>
+
+			{/* Mid: Identity + Quote + Modules */}
+			<BrandMid>
 				<Box>
-					<BrandName>{tenantNombre || "Sistema Municipal"}</BrandName>
-					<BrandSubtitle>Sistema Municipal</BrandSubtitle>
+					<MuniLabel>Municipalidad</MuniLabel>
+					<MuniName>
+						{tenantNombre || "Sistema Integrado"}
+						<br />
+						de Gestión
+					</MuniName>
+					<MuniSub>
+						Plataforma unificada para la gestión
+						<br />
+						de servicios municipales
+					</MuniSub>
 				</Box>
-			</BrandContent>
 
-			{features.length > 0 && (
-				<FeaturesWrapper>
-					{features.map((feat) => (
-						<FeatureRow key={feat.title}>
-							<FeatureIconBox>
-								<feat.icon size={18} color="#fff" />
-							</FeatureIconBox>
-							<Box>
-								<Typography
-									sx={{
-										fontWeight: 600,
-										fontSize: "0.875rem",
-										mb: "2px",
-										color: "#fff",
-									}}
-								>
-									{feat.title}
-								</Typography>
-								<Typography
-									sx={{
-										fontSize: "0.8125rem",
-										lineHeight: 1.5,
-										opacity: 0.9,
-										color: "#fff",
-									}}
-								>
-									{feat.description}
-								</Typography>
-							</Box>
-						</FeatureRow>
-					))}
-				</FeaturesWrapper>
-			)}
+				<QuoteBlock>
+					<QuoteText>
+						&ldquo;La interfaz debe desaparecer.
+						<br />
+						Solo debe quedar el trabajo
+						<br />
+						y la persona que lo hace.&rdquo;
+					</QuoteText>
+					<QuoteAuthor>— MERIDIAN Design Manifesto</QuoteAuthor>
+				</QuoteBlock>
 
-			<DeveloperFooter>
-				<Box
-					sx={{
-						fontSize: "0.6875rem",
-						opacity: 0.4,
-						letterSpacing: "0.04em",
-						color: "#fff",
-						display: "inline-flex",
-						alignItems: "center",
-						gap: "6px",
-						"&:hover": { opacity: 0.6 },
-						transition: "opacity 100ms ease",
-					}}
-				>
-					<Box
-						sx={{
-							width: 8,
-							height: 8,
-							borderRadius: "3px",
-							background: "rgba(255, 255, 255, 0.4)",
-						}}
-					/>
-					Desarrollado por CrisCar
+				<Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+					<ModulesLabel>Sistemas disponibles</ModulesLabel>
+					<Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+						{AVAILABLE_MODULES.map((mod) => (
+							<ModuleChip key={mod}>Sistema {mod}</ModuleChip>
+						))}
+					</Box>
 				</Box>
-			</DeveloperFooter>
+			</BrandMid>
+
+			{/* Bottom: Clock + Status */}
+			<BrandBot>
+				<ClockText>{time}</ClockText>
+				<DateText>{date}</DateText>
+				<StatusRow>
+					<StatusDot />
+					<StatusText>Sistema operativo · MERIDIAN v1.0</StatusText>
+				</StatusRow>
+			</BrandBot>
 		</Panel>
 	);
 });

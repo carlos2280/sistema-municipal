@@ -74,6 +74,7 @@ export type LoginAreas = {
 export type Areas = {
 	id: number;
 	nombre: string;
+	descripcion: string | null;
 };
 
 export type ContrasenaTemporal = {

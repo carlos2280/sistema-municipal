@@ -1,65 +1,122 @@
-import { Box, styled } from "@mui/material";
+/**
+ * AuthLayout — Split-panel MERIDIAN
+ *
+ * Left: BrandingPanel (void + orbs)
+ * Right: Form content (ground background)
+ *
+ * Responsive: stacks vertically on tablet/mobile.
+ */
+
+import { Box, keyframes, styled } from "@mui/material";
 import { memo, type ReactNode } from "react";
-import {
-	BrandingPanel,
-	type BrandingFeature,
-} from "./BrandingPanel";
+import { BrandingPanel } from "./BrandingPanel";
 
-// ── Split-panel layout ───────────────────────────────────────────────────────
+// ── Animations ──────────────────────────────────────────────────────────────
 
-const LayoutRoot = styled(Box)({
-	display: "flex",
-	minHeight: "100vh",
-	overflow: "hidden",
+const rootExit = keyframes`
+  to { opacity: 0; }
+`;
 
-	// Tablet portrait — stack vertically
-	"@media (max-width: 899px)": {
-		flexDirection: "column",
-	},
-});
+// ── Layout ──────────────────────────────────────────────────────────────────
 
-const FormPanel = styled(Box)(({ theme }) => ({
-	flex: 1,
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	justifyContent: "center",
-	padding: 32,
-	backgroundColor: theme.palette.background.default,
-	position: "relative",
-	overflowY: "auto",
+const LayoutRoot = styled(Box)<{ ownerState: { exiting: boolean } }>(({ theme, ownerState }) => ({
+	position: "fixed",
+	inset: 0,
+	display: "grid",
+	gridTemplateColumns: "1fr 1fr",
+	background: theme.meridian.surfaces.void,
+	fontFamily: theme.typography.fontFamily,
+	color: theme.palette.text.primary,
 
-	// Tablet portrait
-	"@media (max-width: 899px)": {
-		padding: "32px 20px",
-		justifyContent: "flex-start",
-		paddingTop: 32,
+	...(ownerState.exiting && {
+		animation: `${rootExit} 400ms ease-in forwards`,
+	}),
+
+	[theme.breakpoints.down("lg")]: {
+		gridTemplateColumns: "40% 1fr",
 	},
 
-	// Mobile
-	"@media (max-width: 639px)": {
-		padding: "24px 16px",
-		paddingTop: 24,
+	[theme.breakpoints.down("md")]: {
+		gridTemplateColumns: "1fr",
+		gridTemplateRows: "auto 1fr",
+	},
+
+	"@media (min-width: 1440px)": {
+		gridTemplateColumns: "1fr 1fr",
+	},
+
+	"@media (prefers-reduced-motion: reduce)": {
+		animationDuration: "0.01ms !important",
 	},
 }));
 
-const FormContainer = styled(Box)({
+const FormPanel = styled(Box)(({ theme }) => ({
+	position: "relative",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	background: theme.meridian.surfaces.ground,
+	padding: "32px 48px",
+	overflowY: "auto",
+	overflowX: "hidden",
+
+	// Custom scrollbar
+	"&::-webkit-scrollbar": { width: 3 },
+	"&::-webkit-scrollbar-track": { background: "transparent" },
+	"&::-webkit-scrollbar-thumb": {
+		background: "rgba(255,255,255,0.08)",
+		borderRadius: 2,
+	},
+
+	[theme.breakpoints.down("lg")]: {
+		padding: "24px 32px",
+	},
+
+	[theme.breakpoints.down("md")]: {
+		padding: "32px 24px",
+		alignItems: "flex-start",
+		paddingTop: 40,
+	},
+
+	[theme.breakpoints.down("sm")]: {
+		padding: "24px 20px",
+		paddingTop: 32,
+	},
+
+	"@media (min-width: 1440px)": {
+		padding: "48px 72px",
+	},
+}));
+
+const FormContainer = styled(Box)(() => ({
 	width: "100%",
 	maxWidth: 400,
-});
+	position: "relative",
+	zIndex: 1,
+
+	[`@media (min-width: 1440px)`]: {
+		maxWidth: 440,
+	},
+
+	[`@media (max-width: 767px)`]: {
+		maxWidth: "100%",
+	},
+}));
+
+// ── Component ───────────────────────────────────────────────────────────────
 
 interface AuthLayoutProps {
-	children: ReactNode;
-	features?: BrandingFeature[];
+	readonly children: ReactNode;
+	readonly exiting?: boolean;
 }
 
 export const AuthLayout = memo(function AuthLayout({
 	children,
-	features,
+	exiting = false,
 }: AuthLayoutProps) {
 	return (
-		<LayoutRoot>
-			<BrandingPanel features={features} />
+		<LayoutRoot ownerState={{ exiting }}>
+			<BrandingPanel />
 			<FormPanel>
 				<FormContainer>{children}</FormContainer>
 			</FormPanel>

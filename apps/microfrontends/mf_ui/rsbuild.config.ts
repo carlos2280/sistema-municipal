@@ -30,9 +30,9 @@ export default defineConfig(() => {
         shared: {
           react: { singleton: true, requiredVersion: false },
           'react-dom': { singleton: true, requiredVersion: false },
-          '@mui/material': { singleton: true, requiredVersion: false },
-          '@emotion/react': { singleton: true, requiredVersion: false },
-          '@emotion/styled': { singleton: true, requiredVersion: false },
+          '@mui/material': { singleton: true, requiredVersion: false, version: '7.3.7' },
+          '@emotion/react': { singleton: true, requiredVersion: false, version: '11.14.0' },
+          '@emotion/styled': { singleton: true, requiredVersion: false, version: '11.14.0' },
         },
       }),
     ],
