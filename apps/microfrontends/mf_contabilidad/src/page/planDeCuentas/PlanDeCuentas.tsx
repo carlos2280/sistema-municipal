@@ -237,6 +237,15 @@ function countNodes(nodes: TreeItemData[]): number {
   return count;
 }
 
+function countDescendants(node: TreeItemData): number {
+  if (!node.children?.length) return 0;
+  let count = node.children.length;
+  for (const child of node.children) {
+    count += countDescendants(child);
+  }
+  return count;
+}
+
 function buildYearOptions(): number[] {
   const current = new Date().getFullYear();
   return [current, current - 1, current - 2, current - 3];
@@ -603,6 +612,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
         open={!!deleteTarget}
         accountCode={deleteTarget?.item.label.split(' – ')[0] || ''}
         accountName={deleteTarget?.item.label.split(' – ')[1] || ''}
+        childCount={deleteTarget ? countDescendants(deleteTarget.item) : 0}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />

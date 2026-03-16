@@ -7,6 +7,7 @@ export interface DeleteConfirmDialogProps {
   open: boolean;
   accountCode: string;
   accountName: string;
+  childCount: number;
   onClose: () => void;
   onConfirm: () => void;
   isLoading?: boolean;
@@ -20,6 +21,7 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
   open,
   accountCode,
   accountName,
+  childCount,
   onClose,
   onConfirm,
   isLoading = false,
@@ -55,7 +57,10 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
       sx={{
         position: 'fixed',
         inset: 0,
-        bgcolor: visible ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)',
+        bgcolor: (theme) =>
+          visible
+            ? alpha(theme.palette.common.black, 0.5)
+            : alpha(theme.palette.common.black, 0),
         zIndex: 1400,
         display: 'flex',
         alignItems: 'center',
@@ -113,17 +118,30 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
             >
               Eliminar cuenta
             </Typography>
-            <Typography
-              className="dialog-text"
-              sx={{
-                fontSize: '0.8125rem',
-                color: 'text.secondary',
-                mt: 0.5,
-              }}
-            >
-              Esta accion no se puede deshacer. La cuenta sera eliminada
-              permanentemente del plan de cuentas.
-            </Typography>
+            {childCount > 0 ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  mt: 0.5,
+                  color: 'warning.main',
+                }}
+              >
+                <AlertTriangle size={14} style={{ flexShrink: 0 }} />
+                <Typography variant="body2">
+                  Esta cuenta tiene {childCount} subcuenta{childCount > 1 ? 's' : ''}.
+                  Se eliminarán también.
+                </Typography>
+              </Box>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{ color: 'text.secondary', mt: 0.5 }}
+              >
+                Esta acción no se puede deshacer.
+              </Typography>
+            )}
           </Box>
         </Box>
 
