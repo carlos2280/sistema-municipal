@@ -41,8 +41,32 @@ export const actualizarPlanesCuenta = async (
   return row ?? null;
 };
 
+/**
+ * Elimina una cuenta y todos sus descendientes (cascade manual).
+ * Orden: hijos primero (bottom-up) para respetar FK parentId.
+ */
 export const eliminarPlanesCuenta = async (db: DbClient, id: number) => {
-  await db.delete(planesCuentas).where(eq(planesCuentas.id, id));
+  // Recopilar todos los IDs a eliminar (el nodo + descendientes)
+  const idsToDelete: number[] = [];
+
+  async function collectDescendants(parentId: number) {
+    const children = await db
+      .select({ id: planesCuentas.id })
+      .from(planesCuentas)
+      .where(eq(planesCuentas.parentId, parentId));
+
+    for (const child of children) {
+      await collectDescendants(child.id);
+    }
+    idsToDelete.push(parentId);
+  }
+
+  await collectDescendants(id);
+
+  // Eliminar en orden bottom-up (hijos antes que padres)
+  for (const deleteId of idsToDelete) {
+    await db.delete(planesCuentas).where(eq(planesCuentas.id, deleteId));
+  }
 };
 
 export const obtenerArbolPlanes = async (db: DbClient) => {
