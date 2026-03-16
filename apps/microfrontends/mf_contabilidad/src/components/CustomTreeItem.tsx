@@ -16,7 +16,9 @@ export interface TreeNodeProps {
   level: number;
   expandedItems: string[];
   selectedId: string | null;
+  hasSelection: boolean;
   contextId?: string | null;
+  actingId?: string | null;
   searchTerm: string;
   isMobile?: boolean;
   onToggle: (id: string) => void;
@@ -236,23 +238,6 @@ const ActionBtn = styled('button')<{ variant: 'add' | 'edit' | 'delete' }>(
   },
 );
 
-/* ── CSS Grid expand/collapse — MERIDIAN pattern ── */
-const ChildrenGrid = styled(Box, {
-  shouldForwardProp: (p) => p !== 'isExpanded',
-})<{ isExpanded?: boolean }>(({ isExpanded }) => ({
-  display: 'grid',
-  gridTemplateRows: isExpanded ? '1fr' : '0fr',
-  transition: `grid-template-rows 260ms ${EASING_SPRING}`,
-}));
-
-const ChildrenInner = styled(Box, {
-  shouldForwardProp: (p) => p !== 'isExpanded',
-})<{ isExpanded?: boolean }>(({ isExpanded }) => ({
-  overflow: 'hidden',
-  minHeight: 0,
-  opacity: isExpanded ? 1 : 0,
-  transition: 'opacity 180ms ease',
-}));
 
 /* ── Component ── */
 
@@ -261,7 +246,9 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   level,
   expandedItems,
   selectedId,
+  hasSelection,
   contextId,
+  actingId,
   searchTerm,
   isMobile = false,
   onToggle,
@@ -276,7 +263,10 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   const isExpanded = expandedItems.includes(item.id);
   const isSelected = selectedId === item.id;
   const isContext = !!contextId && contextId === String(item.idPlanCuenta);
+  const isActing = !!actingId && actingId === item.id;
   const tipoCuentaId = item.tipoCuentaId ?? 0;
+  // MERIDIAN: suppress hover-actions on non-selected nodes when selection is active
+  const suppressActions = hasSelection && !isSelected;
 
   // Split label into code and name
   const [codigo, ...nombreParts] = item.label.split(' – ');
@@ -340,7 +330,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   return (
     <Box>
       <NodeRow
-        isSelected={isSelected}
+        isSelected={isSelected || isActing}
         isContext={isContext}
         onClick={handleRowClick}
         sx={{
@@ -485,25 +475,33 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         {/* Hover/touch actions — MERIDIAN positioned container */}
         <ActionsWrap
           className="tree-actions"
-          sx={
-            isMobile
-              ? {
-                  position: 'relative',
-                  right: 'auto',
-                  top: 'auto',
-                  transform: 'none',
-                  opacity: 1,
-                  pointerEvents: 'all',
-                  gap: '2px',
-                  marginLeft: '4px',
-                  background: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none',
-                  padding: 0,
-                  '& button': { width: 32, height: 32, borderRadius: '6px' },
-                }
-              : undefined
-          }
+          sx={{
+            // Selected node: always show actions
+            ...(isSelected && !isMobile && {
+              opacity: 1,
+              pointerEvents: 'all' as const,
+            }),
+            // Suppress actions on non-selected nodes when selection is active
+            ...(suppressActions && !isMobile && {
+              opacity: '0 !important',
+              pointerEvents: 'none !important' as const,
+            }),
+            ...(isMobile && {
+              position: 'relative',
+              right: 'auto',
+              top: 'auto',
+              transform: 'none',
+              opacity: 1,
+              pointerEvents: 'all',
+              gap: '2px',
+              marginLeft: '4px',
+              background: 'transparent',
+              border: 'none',
+              boxShadow: 'none',
+              padding: 0,
+              '& button': { width: 32, height: 32, borderRadius: '6px' },
+            }),
+          }}
         >
           {canAdd && (
             <ActionBtn
@@ -544,30 +542,28 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         </ActionsWrap>
       </NodeRow>
 
-      {/* Children (recursive) — CSS Grid animation */}
-      {hasChildren && (
-        <ChildrenGrid isExpanded={isExpanded}>
-          <ChildrenInner isExpanded={isExpanded}>
-            {item.children!.map((child) => (
-              <CustomTreeItem
-                key={child.id}
-                item={child}
-                level={level + 1}
-                expandedItems={expandedItems}
-                selectedId={selectedId}
-                contextId={contextId}
-                searchTerm={searchTerm}
-                isMobile={isMobile}
-                onToggle={onToggle}
-                onSelect={onSelect}
-                onCreate={onCreate}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                highlight={highlight}
-              />
-            ))}
-          </ChildrenInner>
-        </ChildrenGrid>
+      {/* Children (recursive) — only mount when expanded */}
+      {hasChildren && isExpanded && (
+        item.children!.map((child) => (
+          <CustomTreeItem
+            key={child.id}
+            item={child}
+            level={level + 1}
+            expandedItems={expandedItems}
+            selectedId={selectedId}
+            hasSelection={hasSelection}
+            contextId={contextId}
+            actingId={actingId}
+            searchTerm={searchTerm}
+            isMobile={isMobile}
+            onToggle={onToggle}
+            onSelect={onSelect}
+            onCreate={onCreate}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            highlight={highlight}
+          />
+        ))
       )}
     </Box>
   );

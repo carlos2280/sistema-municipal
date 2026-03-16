@@ -75,6 +75,39 @@ export function usePlanDeCuentasTree() {
     setExpandedItems((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, []);
 
+  // Toggle único: detecta si todo está expandido
+  const areAllExpanded = useMemo(() => {
+    function countExpandable(nodes: TreeItemData[]): number {
+      let c = 0;
+      for (const n of nodes) {
+        if (n.children?.length) { c++; c += countExpandable(n.children); }
+      }
+      return c;
+    }
+    return expandedItems.length >= countExpandable(treeData);
+  }, [expandedItems, treeData]);
+
+  const toggleAll = useCallback(() => {
+    if (areAllExpanded) collapseAll();
+    else expandAll();
+  }, [areAllExpanded, collapseAll, expandAll]);
+
+  // Contador de resultados de búsqueda
+  const matchCount = useMemo(() => {
+    if (!searchTerm.trim()) return 0;
+    const term = searchTerm.toLowerCase().trim();
+    function count(nodes: TreeItemData[]): number {
+      let c = 0;
+      for (const n of nodes) {
+        const label = n.label?.toLowerCase() ?? '';
+        if (label.includes(term)) c++;
+        if (n.children?.length) c += count(n.children);
+      }
+      return c;
+    }
+    return count(treeData);
+  }, [searchTerm, treeData]);
+
   // Buscar item por ID en el árbol
   const findItemById = useCallback(
     (id: string): TreeItemData | null => {
@@ -93,7 +126,7 @@ export function usePlanDeCuentasTree() {
     [treeData],
   );
 
-  return {
+  return useMemo(() => ({
     // Estado
     searchTerm,
     expandedItems,
@@ -111,7 +144,16 @@ export function usePlanDeCuentasTree() {
     clearSearch,
     expandAll,
     collapseAll,
+    toggleAll,
     expandNode,
     findItemById,
-  };
+
+    // Derivados
+    areAllExpanded,
+    matchCount,
+  }), [
+    searchTerm, expandedItems, autoExpandedItems, treeData, filteredTreeData,
+    isLoading, error, setSearchTerm, setExpandedItems, clearSearch, expandAll,
+    collapseAll, toggleAll, expandNode, findItemById, areAllExpanded, matchCount,
+  ]);
 }

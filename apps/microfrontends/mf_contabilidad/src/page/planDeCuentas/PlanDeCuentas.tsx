@@ -12,7 +12,7 @@ import {
   UnfoldVertical,
   X,
 } from 'lucide-react';
-import { memo, type JSX, useCallback, useMemo, useState } from 'react';
+import { memo, type JSX, useCallback, useMemo, useRef, useState } from 'react';
 
 import { PlanDeCuentasTree } from '../../components/PlanDeCuentasTree';
 import { AccountPanel } from '../../components/planCuentas/AccountPanel';
@@ -253,32 +253,46 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   const panel = useAccountPanel({ onExpandNode: tree.expandNode });
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ item: TreeItemData } | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const yearOptions = useMemo(() => buildYearOptions(), []);
   const totalCuentas = useMemo(() => countNodes(tree.treeData), [tree.treeData]);
 
+  // ── Stable refs for handlers (avoid breaking memo on 500+ nodes) ──
+  const searchTermRef = useRef(tree.searchTerm);
+  searchTermRef.current = tree.searchTerm;
+  const autoExpandedRef = useRef(tree.autoExpandedItems);
+  autoExpandedRef.current = tree.autoExpandedItems;
+
   // ── Handlers ────────────────────────────────────────────────────
 
   const handleToggleNode = useCallback(
     (id: string) => {
-      const current = tree.searchTerm.trim()
-        ? tree.autoExpandedItems
-        : tree.expandedItems;
-      tree.setExpandedItems(
-        current.includes(id)
-          ? current.filter((i) => i !== id)
-          : [...current, id],
-      );
+      if (searchTermRef.current.trim()) {
+        // Search mode: override autoExpanded snapshot
+        const current = autoExpandedRef.current;
+        tree.setExpandedItems(
+          current.includes(id)
+            ? current.filter((i) => i !== id)
+            : [...current, id],
+        );
+      } else {
+        // Normal mode: functional update (stable ref)
+        tree.setExpandedItems((prev) =>
+          prev.includes(id)
+            ? prev.filter((i) => i !== id)
+            : [...prev, id],
+        );
+      }
     },
-    [tree],
+    [tree.setExpandedItems],
   );
 
   const handleSelectNode = useCallback(
-    (_item: TreeItemData) => {
-      // Solo seleccionar visualmente el nodo, no abrir panel.
-      // La edición se activa exclusivamente desde el botón de editar (lápiz).
+    (item: TreeItemData) => {
+      setSelectedNodeId(item.id);
     },
     [],
   );
@@ -405,28 +419,16 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            startIcon={<UnfoldVertical size={14} />}
-            onClick={tree.expandAll}
-            sx={isSmallPhone ? { minWidth: 36, px: 0, '& .MuiButton-startIcon': { mr: 0 }, '& span:last-child': { display: 'none' } } : undefined}
-          >
-            {!isSmallPhone && 'Expandir'}
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            startIcon={<FoldVertical size={14} />}
-            onClick={tree.collapseAll}
-            sx={isSmallPhone ? { minWidth: 36, px: 0, '& .MuiButton-startIcon': { mr: 0 }, '& span:last-child': { display: 'none' } } : undefined}
-          >
-            {!isSmallPhone && 'Colapsar'}
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          color="secondary"
+          size="small"
+          startIcon={tree.areAllExpanded ? <FoldVertical size={14} /> : <UnfoldVertical size={14} />}
+          onClick={tree.toggleAll}
+          sx={isSmallPhone ? { minWidth: 36, px: 0, '& .MuiButton-startIcon': { mr: 0 }, '& span:last-child': { display: 'none' } } : undefined}
+        >
+          {!isSmallPhone && (tree.areAllExpanded ? 'Colapsar' : 'Expandir')}
+        </Button>
       </PageHeaderRoot>
 
       {/* ── Toolbar ──────────────────────────────────────────────── */}
@@ -473,19 +475,28 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
           </IconButton>
         )}
 
-        {/* Stats — ocultas en mobile */}
+        {/* Stats / Search count — hidden on mobile */}
         {!isMobile && (
           <StatsContainer>
-            <StatItem>
-              <Layers size={12} />
-              Cuentas
-              <span className="stat-value">{totalCuentas}</span>
-            </StatItem>
-            <StatItem>
-              <GitBranch size={12} />
-              Niveles
-              <span className="stat-value">8</span>
-            </StatItem>
+            {tree.searchTerm.trim() ? (
+              <StatItem>
+                <span className="stat-value">{tree.matchCount}</span>
+                {` resultado${tree.matchCount !== 1 ? 's' : ''}`}
+              </StatItem>
+            ) : (
+              <>
+                <StatItem>
+                  <Layers size={12} />
+                  Cuentas
+                  <span className="stat-value">{totalCuentas}</span>
+                </StatItem>
+                <StatItem>
+                  <GitBranch size={12} />
+                  Niveles
+                  <span className="stat-value">8</span>
+                </StatItem>
+              </>
+            )}
           </StatsContainer>
         )}
 
@@ -560,8 +571,10 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
           expandedItems={
             tree.searchTerm.trim() ? tree.autoExpandedItems : tree.expandedItems
           }
-          selectedId={panel.selectedItem?.id || null}
+          selectedId={selectedNodeId}
+          hasSelection={!!selectedNodeId}
           contextId={panel.mode === 'crear' ? (panel.selectedItem?.idPlanCuenta?.toString() ?? null) : null}
+          actingId={panel.isOpen ? (panel.selectedItem?.id ?? null) : null}
           searchTerm={tree.searchTerm}
           isMobile={isMobile}
           onToggle={handleToggleNode}
