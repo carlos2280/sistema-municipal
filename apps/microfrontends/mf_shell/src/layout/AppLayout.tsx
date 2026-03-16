@@ -55,6 +55,7 @@ import { ThemeCustomizer } from "mf_ui/components";
 import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
 import { useModuleSync } from "../hooks/useModuleSync";
 import { StatusBar } from "./StatusBar";
+import { Compass } from "./Compass";
 
 // ============================================================================
 // CONSTANTS
@@ -560,6 +561,7 @@ export default function AppLayout() {
           }}
         >
           <Outlet />
+          <Compass/>
         </Box>
 
         {/* StatusBar */}
