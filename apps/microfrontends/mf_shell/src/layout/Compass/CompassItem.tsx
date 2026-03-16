@@ -89,7 +89,7 @@ const ItemRoot = styled("button")(({ theme }) => ({
 		color: theme.palette.primary.main,
 		boxShadow: [
 			`0 0 0 3px ${alpha(theme.palette.primary.main, 0.2)}`,
-			`0 8px 24px rgba(0,0,0,0.35)`,
+			`0 8px 24px ${alpha(theme.palette.common.black, 0.35)}`,
 		].join(", "),
 	},
 

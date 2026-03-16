@@ -89,7 +89,7 @@ const HeaderTitle = styled("span")(({ theme }) => ({
 const CloseButton = styled("button")(({ theme }) => ({
 	border: "none",
 	background: "transparent",
-	padding: 4,
+	padding: 8,
 	borderRadius: 6,
 	cursor: "pointer",
 	color: theme.palette.text.secondary,
@@ -97,6 +97,14 @@ const CloseButton = styled("button")(({ theme }) => ({
 	alignItems: "center",
 	justifyContent: "center",
 	flexShrink: 0,
+	minWidth: 32,
+	minHeight: 32,
+
+	// Mobile: touch target 44px
+	[theme.breakpoints.down("md")]: {
+		minWidth: 44,
+		minHeight: 44,
+	},
 	transition: "background 150ms ease, color 150ms ease",
 
 	"&:hover": {

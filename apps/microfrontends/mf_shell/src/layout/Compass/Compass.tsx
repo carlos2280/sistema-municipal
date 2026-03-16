@@ -194,10 +194,9 @@ const FabButton = styled("button", {
 		outlineOffset: 3,
 	},
 
-	// Mobile
+	// Mobile: mantener 48px (spec: Compass 48px en todos los tamaños)
 	[theme.breakpoints.down("sm")]: {
-		width: 44,
-		height: 44,
+		// Touch target ya es 48px, no reducir
 	},
 }));
 

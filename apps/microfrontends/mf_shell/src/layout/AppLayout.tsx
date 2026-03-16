@@ -17,7 +17,7 @@
  * Focus Mode: Ctrl+Shift+F — eyebrow compact, compass hidden
  */
 
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, GlobalStyles } from "@mui/material";
 import { useState, useCallback, useEffect } from "react";
 import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
@@ -105,6 +105,18 @@ export default function AppLayout() {
 	return (
 		<>
 			<CssBaseline />
+			<GlobalStyles
+				styles={{
+					"@media (prefers-reduced-motion: reduce)": {
+						"*, *::before, *::after": {
+							animationDuration: "0.01ms !important",
+							animationIterationCount: "1 !important",
+							transitionDuration: "0.01ms !important",
+							scrollBehavior: "auto !important",
+						},
+					},
+				}}
+			/>
 
 			{/* ── Eyebrow (28px top bar) ───────────────────────────────── */}
 			<Eyebrow

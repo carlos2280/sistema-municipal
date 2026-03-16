@@ -152,6 +152,7 @@ const MenuItem = styled("button")(({ theme }) => ({
 	transition: "background 120ms ease, color 120ms ease",
 	fontFamily: theme.typography.fontFamily,
 	textAlign: "left",
+	minHeight: 36,
 
 	"&:hover": {
 		background: alpha(theme.palette.text.primary, 0.06),
@@ -161,6 +162,12 @@ const MenuItem = styled("button")(({ theme }) => ({
 	"&:focus-visible": {
 		outline: `2px solid ${theme.palette.primary.main}`,
 		outlineOffset: -2,
+	},
+
+	// Mobile: touch target mínimo 44px
+	[theme.breakpoints.down("md")]: {
+		minHeight: 44,
+		padding: "12px 16px",
 	},
 }));
 
