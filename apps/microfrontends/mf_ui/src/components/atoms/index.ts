@@ -17,3 +17,7 @@ export { StatusDot } from "./StatusDot";
 export { Divider } from "./Divider";
 export { StatusChip } from "./StatusChip";
 export type { StatusChipProps } from "./StatusChip";
+export { MeridianLogo } from "./MeridianLogo";
+export type { MeridianLogoProps } from "./MeridianLogo";
+export { ClockDisplay } from "./ClockDisplay";
+export type { ClockDisplayProps } from "./ClockDisplay";

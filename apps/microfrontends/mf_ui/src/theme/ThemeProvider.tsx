@@ -27,7 +27,6 @@ import {
   useState,
 } from 'react';
 import {
-  createMeridianTheme,
   getMeridianTheme,
   getModuleThemeOverrides,
   MODULE_ACCENTS,
@@ -203,11 +202,19 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     savePreferences(preferences);
   }, [preferences]);
 
-  // Aura — cambiar body background tint según módulo
+  // Aura — cambiar body background tint + CSS custom properties según módulo
   useEffect(() => {
+    const mod = MODULE_ACCENTS[preferences.activeModule];
+    const root = document.documentElement;
+
     document.body.setAttribute('data-module', preferences.activeModule);
+
+    // CSS variables globales para accent dinámico (usadas por layout MERIDIAN)
+    root.style.setProperty('--accent', mod.main);
+    root.style.setProperty('--accent-rgb', mod.rgb);
+    root.style.setProperty('--ground-tint', mod.tint);
+
     if (isDarkMode) {
-      const mod = MODULE_ACCENTS[preferences.activeModule];
       document.body.style.backgroundColor = mod.tint;
       document.body.style.transition = 'background-color 500ms ease';
     } else {

@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "../component/ProtectedRoute";
+import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
 import DashboardPage from "../pages/DashboardPage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";

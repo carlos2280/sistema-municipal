@@ -10,7 +10,7 @@ import type { TSchemaCredenciales } from "../../../types/login.zod";
 import type { AreaOption, LoginStep } from "../types";
 import { useAreaSistemas } from "./useAreaSistemas";
 import { useLoginFinish } from "./useLoginFinish";
-import useHookFormSchema from "../../../hook/useHookFormSchema";
+import useHookFormSchema from "../../../hooks/useHookFormSchema";
 import { schemaCredenciales } from "../../../types/login.zod";
 
 /**

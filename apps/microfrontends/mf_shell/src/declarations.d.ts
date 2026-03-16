@@ -5,6 +5,23 @@ declare module "mf_ui/theme" {
 	import type { ReactNode, ComponentType } from "react";
 	import type { Theme } from "@mui/material/styles";
 
+	export type ModuleCode =
+		| "home"
+		| "contabilidad"
+		| "tesoreria"
+		| "rrhh"
+		| "obras"
+		| "catastro"
+		| "config"
+		| "chat";
+
+	export const MODULE_ACCENTS: Record<
+		ModuleCode,
+		{ main: string; rgb: string; tint: string; name: string }
+	>;
+
+	export function getContrastText(hex: string): "#000" | "#fff";
+
 	export const ThemeProvider: ComponentType<{ children: ReactNode }>;
 	export const ThemeContext: React.Context<{
 		toggleTheme: () => void;
@@ -12,8 +29,22 @@ declare module "mf_ui/theme" {
 	}>;
 	export const useTheme: () => {
 		isDarkMode: boolean;
+		toggleDarkMode: () => void;
 		toggleTheme: () => void;
 		theme: Theme;
+		preferences: {
+			mode: "light" | "dark" | "system";
+			activeModule: ModuleCode;
+			textSize: "small" | "medium" | "large";
+			tableDensity: "compact" | "normal" | "relaxed";
+		};
+		activeModule: ModuleCode;
+		setActiveModule: (code: ModuleCode) => void;
+		setMode: (mode: "light" | "dark" | "system") => void;
+		setTextSize: (size: "small" | "medium" | "large") => void;
+		setTableDensity: (density: "compact" | "normal" | "relaxed") => void;
+		resetToDefaults: () => void;
+		isDarkTheme: boolean;
 	};
 	export const lightTheme: Theme;
 	export const darkTheme: Theme;
@@ -26,6 +57,49 @@ declare module "mf_ui/components" {
 	export const PageHeader: FC<{ title: string; subtitle?: string }>;
 	export const AppLoader: FC;
 	export const EmptyState: FC<{ message: string; icon?: ReactNode }>;
+
+	// Átomos
+	export const MeridianLogo: FC<{
+		size?: "xs" | "sm" | "md" | "lg" | "xl";
+		color?: string;
+		className?: string;
+	}>;
+	export const ClockDisplay: FC<{
+		format?: "12h" | "24h";
+		showSeconds?: boolean;
+		updateInterval?: number;
+		className?: string;
+	}>;
+	export const StatusDot: FC<{
+		color?: "success" | "warning" | "error" | "info" | "neutral";
+		size?: "small" | "medium" | "large";
+		pulse?: boolean;
+		label?: string;
+	}>;
+	export const Badge: FC<{
+		children: ReactNode;
+		variant?: "filled" | "outlined" | "soft";
+		color?: "primary" | "secondary" | "success" | "warning" | "error" | "info" | "neutral";
+		size?: "small" | "medium" | "large";
+		startIcon?: ReactNode;
+		endIcon?: ReactNode;
+		pill?: boolean;
+		pulse?: boolean;
+		className?: string;
+	}>;
+
+	// Moléculas
+	export const UserAvatar: FC<{
+		name?: string;
+		src?: string;
+		size?: "xs" | "sm" | "md" | "lg" | "xl";
+		status?: "online" | "offline" | "away" | "busy";
+		showName?: boolean;
+		subtitle?: string;
+		color?: string;
+		icon?: ReactNode;
+		onClick?: () => void;
+	}>;
 }
 
 declare module "mf_contabilidad/routes" {

@@ -8,9 +8,9 @@ import { toast } from "sonner";
 import {
 	type TSchemaFormContrasenaTemporal,
 	schemaFormContrasenaTemporal,
-} from "../types/contrasenaTemporal";
-import { skipToken } from "../utils/skipToken";
-import useHookFormSchema from "./useHookFormSchema";
+} from "../../../types/contrasenaTemporal";
+import { skipToken } from "../../../utils/skipToken";
+import useHookFormSchema from "../../../hooks/useHookFormSchema";
 
 const useContrasenaTemporal = (token?: string) => {
 	const navigate = useNavigate();

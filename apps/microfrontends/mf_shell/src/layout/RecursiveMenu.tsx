@@ -19,39 +19,13 @@ import type { IconName } from "lucide-react/dynamic";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import slugify from "slugify";
-import { getIconLucile } from "../../utils/IconDynamicLucile";
+import { getIconLucile } from "../utils/IconDynamicLucile";
+import type { MenuItem } from "../types/menu";
 
-// interface MenuItem {
-//   id: number;
-//   idSistema: number;
-//   idPadre: number | null;
-//   nombre: string;
-//   nivel: number;
-//   orden: number;
-//   icono: IconName;
-//   createdAt: string;
-//   updatedAt: string;
-//   hijos: MenuItem[];
-//   componente: string;
-// }
-
-interface MenuItem {
-	id: number;
-	idSistema: number;
-	idPadre: number | null;
-	nombre: string;
-	nivel: number;
-	orden: number;
-	createdAt: string;
-	updatedAt: string;
-	hijos: MenuItem[];
-	componente: string;
-	icono: IconName;
-}
 interface MenuProps {
 	nombreSistema: string;
 	items: MenuItem[];
-	collapsed?: boolean; // Nueva prop para controlar el estado colapsado
+	collapsed?: boolean;
 }
 
 const MenuContainer = styled(List, {
@@ -576,7 +550,7 @@ const MenuItemComponent: React.FC<{
 			collapsed={collapsed}
 			aria-expanded={hasChildren && !collapsed ? open : undefined}
 		>
-			{level === 0 && <ListItemIcon>{getIconLucile(item.icono)}</ListItemIcon>}
+			{level === 0 && <ListItemIcon>{getIconLucile(item.icono as IconName)}</ListItemIcon>}
 
 			<ListItemText primary={item.nombre} />
 

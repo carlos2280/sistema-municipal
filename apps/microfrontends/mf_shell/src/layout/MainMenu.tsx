@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { useMenu } from '../../hook/useMenu';
+import { useMenu } from '../hooks/useMenu';
 import RecursiveMenu from './RecursiveMenu';
 
 interface Props {

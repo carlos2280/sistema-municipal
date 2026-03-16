@@ -9,6 +9,7 @@
  */
 
 import { createTheme, type ThemeOptions, type Theme } from '@mui/material/styles';
+import { transitions, zIndexLayout } from './tokens';
 
 // ─── Module Accents ──────────────────────────────────────────────
 export const MODULE_ACCENTS = {
@@ -171,7 +172,37 @@ export interface MeridianTokens {
     rgb: string;
     tint: string;
   };
+  durations: {
+    instant: string;
+    fast: string;
+    normal: string;
+    slow: string;
+    cinematic: string;
+  };
+  easings: {
+    out: string;
+    in: string;
+    inOut: string;
+    spring: string;
+  };
+  zIndex: {
+    statusLine: number;
+    eyebrow: number;
+    floating: number;
+    compass: number;
+    navPanel: number;
+    cmdOverlay: number;
+    cmdPalette: number;
+    onboarding: number;
+  };
 }
+
+// ─── Shared motion tokens (mode-agnostic) ────────────────────
+const motionTokens = {
+  durations: { ...transitions.duration },
+  easings: { ...transitions.easing },
+  zIndex: { ...zIndexLayout },
+};
 
 const darkTokens: MeridianTokens = {
   surfaces: {
@@ -201,6 +232,7 @@ const darkTokens: MeridianTokens = {
     rgb:  MODULE_ACCENTS.home.rgb,
     tint: MODULE_ACCENTS.home.tint,
   },
+  ...motionTokens,
 };
 
 const lightTokens: MeridianTokens = {
@@ -231,6 +263,7 @@ const lightTokens: MeridianTokens = {
     rgb:  MODULE_ACCENTS.home.rgb,
     tint: MODULE_ACCENTS.home.tint,
   },
+  ...motionTokens,
 };
 
 // ─── Tipografía ──────────────────────────────────────────────────

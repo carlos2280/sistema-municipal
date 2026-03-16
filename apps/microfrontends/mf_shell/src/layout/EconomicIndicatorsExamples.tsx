@@ -1,7 +1,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useObtenerIndicadoresQuery } from "mf_store/store";
 import { useMemo } from "react";
-import EconomicIndicators from "../component/EconomicIndicators";
+import EconomicIndicators from "./EconomicIndicators";
 
 interface CurrencyData {
 	code: string;

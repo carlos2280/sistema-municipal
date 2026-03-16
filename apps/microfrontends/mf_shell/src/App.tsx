@@ -8,7 +8,7 @@ import {
 } from "mf_store/store";
 import { AppLoader } from "mf_ui/components";
 import { useEffect, useState } from "react";
-import { useMenu } from "./hook/useMenu";
+import { useMenu } from "./hooks/useMenu";
 import { useTenantResolver } from "./hooks/useTenantResolver";
 import { registerDynamicRemotes } from "./modules/dynamicModuleLoader";
 import TenantNotFound from "./pages/TenantNotFound";

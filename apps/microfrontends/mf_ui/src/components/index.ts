@@ -26,8 +26,10 @@ export {
   StatusDot,
   Divider,
   StatusChip,
+  MeridianLogo,
+  ClockDisplay,
 } from "./atoms";
-export type { StatusChipProps } from "./atoms";
+export type { StatusChipProps, MeridianLogoProps, ClockDisplayProps } from "./atoms";
 
 // =============================================================================
 // ATOMIC DESIGN — Moléculas

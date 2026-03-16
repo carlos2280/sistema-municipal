@@ -34,6 +34,29 @@ interface MeridianTokens {
 		rgb: string;
 		tint: string;
 	};
+	durations: {
+		instant: string;
+		fast: string;
+		normal: string;
+		slow: string;
+		cinematic: string;
+	};
+	easings: {
+		out: string;
+		in: string;
+		inOut: string;
+		spring: string;
+	};
+	zIndex: {
+		statusLine: number;
+		eyebrow: number;
+		floating: number;
+		compass: number;
+		navPanel: number;
+		cmdOverlay: number;
+		cmdPalette: number;
+		onboarding: number;
+	};
 }
 
 declare module "@mui/material/styles" {

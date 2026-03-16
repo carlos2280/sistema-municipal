@@ -46,7 +46,7 @@ import {
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useAppSelector, selectSistemaId, useObtenerConversacionesQuery } from "mf_store/store";
-import MainMenu from "../component/mainMenu/MainMenu";
+import MainMenu from "./MainMenu";
 import AccountMenu from "./AccountMenu";
 import CustomizedMenus from "./CustomizedMenus";
 import { EconomicIndicatorsExamples } from "./EconomicIndicatorsExamples";

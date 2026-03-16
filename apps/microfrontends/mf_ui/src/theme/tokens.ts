@@ -62,7 +62,7 @@ export const fontFeatures = {
   number: "'tnum' 1, 'ss01' 1",
 } as const;
 
-// ─── Z-Index Scale ───────────────────────────────────────────
+// ─── Z-Index Scale (MUI base) ────────────────────────────────
 export const zIndex = {
   hide: -1,
   base: 0,
@@ -75,7 +75,19 @@ export const zIndex = {
   popover: 1500,
   toast: 1700,
   tooltip: 1800,
-  compass: 1900,
+} as const;
+
+// ─── Z-Index Layout MERIDIAN ─────────────────────────────────
+// Escala dedicada para los componentes del layout shell
+export const zIndexLayout = {
+  statusLine: 700,
+  eyebrow: 800,
+  floating: 850,     // NotificationPanel, AvatarMenu
+  compass: 900,
+  navPanel: 960,
+  cmdOverlay: 970,
+  cmdPalette: 980,
+  onboarding: 1050,
 } as const;
 
 // ─── Breakpoints ─────────────────────────────────────────────
@@ -100,6 +112,7 @@ export const transitions = {
     out: 'cubic-bezier(0.0, 0.0, 0.2, 1.0)',
     in: 'cubic-bezier(0.4, 0.0, 1.0, 1.0)',
     inOut: 'cubic-bezier(0.4, 0.0, 0.2, 1.0)',
+    spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
   },
 } as const;
 
@@ -129,6 +142,7 @@ export default {
   fontFamily,
   fontFeatures,
   zIndex,
+  zIndexLayout,
   breakpoints,
   transitions,
   semanticColors,

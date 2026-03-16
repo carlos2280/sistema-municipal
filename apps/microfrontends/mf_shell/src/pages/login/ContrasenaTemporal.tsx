@@ -16,7 +16,7 @@ import { Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { Controller, FormProvider } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
-import useContrasenaTemporal from "../../hook/useContrasenaTemporal";
+import useContrasenaTemporal from "./hooks/useContrasenaTemporal";
 import { AuthLayout } from "./components/AuthLayout";
 import { AuthCard } from "./components/AuthCard";
 import { AuthHeader } from "./components/AuthHeader";
