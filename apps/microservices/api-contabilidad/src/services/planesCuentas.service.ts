@@ -160,7 +160,8 @@ export const buscarCuentasPorPrefijo = async (
 };
 
 /**
- * Verifica si un código de cuenta ya existe para un año contable específico
+ * Verifica si un código de cuenta ya existe para un año contable específico.
+ * N4+ son cuentas por ejercicio — el mismo código puede existir en años distintos.
  */
 export const verificarCodigoExiste = async (
   db: DbClient,

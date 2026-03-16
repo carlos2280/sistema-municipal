@@ -260,11 +260,11 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   const isMobile = useMediaQuery(theme.breakpoints.down(640));
   const isSmallPhone = useMediaQuery(theme.breakpoints.down(380));
 
-  const tree = usePlanDeCuentasTree();
-  const panel = useAccountPanel({ onExpandNode: tree.expandNode });
-  const [eliminarCuenta, { isLoading: isDeleting }] = useEliminarPlanesCuentaMutation();
-
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const tree = usePlanDeCuentasTree();
+  const panel = useAccountPanel({ onExpandNode: tree.expandNode, selectedYear });
+  const [eliminarCuenta, { isLoading: isDeleting }] = useEliminarPlanesCuentaMutation();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ item: TreeItemData } | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);

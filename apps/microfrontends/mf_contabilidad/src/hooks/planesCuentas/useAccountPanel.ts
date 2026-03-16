@@ -93,6 +93,8 @@ interface UseAccountPanelReturn {
 
 interface UseAccountPanelOptions {
   onExpandNode?: (id: string) => void;
+  /** Año contable seleccionado en el UI — fuente de verdad para verificación y creación */
+  selectedYear?: number;
 }
 
 /**
@@ -100,7 +102,7 @@ interface UseAccountPanelOptions {
  * Consolida la lógica de useCreatePlanCuenta y usePlanDeCuentas.
  */
 export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPanelReturn {
-  const { onExpandNode } = options ?? {};
+  const { onExpandNode, selectedYear = new Date().getFullYear() } = options ?? {};
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<PanelMode>(null);
   const [selectedItem, setSelectedItem] = useState<TreeItemData | null>(null);
@@ -132,7 +134,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
   } = useVerificarCodigo();
 
   // Verificar código mediante subscription (no causa re-renders del componente padre)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const subscription = methods.watch((values, { name }) => {
@@ -186,7 +188,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
       methods.reset(
         {
           // id: undefined para crear nueva cuenta
-          anoContable: item.data.anoContable ?? new Date().getFullYear(),
+          anoContable: selectedYear,
           // Si es nodo de subgrupo, el parentId de la nueva cuenta será null (primera cuenta del subgrupo)
           // Si es nodo de planes_cuentas, el parentId será el id del item
           parentId: isSubgrupoNode ? null : item.data.id,
@@ -207,7 +209,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
 
       setIsOpen(true);
     },
-    [methods],
+    [methods, selectedYear],
   );
 
   // -------------------------------------------------------------------------
@@ -224,7 +226,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
       methods.reset(
         {
           id: item.data.id,
-          anoContable: item.data.anoContable ?? new Date().getFullYear(),
+          anoContable: item.data.anoContable ?? selectedYear,
           parentId: item.data.parentId ?? null,
           subgrupoId: item.data.subgrupoId,
           tipoCuentaId: item.data.tipoCuentaId,
@@ -237,7 +239,7 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
       );
       setIsOpen(true);
     },
-    [methods],
+    [methods, selectedYear],
   );
 
   // -------------------------------------------------------------------------
