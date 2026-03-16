@@ -13,7 +13,7 @@
  * │ StatusLine 2px                       │
  * └──────────────────────────────────────┘
  *
- * Overlays on-demand: NavPanel, CommandPalette, ThemeCustomizer, ChatDrawer
+ * Overlays on-demand: NavPanel, CommandPalette, NotificationPanel, AvatarMenu, ThemeCustomizer, ChatDrawer
  * Focus Mode: Ctrl+Shift+F — eyebrow compact, compass hidden
  */
 
@@ -29,6 +29,8 @@ import { Compass } from "./Compass";
 import { NavPanel, useNavPanel } from "./NavPanel";
 import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import StatusLine from "./StatusLine";
+import NotificationPanel from "./NotificationPanel";
+import AvatarMenu from "./AvatarMenu";
 
 // ============================================================================
 // COMPONENT
@@ -40,6 +42,8 @@ export default function AppLayout() {
 	// ── Panel states ────────────────────────────────────────────────
 	const navPanel = useNavPanel();
 	const cmdPalette = useCommandPalette();
+	const [notifOpen, setNotifOpen] = useState(false);
+	const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
 	const [customizerOpen, setCustomizerOpen] = useState(false);
 	const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
 	const [orgOpen, setOrgOpen] = useState(false);
@@ -69,10 +73,31 @@ export default function AppLayout() {
 		setCustomizerOpen(true);
 	}, [cmdPalette]);
 
+	const handleOpenCustomizerFromAvatar = useCallback(() => {
+		setAvatarMenuOpen(false);
+		setCustomizerOpen(true);
+	}, []);
+
+	const handleOpenNavFromAvatar = useCallback(() => {
+		setAvatarMenuOpen(false);
+		navPanel.open();
+	}, [navPanel]);
+
 	const handleChangeSistema = useCallback(() => {
 		navPanel.close();
 		// El Compass se encarga del cambio de sistema
 	}, [navPanel]);
+
+	// Cerrar otros floating panels cuando se abre uno
+	const handleNotifClick = useCallback(() => {
+		setAvatarMenuOpen(false);
+		setNotifOpen((prev) => !prev);
+	}, []);
+
+	const handleAvatarClick = useCallback(() => {
+		setNotifOpen(false);
+		setAvatarMenuOpen((prev) => !prev);
+	}, []);
 
 	// Ocultar Compass cuando NavPanel o CommandPalette están abiertos
 	const compassHidden = navPanel.isOpen || cmdPalette.isOpen;
@@ -84,8 +109,8 @@ export default function AppLayout() {
 			{/* ── Eyebrow (28px top bar) ───────────────────────────────── */}
 			<Eyebrow
 				onModuleClick={navPanel.toggle}
-				onNotificationClick={() => {/* Fase 9: NotificationPanel */}}
-				onAvatarClick={navPanel.toggle}
+				onNotificationClick={handleNotifClick}
+				onAvatarClick={handleAvatarClick}
 			/>
 
 			{/* ── Stage (content area) ─────────────────────────────────── */}
@@ -109,6 +134,19 @@ export default function AppLayout() {
 				isOpen={cmdPalette.isOpen}
 				onClose={cmdPalette.close}
 				onOpenCustomizer={handleOpenCustomizerFromCmd}
+			/>
+
+			{/* ── Floating Panels (z-index: 850) ──────────────────────────── */}
+			<NotificationPanel
+				isOpen={notifOpen}
+				onClose={() => setNotifOpen(false)}
+			/>
+
+			<AvatarMenu
+				isOpen={avatarMenuOpen}
+				onClose={() => setAvatarMenuOpen(false)}
+				onOpenNavPanel={handleOpenNavFromAvatar}
+				onOpenCustomizer={handleOpenCustomizerFromAvatar}
 			/>
 
 			<ThemeCustomizer
