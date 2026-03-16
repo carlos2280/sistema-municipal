@@ -338,13 +338,22 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
 
   return (
     <Box
-      sx={{
+      sx={(t) => ({
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        height: '100%',
-      }}
+        // Full-bleed: compensate Stage padding for edge-to-edge layout
+        mx: '-48px',
+        mt: '-40px',
+        mb: '-80px',
+        height: 'calc(100vh - 28px)', // viewport minus Eyebrow height
+        [t.breakpoints.down('md')]: {
+          mx: '-16px',
+          mt: '-24px',
+          height: 'calc(100vh - 44px)', // minus mobile Eyebrow
+        },
+      })}
     >
       {/* ── PageHeader ──────────────────────────────────────────── */}
       <PageHeaderRoot>
@@ -365,7 +374,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
             <Typography
               component="h1"
               sx={{
-                fontFamily: 'var(--font-display, "Plus Jakarta Sans", sans-serif)',
+                fontFamily: '"Bricolage Grotesque", sans-serif',
                 fontSize: isMobile ? '1rem' : '1.25rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',

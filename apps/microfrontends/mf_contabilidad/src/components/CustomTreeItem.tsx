@@ -1,16 +1,14 @@
 import { Box, Typography } from '@mui/material';
 import { alpha, styled, useTheme } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
 import {
   ChevronRight,
   Crosshair,
-  FileText,
-  Folder,
-  FolderOpen,
   Pencil,
   Plus,
   Trash2,
 } from 'lucide-react';
-import { memo, type JSX } from 'react';
+import { memo, useCallback, type JSX } from 'react';
 import type { TreeItemData } from '../utils/planDeCuentasUtils';
 
 export interface TreeNodeProps {
@@ -31,29 +29,45 @@ export interface TreeNodeProps {
 
 const MAX_NIVEL_CUENTA = 8;
 
-/* ── Badge config by tipoCuentaId ── */
-const badgeConfig: Record<number, { label: string; bgColor: string; color: string }> = {
-  1: { label: 'TITULO', bgColor: 'rgba(13,107,94,0.12)', color: 'rgb(13,107,94)' },
-  2: { label: 'GRUPO', bgColor: 'rgba(79,70,201,0.1)', color: '#4f46c9' },
-  3: { label: 'SUBGRUPO', bgColor: 'rgba(217,119,6,0.1)', color: '#d97706' },
-};
+/* ── MERIDIAN Typography ── */
+const FONT_MONO = '"DM Mono", monospace';
+const FONT_SANS = '"DM Sans", sans-serif';
 
-/** Color del borde izquierdo por nivel en mobile */
-const MOBILE_LEVEL_COLORS = [
-  '#0d6b5e', // 0 Titulo — jade primary
-  '#6366f1', // 1 Grupo — indigo
-  '#d97706', // 2 Subgrupo — amber
-] as const;
+/* ── MERIDIAN Easing ── */
+const EASING_SPRING = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
-function getMobileBorderColor(level: number, divider: string): string {
-  if (level < MOBILE_LEVEL_COLORS.length) return MOBILE_LEVEL_COLORS[level];
-  return divider;
+
+/** Mobile border color by level — theme-aware */
+function getMobileBorderColor(level: number, theme: Theme): string {
+  if (level === 0) return theme.palette.primary.main;
+  if (level === 1) return theme.palette.info.main;
+  if (level === 2) return theme.palette.warning.main;
+  return theme.palette.divider;
 }
 
 function getMobileBorderWidth(level: number): number {
   if (level === 0) return 4;
   if (level <= 2) return 3;
   return 2;
+}
+
+/** Mobile code typography by level — theme-aware */
+function getMobileCodeStyle(level: number, theme: Theme) {
+  if (level === 0) return { fontSize: '0.875rem', fontWeight: 800, color: theme.palette.primary.main };
+  if (level === 1) return { fontSize: '0.8125rem', fontWeight: 700, color: theme.palette.info.main };
+  if (level === 2) return { fontSize: '0.8125rem', fontWeight: 600, color: theme.palette.warning.main };
+  return { fontSize: '0.75rem', fontWeight: 600, color: theme.palette.text.disabled };
+}
+
+/** Mobile name typography by level */
+function getMobileNameStyle(level: number, theme: Theme) {
+  if (level === 0)
+    return { fontSize: '0.9375rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.02em' };
+  if (level === 1)
+    return { fontSize: '0.875rem', fontWeight: 600 };
+  if (level === 2)
+    return { fontSize: '0.8125rem', fontWeight: 550 };
+  return { fontSize: '0.8125rem', fontWeight: 400, color: theme.palette.text.secondary };
 }
 
 /* ── Styled components ── */
@@ -69,46 +83,47 @@ const NodeRow = styled(Box, {
   cursor: 'pointer',
   gap: 4,
   position: 'relative',
-  transition: 'background-color 150ms ease',
+  minHeight: 32,
+  transition: 'background-color 80ms', // MERIDIAN: instant hover
 
-  // Context state (creando aquí) — prioridad sobre selected
+  // Acting state (context — creating/editing) — priority over selected
   ...(isContext && {
-    backgroundColor: alpha(theme.palette.success.main, 0.07),
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
     '&::before': {
       content: '""',
       position: 'absolute',
-      left: 3,
-      top: 4,
-      bottom: 4,
-      width: 3,
-      borderRadius: 2,
-      backgroundColor: theme.palette.success.main,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 2,
+      backgroundColor: theme.palette.primary.main,
+      opacity: 0.5,
     },
   }),
 
-  // Selected state — solo cuando NO es contexto activo
+  // Selected state — only when NOT acting
   ...(!isContext && isSelected && {
-    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
     '&::before': {
       content: '""',
       position: 'absolute',
-      left: 3,
-      top: 4,
-      bottom: 4,
-      width: 3,
-      borderRadius: 2,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 2,
       backgroundColor: theme.palette.primary.main,
     },
   }),
 
   '&:hover': {
     backgroundColor: isContext
-      ? alpha(theme.palette.success.main, 0.11)
+      ? alpha(theme.palette.primary.main, 0.08)
       : isSelected
         ? alpha(theme.palette.primary.main, 0.12)
-        : alpha(theme.palette.primary.main, 0.05),
+        : theme.meridian.surfaces.s3,
     '& .tree-actions': {
       opacity: 1,
+      pointerEvents: 'all' as const,
     },
   },
 }));
@@ -126,29 +141,31 @@ const IndentGuide = styled('span')(({ theme }) => ({
     top: 0,
     bottom: 0,
     width: 1,
-    backgroundColor: theme.palette.divider,
+    backgroundColor: theme.meridian.borders.muted,
   },
 }));
 
 const ToggleBtn = styled('button', {
   shouldForwardProp: (p) => p !== 'isExpanded' && p !== 'isLeaf',
 })<{ isExpanded?: boolean; isLeaf?: boolean }>(({ theme, isExpanded, isLeaf }) => ({
-  width: 20,
-  height: 20,
+  width: 18,
+  height: 18,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   border: 'none',
   backgroundColor: 'transparent',
-  color: theme.palette.text.disabled,
+  color: theme.meridian.text.tx4,
   cursor: 'pointer',
-  borderRadius: 4,
+  borderRadius: 3,
   padding: 0,
   flexShrink: 0,
-  transition: 'transform 150ms ease, background-color 150ms ease, color 150ms ease',
+  marginRight: 4,
+  transition: `transform 200ms ${EASING_SPRING}, color 150ms`,
 
   ...(isExpanded && {
     transform: 'rotate(90deg)',
+    color: theme.palette.primary.main,
   }),
 
   ...(isLeaf && {
@@ -161,18 +178,6 @@ const ToggleBtn = styled('button', {
   },
 }));
 
-const NodeIcon = styled('span', {
-  shouldForwardProp: (p) => p !== 'isFolder',
-})<{ isFolder?: boolean }>(({ theme, isFolder }) => ({
-  width: 18,
-  height: 18,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  color: isFolder ? '#d97706' : theme.palette.text.disabled,
-}));
-
 const LabelWrap = styled(Box)({
   flex: 1,
   display: 'flex',
@@ -181,85 +186,73 @@ const LabelWrap = styled(Box)({
   minWidth: 0,
 });
 
-const ActionsWrap = styled(Box)({
-  opacity: 0,
+/* ── MERIDIAN Action container — positioned with bg/border/shadow ── */
+const ActionsWrap = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  right: 8,
+  top: '50%',
+  transform: 'translateY(-50%)',
   display: 'flex',
-  gap: 2,
-  marginLeft: 8,
-  flexShrink: 0,
-  transition: 'opacity 150ms ease',
-});
+  alignItems: 'center',
+  gap: 4,
+  padding: '3px 4px',
+  background: theme.meridian.surfaces.s3,
+  border: `1px solid ${theme.meridian.borders.muted}`,
+  borderRadius: 4,
+  boxShadow: theme.meridian.shadows.sm,
+  opacity: 0,
+  pointerEvents: 'none' as const,
+  transition: 'opacity 120ms',
+  zIndex: 2,
+}));
 
+/* ── MERIDIAN 28×28px action buttons ── */
 const ActionBtn = styled('button')<{ variant: 'add' | 'edit' | 'delete' }>(
-  ({ variant }) => {
-    const colors = {
-      add: { color: '#059669', hoverBg: 'rgba(5,150,105,0.12)' },
-      edit: { color: '#2563eb', hoverBg: 'rgba(37,99,235,0.12)' },
-      delete: { color: '#ef4444', hoverBg: 'rgba(220,38,38,0.1)' },
+  ({ theme, variant }) => {
+    const colorMap = {
+      add: { base: theme.palette.primary.main, hoverAlpha: 0.12 },
+      edit: { base: theme.palette.info.main, hoverAlpha: 0.10 },
+      delete: { base: theme.palette.error.main, hoverAlpha: 0.10 },
     };
-    const c = colors[variant];
+    const c = colorMap[variant];
     return {
-      width: 24,
-      height: 24,
+      width: 28,
+      height: 28,
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
       border: 'none',
-      borderRadius: 4,
+      borderRadius: 5,
       backgroundColor: 'transparent',
-      color: c.color,
+      color: theme.palette.text.disabled,
       cursor: 'pointer',
       padding: 0,
+      transition: 'background 100ms, color 100ms',
       '&:hover': {
-        backgroundColor: c.hoverBg,
+        backgroundColor: alpha(c.base, c.hoverAlpha),
+        color: c.base,
       },
     };
   },
 );
 
-const ChildrenWrap = styled(Box, {
+/* ── CSS Grid expand/collapse — MERIDIAN pattern ── */
+const ChildrenGrid = styled(Box, {
+  shouldForwardProp: (p) => p !== 'isExpanded',
+})<{ isExpanded?: boolean }>(({ isExpanded }) => ({
+  display: 'grid',
+  gridTemplateRows: isExpanded ? '1fr' : '0fr',
+  transition: `grid-template-rows 260ms ${EASING_SPRING}`,
+}));
+
+const ChildrenInner = styled(Box, {
   shouldForwardProp: (p) => p !== 'isExpanded',
 })<{ isExpanded?: boolean }>(({ isExpanded }) => ({
   overflow: 'hidden',
-  maxHeight: isExpanded ? 2000 : 0,
+  minHeight: 0,
   opacity: isExpanded ? 1 : 0,
-  transition: 'max-height 300ms ease, opacity 200ms ease',
+  transition: 'opacity 180ms ease',
 }));
-
-const TypeBadge = styled('span')<{ badgetype: 'titulo' | 'grupo' | 'subgrupo' }>(
-  ({ badgetype }) => {
-    const cfg = {
-      titulo: badgeConfig[1],
-      grupo: badgeConfig[2],
-      subgrupo: badgeConfig[3],
-    }[badgetype];
-    return {
-      fontSize: '0.5625rem',
-      fontWeight: 700,
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.06em',
-      padding: '1px 6px',
-      borderRadius: 3,
-      backgroundColor: cfg.bgColor,
-      color: cfg.color,
-      whiteSpace: 'nowrap' as const,
-      lineHeight: 1.4,
-    };
-  },
-);
-
-/* ── Mobile level-specific text styles ── */
-const MOBILE_CODE_STYLES: Record<number, object> = {
-  0: { fontSize: '0.875rem', fontWeight: 800, color: '#0d6b5e' },
-  1: { fontSize: '0.8125rem', fontWeight: 700, color: '#6366f1' },
-  2: { fontSize: '0.8125rem', fontWeight: 600, color: '#d97706' },
-};
-
-const MOBILE_NAME_STYLES: Record<number, object> = {
-  0: { fontSize: '0.9375rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.02em' },
-  1: { fontSize: '0.875rem', fontWeight: 600 },
-  2: { fontSize: '0.8125rem', fontWeight: 550 },
-};
 
 /* ── Component ── */
 
@@ -284,61 +277,65 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   const isSelected = selectedId === item.id;
   const isContext = !!contextId && contextId === String(item.idPlanCuenta);
   const tipoCuentaId = item.tipoCuentaId ?? 0;
-  // Carpeta solo si realmente tiene hijos — así cuentas sin subcuentas muestran ícono de archivo
-  const isFolder = hasChildren;
 
   // Split label into code and name
   const [codigo, ...nombreParts] = item.label.split(' – ');
   const nombre = nombreParts.join(' – ');
-
-  // Badge: only for levels 0-2 (tipoCuentaId 1-3)
-  const badgeType =
-    tipoCuentaId === 1
-      ? 'titulo'
-      : tipoCuentaId === 2
-        ? 'grupo'
-        : tipoCuentaId === 3
-          ? 'subgrupo'
-          : null;
-
-  // Desktop level-based text styling
-  const codeFontSize = level === 0 ? '0.8125rem' : '0.75rem';
-  const nameFontSize = level === 0 ? '0.875rem' : '0.8125rem';
-  const nameFontWeight = level === 0 ? 700 : level === 1 ? 600 : 450;
 
   // Action visibility — Titulos(1), Grupos(2), Subgrupos(3) son fijos CGR/SUBDERE
   const canAdd = tipoCuentaId >= 3 && tipoCuentaId < MAX_NIVEL_CUENTA;
   const canEdit = tipoCuentaId >= 4;
   const canDelete = tipoCuentaId >= 5;
 
-  const handleRowClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelect(item);
-    if (hasChildren) {
-      onToggle(item.id);
-    }
+  // N1 (Título) gets a bottom border separator like the prototype
+  const isN1 = tipoCuentaId === 1;
+
+  // ── Desktop MERIDIAN typography ──
+  const desktopCodeStyle = {
+    fontFamily: FONT_MONO,
+    fontSize: level === 0 ? '13px' : level === 1 ? '12px' : level >= 5 ? (level >= 7 ? '10.5px' : '11px') : '11.5px',
+    fontWeight: level === 0 ? 600 : 400,
+    letterSpacing: '0.02em',
+    fontFeatureSettings: "'tnum' 1, 'cv01' 1",
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap' as const,
   };
 
-  const handleToggleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggle(item.id);
+  const desktopNameStyle = {
+    fontFamily: FONT_SANS,
+    fontSize: level === 0 ? '13.5px' : level >= 5 ? (level >= 7 ? '12px' : '12.5px') : '13px',
+    fontWeight: level === 0 ? 600 : level === 1 ? 500 : 400,
+    color: level >= 5 ? theme.palette.text.secondary : theme.palette.text.primary,
+    overflow: 'hidden' as const,
+    textOverflow: 'ellipsis' as const,
+    whiteSpace: 'nowrap' as const,
   };
 
-  // ── Mobile: border color and width by level ──────────────────────
-  const mobileBorderColor = getMobileBorderColor(level, theme.palette.divider);
+  // ── Mobile typography ──
+  const mobileCodeStyle = getMobileCodeStyle(level, theme);
+  const mobileNameStyle = getMobileNameStyle(level, theme);
+  const mobileBorderColor = getMobileBorderColor(level, theme);
   const mobileBorderWidth = getMobileBorderWidth(level);
 
-  // ── Mobile code/name styles ──────────────────────────────────────
-  const mobileCodeStyle = MOBILE_CODE_STYLES[level] ?? {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: theme.palette.text.disabled,
-  };
-  const mobileNameStyle = MOBILE_NAME_STYLES[level] ?? {
-    fontSize: '0.8125rem',
-    fontWeight: 400,
-    color: theme.palette.text.secondary,
-  };
+  // ── Handlers with useCallback ──
+  const handleRowClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onSelect(item);
+      if (hasChildren) {
+        onToggle(item.id);
+      }
+    },
+    [item, hasChildren, onSelect, onToggle],
+  );
+
+  const handleToggleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onToggle(item.id);
+    },
+    [item.id, onToggle],
+  );
 
   return (
     <Box>
@@ -346,43 +343,43 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         isSelected={isSelected}
         isContext={isContext}
         onClick={handleRowClick}
-        sx={
-          isMobile
-            ? {
-                margin: 0,
-                borderRadius: 0,
-                minHeight: level === 0 ? 52 : 48,
-                padding:
-                  level === 0 ? '16px 12px 16px 16px' : '12px 12px 12px 16px',
-                borderLeft: `${mobileBorderWidth}px solid ${
-                  isContext
-                    ? theme.palette.success.main
-                    : isSelected
-                      ? theme.palette.primary.main
-                      : mobileBorderColor
-                }`,
-                borderTop: '1px solid rgba(226, 232, 240, 0.3)',
-                background: isContext
-                  ? alpha(theme.palette.success.main, 0.07)
-                  : isSelected
-                    ? `rgba(13, 107, 94, 0.06)`
-                    : level === 0
-                      ? 'rgba(13, 107, 94, 0.03)'
-                      : 'transparent',
-                '&::before': { display: 'none' },
-                '&:hover': {
-                  background: isContext
-                    ? alpha(theme.palette.success.main, 0.11)
-                    : isSelected
-                      ? 'rgba(13, 107, 94, 0.08)'
-                      : 'rgba(13, 107, 94, 0.03)',
-                  '& .tree-actions': { opacity: 1 },
-                },
-              }
-            : undefined
-        }
+        sx={{
+          // N1 separator line (prototype: .pc-lv0 > .pc-node-row border-bottom)
+          ...(isN1 && !isMobile && {
+            borderBottom: `1px solid ${theme.meridian.borders.muted}`,
+          }),
+          ...(isMobile && {
+            margin: 0,
+            borderRadius: 0,
+            minHeight: level === 0 ? 52 : 48,
+            padding:
+              level === 0 ? '16px 12px 16px 16px' : '12px 12px 12px 16px',
+            borderLeft: `${mobileBorderWidth}px solid ${
+              isContext || isSelected
+                ? theme.palette.primary.main
+                : mobileBorderColor
+            }`,
+            borderTop: `1px solid ${theme.palette.divider}`,
+            background: isContext
+              ? alpha(theme.palette.primary.main, 0.05)
+              : isSelected
+                ? alpha(theme.palette.primary.main, 0.06)
+                : level === 0
+                  ? alpha(theme.palette.primary.main, 0.03)
+                  : 'transparent',
+            '&::before': { display: 'none' },
+            '&:hover': {
+              background: isContext
+                ? alpha(theme.palette.primary.main, 0.08)
+                : isSelected
+                  ? alpha(theme.palette.primary.main, 0.08)
+                  : alpha(theme.palette.primary.main, 0.03),
+              '& .tree-actions': { opacity: 1 },
+            },
+          }),
+        }}
       >
-        {/* Indent guides — ocultas en mobile (jerarquía por borde de color) */}
+        {/* Indent guides — hidden in mobile */}
         {!isMobile &&
           Array.from({ length: level }, (_, i) => <IndentGuide key={i} />)}
 
@@ -413,23 +410,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
           <ChevronRight size={14} />
         </ToggleBtn>
 
-        {/* Node icon */}
-        <NodeIcon
-          isFolder={isFolder}
-          sx={isMobile ? { width: 16, height: 16 } : undefined}
-        >
-          {isFolder ? (
-            isExpanded ? (
-              <FolderOpen size={isMobile ? 16 : 18} />
-            ) : (
-              <Folder size={isMobile ? 16 : 18} />
-            )
-          ) : (
-            <FileText size={isMobile ? 16 : 18} />
-          )}
-        </NodeIcon>
-
-        {/* Label */}
+        {/* Label — MERIDIAN order: código → badge → nombre */}
         <LabelWrap
           sx={
             isMobile
@@ -437,44 +418,24 @@ export const CustomTreeItem = memo(function CustomTreeItem({
               : undefined
           }
         >
-          {/* Código */}
+          {/* Código — DM Mono */}
           <Typography
             component="span"
             sx={
               isMobile
                 ? {
-                    fontFamily: 'monospace',
+                    fontFamily: FONT_MONO,
                     lineHeight: 1.2,
                     whiteSpace: 'nowrap',
                     ...mobileCodeStyle,
                   }
-                : {
-                    fontFamily: 'monospace',
-                    fontSize: codeFontSize,
-                    fontWeight: 700,
-                    color: theme.palette.primary.main,
-                    whiteSpace: 'nowrap',
-                  }
+                : { ...desktopCodeStyle, marginRight: '4px' }
             }
           >
             {highlight(codigo, searchTerm)}
           </Typography>
 
-          {/* Separador — oculto en mobile */}
-          {!isMobile && (
-            <Typography
-              component="span"
-              sx={{
-                color: theme.palette.text.disabled,
-                fontSize: '0.8125rem',
-                userSelect: 'none',
-              }}
-            >
-              —
-            </Typography>
-          )}
-
-          {/* Nombre */}
+          {/* Nombre — DM Sans */}
           <Typography
             component="span"
             sx={
@@ -486,26 +447,14 @@ export const CustomTreeItem = memo(function CustomTreeItem({
                     maxWidth: '100%',
                     ...mobileNameStyle,
                   }
-                : {
-                    fontSize: nameFontSize,
-                    fontWeight: nameFontWeight,
-                    color: theme.palette.text.primary,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }
+                : desktopNameStyle
             }
           >
             {highlight(nombre, searchTerm)}
           </Typography>
-
-          {/* Type badge — solo en desktop */}
-          {!isMobile && badgeType && (
-            <TypeBadge badgetype={badgeType}>{badgeConfig[tipoCuentaId].label}</TypeBadge>
-          )}
         </LabelWrap>
 
-        {/* Indicador de contexto activo: "Creando aquí" */}
+        {/* Context indicator: "Creando aquí" */}
         {isContext && (
           <Box
             sx={{
@@ -516,8 +465,8 @@ export const CustomTreeItem = memo(function CustomTreeItem({
               py: '2px',
               mr: 0.5,
               borderRadius: '20px',
-              bgcolor: (t) => alpha(t.palette.success.main, 0.1),
-              border: (t) => `1px solid ${alpha(t.palette.success.main, 0.3)}`,
+              bgcolor: alpha(theme.palette.success.main, 0.1),
+              border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
               color: 'success.main',
               fontSize: '0.5625rem',
               fontWeight: 700,
@@ -533,15 +482,24 @@ export const CustomTreeItem = memo(function CustomTreeItem({
           </Box>
         )}
 
-        {/* Hover/touch actions */}
+        {/* Hover/touch actions — MERIDIAN positioned container */}
         <ActionsWrap
           className="tree-actions"
           sx={
             isMobile
               ? {
+                  position: 'relative',
+                  right: 'auto',
+                  top: 'auto',
+                  transform: 'none',
                   opacity: 1,
+                  pointerEvents: 'all',
                   gap: '2px',
                   marginLeft: '4px',
+                  background: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  padding: 0,
                   '& button': { width: 32, height: 32, borderRadius: '6px' },
                 }
               : undefined
@@ -586,28 +544,30 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         </ActionsWrap>
       </NodeRow>
 
-      {/* Children (recursive) */}
+      {/* Children (recursive) — CSS Grid animation */}
       {hasChildren && (
-        <ChildrenWrap isExpanded={isExpanded}>
-          {item.children!.map((child) => (
-            <CustomTreeItem
-              key={child.id}
-              item={child}
-              level={level + 1}
-              expandedItems={expandedItems}
-              selectedId={selectedId}
-              contextId={contextId}
-              searchTerm={searchTerm}
-              isMobile={isMobile}
-              onToggle={onToggle}
-              onSelect={onSelect}
-              onCreate={onCreate}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              highlight={highlight}
-            />
-          ))}
-        </ChildrenWrap>
+        <ChildrenGrid isExpanded={isExpanded}>
+          <ChildrenInner isExpanded={isExpanded}>
+            {item.children!.map((child) => (
+              <CustomTreeItem
+                key={child.id}
+                item={child}
+                level={level + 1}
+                expandedItems={expandedItems}
+                selectedId={selectedId}
+                contextId={contextId}
+                searchTerm={searchTerm}
+                isMobile={isMobile}
+                onToggle={onToggle}
+                onSelect={onSelect}
+                onCreate={onCreate}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                highlight={highlight}
+              />
+            ))}
+          </ChildrenInner>
+        </ChildrenGrid>
       )}
     </Box>
   );
