@@ -610,10 +610,10 @@ function withCodigoLength(schema: typeof baseObject) {
 - [x] Sin hijos: muestra "Esta acción no se puede deshacer."
 
 ### Fase 4 — API Delete
-- [ ] handleConfirmDelete llama a mutation real (useEliminarPlanesCuentaMutation)
-- [ ] Toast de éxito muestra código formateado de la cuenta eliminada
-- [ ] Toast de error en caso de falla
-- [ ] Selección se limpia si el nodo eliminado estaba seleccionado
+- [x] handleConfirmDelete llama a mutation real (useEliminarPlanesCuentaMutation)
+- [x] Toast de éxito muestra código formateado de la cuenta eliminada
+- [x] Toast de error en caso de falla
+- [x] Selección se limpia si el nodo eliminado estaba seleccionado
 
 ### Fase 5 — Calidad de Código
 - [ ] Zero `any`: eliminar `control: any` en AccountPanel.tsx y `palette: any` en planDeCuentasUtils.ts

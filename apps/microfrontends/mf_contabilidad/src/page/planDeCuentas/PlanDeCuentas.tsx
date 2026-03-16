@@ -12,7 +12,9 @@ import {
   UnfoldVertical,
   X,
 } from 'lucide-react';
+import { useEliminarPlanesCuentaMutation } from 'mf_store/store';
 import { memo, type JSX, useCallback, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { PlanDeCuentasTree } from '../../components/PlanDeCuentasTree';
 import { AccountPanel } from '../../components/planCuentas/AccountPanel';
@@ -260,6 +262,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
 
   const tree = usePlanDeCuentasTree();
   const panel = useAccountPanel({ onExpandNode: tree.expandNode });
+  const [eliminarCuenta, { isLoading: isDeleting }] = useEliminarPlanesCuentaMutation();
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -310,11 +313,20 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
     setDeleteTarget({ item });
   }, []);
 
-  const handleConfirmDelete = useCallback(() => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
-    // TODO: implementar eliminacion real via API
-    setDeleteTarget(null);
-  }, [deleteTarget]);
+    try {
+      await eliminarCuenta(deleteTarget.item.idPlanCuenta).unwrap();
+      const code = deleteTarget.item.label.split(' – ')[0];
+      toast.success(`Cuenta ${code} eliminada`);
+      if (selectedNodeId === deleteTarget.item.id) {
+        setSelectedNodeId(null);
+      }
+      setDeleteTarget(null);
+    } catch {
+      toast.error('Error al eliminar la cuenta');
+    }
+  }, [deleteTarget, eliminarCuenta, selectedNodeId]);
 
   const handleMobileSearchClose = useCallback(() => {
     setMobileSearchOpen(false);
@@ -615,6 +627,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
         childCount={deleteTarget ? countDescendants(deleteTarget.item) : 0}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
       />
     </Box>
   );
