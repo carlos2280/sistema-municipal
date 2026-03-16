@@ -56,6 +56,7 @@ import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
 import { useModuleSync } from "../hooks/useModuleSync";
 import { StatusBar } from "./StatusBar";
 import { Compass } from "./Compass";
+import { NavPanel, useNavPanel } from "./NavPanel";
 
 // ============================================================================
 // CONSTANTS
@@ -288,6 +289,7 @@ export default function AppLayout() {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [chatDrawerOpen, setChatDrawerOpen] = useState(false);
   const [orgOpen, setOrgOpen] = useState(false);
+  const navPanel = useNavPanel();
 
   // Total de mensajes no leídos para el badge del botón de chat
   const { data: conversaciones } = useObtenerConversacionesQuery() as {
@@ -569,6 +571,14 @@ export default function AppLayout() {
       </Box>
 
       {/* ── Side Panels ─────────────────────────────────────────── */}
+      <NavPanel
+        isOpen={navPanel.isOpen}
+        onClose={navPanel.close}
+        onOpenCustomizer={() => {
+          navPanel.close();
+          setCustomizerOpen(true);
+        }}
+      />
       <ThemeCustomizer
         open={customizerOpen}
         onClose={() => setCustomizerOpen(false)}
