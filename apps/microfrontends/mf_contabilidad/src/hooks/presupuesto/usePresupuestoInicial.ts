@@ -20,6 +20,27 @@ import { usePresupuestoDetalle } from "./usePresupuestoDetalle";
 import { useDiscrepancias } from "./useDiscrepancias";
 import { useImportarExcel } from "./useImportarExcel";
 
+/** Estado del toast de confirmación de eliminación de línea */
+export interface DeleteLineaToastState {
+  open: boolean;
+  clientId: string | null;
+  cuentaCodigo?: string;
+  cuentaNombre?: string;
+  subcuentasCount: number;
+  /** Todos los clientIds que serán eliminados (incluye raíz + descendientes) */
+  targetIds: string[];
+  /** IDs de servidor de filas a eliminar (para API calls) */
+  serverIds: number[];
+}
+
+const EMPTY_DELETE_STATE: DeleteLineaToastState = {
+  open: false,
+  clientId: null,
+  subcuentasCount: 0,
+  targetIds: [],
+  serverIds: [],
+};
+
 /**
  * Hook orquestador del Presupuesto Inicial.
  * Coordina: estado de UI, detalle del grid, sync con servidor, discrepancias.
@@ -30,11 +51,12 @@ import { useImportarExcel } from "./useImportarExcel";
 export const usePresupuestoInicial = (presupuestoId?: number) => {
   // ── Estado de UI ─────────────────────────────────────────────────────────────
   const [tabActivo, setTabActivo] = useState<TipoTab>("ingresos");
-  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [headerCollapsed, setHeaderCollapsed] = useState(true);
   const [searchIngresos, setSearchIngresos] = useState("");
   const [searchGastos, setSearchGastos] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteLineaToast, setDeleteLineaToast] = useState<DeleteLineaToastState>(EMPTY_DELETE_STATE);
 
   // ── Formulario del encabezado ─────────────────────────────────────────────
   const anoActual = new Date().getFullYear();
@@ -119,8 +141,6 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
   const detalleActivo = tabActivo === "ingresos" ? detalleIngresos : detalleGastos;
   const discrepanciasActivoMap =
     tabActivo === "ingresos" ? discrepanciasIngresosMap : discrepanciasGastosMap;
-  const searchActivo = tabActivo === "ingresos" ? searchIngresos : searchGastos;
-  const setSearchActivo = tabActivo === "ingresos" ? setSearchIngresos : setSearchGastos;
   const cuentasDisponibles = tabActivo === "ingresos" ? cuentasIngresos : cuentasGastos;
 
   const totalIngresos = useMemo(
@@ -152,7 +172,6 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
 
       if (targetIdx >= 0 && targetIdx < display.length) {
         const targetId = display[targetIdx]._clientId;
-        // Abrir el MontoInput de la fila destino simulando un click
         setTimeout(() => {
           const el = document.querySelector<HTMLElement>(`[data-monto-id="${targetId}"]`);
           el?.click();
@@ -271,37 +290,91 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     }
   }, [presupuestoId, eliminarPresupuesto]);
 
-  // ── Eliminar línea ────────────────────────────────────────────────────────
+  // ── Eliminar línea con cascade ──────────────────────────────────────────
+  /**
+   * Inicia el flujo de eliminación:
+   * 1. Filas nuevas sin descendientes → eliminación inmediata
+   * 2. Filas con descendientes o guardadas → muestra toast de confirmación
+   *
+   * Equivale al prototipo: piDeleteRow() → compute targetRows → show toast
+   */
   const handleEliminarLinea = useCallback(
-    async (clientId: string) => {
+    (clientId: string) => {
       const fila = detalleActivo.filasDisplay.find((f) => f._clientId === clientId);
       if (!fila) return;
 
-      if (fila.isNew || !fila.id) {
+      const info = detalleActivo.getInfoEliminar(clientId);
+
+      // Fila nueva sin descendientes → eliminación inmediata (no necesita confirmación)
+      if ((fila.isNew || !fila.id) && info.count === 0) {
         detalleActivo.eliminarFila(clientId);
         return;
       }
-      detalleActivo.setPendingDelete(clientId);
+
+      // Recopilar IDs para highlight y API calls
+      const allFilas = detalleActivo.filasDisplay;
+      const targetIds = [clientId, ...info.descendantIds];
+      const serverIds = allFilas
+        .filter((f) => targetIds.includes(f._clientId) && f.id !== undefined)
+        .map((f) => f.id!);
+
+      // Mostrar toast de confirmación + resaltar filas en rojo
+      setDeleteLineaToast({
+        open: true,
+        clientId,
+        cuentaCodigo: fila.cuenta?.codigo,
+        cuentaNombre: fila.cuenta?.nombre,
+        subcuentasCount: info.count,
+        targetIds,
+        serverIds,
+      });
     },
     [detalleActivo],
   );
 
+  /**
+   * Confirma la eliminación en cascada:
+   * 1. Elimina cada fila persistida del servidor (API call por fila)
+   * 2. Elimina localmente el nodo + descendientes
+   * 3. Recalcula montos de ancestros
+   *
+   * Equivale al prototipo: piConfirmDelete() → animate → remove → recalc
+   */
   const handleConfirmEliminarLinea = useCallback(async () => {
-    const clientId = detalleActivo.pendingDelete;
-    if (!clientId || !presupuestoId) return;
+    const { clientId, serverIds } = deleteLineaToast;
+    if (!clientId) return;
 
-    const fila = detalleActivo.filasDisplay.find((f) => f._clientId === clientId);
-    if (!fila?.id) return;
-
+    setIsSaving(true);
     try {
-      await eliminarLinea({ presupuestoId, detalleId: fila.id }).unwrap();
-      detalleActivo.eliminarFila(clientId);
-      detalleActivo.setPendingDelete(null);
-      toast.success("Línea eliminada.");
+      // Eliminar del servidor (en paralelo para mejor performance)
+      if (presupuestoId && serverIds.length > 0) {
+        await Promise.all(
+          serverIds.map((detalleId) =>
+            eliminarLinea({ presupuestoId, detalleId }).unwrap(),
+          ),
+        );
+      }
+
+      // Eliminar localmente con cascade + recalc de ancestros
+      detalleActivo.eliminarConDescendientes(clientId);
+
+      const count = deleteLineaToast.subcuentasCount;
+      const msg = count > 0
+        ? `Línea y ${count} subcuenta${count > 1 ? "s" : ""} eliminada${count > 1 ? "s" : ""}.`
+        : "Línea eliminada.";
+      toast.success(msg);
     } catch {
       toast.error("Error al eliminar la línea.");
+    } finally {
+      setIsSaving(false);
+      setDeleteLineaToast(EMPTY_DELETE_STATE);
     }
-  }, [detalleActivo, presupuestoId, eliminarLinea]);
+  }, [deleteLineaToast, presupuestoId, eliminarLinea, detalleActivo]);
+
+  /** Cancela el toast de eliminación */
+  const handleCancelEliminarLinea = useCallback(() => {
+    setDeleteLineaToast(EMPTY_DELETE_STATE);
+  }, []);
 
   return {
     // Estado UI
@@ -309,8 +382,10 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     setTabActivo,
     headerCollapsed,
     setHeaderCollapsed: () => setHeaderCollapsed((p) => !p),
-    searchActivo,
-    setSearchActivo,
+    searchIngresos,
+    setSearchIngresos,
+    searchGastos,
+    setSearchGastos,
     confirmDelete,
     setConfirmDelete,
     isSaving,
@@ -360,6 +435,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     handleEliminarPresupuesto,
     handleEliminarLinea,
     handleConfirmEliminarLinea,
+    handleCancelEliminarLinea,
+    // Delete toast state
+    deleteLineaToast,
     // Mapas individuales para badges de tabs
     discrepanciasIngresosMap,
     discrepanciasGastosMap,

@@ -1,44 +1,78 @@
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AddIcon from "@mui/icons-material/Add";
+import CalculateIcon from "@mui/icons-material/Calculate";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import HistoryIcon from "@mui/icons-material/History";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PrintIcon from "@mui/icons-material/Print";
 import SaveIcon from "@mui/icons-material/Save";
 import ScaleIcon from "@mui/icons-material/Scale";
+import SearchIcon from "@mui/icons-material/Search";
 import SouthWestIcon from "@mui/icons-material/SouthWest";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   Badge,
   Box,
   Button,
   CircularProgress,
-  Divider,
   IconButton,
-  Stack,
+  InputAdornment,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useLayoutEffect, useRef } from "react";
+import { alpha, type Theme } from "@mui/material/styles";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { FormProvider } from "react-hook-form";
-import DiscrepanciaBanner from "../../components/presupuesto/molecules/DiscrepanciaBanner";
+import DeleteConfirmToast from "../../components/presupuesto/molecules/DeleteConfirmToast";
 import DeleteLineaDialog from "../../components/presupuesto/molecules/DeleteLineaDialog";
 import PresupuestoHeader from "../../components/presupuesto/molecules/PresupuestoHeader";
-import PresupuestoToolbar from "../../components/presupuesto/molecules/PresupuestoToolbar";
 import PresupuestoGrid from "../../components/presupuesto/organisms/PresupuestoGrid";
 import PresupuestoResumen from "../../components/presupuesto/organisms/PresupuestoResumen";
 import { usePresupuestoInicial } from "../../hooks/presupuesto/usePresupuestoInicial";
+
+// ─── Tipos ────────────────────────────────────────────────────────
+type TabValue = "ingresos" | "gastos" | "resumen";
 
 interface PresupuestoInicialProps {
   presupuestoId?: number;
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────
+const formatFecha = (iso: string | null, conHora = false): string => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const fecha = d.toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" });
+  if (!conHora) return fecha;
+  const hora = d.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+  return `${fecha} ${hora}`;
+};
+
+const formatCLP = (n: number): string =>
+  n.toLocaleString("es-CL", { style: "decimal", maximumFractionDigits: 0 });
+
+// ─── Stage padding overrides (full-bleed dentro del Stage) ────────
+// El Stage usa padding 40px 48px 80px — debemos anularlo para esta vista
+const STAGE_PT = 40;
+const STAGE_PX = 48;
+const STAGE_PB = 80;
+const EYEBROW_H = 28;
+
+// ─── Sx helpers (composables) ─────────────────────────────────────
+const numericFontSx = {
+  fontFamily: "'Space Grotesk', sans-serif",
+  fontFeatureSettings: "'tnum' 1, 'ss01' 1",
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════
+//  PRESUPUESTO INICIAL — Vista MERIDIAN
+// ═══════════════════════════════════════════════════════════════════
 const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
   const {
     tabActivo,
@@ -63,7 +97,6 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
     loadingCuentasGastos,
     detalleIngresos,
     detalleGastos,
-    detalleActivo,
     discrepanciasIngresosMap,
     discrepanciasGastosMap,
     filasIngresos,
@@ -80,26 +113,46 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
     handleEliminarPresupuesto,
     handleEliminarLinea,
     handleConfirmEliminarLinea,
-    fechaCreacion,
+    handleCancelEliminarLinea,
+    deleteLineaToast,
     fechaModificacion,
   } = usePresupuestoInicial(presupuestoId);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Reset scroll antes del paint cuando cambia el tab — evita el salto visual
   useLayoutEffect(() => {
     contentRef.current?.scrollTo({ top: 0 });
   }, [tabActivo]);
 
-  const formatFecha = (iso: string | null, conHora = false): string => {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    const fecha = d.toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" });
-    if (!conHora) return fecha;
-    const hora = d.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
-    return `${fecha} ${hora}`;
-  };
+  // ── Derivados ──────────────────────────────────────────────────
+  // Set de IDs marcados para eliminación (resaltados en rojo en el grid)
+  const deleteTargetIds = useMemo(
+    () => new Set(deleteLineaToast.targetIds),
+    [deleteLineaToast.targetIds],
+  );
 
+  const discrepanciasEnIngresos = [...(discrepanciasIngresosMap?.values() ?? [])].filter(
+    (d) => d !== null && d !== 0,
+  ).length;
+  const discrepanciasEnGastos = [...(discrepanciasGastosMap?.values() ?? [])].filter(
+    (d) => d !== null && d !== 0,
+  ).length;
+
+  const searchActivo = tabActivo === "ingresos" ? searchIngresos : searchGastos;
+  const setSearchActivo = tabActivo === "ingresos" ? setSearchIngresos : setSearchGastos;
+  const loadingCuentasActivo = tabActivo === "ingresos" ? loadingCuentasIngresos : loadingCuentasGastos;
+
+  // Total dinámico para el footer según tab activo
+  const footerTotal = tabActivo === "ingresos" ? totalIngresos : totalGastos;
+  const footerLabel = tabActivo === "ingresos" ? "Total Ingresos" : tabActivo === "gastos" ? "Total Gastos" : "Equilibrado";
+  const footerColor = (t: Theme) =>
+    tabActivo === "ingresos" ? t.palette.success.main
+      : tabActivo === "gastos" ? t.palette.error.main
+      : t.palette.info.main;
+
+  const numDisplay = numero !== null ? String(numero).padStart(3, "0") : "---";
+
+  // ── Loading ────────────────────────────────────────────────────
   if (isLoadingPresupuesto) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
@@ -108,69 +161,142 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
     );
   }
 
-  const pendingDeleteFila = detalleActivo.filasDisplay.find(
-    (f) => f._clientId === detalleActivo.pendingDelete,
-  );
-
-  // Conteo de discrepancias por tab (independiente del tab activo)
-  const discrepanciasEnIngresos = [...(discrepanciasIngresosMap?.values() ?? [])].filter(
-    (d) => d !== null && d !== 0,
-  ).length;
-  const discrepanciasEnGastos = [...(discrepanciasGastosMap?.values() ?? [])].filter(
-    (d) => d !== null && d !== 0,
-  ).length;
-
   return (
     <FormProvider {...form}>
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", gap: 0 }}>
+      {/* Full-bleed: anula el padding del Stage para que la vista ocupe 100% */}
+      <Box
+        sx={{
+          mx: `${-STAGE_PX}px`,
+          mt: `${-STAGE_PT}px`,
+          mb: `${-STAGE_PB}px`,
+          height: `calc(100vh - ${EYEBROW_H}px)`,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
 
-        {/* ── Page header ──────────────────────────────────────────── */}
+        {/* ═══ PAGE HEADER — compact single-line ═══════════════════ */}
         <Box
-          sx={{
+          sx={(t) => ({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            px: 3,
-            py: 1.5,
+            px: 2.5,
+            py: 1,
             bgcolor: "background.paper",
             borderBottom: "1px solid",
             borderColor: "divider",
+            borderLeft: `3px solid ${t.palette.primary.main}`,
             flexShrink: 0,
-            minHeight: 52,
-            gap: 2,
-          }}
+            gap: 1.5,
+            transition: "border-left-color 400ms",
+          })}
         >
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.25 }}>
-              <Typography variant="caption" color="text.disabled">Inicio</Typography>
-              <Typography variant="caption" color="text.disabled">/</Typography>
-              <Typography variant="caption" color="text.disabled">Presupuesto</Typography>
-              <Typography variant="caption" color="text.disabled">/</Typography>
-              <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600 }}>
+          {/* Left: breadcrumb + doc ID */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.disabled", cursor: "pointer", "&:hover": { color: "primary.main" }, transition: "color 150ms" }}
+              >
+                Inicio
+              </Typography>
+              <Typography variant="caption" sx={(t) => ({ color: t.meridian.text.tx4, fontSize: "10px" })}>
+                ›
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.disabled", cursor: "pointer", "&:hover": { color: "primary.main" }, transition: "color 150ms" }}
+              >
+                Contabilidad
+              </Typography>
+              <Typography variant="caption" sx={(t) => ({ color: t.meridian.text.tx4, fontSize: "10px" })}>
+                ›
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.disabled", cursor: "pointer", "&:hover": { color: "primary.main" }, transition: "color 150ms" }}
+              >
+                Presupuesto
+              </Typography>
+              <Typography variant="caption" sx={(t) => ({ color: t.meridian.text.tx4, fontSize: "10px" })}>
+                ›
+              </Typography>
+              <Typography
+                sx={{
+                  color: "text.primary",
+                  fontWeight: 700,
+                  fontFamily: "'Bricolage Grotesque', sans-serif",
+                  fontSize: "13px",
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 Presupuesto Inicial
               </Typography>
             </Box>
-            <Typography
-              sx={{
-                fontSize: "1.125rem",
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                color: "text.primary",
-                lineHeight: 1.2,
-              }}
+
+            {/* Doc ID chip */}
+            <Box
+              sx={(t) => ({
+                fontFamily: "'DM Mono', monospace",
+                fontSize: "10px",
+                fontWeight: 600,
+                color: t.meridian.text.tx4,
+                px: 0.75,
+                py: 0.25,
+                bgcolor: t.meridian.surfaces.s3,
+                borderRadius: 1,
+                flexShrink: 0,
+              })}
             >
-              Presupuesto Inicial
-            </Typography>
+              #{numDisplay}
+            </Box>
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+          {/* Right: discrepancy pill + actions */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+            {/* Discrepancy pill */}
+            {totalDiscrepancias > 0 && (
+              <Tooltip
+                title={`${totalDiscrepancias} discrepancia${totalDiscrepancias > 1 ? "s" : ""} — hijos no coinciden con padre`}
+                arrow
+              >
+                <Box
+                  onClick={handleRecalcularTodo}
+                  sx={(t) => ({
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    px: 1,
+                    py: 0.375,
+                    borderRadius: "10px",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    fontFamily: "'DM Mono', monospace",
+                    bgcolor: alpha(t.palette.warning.main, 0.10),
+                    color: "warning.main",
+                    border: `1px solid ${alpha(t.palette.warning.main, 0.22)}`,
+                    cursor: "pointer",
+                    transition: "background 150ms",
+                    "&:hover": { bgcolor: alpha(t.palette.warning.main, 0.18) },
+                  })}
+                >
+                  <WarningAmberIcon sx={{ fontSize: "12px" }} />
+                  <span>{totalDiscrepancias}</span>
+                </Box>
+              </Tooltip>
+            )}
+
+            <Box sx={{ width: "1px", height: 16, bgcolor: "divider", flexShrink: 0 }} />
+
             <Button
               size="small"
               variant="text"
               color="inherit"
-              startIcon={headerCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              startIcon={headerCollapsed ? <ExpandMoreIcon sx={{ fontSize: "14px" }} /> : <ExpandLessIcon sx={{ fontSize: "14px" }} />}
               onClick={setHeaderCollapsed}
-              sx={{ color: "text.secondary", fontWeight: 500 }}
+              sx={{ color: "text.disabled", fontWeight: 500, fontSize: "11px", minWidth: 0, px: 1 }}
             >
               {headerCollapsed ? "Mostrar" : "Ocultar"}
             </Button>
@@ -178,18 +304,18 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
               size="small"
               variant="text"
               color="inherit"
-              startIcon={<HistoryIcon />}
-              sx={{ color: "text.secondary", fontWeight: 500 }}
+              startIcon={<HistoryIcon sx={{ fontSize: "13px" }} />}
+              sx={{ color: "text.disabled", fontWeight: 500, fontSize: "11px", minWidth: 0, px: 1 }}
             >
               Historial
             </Button>
-            <IconButton size="small" sx={{ color: "text.disabled" }}>
-              <HelpOutlineIcon sx={{ fontSize: "1.125rem" }} />
+            <IconButton size="small" sx={{ color: "text.disabled", p: 0.5 }}>
+              <HelpOutlineIcon sx={{ fontSize: "14px" }} />
             </IconButton>
           </Box>
         </Box>
 
-        {/* ── Encabezado colapsable ─────────────────────────────────── */}
+        {/* ═══ ENCABEZADO COLAPSABLE ═══════════════════════════════ */}
         <PresupuestoHeader
           collapsed={headerCollapsed}
           onToggle={setHeaderCollapsed}
@@ -197,64 +323,68 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
           anosDisponibles={anosDisponibles}
         />
 
-        {/* ── Banner de discrepancias ──────────────────────────────── */}
-        <DiscrepanciaBanner
-          count={totalDiscrepancias}
-          onRecalcularTodo={handleRecalcularTodo}
-          loading={isSaving}
-        />
-
-        {/* ── Tabs: Ingresos / Gastos / Resumen ────────────────────── */}
+        {/* ═══ TABS + TOOLBAR (merged for density) ═════════════════ */}
         <Box
           sx={{
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "space-between",
+            px: 2.5,
+            bgcolor: "background.paper",
             borderBottom: "1px solid",
             borderColor: "divider",
-            bgcolor: "background.paper",
-            px: 3,
             flexShrink: 0,
+            gap: 1,
           }}
         >
+          {/* Tabs */}
           <Tabs
             value={tabActivo}
-            onChange={(_e, v) => setTabActivo(v)}
+            onChange={(_e, v: TabValue) => setTabActivo(v)}
             textColor="primary"
             indicatorColor="primary"
-            sx={{ minHeight: 44 }}
+            sx={{ minHeight: 38, "& .MuiTab-root": { minHeight: 38, py: 0, px: 1.75, minWidth: 0 } }}
           >
             <Tab
               value="ingresos"
-              sx={{ minHeight: 44, py: 0, px: 2.5 }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                  <SouthWestIcon sx={{ fontSize: "0.875rem" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <SouthWestIcon sx={{ fontSize: "12px" }} />
                   <Typography
-                    variant="caption"
-                    sx={{ fontWeight: tabActivo === "ingresos" ? 600 : 500, letterSpacing: 0.3 }}
+                    component="span"
+                    sx={{ fontSize: "11.5px", fontWeight: tabActivo === "ingresos" ? 600 : 500 }}
                   >
                     Ingresos
                   </Typography>
                   <Box
                     component="span"
-                    sx={{
+                    sx={(t) => ({
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      px: 0.75,
-                      minWidth: 18,
-                      height: 18,
-                      borderRadius: "9px",
-                      fontSize: "0.625rem",
+                      px: 0.5,
+                      minWidth: 16,
+                      height: 16,
+                      borderRadius: "8px",
+                      fontSize: "9px",
                       fontWeight: 700,
-                      fontFamily: "monospace",
-                      bgcolor: tabActivo === "ingresos" ? "rgba(13, 107, 94, 0.12)" : "grey.100",
+                      fontFamily: "'DM Mono', monospace",
+                      bgcolor: tabActivo === "ingresos"
+                        ? alpha(t.palette.primary.main, 0.12)
+                        : t.meridian.surfaces.s3,
                       color: tabActivo === "ingresos" ? "primary.main" : "text.disabled",
-                    }}
+                      transition: "background 150ms, color 150ms",
+                    })}
                   >
                     {filasIngresos.length}
                   </Box>
                   {discrepanciasEnIngresos > 0 && (
-                    <Badge badgeContent={discrepanciasEnIngresos} color="error" sx={{ "& .MuiBadge-badge": { fontSize: "0.5625rem", minWidth: 16, height: 16, borderRadius: 8 } }}>
-                      <Box sx={{ width: 4 }} />
+                    <Badge
+                      badgeContent={discrepanciasEnIngresos}
+                      color="error"
+                      sx={{ "& .MuiBadge-badge": { fontSize: "9px", minWidth: 14, height: 14, borderRadius: 7 } }}
+                    >
+                      <Box sx={{ width: 2 }} />
                     </Badge>
                   )}
                 </Box>
@@ -262,38 +392,44 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
             />
             <Tab
               value="gastos"
-              sx={{ minHeight: 44, py: 0, px: 2.5 }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                  <NorthEastIcon sx={{ fontSize: "0.875rem" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <NorthEastIcon sx={{ fontSize: "12px" }} />
                   <Typography
-                    variant="caption"
-                    sx={{ fontWeight: tabActivo === "gastos" ? 600 : 500, letterSpacing: 0.3 }}
+                    component="span"
+                    sx={{ fontSize: "11.5px", fontWeight: tabActivo === "gastos" ? 600 : 500 }}
                   >
                     Gastos
                   </Typography>
                   <Box
                     component="span"
-                    sx={{
+                    sx={(t) => ({
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      px: 0.75,
-                      minWidth: 18,
-                      height: 18,
-                      borderRadius: "9px",
-                      fontSize: "0.625rem",
+                      px: 0.5,
+                      minWidth: 16,
+                      height: 16,
+                      borderRadius: "8px",
+                      fontSize: "9px",
                       fontWeight: 700,
-                      fontFamily: "monospace",
-                      bgcolor: tabActivo === "gastos" ? "rgba(13, 107, 94, 0.12)" : "grey.100",
+                      fontFamily: "'DM Mono', monospace",
+                      bgcolor: tabActivo === "gastos"
+                        ? alpha(t.palette.primary.main, 0.12)
+                        : t.meridian.surfaces.s3,
                       color: tabActivo === "gastos" ? "primary.main" : "text.disabled",
-                    }}
+                      transition: "background 150ms, color 150ms",
+                    })}
                   >
                     {filasGastos.length}
                   </Box>
                   {discrepanciasEnGastos > 0 && (
-                    <Badge badgeContent={discrepanciasEnGastos} color="error" sx={{ "& .MuiBadge-badge": { fontSize: "0.5625rem", minWidth: 16, height: 16, borderRadius: 8 } }}>
-                      <Box sx={{ width: 4 }} />
+                    <Badge
+                      badgeContent={discrepanciasEnGastos}
+                      color="error"
+                      sx={{ "& .MuiBadge-badge": { fontSize: "9px", minWidth: 14, height: 14, borderRadius: 7 } }}
+                    >
+                      <Box sx={{ width: 2 }} />
                     </Badge>
                   )}
                 </Box>
@@ -301,49 +437,135 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
             />
             <Tab
               value="resumen"
-              sx={{ minHeight: 44, py: 0, px: 2.5 }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                  <ScaleIcon sx={{ fontSize: "0.875rem" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <ScaleIcon sx={{ fontSize: "12px" }} />
                   <Typography
-                    variant="caption"
-                    sx={{ fontWeight: tabActivo === "resumen" ? 600 : 500, letterSpacing: 0.3 }}
+                    component="span"
+                    sx={{ fontSize: "11.5px", fontWeight: tabActivo === "resumen" ? 600 : 500 }}
                   >
-                    Resumen / Equilibrio
+                    Resumen
                   </Typography>
                 </Box>
               }
             />
           </Tabs>
+
+          {/* Toolbar actions (only for ingresos/gastos tabs) */}
+          {tabActivo !== "resumen" && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+              {/* Search compact */}
+              <TextField
+                value={searchActivo}
+                onChange={(e) => setSearchActivo(e.target.value)}
+                placeholder="Buscar..."
+                size="small"
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ fontSize: "12px", color: "text.disabled" }} />
+                      </InputAdornment>
+                    ),
+                  },
+                  htmlInput: { "aria-label": "Buscar en detalle" },
+                }}
+                sx={{
+                  flex: "0 1 180px",
+                  "& .MuiOutlinedInput-root": {
+                    height: 28,
+                    fontSize: "11.5px",
+                    "&:focus-within": { flex: "0 1 240px" },
+                  },
+                  "& .MuiOutlinedInput-input": { py: 0.5, px: 0.5 },
+                  transition: "flex 200ms",
+                }}
+              />
+
+              {/* Agregar */}
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<AddIcon sx={{ fontSize: "12px" }} />}
+                onClick={() => (tabActivo === "ingresos" ? detalleIngresos : detalleGastos).agregarLinea()}
+                disabled={isSaving}
+                sx={{ height: 28, fontSize: "11px", px: 1, fontWeight: 600, whiteSpace: "nowrap" }}
+              >
+                Agregar
+              </Button>
+
+              {/* Importar */}
+              <Tooltip
+                title={loadingCuentasActivo ? "Cargando cuentas..." : "Importar Excel (.xlsx)"}
+                arrow
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleImportar}
+                    disabled={isSaving || loadingCuentasActivo}
+                    sx={{ width: 28, height: 28 }}
+                  >
+                    {loadingCuentasActivo ? (
+                      <CircularProgress size={12} color="inherit" />
+                    ) : (
+                      <FileUploadIcon sx={{ fontSize: "12px" }} />
+                    )}
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              {/* Exportar */}
+              <Tooltip title="Exportar (próximamente)" arrow>
+                <span>
+                  <IconButton size="small" disabled sx={{ width: 28, height: 28, opacity: 0.5 }}>
+                    <FileDownloadIcon sx={{ fontSize: "12px" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
+          )}
+
+          {/* Toolbar para Resumen: botón recalcular si hay discrepancias */}
+          {tabActivo === "resumen" && totalDiscrepancias > 0 && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+              <Button
+                size="small"
+                startIcon={<CalculateIcon sx={{ fontSize: "12px" }} />}
+                onClick={handleRecalcularTodo}
+                disabled={isSaving}
+                sx={(t) => ({
+                  height: 28,
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  bgcolor: alpha(t.palette.warning.main, 0.08),
+                  color: "warning.main",
+                  border: `1px solid ${alpha(t.palette.warning.main, 0.2)}`,
+                  "&:hover": { bgcolor: alpha(t.palette.warning.main, 0.14) },
+                })}
+              >
+                Recalcular todo
+              </Button>
+            </Box>
+          )}
         </Box>
 
-        {/* ── Contenido del tab activo ──────────────────────────────── */}
-        <Box ref={contentRef} sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0 }}>
-
+        {/* ═══ CONTENIDO DEL TAB ACTIVO ════════════════════════════ */}
+        <Box ref={contentRef} sx={{ flexGrow: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {/* Ingresos — siempre montado, oculto cuando no activo */}
-          <Box sx={{ display: tabActivo === "ingresos" ? "block" : "none" }}>
-            <PresupuestoToolbar
-              searchValue={searchIngresos}
-              onSearchChange={setSearchIngresos}
-              onAgregarLinea={() => detalleIngresos.agregarLinea()}
-              onImportar={handleImportar}
-              disabled={isSaving}
-              loadingCuentas={loadingCuentasIngresos}
-            />
+          <Box sx={{ display: tabActivo === "ingresos" ? "flex" : "none", flexDirection: "column", flexGrow: 1, minHeight: 0 }}>
             <PresupuestoGrid
               filas={detalleIngresos.filasDisplay}
               cuentasDisponibles={cuentasIngresos}
               centrosCosto={centrosCosto}
               cuentasEnUso={detalleIngresos.cuentasEnUso}
               discrepanciasMap={discrepanciasIngresosMap}
-              equilibrio={equilibrio}
-              totalTab={totalIngresos}
+              deleteTargetIds={deleteTargetIds}
               tipoTab="ingresos"
               searchFilter={searchIngresos}
               onCuentaChange={detalleIngresos.setCuenta}
               onCentroCostoChange={detalleIngresos.setCentroCosto}
               onMontoConfirm={detalleIngresos.setMonto}
-              onObservacionChange={detalleIngresos.setObservacion}
               onRecalcular={handleRecalcular}
               onEliminar={handleEliminarLinea}
               onTab={handleTabNavigation}
@@ -352,29 +574,19 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
           </Box>
 
           {/* Gastos — siempre montado, oculto cuando no activo */}
-          <Box sx={{ display: tabActivo === "gastos" ? "block" : "none" }}>
-            <PresupuestoToolbar
-              searchValue={searchGastos}
-              onSearchChange={setSearchGastos}
-              onAgregarLinea={() => detalleGastos.agregarLinea()}
-              onImportar={handleImportar}
-              disabled={isSaving}
-              loadingCuentas={loadingCuentasGastos}
-            />
+          <Box sx={{ display: tabActivo === "gastos" ? "flex" : "none", flexDirection: "column", flexGrow: 1, minHeight: 0 }}>
             <PresupuestoGrid
               filas={detalleGastos.filasDisplay}
               cuentasDisponibles={cuentasGastos}
               centrosCosto={centrosCosto}
               cuentasEnUso={detalleGastos.cuentasEnUso}
               discrepanciasMap={discrepanciasGastosMap}
-              equilibrio={equilibrio}
-              totalTab={totalGastos}
+              deleteTargetIds={deleteTargetIds}
               tipoTab="gastos"
               searchFilter={searchGastos}
               onCuentaChange={detalleGastos.setCuenta}
               onCentroCostoChange={detalleGastos.setCentroCosto}
               onMontoConfirm={detalleGastos.setMonto}
-              onObservacionChange={detalleGastos.setObservacion}
               onRecalcular={handleRecalcular}
               onEliminar={handleEliminarLinea}
               onTab={handleTabNavigation}
@@ -382,167 +594,172 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
             />
           </Box>
 
-          {/* Resumen */}
+          {/* Resumen — contenedor scrollable propio */}
           {tabActivo === "resumen" && (
-            <PresupuestoResumen
-              filasIngresos={filasIngresos}
-              filasGastos={filasGastos}
-              equilibrio={equilibrio}
-            />
+            <Box sx={{ flexGrow: 1, minHeight: 0, overflow: "auto" }}>
+              <PresupuestoResumen
+                filasIngresos={filasIngresos}
+                filasGastos={filasGastos}
+                discrepanciasIngresosMap={discrepanciasIngresosMap}
+                discrepanciasGastosMap={discrepanciasGastosMap}
+                equilibrio={equilibrio}
+              />
+            </Box>
           )}
         </Box>
 
-        {/* ── Barra de información ──────────────────────────────────── */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            px: 3,
-            py: 0.875,
-            bgcolor: "grey.50",
-            borderTop: "1px solid",
-            borderColor: "divider",
-            flexShrink: 0,
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Conteo de líneas */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.625 }}>
-            <InsertDriveFileOutlinedIcon sx={{ fontSize: "0.75rem", color: "text.disabled" }} />
-            <Typography variant="caption" color="text.disabled">
-              {filasIngresos.length} línea{filasIngresos.length !== 1 ? "s" : ""} ingresos
-              {" · "}
-              {filasGastos.length} línea{filasGastos.length !== 1 ? "s" : ""} gastos
-            </Typography>
-          </Box>
-
-          {presupuestoId && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />
-              <Typography variant="caption" color="text.disabled" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
-                #{numero}
-              </Typography>
-            </>
-          )}
-
-          {fechaModificacion && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.625 }}>
-                <PersonOutlineIcon sx={{ fontSize: "0.75rem", color: "text.disabled" }} />
-                <Typography variant="caption" color="text.disabled">
-                  Últ. cambio: {formatFecha(fechaModificacion, true)}
-                </Typography>
-              </Box>
-            </>
-          )}
-
-          {fechaCreacion && (
-            <>
-              <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.625 }}>
-                <CalendarTodayIcon sx={{ fontSize: "0.625rem", color: "text.disabled" }} />
-                <Typography variant="caption" color="text.disabled">
-                  Creado: {formatFecha(fechaCreacion)}
-                </Typography>
-              </Box>
-            </>
-          )}
-        </Box>
-
-        {/* ── Footer: acciones ─────────────────────────────────────── */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            px: 3,
-            py: 1.5,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            flexShrink: 0,
-            boxShadow: "0 -2px 8px -2px rgba(0,0,0,0.06)",
-            gap: 2,
-          }}
-        >
-          {/* Eliminar */}
-          <Tooltip
-            title={!presupuestoId ? "Guarde primero el presupuesto" : "Eliminar presupuesto completo"}
-            arrow
+        {/* ═══ FOOTER BAR — Unified total + actions ════════════════ */}
+        {tabActivo !== "resumen" && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 2.5,
+              py: 0.75,
+              bgcolor: "background.paper",
+              borderTop: "1px solid",
+              borderColor: "divider",
+              flexShrink: 0,
+              gap: 1.5,
+            }}
           >
-            <span>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                startIcon={<DeleteOutlineIcon />}
-                onClick={() => setConfirmDelete(true)}
-                disabled={!presupuestoId || isSaving}
+            {/* Left: Total dinámico + metadata */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+              {/* Total label + value */}
+              <Typography
+                sx={{
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: footerColor,
+                  whiteSpace: "nowrap",
+                }}
               >
-                Eliminar
+                {footerLabel}
+              </Typography>
+              <Typography
+                sx={{
+                  ...numericFontSx,
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                  color: footerColor,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                $ {formatCLP(footerTotal)}
+              </Typography>
+
+              {/* Separator */}
+              <Box sx={{ width: "1px", height: 16, bgcolor: "divider", flexShrink: 0 }} />
+
+              {/* Line count */}
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: "'DM Mono', monospace",
+                  fontSize: "10px",
+                  color: "text.disabled",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {filasIngresos.length} + {filasGastos.length} líneas
+              </Typography>
+
+              {/* Last modified */}
+              {fechaModificacion && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontSize: "10px",
+                    color: "text.disabled",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Últ: {formatFecha(fechaModificacion, false)}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Right: action buttons + save */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+              {/* Eliminar */}
+              <Tooltip
+                title={!presupuestoId ? "Guarde primero el presupuesto" : "Eliminar presupuesto"}
+                arrow
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => setConfirmDelete(true)}
+                    disabled={!presupuestoId || isSaving}
+                    sx={{ color: "error.main", opacity: 0.6, "&:hover": { opacity: 1 }, width: 28, height: 28 }}
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: "12px" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              {/* Imprimir */}
+              <Tooltip title="Imprimir (próximamente)" arrow>
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled
+                    sx={{ opacity: 0.6, "&:hover": { opacity: 1 }, width: 28, height: 28 }}
+                  >
+                    <PrintIcon sx={{ fontSize: "12px" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              {/* Exportar */}
+              <Tooltip title="Exportar (próximamente)" arrow>
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled
+                    sx={{ opacity: 0.6, "&:hover": { opacity: 1 }, width: 28, height: 28 }}
+                  >
+                    <FileDownloadIcon sx={{ fontSize: "12px" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              {/* Separator */}
+              <Box sx={{ width: "1px", height: 18, bgcolor: "divider", flexShrink: 0, mx: 0.25 }} />
+
+              {/* Guardar */}
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={
+                  isSaving ? <CircularProgress size={12} color="inherit" /> : <SaveIcon sx={{ fontSize: "12px" }} />
+                }
+                onClick={handleGuardar}
+                disabled={isSaving}
+                sx={{ height: 28, fontWeight: 700, fontSize: "12px", minWidth: 85, px: 1.75 }}
+              >
+                {isSaving ? "Guardando..." : "Guardar"}
               </Button>
-            </span>
-          </Tooltip>
+            </Box>
+          </Box>
+        )}
 
-          {/* Acciones derecha */}
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Próximamente" arrow>
-              <span>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="inherit"
-                  startIcon={<PrintIcon />}
-                  disabled
-                  sx={{ color: "text.secondary", borderColor: "divider" }}
-                >
-                  Imprimir
-                </Button>
-              </span>
-            </Tooltip>
-
-            <Tooltip title="Próximamente" arrow>
-              <span>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="inherit"
-                  startIcon={<FileDownloadIcon />}
-                  disabled
-                  sx={{ color: "text.secondary", borderColor: "divider" }}
-                >
-                  Exportar
-                </Button>
-              </span>
-            </Tooltip>
-
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={
-                isSaving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />
-              }
-              onClick={handleGuardar}
-              disabled={isSaving}
-              sx={{ minWidth: 100, fontWeight: 600 }}
-            >
-              {isSaving ? "Guardando..." : "Guardar"}
-            </Button>
-          </Stack>
-        </Box>
-
-        {/* ── Diálogos ─────────────────────────────────────────────── */}
-        <DeleteLineaDialog
-          open={!!detalleActivo.pendingDelete}
-          cuentaCodigo={pendingDeleteFila?.cuenta?.codigo}
-          cuentaNombre={pendingDeleteFila?.cuenta?.nombre}
+        {/* ═══ TOAST eliminación de línea (prototype-style) ════════ */}
+        <DeleteConfirmToast
+          open={deleteLineaToast.open}
+          cuentaCodigo={deleteLineaToast.cuentaCodigo}
+          cuentaNombre={deleteLineaToast.cuentaNombre}
+          subcuentasCount={deleteLineaToast.subcuentasCount}
           onConfirm={handleConfirmEliminarLinea}
-          onCancel={() => detalleActivo.setPendingDelete(null)}
+          onCancel={handleCancelEliminarLinea}
           loading={isSaving}
         />
 
+        {/* ═══ DIÁLOGO eliminación del documento completo ════════ */}
         <DeleteLineaDialog
           open={confirmDelete}
           cuentaCodigo="Presupuesto Inicial"

@@ -7,13 +7,24 @@ import type {
   FilaDisplay,
 } from "../../types/presupuesto.types";
 import type { DetalleItem } from "mf_store/store";
+import {
+  buildTreeMaps,
+  recalcAncestors,
+  getDeleteInfo,
+  removeWithDescendants,
+  type DeleteInfo,
+} from "../../utils/presupuestoTree";
 
 /**
  * Hook de responsabilidad única: gestión del estado local del grid de detalle.
  * Convierte DetalleItem[] (del servidor) en FilaDetalle[] (estado local) y
  * expone operaciones CRUD sobre la grilla de forma optimista.
  *
+ * Las operaciones de monto y eliminación propagan cambios en cascada
+ * (bottom-up para montos, top-down para eliminación).
+ *
  * SOLID - SRP: solo se encarga del estado local del grid (no del servidor).
+ * SOLID - OCP: la lógica de árbol se delega a utils/presupuestoTree.ts.
  */
 export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   const [filas, setFilas] = useState<FilaDetalle[]>(() =>
@@ -59,12 +70,22 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     );
   }, []);
 
+  /**
+   * Actualiza el monto de una fila y propaga la suma en cascada
+   * hacia todos los ancestros (bottom-up), igual que el prototipo:
+   *   _piRecalcParentMontos() → recalcula cada padre como Σ hijos directos.
+   */
   const setMonto = useCallback((clientId: string, monto: number) => {
-    setFilas((prev) =>
-      prev.map((f) =>
+    setFilas((prev) => {
+      // 1. Actualizar la fila objetivo
+      const updated = prev.map((f) =>
         f._clientId === clientId ? { ...f, montoAnual: monto, isDirty: true } : f,
-      ),
-    );
+      );
+
+      // 2. Propagar suma hacia ancestros
+      const maps = buildTreeMaps(updated);
+      return recalcAncestors(updated, clientId, maps);
+    });
   }, []);
 
   const setObservacion = useCallback((clientId: string, obs: string) => {
@@ -75,9 +96,59 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     );
   }, []);
 
+  /**
+   * Elimina solo una fila individual (sin descendientes).
+   * Para eliminación con cascade, usar eliminarConDescendientes.
+   */
   const eliminarFila = useCallback((clientId: string) => {
-    setFilas((prev) => prev.filter((f) => f._clientId !== clientId));
+    setFilas((prev) => {
+      const filtered = prev.filter((f) => f._clientId !== clientId);
+      // Recalcular ancestros del nodo eliminado
+      const maps = buildTreeMaps(prev);
+      const parentId = maps.childToParent.get(clientId);
+      if (parentId) {
+        const newMaps = buildTreeMaps(filtered);
+        const childrenOfParent = newMaps.parentToChildren.get(parentId) ?? [];
+        const sumaHijos = filtered
+          .filter((f) => childrenOfParent.includes(f._clientId))
+          .reduce((sum, f) => sum + f.montoAnual, 0);
+        let recalced = filtered.map((f) =>
+          f._clientId === parentId ? { ...f, montoAnual: sumaHijos, isDirty: true } : f,
+        );
+        recalced = recalcAncestors(recalced, parentId, newMaps);
+        return recalced;
+      }
+      return filtered;
+    });
   }, []);
+
+  /**
+   * Elimina un nodo y TODOS sus descendientes en cascada,
+   * luego recalcula los montos de los ancestros del nodo eliminado.
+   *
+   * Equivale al flujo del prototipo:
+   *   piConfirmDelete() → remove rows → _piRecalcParentMontos() → _piValidateTree()
+   *
+   * @returns IDs de todas las filas eliminadas (incluyendo descendientes)
+   */
+  const eliminarConDescendientes = useCallback((clientId: string): string[] => {
+    let removedIds: string[] = [];
+    setFilas((prev) => {
+      const result = removeWithDescendants(prev, clientId);
+      removedIds = result.removedIds;
+      return result.updated;
+    });
+    return removedIds;
+  }, []);
+
+  /**
+   * Obtiene información sobre los descendientes de una fila para mostrar
+   * en la UI de confirmación de eliminación.
+   */
+  const getInfoEliminar = useCallback(
+    (clientId: string): DeleteInfo => getDeleteInfo(clientId, filas),
+    [filas],
+  );
 
   /** Importar filas en bloque (reemplaza todas las filas actuales) */
   const importarFilas = useCallback((nuevas: FilaDetalle[]) => {
@@ -99,9 +170,13 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
         const sumaHijos = prev
           .filter((f) => hijosIds.includes(f._clientId))
           .reduce((sum, f) => sum + f.montoAnual, 0);
-        return prev.map((f) =>
+        let updated = prev.map((f) =>
           f._clientId === clientId ? { ...f, montoAnual: sumaHijos, isDirty: true } : f,
         );
+        // Propagar hacia ancestros superiores
+        const maps = buildTreeMaps(updated);
+        updated = recalcAncestors(updated, clientId, maps);
+        return updated;
       });
     },
     [],
@@ -111,9 +186,11 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   const recalcularTodo = useCallback((displayFilas: FilaDisplay[]) => {
     setFilas((prev) => {
       const newFilas = [...prev];
-      for (const display of displayFilas) {
+      // Bottom-up: procesar desde los niveles más profundos hacia la raíz
+      const sorted = [...displayFilas].sort((a, b) => b.nivel - a.nivel);
+      for (const display of sorted) {
         if (display.hijosIds.length === 0) continue;
-        const sumaHijos = prev
+        const sumaHijos = newFilas
           .filter((f) => display.hijosIds.includes(f._clientId))
           .reduce((sum, f) => sum + f.montoAnual, 0);
         const idx = newFilas.findIndex((f) => f._clientId === display._clientId);
@@ -127,12 +204,6 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
 
   // ── Filas con jerarquía computada ───────────────────────────────────────────
 
-  /**
-   * Construye FilaDisplay[] desde FilaDetalle[]:
-   * - Calcula nivel jerárquico (0 = raíz, 1 = hijo, etc.)
-   * - Calcula hijosIds para cada fila padre
-   * - Orden: pre-order (padre antes que hijos)
-   */
   const filasDisplay = useMemo<FilaDisplay[]>(() => {
     return buildDisplayOrder(filas);
   }, [filas]);
@@ -160,6 +231,8 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     setMonto,
     setObservacion,
     eliminarFila,
+    eliminarConDescendientes,
+    getInfoEliminar,
     importarFilas,
     marcarGuardada,
     recalcularPadre,
@@ -189,13 +262,11 @@ function detalleToFila(d: DetalleItem): FilaDetalle {
  * Soporta jerarquía de N niveles basada en cuenta.parentId.
  */
 function buildDisplayOrder(filas: FilaDetalle[]): FilaDisplay[] {
-  // Mapa cuentaId → clientId (para resolver parentId → clientId)
   const cuentaIdToClientId = new Map<number, string>();
   for (const f of filas) {
     if (f.cuentaId) cuentaIdToClientId.set(f.cuentaId, f._clientId);
   }
 
-  // Construir árbol de clientIds
   const childrenMap = new Map<string, string[]>();
   const rootClientIds: string[] = [];
 
@@ -215,7 +286,6 @@ function buildDisplayOrder(filas: FilaDetalle[]): FilaDisplay[] {
     }
   }
 
-  // Pre-order traversal
   const result: FilaDisplay[] = [];
   const filaMap = new Map(filas.map((f) => [f._clientId, f]));
 

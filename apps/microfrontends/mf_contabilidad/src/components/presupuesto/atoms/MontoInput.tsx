@@ -1,11 +1,17 @@
 import { Box, Input } from "@mui/material";
 import {
   type KeyboardEvent,
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from "react";
+
+export interface MontoInputHandle {
+  startEdit: () => void;
+}
 
 interface MontoInputProps {
   value: number;
@@ -29,14 +35,14 @@ const parseCLP = (raw: string): number => {
   return parseInt(clean, 10) || 0;
 };
 
-const MontoInput = ({
+const MontoInput = forwardRef<MontoInputHandle, MontoInputProps>(({
   value,
   onConfirm,
   onTab,
   readOnly = false,
   placeholder = "0",
   hasError = false,
-}: MontoInputProps) => {
+}, ref) => {
   const [editing, setEditing] = useState(false);
   const [rawValue, setRawValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +52,8 @@ const MontoInput = ({
     setRawValue(value === 0 ? "" : formatCLP(value));
     setEditing(true);
   };
+
+  useImperativeHandle(ref, () => ({ startEdit }));
 
   useEffect(() => {
     if (editing) inputRef.current?.select();
@@ -80,6 +88,11 @@ const MontoInput = ({
     else if (e.key === "Tab") { e.preventDefault(); confirm(); onTab?.(e.shiftKey); }
   };
 
+  const numFont = {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontFeatureSettings: "'tnum' 1, 'ss01' 1",
+  } as const;
+
   if (editing) {
     return (
       <Input
@@ -91,8 +104,8 @@ const MontoInput = ({
         placeholder={placeholder}
         disableUnderline={false}
         sx={{
-          fontFamily: "monospace",
-          fontSize: "0.8125rem",
+          ...numFont,
+          fontSize: "12.5px",
           fontWeight: 600,
           width: 160,
           "& input": { textAlign: "right", padding: "3px 8px" },
@@ -106,15 +119,16 @@ const MontoInput = ({
     <Box
       onClick={startEdit}
       sx={{
-        fontFamily: "monospace",
-        fontSize: "0.8125rem",
+        ...numFont,
+        fontSize: "12.5px",
         fontWeight: 600,
+        letterSpacing: "-0.01em",
         textAlign: "right",
         cursor: readOnly ? "default" : "pointer",
         padding: "2px 6px",
         margin: "-2px -6px",
         borderRadius: 0.5,
-        color: hasError ? "error.main" : value === 0 ? "text.disabled" : "text.primary",
+        color: hasError ? "warning.main" : value === 0 ? "text.disabled" : "inherit",
         "&:hover": readOnly ? {} : {
           bgcolor: "action.hover",
           boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}20`,
@@ -128,6 +142,8 @@ const MontoInput = ({
       {value === 0 ? placeholder : formatCLP(value)}
     </Box>
   );
-};
+});
+
+MontoInput.displayName = "MontoInput";
 
 export default MontoInput;

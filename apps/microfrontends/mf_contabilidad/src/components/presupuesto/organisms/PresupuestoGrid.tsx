@@ -1,23 +1,10 @@
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useCallback, useMemo, useRef } from "react";
+import { Box, Typography } from "@mui/material";
+import { memo, useMemo } from "react";
 import type {
   CentrosCostoItem,
   CuentaPresupuestaria,
-  EquilibrioState,
   FilaDisplay,
 } from "../../../types/presupuesto.types";
-import { formatCLP } from "../atoms/MontoInput";
-import EquilibrioIndicator from "../atoms/EquilibrioIndicator";
 import PresupuestoDetalleRow from "../molecules/PresupuestoDetalleRow";
 
 interface PresupuestoGridProps {
@@ -26,14 +13,12 @@ interface PresupuestoGridProps {
   centrosCosto: CentrosCostoItem[];
   cuentasEnUso: number[];
   discrepanciasMap: Map<string, number | null>;
-  equilibrio: EquilibrioState;
-  totalTab: number;
+  deleteTargetIds: Set<string>;
   tipoTab: "ingresos" | "gastos";
   searchFilter: string;
   onCuentaChange: (clientId: string, cuenta: CuentaPresupuestaria | null) => void;
   onCentroCostoChange: (clientId: string, cc: CentrosCostoItem | null) => void;
   onMontoConfirm: (clientId: string, monto: number) => void;
-  onObservacionChange: (clientId: string, obs: string) => void;
   onRecalcular: (clientId: string) => void;
   onEliminar: (clientId: string) => void;
   onTab: (clientId: string, shiftKey: boolean) => void;
@@ -41,11 +26,51 @@ interface PresupuestoGridProps {
   isSaving?: boolean;
 }
 
-const ROW_HEIGHT = 40; // altura estimada por fila
+// ─── Constantes ───────────────────────────────────────────────────────────────
+
+// Anchos fijos por columna (table-layout: fixed)
+const COL_WIDTHS = {
+  cuenta: 180,
+  nombre: undefined, // flex: toma el espacio restante
+  areaGestion: 150,
+  monto: 170,
+  status: 36,
+  actions: 70,
+} as const;
+
+const headerCellBase = {
+  fontSize: "9.5px",
+  fontWeight: 700,
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  color: "primary.main",
+  py: "7px",
+  px: "14px",
+  whiteSpace: "nowrap" as const,
+  borderBottom: "none",
+};
+
+const colgroup = (
+  <colgroup>
+    <col style={{ width: COL_WIDTHS.cuenta }} />
+    <col />
+    <col style={{ width: COL_WIDTHS.areaGestion }} />
+    <col style={{ width: COL_WIDTHS.monto }} />
+    <col style={{ width: COL_WIDTHS.status }} />
+    <col style={{ width: COL_WIDTHS.actions }} />
+  </colgroup>
+);
 
 /**
- * Organism: grilla virtualizada del detalle presupuestario.
- * Solo renderiza las filas visibles (~15-20) en lugar de todas (~250).
+ * Organism: grilla del detalle presupuestario.
+ *
+ * Sin virtualización — ~250 filas con <td> nativo = ~1,500 DOM elements,
+ * bien dentro de lo manejable. Elimina los problemas de:
+ *   - Secciones negras al scroll rápido
+ *   - Temblor por mount/unmount de filas
+ *   - Complejidad de spacers + estimateSize
+ *
+ * table-layout: fixed + colgroup → anchos estables, sin recálculo.
  */
 const PresupuestoGrid = ({
   filas,
@@ -53,14 +78,12 @@ const PresupuestoGrid = ({
   centrosCosto,
   cuentasEnUso,
   discrepanciasMap,
-  equilibrio,
-  totalTab,
+  deleteTargetIds,
   tipoTab,
   searchFilter,
   onCuentaChange,
   onCentroCostoChange,
   onMontoConfirm,
-  onObservacionChange,
   onRecalcular,
   onEliminar,
   onTab,
@@ -77,17 +100,28 @@ const PresupuestoGrid = ({
     );
   }, [filas, searchFilter]);
 
-  const etiquetaTotal = tipoTab === "ingresos" ? "Total Ingresos" : "Total Gastos";
-  const colorTotal = tipoTab === "ingresos" ? "success.dark" : "error.dark";
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
-    count: filasFiltradas.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: useCallback(() => ROW_HEIGHT, []),
-    overscan: 8,
-  });
+  // Set de descendientes de padres con discrepancia
+  const warnChildIds = useMemo(() => {
+    const ids = new Set<string>();
+    const warnParentCodes: string[] = [];
+    for (const [clientId, delta] of discrepanciasMap) {
+      if (delta !== null && delta !== 0) {
+        const fila = filas.find((f) => f._clientId === clientId);
+        if (fila?.cuenta?.codigo) warnParentCodes.push(fila.cuenta.codigo);
+      }
+    }
+    if (warnParentCodes.length === 0) return ids;
+    for (const f of filas) {
+      if (!f.cuenta?.codigo) continue;
+      for (const parentCode of warnParentCodes) {
+        if (f.cuenta.codigo !== parentCode && f.cuenta.codigo.startsWith(parentCode)) {
+          ids.add(f._clientId);
+          break;
+        }
+      }
+    }
+    return ids;
+  }, [filas, discrepanciasMap]);
 
   if (filasFiltradas.length === 0 && !loading) {
     return (
@@ -110,152 +144,73 @@ const PresupuestoGrid = ({
     );
   }
 
-  const virtualItems = virtualizer.getVirtualItems();
-  const totalSize = virtualizer.getTotalSize();
-
   return (
-    <Box>
-      <TableContainer
-        ref={scrollRef}
-        sx={{
-          maxHeight: "clamp(320px, 55vh, 640px)",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.default",
-          overflow: "auto",
-        }}
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* ── Header fijo ── */}
+      <Box
+        component="table"
+        sx={(t) => ({
+          width: "100%",
+          tableLayout: "fixed",
+          borderCollapse: "collapse",
+          flexShrink: 0,
+          bgcolor: t.meridian.surfaces.s1,
+          borderBottom: `2px solid ${t.palette.primary.main}`,
+        })}
       >
-        <Table
-          size="small"
-          stickyHeader
-          sx={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ width: 100, bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", py: 1 }}>
-                Cuenta
-              </TableCell>
-              <TableCell sx={{ bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", py: 1 }}>
-                Nombre Cuenta
-              </TableCell>
-              <TableCell sx={{ width: 80, textAlign: "center", bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", py: 1 }}>
-                C. Costo
-              </TableCell>
-              <TableCell sx={{ width: 180, textAlign: "right", bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", py: 1 }}>
-                Total Anual ($)
-              </TableCell>
-              <TableCell sx={{ width: 50, bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", py: 1 }} />
-              <TableCell sx={{ width: 140, bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", py: 1 }}>
-                Observación
-              </TableCell>
-              <TableCell sx={{ width: 60, bgcolor: "background.paper", borderBottom: "2px solid", borderColor: "divider", py: 1 }} />
-            </TableRow>
-          </TableHead>
+        {colgroup}
+        <thead>
+          <tr>
+            <Box component="th" sx={{ ...headerCellBase, textAlign: "left" }}>Cuenta</Box>
+            <Box component="th" sx={{ ...headerCellBase, textAlign: "left" }}>Nombre Cuenta</Box>
+            <Box component="th" sx={{ ...headerCellBase, textAlign: "center" }}>Área Gestión</Box>
+            <Box component="th" sx={{ ...headerCellBase, textAlign: "right" }}>Total Anual ($)</Box>
+            <th style={{ padding: 0 }} />
+            <th style={{ padding: 0 }} />
+          </tr>
+        </thead>
+      </Box>
 
-          <TableBody>
-            {/* Spacer superior para virtualización */}
-            {virtualItems.length > 0 && virtualItems[0].start > 0 && (
-              <tr><td colSpan={7} style={{ height: virtualItems[0].start, padding: 0, border: 0 }} /></tr>
-            )}
-
-            {virtualItems.map((virtualRow) => {
-              const fila = filasFiltradas[virtualRow.index];
-              return (
-                <PresupuestoDetalleRow
-                  key={fila._clientId}
-                  fila={fila}
-                  cuentasDisponibles={cuentasDisponibles}
-                  centrosCosto={centrosCosto}
-                  cuentasEnUso={cuentasEnUso}
-                  discrepanciaDelta={discrepanciasMap.get(fila._clientId) ?? null}
-                  tipoTab={tipoTab}
-                  onCuentaChange={onCuentaChange}
-                  onCentroCostoChange={onCentroCostoChange}
-                  onMontoConfirm={onMontoConfirm}
-                  onObservacionChange={onObservacionChange}
-                  onRecalcular={onRecalcular}
-                  onEliminar={onEliminar}
-                  onTab={onTab}
-                  loading={isSaving}
-                />
-              );
-            })}
-
-            {/* Spacer inferior para virtualización */}
-            {virtualItems.length > 0 && (
-              <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    height: totalSize - (virtualItems[virtualItems.length - 1].end),
-                    padding: 0,
-                    border: 0,
-                  }}
-                />
-              </tr>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Barra de totales */}
+      {/* ── Body scrollable ── */}
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          px: 3,
-          py: 1.5,
-          bgcolor: "background.paper",
-          borderTop: "2px solid",
-          borderColor: "divider",
-          flexShrink: 0,
+          flexGrow: 1,
+          minHeight: 0,
+          overflow: "auto",
+          bgcolor: "background.default",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                color: "text.secondary",
-              }}
-            >
-              {etiquetaTotal}
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: "monospace",
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: colorTotal,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              ${formatCLP(totalTab)}
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-            <Typography
-              variant="caption"
-              sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "text.secondary" }}
-            >
-              Líneas
-            </Typography>
-            <Typography sx={{ fontFamily: "monospace", fontSize: "0.875rem", fontWeight: 700 }}>
-              {filasFiltradas.length}
-            </Typography>
-          </Box>
-        </Box>
-
-        <EquilibrioIndicator
-          estado={equilibrio.estado}
-          diferencia={equilibrio.diferencia}
-          discrepanciasPendientes={equilibrio.discrepanciasPendientes}
-          compact
-        />
+        <table
+          style={{
+            width: "100%",
+            tableLayout: "fixed",
+            borderCollapse: "collapse",
+          }}
+        >
+          {colgroup}
+          <tbody>
+            {filasFiltradas.map((fila) => (
+              <PresupuestoDetalleRow
+                key={fila._clientId}
+                fila={fila}
+                cuentasDisponibles={cuentasDisponibles}
+                centrosCosto={centrosCosto}
+                cuentasEnUso={cuentasEnUso}
+                discrepanciaDelta={discrepanciasMap.get(fila._clientId) ?? null}
+                isWarnChild={warnChildIds.has(fila._clientId)}
+                isDeleteTarget={deleteTargetIds.has(fila._clientId)}
+                tipoTab={tipoTab}
+                onCuentaChange={onCuentaChange}
+                onCentroCostoChange={onCentroCostoChange}
+                onMontoConfirm={onMontoConfirm}
+                onRecalcular={onRecalcular}
+                onEliminar={onEliminar}
+                onTab={onTab}
+                loading={isSaving}
+              />
+            ))}
+          </tbody>
+        </table>
       </Box>
     </Box>
   );
