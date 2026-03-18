@@ -14,6 +14,7 @@ on:
 
 env:
   NODE_VERSION: '22'
+  RAILWAY_PROJECT_ID: '8d4f52bd-6e36-4d06-8d5a-c15bc649b9ed'
 
 
 jobs:
@@ -75,6 +76,7 @@ jobs:
         run: railway up --service api-gateway --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-api-identidad:
     name: Deploy API Identidad
@@ -90,6 +92,7 @@ jobs:
         run: railway up --service api-identidad --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-api-autorizacion:
     name: Deploy API Autorizacion
@@ -105,6 +108,7 @@ jobs:
         run: railway up --service api-autorizacion --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-api-contabilidad:
     name: Deploy API Contabilidad
@@ -120,6 +124,7 @@ jobs:
         run: railway up --service api-contabilidad --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   # ============================================
   # Deploy Microfrontends (en paralelo)
@@ -138,6 +143,7 @@ jobs:
         run: railway up --service mf-shell --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-mf-store:
     name: Deploy MF Store
@@ -153,6 +159,7 @@ jobs:
         run: railway up --service mf-store --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-mf-ui:
     name: Deploy MF UI
@@ -168,6 +175,7 @@ jobs:
         run: railway up --service mf-ui --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   deploy-mf-contabilidad:
     name: Deploy MF Contabilidad
@@ -183,6 +191,7 @@ jobs:
         run: railway up --service mf-contabilidad --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ env.RAILWAY_PROJECT_ID }}
 
   # ============================================
   # Deployment Summary
