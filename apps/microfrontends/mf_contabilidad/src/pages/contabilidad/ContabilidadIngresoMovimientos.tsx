@@ -1,5 +1,5 @@
 const ContabilidadIngresoMovimientos = () => {
-	return <div>ContabilidadIngresoMovimientos</div>;
+  return <div>ContabilidadIngresoMovimientos</div>;
 };
 
 export default ContabilidadIngresoMovimientos;

@@ -1,13 +1,16 @@
+import { useConversaciones } from '@/hooks'
+import type { CreateReunionInput } from '@/types/meeting.types'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import { Calendar, MapPin, Mic, Plus, Video } from 'lucide-react'
-import { memo, useState } from 'react'
-import { useCrearReunionMutation, useProximasReunionesQuery } from 'mf_store/store'
+import {
+  useCrearReunionMutation,
+  useProximasReunionesQuery,
+} from 'mf_store/store'
 import type { Reunion, TipoReunion } from 'mf_store/store'
-import { useConversaciones } from '@/hooks'
-import type { CreateReunionInput } from '@/types/meeting.types'
+import { memo, useState } from 'react'
 import { CreateMeetingDialog } from './CreateMeetingDialog'
 
 interface MeetingsPanelProps {
@@ -22,7 +25,10 @@ const TIPO_ICON: Record<TipoReunion, React.ReactNode> = {
   presencial: <MapPin size={13} />,
 }
 
-const ESTADO_COLOR: Record<string, 'default' | 'primary' | 'success' | 'error'> = {
+const ESTADO_COLOR: Record<
+  string,
+  'default' | 'primary' | 'success' | 'error'
+> = {
   programada: 'primary',
   activa: 'success',
   completada: 'default',
@@ -34,16 +40,29 @@ function formatDateGroup(iso: string): string {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const meetDay = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  const diffDays = Math.round((meetDay.getTime() - today.getTime()) / 86_400_000)
+  const diffDays = Math.round(
+    (meetDay.getTime() - today.getTime()) / 86_400_000,
+  )
   if (diffDays === 0) return 'Hoy'
   if (diffDays === 1) return 'Mañana'
   if (diffDays < 7)
-    return d.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'short' })
-  return d.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })
+    return d.toLocaleDateString('es', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+    })
+  return d.toLocaleDateString('es', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('es', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function groupByDate(reuniones: Reunion[]): [string, Reunion[]][] {
@@ -51,6 +70,7 @@ function groupByDate(reuniones: Reunion[]): [string, Reunion[]][] {
   for (const r of reuniones) {
     const key = formatDateGroup(r.fechaInicio)
     if (!map.has(key)) map.set(key, [])
+    // biome-ignore lint/style/noNonNullAssertion: map.set garantiza que key existe
     map.get(key)!.push(r)
   }
   return Array.from(map.entries())
@@ -69,7 +89,9 @@ export const MeetingsPanel = memo(function MeetingsPanel({
   const convOptions = conversaciones.map((conv) => {
     let nombre = conv.nombre ?? `Conversación ${conv.id}`
     if (conv.tipo === 'directa') {
-      const other = conv.participantes?.find((p) => p.usuarioId !== currentUserId)
+      const other = conv.participantes?.find(
+        (p) => p.usuarioId !== currentUserId,
+      )
       if (other?.usuario?.nombreCompleto) nombre = other.usuario.nombreCompleto
     }
     return { id: conv.id, nombre, tipo: conv.tipo as 'directa' | 'grupo' }
@@ -89,7 +111,10 @@ export const MeetingsPanel = memo(function MeetingsPanel({
     }))
     .filter((g) => g.miembros.length > 0)
 
-  const handleConfirm = async (data: CreateReunionInput, conversacionId?: number) => {
+  const handleConfirm = async (
+    data: CreateReunionInput,
+    conversacionId?: number,
+  ) => {
     if (!conversacionId) return
     await crearMutation({ conversacionId, ...data }).unwrap()
   }
@@ -99,7 +124,14 @@ export const MeetingsPanel = memo(function MeetingsPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* CTA */}
-      <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box
+        sx={{
+          px: 2,
+          py: 1.5,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         <Button
           variant="contained"
           size="small"
@@ -183,7 +215,9 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                       mb: 0.5,
                     }}
                   >
-                    <Typography sx={{ fontWeight: 600, fontSize: 13, flex: 1, pr: 1 }}>
+                    <Typography
+                      sx={{ fontWeight: 600, fontSize: 13, flex: 1, pr: 1 }}
+                    >
                       {reunion.titulo}
                     </Typography>
                     <Chip
@@ -204,12 +238,17 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                   >
                     {TIPO_ICON[reunion.tipo]}
                     <Typography fontSize={12}>
-                      {formatTime(reunion.fechaInicio)} – {formatTime(reunion.fechaFin)}
+                      {formatTime(reunion.fechaInicio)} –{' '}
+                      {formatTime(reunion.fechaFin)}
                     </Typography>
                   </Box>
 
                   {reunion.ubicacion && (
-                    <Typography fontSize={11} color="text.disabled" sx={{ mt: 0.25 }}>
+                    <Typography
+                      fontSize={11}
+                      color="text.disabled"
+                      sx={{ mt: 0.25 }}
+                    >
                       {reunion.ubicacion}
                     </Typography>
                   )}

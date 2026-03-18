@@ -1,14 +1,7 @@
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import {
-  Mic,
-  MicOff,
-  Monitor,
-  Phone,
-  Video,
-  VideoOff,
-} from 'lucide-react'
+import { Mic, MicOff, Monitor, Phone, Video, VideoOff } from 'lucide-react'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -179,9 +172,7 @@ export function VideoCallPage() {
         <IconButton
           onClick={() => setIsScreenSharing(!isScreenSharing)}
           sx={{
-            bgcolor: isScreenSharing
-              ? 'primary.main'
-              : 'rgba(255,255,255,0.1)',
+            bgcolor: isScreenSharing ? 'primary.main' : 'rgba(255,255,255,0.1)',
             color: 'white',
             width: 56,
             height: 56,

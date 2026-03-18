@@ -1,41 +1,41 @@
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  type DefaultValues,
-  type FieldValues,
-  type Mode,
-  type UseFormReturn,
-  useForm,
-} from 'react-hook-form';
-import type { ZodType } from 'zod';
+	type DefaultValues,
+	type FieldValues,
+	type Mode,
+	type UseFormReturn,
+	useForm,
+} from "react-hook-form";
+import type { ZodType } from "zod";
 
 type useHookFormSchemaProps<T extends FieldValues> = {
-  schema: ZodType<T>;
-  mode?: Mode;
-  defaultValues: DefaultValues<T>;
+	schema: ZodType<T>;
+	mode?: Mode;
+	defaultValues: DefaultValues<T>;
 };
 
 type useHookFormSchemaReturnProps<T extends FieldValues> = {
-  methods: UseFormReturn<T>;
+	methods: UseFormReturn<T>;
 };
 
 const useHookFormSchema = <T extends FieldValues>({
-  schema,
-  mode = 'all',
-  defaultValues,
+	schema,
+	mode = "all",
+	defaultValues,
 }: useHookFormSchemaProps<T>): useHookFormSchemaReturnProps<T> => {
-  const methods = useForm<T>({
-    mode,
-    defaultValues,
-    resetOptions: {
-      keepDirtyValues: true,
-      keepErrors: true,
-    },
-    resolver: zodResolver(schema),
-  });
+	const methods = useForm<T>({
+		mode,
+		defaultValues,
+		resetOptions: {
+			keepDirtyValues: true,
+			keepErrors: true,
+		},
+		resolver: zodResolver(schema),
+	});
 
-  return {
-    methods,
-  };
+	return {
+		methods,
+	};
 };
 
 export default useHookFormSchema;

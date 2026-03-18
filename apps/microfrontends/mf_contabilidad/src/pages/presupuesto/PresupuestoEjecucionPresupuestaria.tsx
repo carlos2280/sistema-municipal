@@ -1,5 +1,5 @@
 const PresupuestoEjecucionPresupuestaria = () => {
-	return <div>PresupuestoEjecucionPresupuestaria</div>;
+  return <div>PresupuestoEjecucionPresupuestaria</div>;
 };
 
 export default PresupuestoEjecucionPresupuestaria;

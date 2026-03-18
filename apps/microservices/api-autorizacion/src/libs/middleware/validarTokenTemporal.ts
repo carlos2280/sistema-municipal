@@ -1,7 +1,7 @@
 import { db } from "@/app";
 import { loadEnv } from "@/config/env";
-import { tokensContrasenaTemporal } from "@municipal/db-identidad";
 import type { CustomJwtPayload } from "@/types/express/auth";
+import { tokensContrasenaTemporal } from "@municipal/db-identidad";
 import { and, eq, gt } from "drizzle-orm";
 // middlewares/validarTokenTemporal.ts
 import type { NextFunction, Request, Response } from "express";

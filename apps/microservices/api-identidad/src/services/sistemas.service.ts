@@ -7,7 +7,10 @@ import {
 } from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
-export const createSistema = async (db: DbClient, data: NewSistema): Promise<Sistema> => {
+export const createSistema = async (
+  db: DbClient,
+  data: NewSistema,
+): Promise<Sistema> => {
   try {
     const [createdSistema] = await db.insert(sistemas).values(data).returning();
     return createdSistema;
@@ -64,7 +67,10 @@ export const updateSistema = async (
   }
 };
 
-export const deleteSistema = async (db: DbClient, id: number): Promise<Sistema | null> => {
+export const deleteSistema = async (
+  db: DbClient,
+  id: number,
+): Promise<Sistema | null> => {
   try {
     const [deletedSistema] = await db
       .delete(sistemas)

@@ -113,7 +113,10 @@ export function MessageInput({
             bgcolor: 'primary.main',
             color: 'white',
             '&:hover': { bgcolor: 'primary.dark' },
-            '&:disabled': { bgcolor: theme.palette.action.disabledBackground, color: theme.palette.action.disabled },
+            '&:disabled': {
+              bgcolor: theme.palette.action.disabledBackground,
+              color: theme.palette.action.disabled,
+            },
           }}
         >
           <Send size={20} />
@@ -142,7 +145,11 @@ export function MessageInput({
           }}
         >
           <Paperclip size={16} />
-          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Adjuntar</Typography>
+          <Typography
+            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+          >
+            Adjuntar
+          </Typography>
         </Box>
         <Box
           sx={{
@@ -155,7 +162,11 @@ export function MessageInput({
           }}
         >
           <Image size={16} />
-          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Imagen</Typography>
+          <Typography
+            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+          >
+            Imagen
+          </Typography>
         </Box>
         <Box
           ref={emojiAnchorRef}
@@ -170,7 +181,11 @@ export function MessageInput({
           }}
         >
           <Smile size={16} />
-          <Typography sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}>Emoji</Typography>
+          <Typography
+            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+          >
+            Emoji
+          </Typography>
         </Box>
       </Box>
 

@@ -1,6 +1,6 @@
 import { useAppSelector, useVerificarTokenQuery } from "mf_store/store";
-import { Navigate, Outlet } from "react-router-dom";
 import { AppLoader } from "mf_ui/components";
+import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
 	const { isAuthenticated } = useAppSelector((state) => state.auth);

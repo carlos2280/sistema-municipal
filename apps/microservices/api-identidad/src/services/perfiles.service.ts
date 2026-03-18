@@ -7,7 +7,10 @@ import {
 } from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
-export const createPerfil = async (db: DbClient, data: NewPerfil): Promise<Perfil> => {
+export const createPerfil = async (
+  db: DbClient,
+  data: NewPerfil,
+): Promise<Perfil> => {
   try {
     const [createdPerfil] = await db.insert(perfiles).values(data).returning();
     return createdPerfil;
@@ -64,7 +67,10 @@ export const updatePerfil = async (
   }
 };
 
-export const deletePerfil = async (db: DbClient, id: number): Promise<Perfil | null> => {
+export const deletePerfil = async (
+  db: DbClient,
+  id: number,
+): Promise<Perfil | null> => {
   try {
     const [deletedPerfil] = await db
       .delete(perfiles)

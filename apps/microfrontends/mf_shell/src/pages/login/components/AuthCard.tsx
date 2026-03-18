@@ -7,7 +7,7 @@
  */
 
 import { Box, keyframes, styled } from "@mui/material";
-import { memo, type ReactNode } from "react";
+import { type ReactNode, memo } from "react";
 
 const entryCard = keyframes`
   from { opacity: 0; transform: translateY(20px) scale(0.98); }

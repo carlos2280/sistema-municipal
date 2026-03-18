@@ -6,21 +6,16 @@
  * Todos los colores desde theme, nada hardcoded.
  */
 
-import {
-	Alert,
-	Box,
-	alpha,
-	styled,
-} from "@mui/material";
+import { Alert, Box, alpha, styled } from "@mui/material";
 import { Eye, EyeOff, KeyRound, Lock, Mail } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { Controller, FormProvider } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
-import useContrasenaTemporal from "./hooks/useContrasenaTemporal";
-import { AuthLayout } from "./components/AuthLayout";
 import { AuthCard } from "./components/AuthCard";
-import { AuthHeader } from "./components/AuthHeader";
 import { AuthFooter } from "./components/AuthFooter";
+import { AuthHeader } from "./components/AuthHeader";
+import { AuthLayout } from "./components/AuthLayout";
+import useContrasenaTemporal from "./hooks/useContrasenaTemporal";
 
 // ── Styled: Inputs MERIDIAN ─────────────────────────────────────────────────
 
@@ -171,7 +166,9 @@ const TempPasswordForm = memo(function TempPasswordForm() {
 					<FieldGroup>
 						<Label htmlFor="temp-email">Correo electrónico</Label>
 						<InputWrapper>
-							<InputIcon><Mail /></InputIcon>
+							<InputIcon>
+								<Mail />
+							</InputIcon>
 							<StyledInput
 								{...field}
 								id="temp-email"
@@ -193,7 +190,9 @@ const TempPasswordForm = memo(function TempPasswordForm() {
 					<FieldGroup>
 						<Label htmlFor="temp-pwd-old">Contraseña temporal</Label>
 						<InputWrapper>
-							<InputIcon><KeyRound /></InputIcon>
+							<InputIcon>
+								<KeyRound />
+							</InputIcon>
 							<StyledInput
 								{...field}
 								id="temp-pwd-old"
@@ -206,7 +205,9 @@ const TempPasswordForm = memo(function TempPasswordForm() {
 							<EyeButton
 								type="button"
 								onClick={toggleTempPwd}
-								aria-label={showTempPwd ? "Ocultar contraseña" : "Mostrar contraseña"}
+								aria-label={
+									showTempPwd ? "Ocultar contraseña" : "Mostrar contraseña"
+								}
 							>
 								{showTempPwd ? <EyeOff /> : <Eye />}
 							</EyeButton>
@@ -223,7 +224,9 @@ const TempPasswordForm = memo(function TempPasswordForm() {
 					<FieldGroup>
 						<Label htmlFor="temp-pwd-new">Nueva contraseña</Label>
 						<InputWrapper>
-							<InputIcon><Lock /></InputIcon>
+							<InputIcon>
+								<Lock />
+							</InputIcon>
 							<StyledInput
 								{...field}
 								id="temp-pwd-new"
@@ -236,7 +239,9 @@ const TempPasswordForm = memo(function TempPasswordForm() {
 							<EyeButton
 								type="button"
 								onClick={toggleNewPwd}
-								aria-label={showNewPwd ? "Ocultar contraseña" : "Mostrar contraseña"}
+								aria-label={
+									showNewPwd ? "Ocultar contraseña" : "Mostrar contraseña"
+								}
 							>
 								{showNewPwd ? <EyeOff /> : <Eye />}
 							</EyeButton>

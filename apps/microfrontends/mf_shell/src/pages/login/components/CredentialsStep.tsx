@@ -143,7 +143,9 @@ export const CredentialsStep = memo(function CredentialsStep() {
 					<FieldGroup>
 						<Label htmlFor="login-email">Correo electrónico</Label>
 						<InputWrapper>
-							<InputIcon><Mail /></InputIcon>
+							<InputIcon>
+								<Mail />
+							</InputIcon>
 							<StyledInput
 								{...field}
 								id="login-email"
@@ -154,9 +156,7 @@ export const CredentialsStep = memo(function CredentialsStep() {
 								value={field.value ?? ""}
 							/>
 						</InputWrapper>
-						{error && (
-							<ErrorText>{error.message}</ErrorText>
-						)}
+						{error && <ErrorText>{error.message}</ErrorText>}
 					</FieldGroup>
 				)}
 			/>
@@ -172,7 +172,9 @@ export const CredentialsStep = memo(function CredentialsStep() {
 							<ForgotLink tabIndex={0}>¿Olvidaste tu contraseña?</ForgotLink>
 						</LabelRow>
 						<InputWrapper>
-							<InputIcon><Lock /></InputIcon>
+							<InputIcon>
+								<Lock />
+							</InputIcon>
 							<StyledInput
 								{...field}
 								id="login-pwd"
@@ -184,14 +186,14 @@ export const CredentialsStep = memo(function CredentialsStep() {
 							<EyeButton
 								type="button"
 								onClick={togglePassword}
-								aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+								aria-label={
+									showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+								}
 							>
 								{showPassword ? <EyeOff /> : <Eye />}
 							</EyeButton>
 						</InputWrapper>
-						{error && (
-							<ErrorText>{error.message}</ErrorText>
-						)}
+						{error && <ErrorText>{error.message}</ErrorText>}
 					</FieldGroup>
 				)}
 			/>

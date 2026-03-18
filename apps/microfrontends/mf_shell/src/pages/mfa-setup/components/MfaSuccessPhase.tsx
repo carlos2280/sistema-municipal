@@ -103,8 +103,8 @@ export const MfaSuccessPhase = memo(function MfaSuccessPhase({
 						lineHeight: 1.6,
 					}}
 				>
-					Guarda estos códigos de respaldo en un lugar seguro. Cada código
-					solo puede ser usado una vez.
+					Guarda estos códigos de respaldo en un lugar seguro. Cada código solo
+					puede ser usado una vez.
 				</Typography>
 			</NoticeBox>
 

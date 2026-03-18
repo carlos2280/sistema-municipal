@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { db } from '../db/client.js'
 import type { DbClient } from '../db/client.js'
 import { AppError } from '../libs/middleware/AppError.js'
@@ -23,7 +23,7 @@ export const usuariosController = {
         tenantDb,
         q as string,
         usuarioActualId,
-        Number.parseInt(limit as string, 10)
+        Number.parseInt(limit as string, 10),
       )
 
       res.json({

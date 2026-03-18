@@ -5,12 +5,12 @@ import {
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import useHookFormSchema from "../../../hooks/useHookFormSchema";
 import {
 	type TSchemaFormContrasenaTemporal,
 	schemaFormContrasenaTemporal,
 } from "../../../types/contrasenaTemporal";
 import { skipToken } from "../../../utils/skipToken";
-import useHookFormSchema from "../../../hooks/useHookFormSchema";
 
 const useContrasenaTemporal = (token?: string) => {
 	const navigate = useNavigate();

@@ -1,9 +1,9 @@
+import { MeetingCard } from '@/components/meeting/molecules/MeetingCard'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import type { Mensaje } from 'mf_store/store'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { MeetingCard } from '@/components/meeting/molecules/MeetingCard'
 import { MessageBubble } from '../molecules/MessageBubble'
 
 const MESSAGES_PER_PAGE = 50
@@ -55,7 +55,7 @@ function groupMessagesByDate(mensajes: Mensaje[]): Record<string, Mensaje[]> {
       acc[fecha].push(msg)
       return acc
     },
-    {} as Record<string, Mensaje[]>
+    {} as Record<string, Mensaje[]>,
   )
 }
 
@@ -80,6 +80,7 @@ export function MessageList({
 
   // Scroll al final cuando llegan nuevos mensajes.
   // Se hace scroll inmediato + diferido para capturar contenido async (ej: MeetingCard).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: containerRef.current es estable, no necesita ser dep
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -176,7 +177,13 @@ export function MessageList({
             msg.tipo === 'reunion' && msg.contenido ? (
               <Box
                 key={msg.id}
-                sx={{ display: 'flex', justifyContent: msg.remitenteId === currentUserId ? 'flex-end' : 'flex-start' }}
+                sx={{
+                  display: 'flex',
+                  justifyContent:
+                    msg.remitenteId === currentUserId
+                      ? 'flex-end'
+                      : 'flex-start',
+                }}
               >
                 <MeetingCard
                   reunionId={Number(msg.contenido)}
@@ -201,7 +208,7 @@ export function MessageList({
                     : undefined
                 }
               />
-            )
+            ),
           )}
         </Box>
       ))}
@@ -220,7 +227,6 @@ export function MessageList({
           </Typography>
         </Box>
       )}
-
     </Box>
   )
 }

@@ -1,10 +1,13 @@
 import { createServer } from 'node:http'
+import { createLogger } from '@municipal/core/logger'
 import app from './app.js'
 import { env } from './config/env.js'
 import { db } from './db/client.js'
-import { startReminderScheduler, stopReminderScheduler } from './jobs/reminderScheduler.js'
+import {
+  startReminderScheduler,
+  stopReminderScheduler,
+} from './jobs/reminderScheduler.js'
 import { disconnectRedis } from './libs/redis.js'
-import { createLogger } from '@municipal/core/logger'
 import { gruposSistemaService } from './services/gruposSistema.service.js'
 import { initializeSocket } from './socket/index.js'
 
@@ -23,7 +26,9 @@ async function bootstrap() {
       .sincronizarGrupos(db)
       .then((result) => {
         if (result.created.length > 0 || result.updated.length > 0) {
-          logger.info(`[Sync] Grupos del sistema: ${result.created.length} creados, ${result.updated.length} actualizados`)
+          logger.info(
+            `[Sync] Grupos del sistema: ${result.created.length} creados, ${result.updated.length} actualizados`,
+          )
         }
       })
       .catch((err) => {

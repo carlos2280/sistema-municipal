@@ -52,7 +52,7 @@ export function useOnlineUsers(): UseOnlineUsersReturn {
 
   const isUserOnline = useCallback(
     (userId: number) => onlineUsers.has(userId),
-    [onlineUsers]
+    [onlineUsers],
   )
 
   return {

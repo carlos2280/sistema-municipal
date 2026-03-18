@@ -15,7 +15,10 @@ function getUserId(req: { headers: Record<string, unknown> }): number {
   const raw = req.headers["x-user-id"];
   const id = Number(raw);
   if (!raw || Number.isNaN(id) || id <= 0) {
-    throw new AppError("Identidad de usuario no encontrada en la solicitud.", 401);
+    throw new AppError(
+      "Identidad de usuario no encontrada en la solicitud.",
+      401,
+    );
   }
   return id;
 }

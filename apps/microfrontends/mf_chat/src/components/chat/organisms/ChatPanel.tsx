@@ -1,3 +1,5 @@
+import { MeetingsPanel } from '@/components/meeting/organisms/MeetingsPanel'
+import { useConversaciones, useOnlineUsers } from '@/hooks'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -12,9 +14,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Calendar, MessageSquare, Plus, Search, Users, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useConversaciones, useOnlineUsers } from '@/hooks'
 import { ConversationItem } from '../atoms/ConversationItem'
-import { MeetingsPanel } from '@/components/meeting/organisms/MeetingsPanel'
 
 interface ChatPanelProps {
   activeConversationId?: number
@@ -31,7 +31,7 @@ function formatMessageTime(dateStr: string): string {
     const date = new Date(dateStr)
     const now = new Date()
     const diffDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
     )
 
     if (diffDays === 0) {
@@ -77,7 +77,7 @@ export function ChatPanel({
 
       if (conv.tipo === 'directa' && conv.participantes.length > 0) {
         const otherParticipant = conv.participantes.find(
-          (p) => p.usuarioId !== currentUserId
+          (p) => p.usuarioId !== currentUserId,
         )
         if (otherParticipant) {
           nombre = otherParticipant.usuario.nombreCompleto
@@ -122,7 +122,7 @@ export function ChatPanel({
   // Calcular total de mensajes no leídos
   const totalUnread = mappedConversations.reduce(
     (acc, conv) => acc + conv.noLeidos,
-    0
+    0,
   )
 
   const filteredConversations = mappedConversations.filter((conv) => {
@@ -190,7 +190,11 @@ export function ChatPanel({
             <Plus size={20} />
           </IconButton>
           {onClose && (
-            <IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }}>
+            <IconButton
+              size="small"
+              onClick={onClose}
+              sx={{ color: 'text.secondary' }}
+            >
               <X size={20} />
             </IconButton>
           )}
@@ -240,30 +244,32 @@ export function ChatPanel({
       </Box>
 
       {/* Search — oculto en tab Reuniones */}
-      {tabValue !== 3 && <Box sx={{ p: 2 }}>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Buscar conversación..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={18} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              bgcolor: theme.palette.action.hover,
-              '& fieldset': { borderColor: theme.palette.divider },
-            },
-          }}
-        />
-      </Box>}
+      {tabValue !== 3 && (
+        <Box sx={{ p: 2 }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Buscar conversación..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={18} color={theme.palette.text.secondary} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: theme.palette.action.hover,
+                '& fieldset': { borderColor: theme.palette.divider },
+              },
+            }}
+          />
+        </Box>
+      )}
 
       {/* Contenido principal */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>

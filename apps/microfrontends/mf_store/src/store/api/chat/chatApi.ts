@@ -101,8 +101,16 @@ export interface CallTokenResponse {
 // ============ REUNIONES TIPOS ============
 
 export type TipoReunion = "video" | "voz" | "presencial";
-export type EstadoReunion = "programada" | "activa" | "completada" | "cancelada";
-export type EstadoInvitacion = "pendiente" | "aceptada" | "rechazada" | "tentativa";
+export type EstadoReunion =
+	| "programada"
+	| "activa"
+	| "completada"
+	| "cancelada";
+export type EstadoInvitacion =
+	| "pendiente"
+	| "aceptada"
+	| "rechazada"
+	| "tentativa";
 
 export interface InvitacionReunion {
 	id: number;
@@ -218,8 +226,10 @@ export const chatApi = baseApi.injectEndpoints({
 		// Conversaciones
 		obtenerConversaciones: builder.query<Conversacion[], void>({
 			query: () => "chat/conversaciones",
-			transformResponse: (response: { success: boolean; data: Conversacion[] }) =>
-				response.data,
+			transformResponse: (response: {
+				success: boolean;
+				data: Conversacion[];
+			}) => response.data,
 			providesTags: ["Conversaciones"],
 		}),
 
@@ -229,9 +239,7 @@ export const chatApi = baseApi.injectEndpoints({
 				success: boolean;
 				data: Conversacion;
 			}) => response.data,
-			providesTags: (_result, _error, id) => [
-				{ type: "Conversaciones", id },
-			],
+			providesTags: (_result, _error, id) => [{ type: "Conversaciones", id }],
 		}),
 
 		crearConversacionDirecta: builder.mutation<
@@ -355,9 +363,7 @@ export const chatApi = baseApi.injectEndpoints({
 				success: boolean;
 				data: Participante[];
 			}) => response.data,
-			providesTags: (_result, _error, id) => [
-				{ type: "Participantes", id },
-			],
+			providesTags: (_result, _error, id) => [{ type: "Participantes", id }],
 		}),
 
 		agregarParticipante: builder.mutation<

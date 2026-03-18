@@ -62,9 +62,7 @@ export const updateSubscriptionEstado: RequestHandler = async (
     const { estado, motivo, ejecutadoPor } = req.body;
 
     if (!estado || !ejecutadoPor) {
-      return next(
-        new AppError("estado y ejecutadoPor son requeridos", 400),
-      );
+      return next(new AppError("estado y ejecutadoPor son requeridos", 400));
     }
 
     if (!VALID_ESTADOS.includes(estado)) {

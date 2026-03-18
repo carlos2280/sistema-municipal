@@ -135,7 +135,7 @@ declare module 'mf_store/store' {
 
   export function useBuscarUsuariosQuery(
     params: BuscarUsuariosRequest,
-    options?: { skip?: boolean }
+    options?: { skip?: boolean },
   ): {
     data: Usuario[] | undefined
     isLoading: boolean
@@ -152,7 +152,7 @@ declare module 'mf_store/store' {
 
   export function useObtenerMensajesQuery(
     params: ObtenerMensajesRequest,
-    options?: { skip?: boolean }
+    options?: { skip?: boolean },
   ): {
     data: MensajesResponse | undefined
     isLoading: boolean
@@ -161,18 +161,20 @@ declare module 'mf_store/store' {
   }
 
   export function useCrearConversacionDirectaMutation(): [
-    (params: CrearConversacionDirectaRequest) => { unwrap: () => Promise<Conversacion> },
-    { isLoading: boolean; error: unknown }
+    (params: CrearConversacionDirectaRequest) => {
+      unwrap: () => Promise<Conversacion>
+    },
+    { isLoading: boolean; error: unknown },
   ]
 
   export function useCrearGrupoMutation(): [
     (params: CrearGrupoRequest) => { unwrap: () => Promise<Conversacion> },
-    { isLoading: boolean; error: unknown }
+    { isLoading: boolean; error: unknown },
   ]
 
   export function useCrearMensajeMutation(): [
     (params: CrearMensajeRequest) => { unwrap: () => Promise<Mensaje> },
-    { isLoading: boolean; error: unknown }
+    { isLoading: boolean; error: unknown },
   ]
 
   // ============ LLAMADAS ============
@@ -185,14 +187,22 @@ declare module 'mf_store/store' {
 
   export function useLazyObtenerTokenLlamadaQuery(): [
     (llamadaId: number) => { unwrap: () => Promise<CallTokenResponse> },
-    { data: CallTokenResponse | undefined; isLoading: boolean }
+    { data: CallTokenResponse | undefined; isLoading: boolean },
   ]
 
   // ============ REUNIONES ============
 
   export type TipoReunion = 'video' | 'voz' | 'presencial'
-  export type EstadoReunion = 'programada' | 'activa' | 'completada' | 'cancelada'
-  export type EstadoInvitacion = 'pendiente' | 'aceptada' | 'rechazada' | 'tentativa'
+  export type EstadoReunion =
+    | 'programada'
+    | 'activa'
+    | 'completada'
+    | 'cancelada'
+  export type EstadoInvitacion =
+    | 'pendiente'
+    | 'aceptada'
+    | 'rechazada'
+    | 'tentativa'
 
   export interface InvitacionReunion {
     id: number
@@ -248,13 +258,15 @@ declare module 'mf_store/store' {
     llamada: { id: number; token: string; livekitUrl: string; roomName: string }
   }
 
-  export function useListarReunionesQuery(
-    conversacionId: number
-  ): { data: Reunion[] | undefined; isLoading: boolean }
+  export function useListarReunionesQuery(conversacionId: number): {
+    data: Reunion[] | undefined
+    isLoading: boolean
+  }
 
-  export function useObtenerReunionQuery(
-    id: number
-  ): { data: ReunionConInvitaciones | undefined; isLoading: boolean }
+  export function useObtenerReunionQuery(id: number): {
+    data: ReunionConInvitaciones | undefined
+    isLoading: boolean
+  }
 
   export function useProximasReunionesQuery(): {
     data: Reunion[] | undefined
@@ -262,44 +274,53 @@ declare module 'mf_store/store' {
   }
 
   export function useCrearReunionMutation(): [
-    (params: CreateReunionRequest) => { unwrap: () => Promise<ReunionConInvitaciones> },
-    { isLoading: boolean }
+    (params: CreateReunionRequest) => {
+      unwrap: () => Promise<ReunionConInvitaciones>
+    },
+    { isLoading: boolean },
   ]
 
   export function useEditarReunionMutation(): [
     (params: UpdateReunionRequest) => { unwrap: () => Promise<Reunion> },
-    { isLoading: boolean }
+    { isLoading: boolean },
   ]
 
   export function useCancelarReunionMutation(): [
     (id: number) => { unwrap: () => Promise<void> },
-    { isLoading: boolean }
+    { isLoading: boolean },
   ]
 
   export function useRsvpReunionMutation(): [
-    (params: { id: number; estado: EstadoInvitacion }) => { unwrap: () => Promise<InvitacionReunion> },
-    { isLoading: boolean }
+    (params: { id: number; estado: EstadoInvitacion }) => {
+      unwrap: () => Promise<InvitacionReunion>
+    },
+    { isLoading: boolean },
   ]
 
   export function useIniciarReunionMutation(): [
     (id: number) => { unwrap: () => Promise<IniciarReunionResponse> },
-    { isLoading: boolean }
+    { isLoading: boolean },
   ]
 
   // ============ PARTICIPANTES ============
 
-  export function useObtenerParticipantesQuery(
-    conversacionId: number
-  ): { data: Participante[] | undefined; isLoading: boolean }
+  export function useObtenerParticipantesQuery(conversacionId: number): {
+    data: Participante[] | undefined
+    isLoading: boolean
+  }
 
   export function useEliminarParticipanteMutation(): [
-    (params: { conversacionId: number; usuarioId: number }) => { unwrap: () => Promise<void> },
-    { isLoading: boolean }
+    (params: { conversacionId: number; usuarioId: number }) => {
+      unwrap: () => Promise<void>
+    },
+    { isLoading: boolean },
   ]
 
   export function useRenombrarGrupoMutation(): [
-    (params: { conversacionId: number; nombre: string }) => { unwrap: () => Promise<Conversacion> },
-    { isLoading: boolean }
+    (params: { conversacionId: number; nombre: string }) => {
+      unwrap: () => Promise<Conversacion>
+    },
+    { isLoading: boolean },
   ]
 }
 
@@ -319,7 +340,15 @@ declare module 'mf_ui/theme' {
   import type { ReactNode, ComponentType } from 'react'
   import type { Theme } from '@mui/material/styles'
 
-  export type ModuleCode = 'home' | 'contabilidad' | 'tesoreria' | 'rrhh' | 'obras' | 'catastro' | 'config' | 'chat'
+  export type ModuleCode =
+    | 'home'
+    | 'contabilidad'
+    | 'tesoreria'
+    | 'rrhh'
+    | 'obras'
+    | 'catastro'
+    | 'config'
+    | 'chat'
 
   export const ThemeProvider: ComponentType<{ children: ReactNode }>
   export const useTheme: () => {

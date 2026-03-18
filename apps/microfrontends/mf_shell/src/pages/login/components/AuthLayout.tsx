@@ -8,7 +8,7 @@
  */
 
 import { Box, keyframes, styled } from "@mui/material";
-import { memo, type ReactNode } from "react";
+import { type ReactNode, memo } from "react";
 import { BrandingPanel } from "./BrandingPanel";
 
 // ── Animations ──────────────────────────────────────────────────────────────
@@ -19,36 +19,38 @@ const rootExit = keyframes`
 
 // ── Layout ──────────────────────────────────────────────────────────────────
 
-const LayoutRoot = styled(Box)<{ ownerState: { exiting: boolean } }>(({ theme, ownerState }) => ({
-	position: "fixed",
-	inset: 0,
-	display: "grid",
-	gridTemplateColumns: "1fr 1fr",
-	background: theme.meridian.surfaces.void,
-	fontFamily: theme.typography.fontFamily,
-	color: theme.palette.text.primary,
-
-	...(ownerState.exiting && {
-		animation: `${rootExit} 400ms ease-in forwards`,
-	}),
-
-	[theme.breakpoints.down("lg")]: {
-		gridTemplateColumns: "40% 1fr",
-	},
-
-	[theme.breakpoints.down("md")]: {
-		gridTemplateColumns: "1fr",
-		gridTemplateRows: "auto 1fr",
-	},
-
-	"@media (min-width: 1440px)": {
+const LayoutRoot = styled(Box)<{ ownerState: { exiting: boolean } }>(
+	({ theme, ownerState }) => ({
+		position: "fixed",
+		inset: 0,
+		display: "grid",
 		gridTemplateColumns: "1fr 1fr",
-	},
+		background: theme.meridian.surfaces.void,
+		fontFamily: theme.typography.fontFamily,
+		color: theme.palette.text.primary,
 
-	"@media (prefers-reduced-motion: reduce)": {
-		animationDuration: "0.01ms !important",
-	},
-}));
+		...(ownerState.exiting && {
+			animation: `${rootExit} 400ms ease-in forwards`,
+		}),
+
+		[theme.breakpoints.down("lg")]: {
+			gridTemplateColumns: "40% 1fr",
+		},
+
+		[theme.breakpoints.down("md")]: {
+			gridTemplateColumns: "1fr",
+			gridTemplateRows: "auto 1fr",
+		},
+
+		"@media (min-width: 1440px)": {
+			gridTemplateColumns: "1fr 1fr",
+		},
+
+		"@media (prefers-reduced-motion: reduce)": {
+			animationDuration: "0.01ms !important",
+		},
+	}),
+);
 
 const FormPanel = styled(Box)(({ theme }) => ({
 	position: "relative",
@@ -94,11 +96,11 @@ const FormContainer = styled(Box)(() => ({
 	position: "relative",
 	zIndex: 1,
 
-	[`@media (min-width: 1440px)`]: {
+	"@media (min-width: 1440px)": {
 		maxWidth: 440,
 	},
 
-	[`@media (max-width: 767px)`]: {
+	"@media (max-width: 767px)": {
 		maxWidth: "100%",
 	},
 }));

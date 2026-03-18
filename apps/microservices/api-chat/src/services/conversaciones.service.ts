@@ -21,11 +21,14 @@ export const conversacionesService = {
         ultimaLectura: participantes.ultimaLectura,
       })
       .from(conversaciones)
-      .innerJoin(participantes, eq(participantes.conversacionId, conversaciones.id))
+      .innerJoin(
+        participantes,
+        eq(participantes.conversacionId, conversaciones.id),
+      )
       .where(eq(participantes.usuarioId, usuarioId))
       .orderBy(desc(conversaciones.updatedAt))
 
-    const conversacionIds = conversacionesDelUsuario.map(c => c.id)
+    const conversacionIds = conversacionesDelUsuario.map((c) => c.id)
 
     if (conversacionIds.length === 0) {
       return []
@@ -75,19 +78,22 @@ export const conversacionesService = {
         and(
           inArray(mensajes.conversacionId, conversacionIds),
           eq(mensajes.eliminado, false),
-        )
+        ),
       )
       .orderBy(mensajes.conversacionId, desc(mensajes.createdAt))
 
     // Agrupar: solo el primer mensaje por conversación (el más reciente)
-    const ultimoMensajePorConv = new Map<number, {
-      id: number
-      contenido: string | null
-      tipo: string | null
-      createdAt: Date | null
-      remitenteId: number
-      remitente: string
-    }>()
+    const ultimoMensajePorConv = new Map<
+      number,
+      {
+        id: number
+        contenido: string | null
+        tipo: string | null
+        createdAt: Date | null
+        remitenteId: number
+        remitente: string
+      }
+    >()
     for (const m of ultimosMensajes) {
       if (!ultimoMensajePorConv.has(m.conversacionId)) {
         ultimoMensajePorConv.set(m.conversacionId, {
@@ -108,10 +114,13 @@ export const conversacionesService = {
         count: count(),
       })
       .from(mensajes)
-      .innerJoin(participantes, and(
-        eq(participantes.conversacionId, mensajes.conversacionId),
-        eq(participantes.usuarioId, usuarioId),
-      ))
+      .innerJoin(
+        participantes,
+        and(
+          eq(participantes.conversacionId, mensajes.conversacionId),
+          eq(participantes.usuarioId, usuarioId),
+        ),
+      )
       .where(
         and(
           inArray(mensajes.conversacionId, conversacionIds),
@@ -121,7 +130,7 @@ export const conversacionesService = {
             isNull(participantes.ultimaLectura),
             gt(mensajes.createdAt, participantes.ultimaLectura),
           ),
-        )
+        ),
       )
       .groupBy(mensajes.conversacionId)
 
@@ -131,11 +140,14 @@ export const conversacionesService = {
     }
 
     // Agrupar participantes por conversación
-    const participantesPorConversacion = new Map<number, Array<{
-      usuarioId: number
-      rol: string | null
-      usuario: { nombreCompleto: string; email: string }
-    }>>()
+    const participantesPorConversacion = new Map<
+      number,
+      Array<{
+        usuarioId: number
+        rol: string | null
+        usuario: { nombreCompleto: string; email: string }
+      }>
+    >()
 
     for (const p of participantesData) {
       const existing = participantesPorConversacion.get(p.conversacionId) || []
@@ -151,7 +163,7 @@ export const conversacionesService = {
     }
 
     // Transformar resultado para el frontend
-    return conversacionesData.map(conv => {
+    return conversacionesData.map((conv) => {
       const ultimo = ultimoMensajePorConv.get(conv.id)
       return {
         id: conv.id,
@@ -172,7 +184,10 @@ export const conversacionesService = {
               contenido: ultimo.contenido ?? '',
               tipo: ultimo.tipo,
               createdAt: ultimo.createdAt?.toISOString() ?? '',
-              remitente: { id: ultimo.remitenteId, nombreCompleto: ultimo.remitente },
+              remitente: {
+                id: ultimo.remitenteId,
+                nombreCompleto: ultimo.remitente,
+              },
             }
           : null,
         mensajesNoLeidos: noLeidosPorConv.get(conv.id) ?? 0,
@@ -180,7 +195,10 @@ export const conversacionesService = {
     })
   },
 
-  async obtenerConversacionPorId(db: DbClient, id: number): Promise<Conversacion | undefined> {
+  async obtenerConversacionPorId(
+    db: DbClient,
+    id: number,
+  ): Promise<Conversacion | undefined> {
     const [result] = await db
       .select()
       .from(conversaciones)
@@ -192,7 +210,7 @@ export const conversacionesService = {
   async crearConversacion(
     db: DbClient,
     data: NewConversacion,
-    participantesIds: number[]
+    participantesIds: number[],
   ): Promise<Conversacion> {
     const [nuevaConversacion] = await db
       .insert(conversaciones)
@@ -205,7 +223,7 @@ export const conversacionesService = {
         conversacionId: nuevaConversacion.id,
         usuarioId,
         rol: usuarioId === data.creadorId ? 'admin' : 'miembro',
-      })
+      }),
     )
 
     await db.insert(participantes).values(participantesData)
@@ -216,18 +234,21 @@ export const conversacionesService = {
   async crearConversacionDirecta(
     db: DbClient,
     usuarioId1: number,
-    usuarioId2: number
+    usuarioId2: number,
   ): Promise<Conversacion> {
     // Verificar si ya existe una conversación directa entre estos usuarios
     const existente = await db
       .select({ conversacionId: participantes.conversacionId })
       .from(participantes)
-      .innerJoin(conversaciones, eq(participantes.conversacionId, conversaciones.id))
+      .innerJoin(
+        conversaciones,
+        eq(participantes.conversacionId, conversaciones.id),
+      )
       .where(
         and(
           eq(conversaciones.tipo, 'directa'),
-          eq(participantes.usuarioId, usuarioId1)
-        )
+          eq(participantes.usuarioId, usuarioId1),
+        ),
       )
 
     for (const conv of existente) {
@@ -237,8 +258,8 @@ export const conversacionesService = {
         .where(
           and(
             eq(participantes.conversacionId, conv.conversacionId),
-            eq(participantes.usuarioId, usuarioId2)
-          )
+            eq(participantes.usuarioId, usuarioId2),
+          ),
         )
 
       if (otroParticipante.length > 0) {
@@ -255,14 +276,14 @@ export const conversacionesService = {
     return this.crearConversacion(
       db,
       { tipo: 'directa', creadorId: usuarioId1 },
-      [usuarioId1, usuarioId2]
+      [usuarioId1, usuarioId2],
     )
   },
 
   async verificarParticipante(
     db: DbClient,
     conversacionId: number,
-    usuarioId: number
+    usuarioId: number,
   ): Promise<boolean> {
     const [result] = await db
       .select()
@@ -270,8 +291,8 @@ export const conversacionesService = {
       .where(
         and(
           eq(participantes.conversacionId, conversacionId),
-          eq(participantes.usuarioId, usuarioId)
-        )
+          eq(participantes.usuarioId, usuarioId),
+        ),
       )
 
     return !!result
@@ -307,7 +328,7 @@ export const conversacionesService = {
     db: DbClient,
     conversacionId: number,
     usuarioIdToRemove: number,
-    solicitanteId: number
+    solicitanteId: number,
   ) {
     const [conv] = await db
       .select()
@@ -316,9 +337,15 @@ export const conversacionesService = {
 
     if (!conv) return { success: false, error: 'Conversación no encontrada' }
     if (conv.tipo !== 'grupo')
-      return { success: false, error: 'Solo se pueden eliminar miembros de grupos' }
+      return {
+        success: false,
+        error: 'Solo se pueden eliminar miembros de grupos',
+      }
     if (conv.sistema)
-      return { success: false, error: 'No se pueden eliminar miembros de grupos del sistema' }
+      return {
+        success: false,
+        error: 'No se pueden eliminar miembros de grupos del sistema',
+      }
 
     const [solicitante] = await db
       .select()
@@ -326,16 +353,22 @@ export const conversacionesService = {
       .where(
         and(
           eq(participantes.conversacionId, conversacionId),
-          eq(participantes.usuarioId, solicitanteId)
-        )
+          eq(participantes.usuarioId, solicitanteId),
+        ),
       )
 
     if (!solicitante || solicitante.rol !== 'admin') {
-      return { success: false, error: 'Solo administradores pueden eliminar miembros' }
+      return {
+        success: false,
+        error: 'Solo administradores pueden eliminar miembros',
+      }
     }
 
     if (usuarioIdToRemove === solicitanteId) {
-      return { success: false, error: 'No puedes eliminarte a ti mismo del grupo' }
+      return {
+        success: false,
+        error: 'No puedes eliminarte a ti mismo del grupo',
+      }
     }
 
     await db
@@ -343,8 +376,8 @@ export const conversacionesService = {
       .where(
         and(
           eq(participantes.conversacionId, conversacionId),
-          eq(participantes.usuarioId, usuarioIdToRemove)
-        )
+          eq(participantes.usuarioId, usuarioIdToRemove),
+        ),
       )
 
     return { success: true }
@@ -354,7 +387,7 @@ export const conversacionesService = {
     db: DbClient,
     conversacionId: number,
     nuevoUsuarioId: number,
-    solicitanteId: number
+    solicitanteId: number,
   ) {
     const [conv] = await db
       .select()
@@ -363,7 +396,10 @@ export const conversacionesService = {
 
     if (!conv) return { success: false, error: 'Conversación no encontrada' }
     if (conv.tipo !== 'grupo')
-      return { success: false, error: 'Solo se pueden agregar miembros a grupos' }
+      return {
+        success: false,
+        error: 'Solo se pueden agregar miembros a grupos',
+      }
 
     const [solicitante] = await db
       .select()
@@ -371,16 +407,24 @@ export const conversacionesService = {
       .where(
         and(
           eq(participantes.conversacionId, conversacionId),
-          eq(participantes.usuarioId, solicitanteId)
-        )
+          eq(participantes.usuarioId, solicitanteId),
+        ),
       )
 
     if (!solicitante || solicitante.rol !== 'admin') {
-      return { success: false, error: 'Solo administradores pueden agregar miembros' }
+      return {
+        success: false,
+        error: 'Solo administradores pueden agregar miembros',
+      }
     }
 
-    const yaExiste = await this.verificarParticipante(db, conversacionId, nuevoUsuarioId)
-    if (yaExiste) return { success: false, error: 'El usuario ya es miembro del grupo' }
+    const yaExiste = await this.verificarParticipante(
+      db,
+      conversacionId,
+      nuevoUsuarioId,
+    )
+    if (yaExiste)
+      return { success: false, error: 'El usuario ya es miembro del grupo' }
 
     await db.insert(participantes).values({
       conversacionId,
@@ -395,7 +439,7 @@ export const conversacionesService = {
     db: DbClient,
     conversacionId: number,
     nuevoNombre: string,
-    solicitanteId: number
+    solicitanteId: number,
   ) {
     const [conv] = await db
       .select()
@@ -406,7 +450,10 @@ export const conversacionesService = {
     if (conv.tipo !== 'grupo')
       return { success: false, error: 'Solo se pueden renombrar grupos' }
     if (conv.sistema)
-      return { success: false, error: 'No se pueden renombrar grupos del sistema' }
+      return {
+        success: false,
+        error: 'No se pueden renombrar grupos del sistema',
+      }
 
     const [solicitante] = await db
       .select()
@@ -414,12 +461,15 @@ export const conversacionesService = {
       .where(
         and(
           eq(participantes.conversacionId, conversacionId),
-          eq(participantes.usuarioId, solicitanteId)
-        )
+          eq(participantes.usuarioId, solicitanteId),
+        ),
       )
 
     if (!solicitante || solicitante.rol !== 'admin') {
-      return { success: false, error: 'Solo administradores pueden renombrar el grupo' }
+      return {
+        success: false,
+        error: 'Solo administradores pueden renombrar el grupo',
+      }
     }
 
     await db

@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
 import {
   type Conversacion,
   useObtenerConversacionesQuery,
 } from 'mf_store/store'
+import { useEffect } from 'react'
 import { useSocket } from './useSocket'
 
 interface UseConversacionesReturn {

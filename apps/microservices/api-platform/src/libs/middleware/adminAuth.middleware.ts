@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
 import { getEnv } from "@/config/env";
+import type { NextFunction, Request, Response } from "express";
 import { AppError } from "./AppError";
 
 export const requireAdminKey = (

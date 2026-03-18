@@ -1,62 +1,60 @@
-import { Suspense, lazy, type FC } from 'react'
-import { loadRemote } from '@module-federation/enhanced/runtime'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
+import { loadRemote } from "@module-federation/enhanced/runtime";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import { type FC, Suspense, lazy } from "react";
 
 function ChatError() {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        gap: 2,
-      }}
-    >
-      <Typography color="error">
-        Error al cargar el módulo de chat
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Por favor, intenta recargar la página
-      </Typography>
-    </Box>
-  )
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				height: "100%",
+				gap: 2,
+			}}
+		>
+			<Typography color="error">Error al cargar el módulo de chat</Typography>
+			<Typography variant="body2" color="text.secondary">
+				Por favor, intenta recargar la página
+			</Typography>
+		</Box>
+	);
 }
 
 // Carga dinámica del ChatPage desde mf_chat via runtime
 const MfChatPage = lazy(() =>
-  loadRemote<{ ChatPage: FC }>('mf_chat/components')
-    .then((mod) => {
-      if (!mod?.ChatPage) throw new Error('ChatPage no encontrado')
-      return { default: mod.ChatPage }
-    })
-    .catch((err) => {
-      console.error('[ChatPage] Error cargando mf_chat/components:', err)
-      return { default: ChatError }
-    })
-)
+	loadRemote<{ ChatPage: FC }>("mf_chat/components")
+		.then((mod) => {
+			if (!mod?.ChatPage) throw new Error("ChatPage no encontrado");
+			return { default: mod.ChatPage };
+		})
+		.catch((err) => {
+			console.error("[ChatPage] Error cargando mf_chat/components:", err);
+			return { default: ChatError };
+		}),
+);
 
 function ChatLoadingFallback() {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        gap: 2,
-      }}
-    >
-      <CircularProgress />
-      <Typography variant="body2" color="text.secondary">
-        Cargando chat...
-      </Typography>
-    </Box>
-  )
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				height: "100%",
+				gap: 2,
+			}}
+		>
+			<CircularProgress />
+			<Typography variant="body2" color="text.secondary">
+				Cargando chat...
+			</Typography>
+		</Box>
+	);
 }
 
 /**
@@ -64,11 +62,11 @@ function ChatLoadingFallback() {
  * Carga dinámicamente el microfrontend mf_chat via Module Federation runtime.
  */
 export default function ChatPage() {
-  return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Suspense fallback={<ChatLoadingFallback />}>
-        <MfChatPage />
-      </Suspense>
-    </Box>
-  )
+	return (
+		<Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+			<Suspense fallback={<ChatLoadingFallback />}>
+				<MfChatPage />
+			</Suspense>
+		</Box>
+	);
 }

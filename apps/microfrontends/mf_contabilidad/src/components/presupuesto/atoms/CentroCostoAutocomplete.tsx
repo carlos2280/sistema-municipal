@@ -1,12 +1,12 @@
-import { Autocomplete, TextField } from "@mui/material";
-import type { CentrosCostoItem } from "../../../types/presupuesto.types";
+import { Autocomplete, TextField } from '@mui/material';
+import type { CentrosCostoItem } from '../../../types/presupuesto.types';
 
 interface CentroCostoAutocompleteProps {
   value: CentrosCostoItem | null;
   options: CentrosCostoItem[];
   onChange: (cc: CentrosCostoItem | null) => void;
   autoFocus?: boolean;
-  size?: "small" | "medium";
+  size?: 'small' | 'medium';
 }
 
 /**
@@ -18,7 +18,7 @@ const CentroCostoAutocomplete = ({
   options,
   onChange,
   autoFocus = false,
-  size = "small",
+  size = 'small',
 }: CentroCostoAutocompleteProps) => (
   <Autocomplete<CentrosCostoItem>
     value={value}
@@ -36,7 +36,7 @@ const CentroCostoAutocomplete = ({
         autoFocus={autoFocus}
         variant="outlined"
         size={size}
-        sx={{ "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" } }}
+        sx={{ '& .MuiOutlinedInput-root': { fontSize: '0.8125rem' } }}
       />
     )}
   />

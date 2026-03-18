@@ -7,10 +7,10 @@
  * Z-index: 800 (zIndexLayout.eyebrow)
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
+import EyebrowActions from "./EyebrowActions";
 import EyebrowBrand from "./EyebrowBrand";
 import EyebrowContext from "./EyebrowContext";
-import EyebrowActions from "./EyebrowActions";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -41,10 +41,7 @@ const EyebrowRoot = styled("header")(({ theme }) => {
 		left: 0,
 		right: 0,
 		height: EYEBROW_HEIGHT,
-		background: alpha(
-			theme.meridian.surfaces.ground,
-			isDark ? 0.92 : 0.94,
-		),
+		background: alpha(theme.meridian.surfaces.ground, isDark ? 0.92 : 0.94),
 		backdropFilter: "blur(16px)",
 		WebkitBackdropFilter: "blur(16px)",
 		borderBottom: `1px solid ${theme.meridian.borders.muted}`,

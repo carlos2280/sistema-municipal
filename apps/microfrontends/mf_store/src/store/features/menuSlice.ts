@@ -19,7 +19,11 @@ const menuSlice = createSlice({
 	reducers: {
 		menuReceived(
 			state,
-			action: PayloadAction<{ nombreSistema: string; codigoSistema?: string; menuRaiz: MenuItem[] }>,
+			action: PayloadAction<{
+				nombreSistema: string;
+				codigoSistema?: string;
+				menuRaiz: MenuItem[];
+			}>,
 		) {
 			state.nombreSistema = action.payload.nombreSistema;
 			state.codigoSistema = action.payload.codigoSistema || "";

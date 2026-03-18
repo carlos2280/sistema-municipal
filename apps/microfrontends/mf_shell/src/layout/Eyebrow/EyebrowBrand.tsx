@@ -8,8 +8,8 @@
 
 import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
-import { useAppSelector, selectTenantNombre } from "mf_store/store";
-import { MeridianLogo, StatusDot, ClockDisplay } from "mf_ui/components";
+import { selectTenantNombre, useAppSelector } from "mf_store/store";
+import { ClockDisplay, MeridianLogo, StatusDot } from "mf_ui/components";
 
 // ─── Styled Components ──────────────────────────────────────────
 
@@ -113,7 +113,12 @@ function EyebrowBrand() {
 
 			{/* Status dot — P3 (átomo reutilizado de mf_ui) */}
 			<P3Hidden>
-				<StatusDot color="success" size="small" pulse label="Sistema operativo" />
+				<StatusDot
+					color="success"
+					size="small"
+					pulse
+					label="Sistema operativo"
+				/>
 			</P3Hidden>
 
 			{/* Reloj — P3 (átomo reutilizado de mf_ui) */}

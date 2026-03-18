@@ -7,7 +7,7 @@
  * Padding inferior extra para dejar espacio al Compass FAB.
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { Outlet } from "react-router-dom";
 import { EYEBROW_HEIGHT, EYEBROW_HEIGHT_MOBILE } from "../Eyebrow";
 

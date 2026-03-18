@@ -1,13 +1,14 @@
+import { useOnlineUsers } from '@/hooks'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import TextField from '@mui/material/TextField'
@@ -23,13 +24,12 @@ import {
   UserMinus,
   X,
 } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
 import {
-  useObtenerParticipantesQuery,
   useEliminarParticipanteMutation,
+  useObtenerParticipantesQuery,
   useRenombrarGrupoMutation,
 } from 'mf_store/store'
-import { useOnlineUsers } from '@/hooks'
+import { useCallback, useMemo, useState } from 'react'
 
 interface MembersPanelProps {
   conversacionId: number
@@ -96,16 +96,13 @@ export function MembersPanel({
     return participantes.filter(
       (p) =>
         p.usuario.nombreCompleto.toLowerCase().includes(term) ||
-        p.usuario.email.toLowerCase().includes(term)
+        p.usuario.email.toLowerCase().includes(term),
     )
   }, [participantes, searchTerm])
 
-  const handleRemoveClick = useCallback(
-    (usuarioId: number, nombre: string) => {
-      setConfirmDialog({ open: true, usuarioId, nombre })
-    },
-    []
-  )
+  const handleRemoveClick = useCallback((usuarioId: number, nombre: string) => {
+    setConfirmDialog({ open: true, usuarioId, nombre })
+  }, [])
 
   const handleConfirmRemove = useCallback(async () => {
     try {
@@ -291,17 +288,14 @@ export function MembersPanel({
         ) : filteredParticipantes.length === 0 ? (
           <Box sx={{ p: 2, textAlign: 'center' }}>
             <Typography color="text.secondary" variant="body2">
-              {searchTerm
-                ? 'No se encontraron miembros'
-                : 'No hay miembros'}
+              {searchTerm ? 'No se encontraron miembros' : 'No hay miembros'}
             </Typography>
           </Box>
         ) : (
           filteredParticipantes.map((p) => {
             const online = isUserOnline(p.usuarioId)
             const isCurrentUser = p.usuarioId === currentUserId
-            const canRemove =
-              esAdmin && !esSistema && !isCurrentUser
+            const canRemove = esAdmin && !esSistema && !isCurrentUser
 
             return (
               <Box
@@ -322,9 +316,7 @@ export function MembersPanel({
                       width: 40,
                       height: 40,
                       borderRadius: '50%',
-                      bgcolor: getAvatarColor(
-                        p.usuario.nombreCompleto
-                      ),
+                      bgcolor: getAvatarColor(p.usuario.nombreCompleto),
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -404,10 +396,7 @@ export function MembersPanel({
                   <IconButton
                     size="small"
                     onClick={() =>
-                      handleRemoveClick(
-                        p.usuarioId,
-                        p.usuario.nombreCompleto
-                      )
+                      handleRemoveClick(p.usuarioId, p.usuario.nombreCompleto)
                     }
                     disabled={isRemoving}
                     sx={{

@@ -23,7 +23,11 @@ export const connectionTracker = {
    * Registra un nuevo socket para el usuario.
    * Retorna la cantidad total de sockets activos del usuario.
    */
-  async addSocket(redis: Redis, userId: number, socketId: string): Promise<number> {
+  async addSocket(
+    redis: Redis,
+    userId: number,
+    socketId: string,
+  ): Promise<number> {
     const key = userKey(userId)
     await redis.sadd(key, socketId)
     await redis.expire(key, CONN_TTL)
@@ -34,7 +38,11 @@ export const connectionTracker = {
    * Elimina un socket del usuario.
    * Retorna la cantidad de sockets restantes (0 = usuario completamente desconectado).
    */
-  async removeSocket(redis: Redis, userId: number, socketId: string): Promise<number> {
+  async removeSocket(
+    redis: Redis,
+    userId: number,
+    socketId: string,
+  ): Promise<number> {
     const key = userKey(userId)
     await redis.srem(key, socketId)
     return redis.scard(key)

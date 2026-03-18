@@ -183,11 +183,11 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     reconnectWithFreshAuth()
   }, [])
 
-  const emit = useCallback(<T,>(event: string, data: T) => {
+  const emit = useCallback(<T>(event: string, data: T) => {
     getGlobal().socket?.emit(event, data)
   }, [])
 
-  const on = useCallback(<T,>(event: string, callback: (data: T) => void) => {
+  const on = useCallback(<T>(event: string, callback: (data: T) => void) => {
     getGlobal().socket?.on(event, callback)
   }, [])
 

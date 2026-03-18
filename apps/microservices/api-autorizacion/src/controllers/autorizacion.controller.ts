@@ -139,7 +139,8 @@ export const cambiarSistema: RequestHandler = async (req, res, next) => {
 };
 
 export const login: RequestHandler = async (req, res, next) => {
-  const { correo, contrasena, areaId, sistemaId, tenantSlug, mfaCode } = req.body;
+  const { correo, contrasena, areaId, sistemaId, tenantSlug, mfaCode } =
+    req.body;
 
   try {
     const result = await autorizacionService.login({
@@ -154,7 +155,7 @@ export const login: RequestHandler = async (req, res, next) => {
     // Setup MFA obligatorio: email enviado, frontend muestra mensaje
     if ("mfaSetupPending" in result) {
       res.status(200).json(result); // { mfaSetupPending: true, userId }
-    // MFA requerido: NO setear cookies — el frontend debe solicitar el código
+      // MFA requerido: NO setear cookies — el frontend debe solicitar el código
     } else if ("mfaRequired" in result) {
       res.status(200).json(result); // { mfaRequired: true, userId }
     } else {
@@ -191,7 +192,10 @@ export const obtenerMenuporSistema: RequestHandler = async (req, res, next) => {
     return next(new AppError("ID inválido", 400));
   }
   try {
-    const data = await autorizacionService.obtenerMenuPorSistema(getDb(req), id);
+    const data = await autorizacionService.obtenerMenuPorSistema(
+      getDb(req),
+      id,
+    );
     res.status(200).json(data);
   } catch (error) {
     next(error);
@@ -269,7 +273,10 @@ export const me: RequestHandler = async (req, res, next) => {
     }
 
     // Obtener datos completos del usuario desde la BD
-    const usuario = await autorizacionService.obtenerUsuarioPorId(getDb(req), userId);
+    const usuario = await autorizacionService.obtenerUsuarioPorId(
+      getDb(req),
+      userId,
+    );
 
     if (!usuario || !usuario.activo) {
       throw new AppError("Usuario no encontrado o inactivo", 404);
@@ -324,7 +331,12 @@ export const iniciarSetupMfa: RequestHandler = async (req, res, next) => {
     const result = await autorizacionService.iniciarSetupMfa(setupToken);
     res.status(200).json(result);
   } catch (error) {
-    next(new AppError(error instanceof Error ? error.message : "Error al iniciar setup MFA", 400));
+    next(
+      new AppError(
+        error instanceof Error ? error.message : "Error al iniciar setup MFA",
+        400,
+      ),
+    );
   }
 };
 
@@ -337,6 +349,11 @@ export const activarMfa: RequestHandler = async (req, res, next) => {
     const result = await autorizacionService.activarMfa(setupToken, code);
     res.status(200).json(result); // { backupCodes: string[] }
   } catch (error) {
-    next(new AppError(error instanceof Error ? error.message : "Error al activar MFA", 400));
+    next(
+      new AppError(
+        error instanceof Error ? error.message : "Error al activar MFA",
+        400,
+      ),
+    );
   }
 };

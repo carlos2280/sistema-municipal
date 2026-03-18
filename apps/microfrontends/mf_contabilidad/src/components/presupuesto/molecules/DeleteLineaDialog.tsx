@@ -1,4 +1,4 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {
   Button,
   Dialog,
@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from "@mui/material";
+} from '@mui/material';
 
 interface DeleteLineaDialogProps {
   open: boolean;
@@ -29,23 +29,28 @@ const DeleteLineaDialog = ({
   loading = false,
 }: DeleteLineaDialogProps) => (
   <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
-    <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <DeleteOutlineIcon color="error" />
       Eliminar línea
     </DialogTitle>
     <DialogContent>
       <Typography variant="body2" color="text.secondary">
-        ¿Eliminar la cuenta{" "}
+        ¿Eliminar la cuenta{' '}
         {cuentaCodigo && (
           <strong>
             {cuentaCodigo} — {cuentaNombre}
           </strong>
-        )}{" "}
+        )}{' '}
         del presupuesto? Esta acción no se puede deshacer.
       </Typography>
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2 }}>
-      <Button onClick={onCancel} disabled={loading} color="inherit" size="small">
+      <Button
+        onClick={onCancel}
+        disabled={loading}
+        color="inherit"
+        size="small"
+      >
         Cancelar
       </Button>
       <Button

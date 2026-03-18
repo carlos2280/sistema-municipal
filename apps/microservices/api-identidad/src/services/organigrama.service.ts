@@ -1,5 +1,10 @@
 import type { DbClient } from "@/db/client";
-import { departamentos, direcciones, oficinas, usuarios } from "@municipal/db-identidad";
+import {
+  departamentos,
+  direcciones,
+  oficinas,
+  usuarios,
+} from "@municipal/db-identidad";
 import { and, asc, eq } from "drizzle-orm";
 
 // ============================================================================

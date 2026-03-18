@@ -1,6 +1,10 @@
 import type { DbClient } from "@/db/client";
-import { type NewUsuario, type UsuarioUpdate, usuarios } from "@municipal/db-identidad";
 import { generateRandomPassword } from "@/libs/utils/contrasenaAleatoria.utils";
+import {
+  type NewUsuario,
+  type UsuarioUpdate,
+  usuarios,
+} from "@municipal/db-identidad";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "./email.service";

@@ -13,13 +13,18 @@ export const reunionesController = {
     const esParticipante = await conversacionesService.verificarParticipante(
       db,
       conversacionId,
-      userId
+      userId,
     )
     if (!esParticipante) {
-      return res.status(403).json({ success: false, message: 'Sin acceso a esta conversación' })
+      return res
+        .status(403)
+        .json({ success: false, message: 'Sin acceso a esta conversación' })
     }
 
-    const data = await reunionesService.listarPorConversacion(db, conversacionId)
+    const data = await reunionesService.listarPorConversacion(
+      db,
+      conversacionId,
+    )
     return res.json({ success: true, data })
   },
 
@@ -27,41 +32,67 @@ export const reunionesController = {
   async crear(req: Request, res: Response) {
     const conversacionId = Number(req.params.id)
     const userId = req.usuario!.id
-    const { titulo, descripcion, tipo = 'video', fechaInicio, fechaFin, ubicacion, notas, participantesIds } = req.body
+    const {
+      titulo,
+      descripcion,
+      tipo = 'video',
+      fechaInicio,
+      fechaFin,
+      ubicacion,
+      notas,
+      participantesIds,
+    } = req.body
 
     if (!titulo || !fechaInicio || !fechaFin) {
-      return res.status(400).json({ success: false, message: 'titulo, fechaInicio y fechaFin son requeridos' })
+      return res.status(400).json({
+        success: false,
+        message: 'titulo, fechaInicio y fechaFin son requeridos',
+      })
     }
 
     const inicio = new Date(fechaInicio)
     const fin = new Date(fechaFin)
 
-    if (isNaN(inicio.getTime()) || isNaN(fin.getTime()) || fin <= inicio) {
-      return res.status(400).json({ success: false, message: 'Fechas inválidas' })
+    if (
+      Number.isNaN(inicio.getTime()) ||
+      Number.isNaN(fin.getTime()) ||
+      fin <= inicio
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Fechas inválidas' })
     }
 
     const esParticipante = await conversacionesService.verificarParticipante(
       db,
       conversacionId,
-      userId
+      userId,
     )
     if (!esParticipante) {
-      return res.status(403).json({ success: false, message: 'Sin acceso a esta conversación' })
+      return res
+        .status(403)
+        .json({ success: false, message: 'Sin acceso a esta conversación' })
     }
 
     // Si se proveen participantesIds, usarlos (siempre incluir al organizador)
     // Si no, usar todos los participantes de la conversación (comportamiento original)
     let participanteIds: number[]
     if (Array.isArray(participantesIds) && participantesIds.length > 0) {
-      const ids = [...new Set([...participantesIds.map(Number), userId])].filter(
-        (id) => Number.isInteger(id) && id > 0
-      )
+      const ids = [
+        ...new Set([...participantesIds.map(Number), userId]),
+      ].filter((id) => Number.isInteger(id) && id > 0)
       if (ids.length > 50) {
-        return res.status(400).json({ success: false, message: 'Máximo 50 participantes por reunión' })
+        return res.status(400).json({
+          success: false,
+          message: 'Máximo 50 participantes por reunión',
+        })
       }
       participanteIds = ids
     } else {
-      participanteIds = await reunionesService.obtenerParticipanteIds(db, conversacionId)
+      participanteIds = await reunionesService.obtenerParticipanteIds(
+        db,
+        conversacionId,
+      )
     }
 
     const reunion = await reunionesService.crearReunion(
@@ -77,7 +108,7 @@ export const reunionesController = {
         ubicacion: ubicacion?.trim(),
         notas: notas?.trim(),
       },
-      participanteIds
+      participanteIds,
     )
 
     // Emitir via Socket.IO
@@ -104,12 +135,16 @@ export const reunionesController = {
 
     const reunion = await reunionesService.obtenerConInvitaciones(db, id)
     if (!reunion) {
-      return res.status(404).json({ success: false, message: 'Reunión no encontrada' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'Reunión no encontrada' })
     }
 
     const tieneAcceso = await reunionesService.verificarAcceso(db, id, userId)
     if (!tieneAcceso) {
-      return res.status(403).json({ success: false, message: 'Sin acceso a esta reunión' })
+      return res
+        .status(403)
+        .json({ success: false, message: 'Sin acceso a esta reunión' })
     }
 
     return res.json({ success: true, data: reunion })
@@ -119,7 +154,15 @@ export const reunionesController = {
   async editar(req: Request, res: Response) {
     const id = Number(req.params.id)
     const userId = req.usuario!.id
-    const { titulo, descripcion, fechaInicio, fechaFin, ubicacion, notas, tipo } = req.body
+    const {
+      titulo,
+      descripcion,
+      fechaInicio,
+      fechaFin,
+      ubicacion,
+      notas,
+      tipo,
+    } = req.body
 
     const patchData: Record<string, unknown> = {}
     if (titulo !== undefined) patchData.titulo = titulo.trim()
@@ -130,9 +173,17 @@ export const reunionesController = {
     if (fechaInicio !== undefined) patchData.fechaInicio = new Date(fechaInicio)
     if (fechaFin !== undefined) patchData.fechaFin = new Date(fechaFin)
 
-    const reunion = await reunionesService.editarReunion(db, id, userId, patchData as Parameters<typeof reunionesService.editarReunion>[3])
+    const reunion = await reunionesService.editarReunion(
+      db,
+      id,
+      userId,
+      patchData as Parameters<typeof reunionesService.editarReunion>[3],
+    )
     if (!reunion) {
-      return res.status(404).json({ success: false, message: 'Reunión no encontrada o sin permisos' })
+      return res.status(404).json({
+        success: false,
+        message: 'Reunión no encontrada o sin permisos',
+      })
     }
 
     const io = req.app.get('io')
@@ -154,16 +205,29 @@ export const reunionesController = {
 
     const reunion = await reunionesService.cancelarReunion(db, id, userId)
     if (!reunion) {
-      return res.status(404).json({ success: false, message: 'Reunión no encontrada o sin permisos' })
+      return res.status(404).json({
+        success: false,
+        message: 'Reunión no encontrada o sin permisos',
+      })
     }
 
     // Si la reunión tenía una llamada activa, finalizarla
     if (reunionActual?.llamadaId) {
-      await llamadasService.actualizarEstado(db, reunionActual.llamadaId, 'finalizada')
+      await llamadasService.actualizarEstado(
+        db,
+        reunionActual.llamadaId,
+        'finalizada',
+      )
       const io = req.app.get('io')
-      const participanteIds = await llamadasService.obtenerParticipanteIds(db, reunion.conversacionId)
+      const participanteIds = await llamadasService.obtenerParticipanteIds(
+        db,
+        reunion.conversacionId,
+      )
       for (const pid of participanteIds) {
-        io?.to(`user:${pid}`).emit('call:ended', { llamadaId: reunionActual.llamadaId, reason: 'finalizada' })
+        io?.to(`user:${pid}`).emit('call:ended', {
+          llamadaId: reunionActual.llamadaId,
+          reason: 'finalizada',
+        })
       }
     }
 
@@ -183,12 +247,21 @@ export const reunionesController = {
     const { estado } = req.body
 
     if (!['pendiente', 'aceptada', 'rechazada', 'tentativa'].includes(estado)) {
-      return res.status(400).json({ success: false, message: 'Estado inválido' })
+      return res
+        .status(400)
+        .json({ success: false, message: 'Estado inválido' })
     }
 
-    const invitacion = await reunionesService.responderInvitacion(db, id, userId, estado)
+    const invitacion = await reunionesService.responderInvitacion(
+      db,
+      id,
+      userId,
+      estado,
+    )
     if (!invitacion) {
-      return res.status(404).json({ success: false, message: 'Invitación no encontrada' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'Invitación no encontrada' })
     }
 
     const reunion = await reunionesService.obtenerPorId(db, id)
@@ -211,24 +284,36 @@ export const reunionesController = {
 
     const reunion = await reunionesService.obtenerPorId(db, id)
     if (!reunion) {
-      return res.status(404).json({ success: false, message: 'Reunión no encontrada' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'Reunión no encontrada' })
     }
     if (reunion.estado !== 'programada') {
-      return res.status(400).json({ success: false, message: `No se puede iniciar una reunión en estado '${reunion.estado}'` })
+      return res.status(400).json({
+        success: false,
+        message: `No se puede iniciar una reunión en estado '${reunion.estado}'`,
+      })
     }
     if (reunion.tipo === 'presencial') {
-      return res.status(400).json({ success: false, message: 'Las reuniones presenciales no generan llamada' })
+      return res.status(400).json({
+        success: false,
+        message: 'Las reuniones presenciales no generan llamada',
+      })
     }
 
     const tieneAcceso = await reunionesService.verificarAcceso(db, id, userId)
     if (!tieneAcceso) {
-      return res.status(403).json({ success: false, message: 'Sin acceso a esta reunión' })
+      return res
+        .status(403)
+        .json({ success: false, message: 'Sin acceso a esta reunión' })
     }
 
     // Crear llamada LiveKit reutilizando el servicio existente
     const organizador = await llamadasService.obtenerUsuario(db, userId)
     if (!organizador) {
-      return res.status(500).json({ success: false, message: 'Usuario no encontrado' })
+      return res
+        .status(500)
+        .json({ success: false, message: 'Usuario no encontrado' })
     }
 
     const roomName = llamadasService.generateRoomName(reunion.conversacionId)
@@ -240,10 +325,18 @@ export const reunionesController = {
       livekitRoom: roomName,
     })
 
-    const token = await llamadasService.generateToken(roomName, userId, organizador.nombreCompleto)
+    const token = await llamadasService.generateToken(
+      roomName,
+      userId,
+      organizador.nombreCompleto,
+    )
 
     // Vincular llamada a la reunión
-    const reunionActiva = await reunionesService.marcarIniciada(db, id, llamada.id)
+    const reunionActiva = await reunionesService.marcarIniciada(
+      db,
+      id,
+      llamada.id,
+    )
 
     const io = req.app.get('io')
     io?.to(`conversation:${reunion.conversacionId}`).emit('meeting:starting', {

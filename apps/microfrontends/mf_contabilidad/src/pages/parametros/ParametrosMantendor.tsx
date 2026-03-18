@@ -1,5 +1,5 @@
 const ParametrosMantendor = () => {
-	return <div>ParametrosMantendor</div>;
+  return <div>ParametrosMantendor</div>;
 };
 
 export default ParametrosMantendor;

@@ -43,7 +43,7 @@ export const callTracker = {
     redis: Redis,
     llamadaId: number,
     userId: number,
-    socketId: string
+    socketId: string,
   ): Promise<void> {
     const key = callKey(llamadaId)
     await redis.sadd(key, encodeMember(userId, socketId))
@@ -58,7 +58,7 @@ export const callTracker = {
     redis: Redis,
     llamadaId: number,
     userId: number,
-    socketId: string
+    socketId: string,
   ): Promise<{ totalRemaining: number; userHasOtherSockets: boolean }> {
     const key = callKey(llamadaId)
     await redis.srem(key, encodeMember(userId, socketId))
@@ -82,7 +82,7 @@ export const callTracker = {
   async getCallsForSocket(
     redis: Redis,
     userId: number,
-    socketId: string
+    socketId: string,
   ): Promise<number[]> {
     const member = encodeMember(userId, socketId)
     const llamadaIds: number[] = []
@@ -95,7 +95,7 @@ export const callTracker = {
         'MATCH',
         `${KEY_PREFIX}*:sockets`,
         'COUNT',
-        100
+        100,
       )
       cursor = nextCursor
 
@@ -115,7 +115,10 @@ export const callTracker = {
   /**
    * Obtiene los userIds únicos en una llamada.
    */
-  async getParticipantUserIds(redis: Redis, llamadaId: number): Promise<number[]> {
+  async getParticipantUserIds(
+    redis: Redis,
+    llamadaId: number,
+  ): Promise<number[]> {
     const members = await redis.smembers(callKey(llamadaId))
     const userIds = new Set<number>()
     for (const m of members) {

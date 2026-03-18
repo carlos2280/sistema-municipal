@@ -19,19 +19,19 @@
 
 import { CssBaseline, GlobalStyles } from "@mui/material";
 import { selectDrawerOpen, useAppSelector } from "mf_store/store";
-import { useState, useCallback, useEffect } from "react";
 import { ThemeCustomizer } from "mf_ui/components";
+import { useCallback, useEffect, useState } from "react";
 import { useModuleSync } from "../hooks/useModuleSync";
-import { Eyebrow } from "./Eyebrow";
-import { Stage } from "./Stage";
-import { Compass } from "./Compass";
-import { NavPanel, useNavPanel } from "./NavPanel";
-import { CommandPalette, useCommandPalette } from "./CommandPalette";
-import StatusLine from "./StatusLine";
-import NotificationPanel from "./NotificationPanel";
 import AvatarMenu from "./AvatarMenu";
 import { ChatDrawerWrapper } from "./ChatDrawer";
+import { CommandPalette, useCommandPalette } from "./CommandPalette";
+import { Compass } from "./Compass";
+import { Eyebrow } from "./Eyebrow";
+import { NavPanel, useNavPanel } from "./NavPanel";
+import NotificationPanel from "./NotificationPanel";
 import { OrganigramaDialog } from "./Organigrama";
+import { Stage } from "./Stage";
+import StatusLine from "./StatusLine";
 
 // ============================================================================
 // COMPONENT
@@ -173,10 +173,7 @@ export default function AppLayout() {
 				onClose={() => setChatDrawerOpen(false)}
 			/>
 
-			<OrganigramaDialog
-				open={orgOpen}
-				onClose={() => setOrgOpen(false)}
-			/>
+			<OrganigramaDialog open={orgOpen} onClose={() => setOrgOpen(false)} />
 		</>
 	);
 }

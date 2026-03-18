@@ -1,6 +1,10 @@
 export type TipoReunion = 'video' | 'voz' | 'presencial'
 export type EstadoReunion = 'programada' | 'activa' | 'completada' | 'cancelada'
-export type EstadoInvitacion = 'pendiente' | 'aceptada' | 'rechazada' | 'tentativa'
+export type EstadoInvitacion =
+  | 'pendiente'
+  | 'aceptada'
+  | 'rechazada'
+  | 'tentativa'
 
 export interface Reunion {
   id: number

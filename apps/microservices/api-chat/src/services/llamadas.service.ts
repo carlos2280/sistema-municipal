@@ -1,13 +1,13 @@
-import { AccessToken } from 'livekit-server-sdk'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import type { DbClient } from '../db/client.js'
+import { AccessToken } from 'livekit-server-sdk'
 import { env } from '../config/env.js'
+import type { DbClient } from '../db/client.js'
+import { reuniones } from '../db/schemas/index.js'
 import {
   type Llamada,
   type NewLlamada,
   llamadas,
 } from '../db/schemas/llamadas.schema.js'
-import { reuniones } from '../db/schemas/index.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
 import { usuarios } from '../db/schemas/usuarios.schema.js'
 import { mensajesService } from './mensajes.service.js'
@@ -20,7 +20,7 @@ export const llamadasService = {
   async generateToken(
     roomName: string,
     userId: number,
-    userName: string
+    userName: string,
   ): Promise<string> {
     const at = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
       identity: String(userId),
@@ -36,10 +36,7 @@ export const llamadasService = {
   },
 
   async crearLlamada(db: DbClient, data: NewLlamada): Promise<Llamada> {
-    const [nuevaLlamada] = await db
-      .insert(llamadas)
-      .values(data)
-      .returning()
+    const [nuevaLlamada] = await db.insert(llamadas).values(data).returning()
     return nuevaLlamada
   },
 
@@ -47,7 +44,7 @@ export const llamadasService = {
     db: DbClient,
     llamadaId: number,
     estado: Llamada['estado'],
-    extra?: Partial<NewLlamada>
+    extra?: Partial<NewLlamada>,
   ): Promise<Llamada | undefined> {
     const [updated] = await db
       .update(llamadas)
@@ -60,7 +57,7 @@ export const llamadasService = {
   async finalizarLlamada(
     db: DbClient,
     llamadaId: number,
-    participantesQueUnieron: number[]
+    participantesQueUnieron: number[],
   ): Promise<Llamada | undefined> {
     const [llamada] = await db
       .select()
@@ -72,7 +69,7 @@ export const llamadasService = {
     const ahora = new Date()
     const inicio = llamada.iniciadaEn || llamada.createdAt || ahora
     const duracionSegundos = Math.round(
-      (ahora.getTime() - inicio.getTime()) / 1000
+      (ahora.getTime() - inicio.getTime()) / 1000,
     )
 
     const [updated] = await db
@@ -88,7 +85,8 @@ export const llamadasService = {
 
     // Insertar mensaje sistema en la conversación
     const duracionStr = this.formatDuration(duracionSegundos)
-    const tipoLabel = llamada.tipo === 'video' ? 'Videollamada' : 'Llamada de voz'
+    const tipoLabel =
+      llamada.tipo === 'video' ? 'Videollamada' : 'Llamada de voz'
     await mensajesService.crearMensaje(db, {
       conversacionId: llamada.conversacionId,
       remitenteId: llamada.iniciadoPor,
@@ -102,7 +100,7 @@ export const llamadasService = {
   async rechazarLlamada(
     db: DbClient,
     llamadaId: number,
-    estado: 'rechazada' | 'sin_respuesta'
+    estado: 'rechazada' | 'sin_respuesta',
   ): Promise<Llamada | undefined> {
     const [updated] = await db
       .update(llamadas)
@@ -116,9 +114,7 @@ export const llamadasService = {
 
     if (updated) {
       const label =
-        estado === 'rechazada'
-          ? 'Llamada rechazada'
-          : 'Llamada sin respuesta'
+        estado === 'rechazada' ? 'Llamada rechazada' : 'Llamada sin respuesta'
       await mensajesService.crearMensaje(db, {
         conversacionId: updated.conversacionId,
         remitenteId: updated.iniciadoPor,
@@ -131,16 +127,13 @@ export const llamadasService = {
   },
 
   async obtenerPorId(db: DbClient, id: number): Promise<Llamada | undefined> {
-    const [result] = await db
-      .select()
-      .from(llamadas)
-      .where(eq(llamadas.id, id))
+    const [result] = await db.select().from(llamadas).where(eq(llamadas.id, id))
     return result
   },
 
   async obtenerLlamadaActiva(
     db: DbClient,
-    conversacionId: number
+    conversacionId: number,
   ): Promise<Llamada | undefined> {
     const [result] = await db
       .select()
@@ -148,8 +141,8 @@ export const llamadasService = {
       .where(
         and(
           eq(llamadas.conversacionId, conversacionId),
-          inArray(llamadas.estado, ['sonando', 'activa'])
-        )
+          inArray(llamadas.estado, ['sonando', 'activa']),
+        ),
       )
     return result
   },
@@ -157,7 +150,7 @@ export const llamadasService = {
   async obtenerHistorial(
     db: DbClient,
     conversacionId: number,
-    limit = 20
+    limit = 20,
   ): Promise<Llamada[]> {
     return db
       .select()
@@ -178,7 +171,10 @@ export const llamadasService = {
     return user
   },
 
-  async obtenerParticipanteIds(db: DbClient, conversacionId: number): Promise<number[]> {
+  async obtenerParticipanteIds(
+    db: DbClient,
+    conversacionId: number,
+  ): Promise<number[]> {
     const parts = await db
       .select({ usuarioId: participantes.usuarioId })
       .from(participantes)
@@ -201,11 +197,16 @@ export const llamadasService = {
    * Usado para distinguir llamadas de reunión (donde "salir" ≠ "finalizar")
    * de llamadas directas (donde "colgar" = finalizar para todos).
    */
-  async esLlamadaDeReunionActiva(db: DbClient, llamadaId: number): Promise<boolean> {
+  async esLlamadaDeReunionActiva(
+    db: DbClient,
+    llamadaId: number,
+  ): Promise<boolean> {
     const [result] = await db
       .select({ id: reuniones.id })
       .from(reuniones)
-      .where(and(eq(reuniones.llamadaId, llamadaId), eq(reuniones.estado, 'activa')))
+      .where(
+        and(eq(reuniones.llamadaId, llamadaId), eq(reuniones.estado, 'activa')),
+      )
       .limit(1)
     return !!result
   },

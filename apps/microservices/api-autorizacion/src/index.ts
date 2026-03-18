@@ -1,7 +1,7 @@
-import app from "./app";
-import { loadEnv } from "./config/env";
 import { closeTenantPools } from "@municipal/core/database";
 import { createLogger } from "@municipal/core/logger";
+import app from "./app";
+import { loadEnv } from "./config/env";
 
 const logger = createLogger("api-autorizacion");
 const { PORT: PORT_DEFAULT } = loadEnv();

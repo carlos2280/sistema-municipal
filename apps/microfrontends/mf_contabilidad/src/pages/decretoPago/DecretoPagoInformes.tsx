@@ -1,5 +1,5 @@
 const DecretoPagoInformes = () => {
-	return <div>DecretoPagoInformes</div>;
+  return <div>DecretoPagoInformes</div>;
 };
 
 export default DecretoPagoInformes;

@@ -1,5 +1,5 @@
-import { GATEWAY_SIGNATURE, X_USER_HEADERS } from "@municipal/core/auth";
-import type { NextFunction, Request, Response } from "express";
+import { GATEWAY_SIGNATURE, X_USER_HEADERS } from '@municipal/core/auth'
+import type { NextFunction, Request, Response } from 'express'
 
 /**
  * Bloquea requests que no vienen del API Gateway en producción.
@@ -11,20 +11,20 @@ export const requireGateway = (
   res: Response,
   next: NextFunction,
 ): void => {
-  if (process.env.NODE_ENV === "development") {
-    return next();
+  if (process.env.NODE_ENV === 'development') {
+    return next()
   }
 
   // Health checks son accesibles directamente (Railway, monitoring)
-  if (req.path.endsWith("/health")) {
-    return next();
+  if (req.path.endsWith('/health')) {
+    return next()
   }
 
-  const secured = req.headers[X_USER_HEADERS.secured];
+  const secured = req.headers[X_USER_HEADERS.secured]
   if (secured !== GATEWAY_SIGNATURE) {
-    res.status(403).json({ message: "Acceso directo no permitido" });
-    return;
+    res.status(403).json({ message: 'Acceso directo no permitido' })
+    return
   }
 
-  next();
-};
+  next()
+}

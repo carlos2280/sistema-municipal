@@ -1,27 +1,27 @@
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import DomainIcon from "@mui/icons-material/Domain";
-import ExtensionIcon from "@mui/icons-material/Extension";
-import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import { useLocation, useNavigate } from "react-router-dom";
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import DomainIcon from '@mui/icons-material/Domain'
+import ExtensionIcon from '@mui/icons-material/Extension'
+import Divider from '@mui/material/Divider'
+import Drawer from '@mui/material/Drawer'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const DRAWER_WIDTH = 240;
+const DRAWER_WIDTH = 240
 
 const NAV_ITEMS = [
-  { label: "Dashboard", path: "/", icon: <DashboardIcon /> },
-  { label: "Municipalidades", path: "/tenants", icon: <DomainIcon /> },
-  { label: "Módulos", path: "/modules", icon: <ExtensionIcon /> },
-];
+  { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
+  { label: 'Municipalidades', path: '/tenants', icon: <DomainIcon /> },
+  { label: 'Módulos', path: '/modules', icon: <ExtensionIcon /> },
+]
 
 export default function Sidebar() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <Drawer
@@ -29,9 +29,9 @@ export default function Sidebar() {
       sx={{
         width: DRAWER_WIDTH,
         flexShrink: 0,
-        "& .MuiDrawer-paper": {
+        '& .MuiDrawer-paper': {
           width: DRAWER_WIDTH,
-          boxSizing: "border-box",
+          boxSizing: 'border-box',
         },
       }}
     >
@@ -46,8 +46,8 @@ export default function Sidebar() {
           <ListItemButton
             key={item.path}
             selected={
-              item.path === "/"
-                ? location.pathname === "/"
+              item.path === '/'
+                ? location.pathname === '/'
                 : location.pathname.startsWith(item.path)
             }
             onClick={() => navigate(item.path)}
@@ -58,7 +58,7 @@ export default function Sidebar() {
         ))}
       </List>
     </Drawer>
-  );
+  )
 }
 
-export { DRAWER_WIDTH };
+export { DRAWER_WIDTH }

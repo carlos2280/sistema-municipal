@@ -6,13 +6,13 @@
  * El cambio de sistema usa `useCambiarSistemaMutation()`.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-	useAppSelector,
 	selectSistemaId,
-	useMisSistemasQuery,
+	useAppSelector,
 	useCambiarSistemaMutation,
+	useMisSistemasQuery,
 } from "mf_store/store";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -42,12 +42,14 @@ function useCompass() {
 
 	// Construir lista: home + sistemas del usuario
 	const sistemas: CompassSistema[] = useMemo(() => {
-		const items = misSistemas.map((s: { id: number; nombre: string; icono: string | null }) => ({
-			id: s.id,
-			nombre: s.nombre,
-			icono: s.icono,
-			isHome: false,
-		}));
+		const items = misSistemas.map(
+			(s: { id: number; nombre: string; icono: string | null }) => ({
+				id: s.id,
+				nombre: s.nombre,
+				icono: s.icono,
+				isHome: false,
+			}),
+		);
 		return [HOME_ITEM, ...items];
 	}, [misSistemas]);
 
@@ -73,7 +75,7 @@ function useCompass() {
 		function handleKeyDown(e: KeyboardEvent) {
 			// Alt+1..N → cambio directo de sistema
 			if (e.altKey && e.key >= "1" && e.key <= "9") {
-				const index = parseInt(e.key, 10) - 1;
+				const index = Number.parseInt(e.key, 10) - 1;
 				if (index < sistemas.length) {
 					e.preventDefault();
 					goSistema(sistemas[index].id);

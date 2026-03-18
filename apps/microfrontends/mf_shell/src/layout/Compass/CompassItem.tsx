@@ -5,7 +5,7 @@
  * La magnificación CSS (1.32 / 1.12 / 1.04) se aplica desde el contenedor padre.
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { LayoutGrid } from "lucide-react";
 import * as icons from "lucide-react";
 import type { LucideProps } from "lucide-react";
@@ -48,9 +48,12 @@ function SafeLucideIcon({
 	if (!name) return <LayoutGrid size={size} strokeWidth={strokeWidth} />;
 
 	const pascalName = toPascalCase(name);
-	const IconComponent = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
+	const IconComponent = (
+		icons as unknown as Record<string, React.ComponentType<LucideProps>>
+	)[pascalName];
 
-	if (!IconComponent) return <LayoutGrid size={size} strokeWidth={strokeWidth} />;
+	if (!IconComponent)
+		return <LayoutGrid size={size} strokeWidth={strokeWidth} />;
 
 	return <IconComponent size={size} strokeWidth={strokeWidth} />;
 }
@@ -76,11 +79,11 @@ const ItemRoot = styled("button")(({ theme }) => ({
 	color: theme.palette.text.secondary,
 	boxShadow: theme.meridian.shadows.sm,
 	transition: [
-		`opacity 180ms ease`,
+		"opacity 180ms ease",
 		`transform 280ms ${theme.meridian.easings.spring}`,
-		`background 150ms ease`,
-		`border-color 150ms ease`,
-		`box-shadow 180ms ease`,
+		"background 150ms ease",
+		"border-color 150ms ease",
+		"box-shadow 180ms ease",
 	].join(", "),
 
 	"&:hover": {

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
 import {
 	selectTenantResolved,
 	tenantReceived,
 	useAppDispatch,
 	useAppSelector,
 } from "mf_store/store";
+import { useEffect, useState } from "react";
 
 type TenantResolverStatus = "loading" | "resolved" | "error";
 

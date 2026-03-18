@@ -19,11 +19,19 @@ export function startReminderScheduler(io: Server): void {
 
   timer = setInterval(async () => {
     try {
-      const pendientes = await reunionesService.obtenerRecordatoriosPendientes(db)
+      const pendientes =
+        await reunionesService.obtenerRecordatoriosPendientes(db)
 
       for (const recordatorio of pendientes) {
-        const reunion = await reunionesService.obtenerPorId(db, recordatorio.reunionId)
-        if (!reunion || reunion.estado === 'cancelada' || reunion.estado === 'completada') {
+        const reunion = await reunionesService.obtenerPorId(
+          db,
+          recordatorio.reunionId,
+        )
+        if (
+          !reunion ||
+          reunion.estado === 'cancelada' ||
+          reunion.estado === 'completada'
+        ) {
           await reunionesService.marcarRecordatorioEnviado(db, recordatorio.id)
           continue
         }
@@ -39,7 +47,7 @@ export function startReminderScheduler(io: Server): void {
         await reunionesService.marcarRecordatorioEnviado(db, recordatorio.id)
 
         console.log(
-          `[Reminder] Enviado recordatorio reunión ${reunion.id} → usuario ${recordatorio.usuarioId} (${minutosRestantes} min restantes)`
+          `[Reminder] Enviado recordatorio reunión ${reunion.id} → usuario ${recordatorio.usuarioId} (${minutosRestantes} min restantes)`,
         )
       }
     } catch (err) {

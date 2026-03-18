@@ -30,11 +30,11 @@ createRoot(rootElement).render(
 							richColors
 							toastOptions={{
 								style: {
-									borderRadius: '10px',
+									borderRadius: "10px",
 									fontFamily: '"Plus Jakarta Sans", Roboto, sans-serif',
-									boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
-									padding: '12px 16px',
-									fontSize: '0.875rem',
+									boxShadow: "0 4px 16px rgba(0, 0, 0, 0.12)",
+									padding: "12px 16px",
+									fontSize: "0.875rem",
 								},
 							}}
 						/>

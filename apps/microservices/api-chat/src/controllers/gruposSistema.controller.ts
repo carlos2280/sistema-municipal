@@ -9,7 +9,7 @@ const getDb = (req: Request) => (req.tenantDb ?? db) as DbClient
 export const sincronizarGruposSistema: RequestHandler = async (
   req,
   res,
-  next
+  next,
 ) => {
   try {
     const tenantDb = getDb(req)

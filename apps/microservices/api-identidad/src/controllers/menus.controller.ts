@@ -1,7 +1,7 @@
 import { db } from "@/app";
 import type { DbClient } from "@/db/client";
-import type { NewMenu } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
+import type { NewMenu } from "@municipal/db-identidad";
 import * as menusService from "@services/menus.service";
 import type { RequestHandler } from "express";
 

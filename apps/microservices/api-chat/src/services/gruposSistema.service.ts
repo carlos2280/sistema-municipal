@@ -1,9 +1,9 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
-import { participantes } from '../db/schemas/participantes.schema.js'
 import { departamentos } from '../db/schemas/departamentos.schema.js'
 import { oficinas } from '../db/schemas/oficinas.schema.js'
+import { participantes } from '../db/schemas/participantes.schema.js'
 import { usuarios } from '../db/schemas/usuarios.schema.js'
 
 interface SyncResult {
@@ -21,7 +21,7 @@ export const gruposSistemaService = {
       .where(eq(conversaciones.sistema, true))
 
     const gruposPorDepto = new Map(
-      gruposSistema.map((g) => [g.departamentoId, g])
+      gruposSistema.map((g) => [g.departamentoId, g]),
     )
 
     const result: SyncResult = { created: [], updated: [] }
@@ -33,10 +33,7 @@ export const gruposSistemaService = {
         .from(usuarios)
         .innerJoin(oficinas, eq(usuarios.idOficina, oficinas.id))
         .where(
-          and(
-            eq(oficinas.idDepartamento, depto.id),
-            eq(usuarios.activo, true)
-          )
+          and(eq(oficinas.idDepartamento, depto.id), eq(usuarios.activo, true)),
         )
 
       const userIds = usuariosDepto.map((u) => u.id)
@@ -63,7 +60,7 @@ export const gruposSistemaService = {
             conversacionId: newGroup.id,
             usuarioId: uid,
             rol: 'miembro' as const,
-          }))
+          })),
         )
 
         result.created.push(newGroup.id)
@@ -88,7 +85,7 @@ export const gruposSistemaService = {
               conversacionId: existingGroup.id,
               usuarioId: uid,
               rol: 'miembro' as const,
-            }))
+            })),
           )
         }
 
@@ -98,8 +95,8 @@ export const gruposSistemaService = {
             .where(
               and(
                 eq(participantes.conversacionId, existingGroup.id),
-                inArray(participantes.usuarioId, toRemove)
-              )
+                inArray(participantes.usuarioId, toRemove),
+              ),
             )
         }
 

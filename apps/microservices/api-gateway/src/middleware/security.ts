@@ -33,7 +33,9 @@ export const authenticatedLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req: Request) =>
-    req.__gatewayUser ? `user:${req.__gatewayUser.userId}` : (req.ip ?? "unknown"),
+    req.__gatewayUser
+      ? `user:${req.__gatewayUser.userId}`
+      : (req.ip ?? "unknown"),
   skip: (req: Request) => !req.__gatewayUser,
 });
 

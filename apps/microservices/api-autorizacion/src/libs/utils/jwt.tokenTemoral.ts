@@ -1,12 +1,11 @@
 // utils/token.ts
-import { loadEnv } from '@/config/env';
-import jwt from 'jsonwebtoken';
+import { loadEnv } from "@/config/env";
+import jwt from "jsonwebtoken";
 const { JWT_SECRET_TEMP } = loadEnv();
-if (!JWT_SECRET_TEMP) throw new Error('JWT_SECRET_TEMP no está configurado');
+if (!JWT_SECRET_TEMP) throw new Error("JWT_SECRET_TEMP no está configurado");
 const JWT_SECRET = JWT_SECRET_TEMP;
 
-
 export const generarTokenTemporal = (correo: string) => {
-    const payload = { correo };
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+  const payload = { correo };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
 };

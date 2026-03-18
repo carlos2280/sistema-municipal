@@ -1,10 +1,10 @@
 import { RouterProvider, type RouterProviderProps } from "react-router-dom";
 import "./App.css";
 import {
+	selectCodigoSistema,
 	selectIsAuthenticated,
 	selectModulosActivos,
 	selectSistemaId,
-	selectCodigoSistema,
 	useAppSelector,
 } from "mf_store/store";
 import { AppLoader } from "mf_ui/components";
@@ -90,11 +90,20 @@ function App() {
 		};
 
 		initializeRouter();
-	}, [isAuthenticated, isWaitingForAuthData, modulosActivos, tenantStatus, sistemaId, menu]);
+	}, [
+		isAuthenticated,
+		isWaitingForAuthData,
+		modulosActivos,
+		tenantStatus,
+		sistemaId,
+		menu,
+	]);
 
 	// Resolución de tenant en progreso
 	if (tenantStatus === "loading") {
-		return <AppLoader variant="branded" message="Identificando municipalidad..." />;
+		return (
+			<AppLoader variant="branded" message="Identificando municipalidad..." />
+		);
 	}
 
 	// Hostname no encontrado

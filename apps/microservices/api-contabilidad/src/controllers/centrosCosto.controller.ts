@@ -30,8 +30,13 @@ export const actualizarCentroCosto: RequestHandler = async (req, res, next) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) return next(new AppError("ID inválido", 400));
   try {
-    const updated = await ccService.actualizarCentroCosto(getDb(req), id, req.body);
-    if (!updated) return next(new AppError("Centro de costo no encontrado", 404));
+    const updated = await ccService.actualizarCentroCosto(
+      getDb(req),
+      id,
+      req.body,
+    );
+    if (!updated)
+      return next(new AppError("Centro de costo no encontrado", 404));
     res.status(200).json(updated);
   } catch (error) {
     next(error);

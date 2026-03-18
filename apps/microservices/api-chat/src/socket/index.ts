@@ -20,7 +20,10 @@ interface TokenPayload {
 // ---------------------------------------------------------------------------
 const CACHE_TTL_MS = 5 * 60 * 1000
 
-const chatSubscriptionCache = new Map<string, { allowed: boolean; expiresAt: number }>()
+const chatSubscriptionCache = new Map<
+  string,
+  { allowed: boolean; expiresAt: number }
+>()
 
 async function isChatModuleActive(tenantSlug: string): Promise<boolean> {
   if (!env.PLATFORM_URL) return true
@@ -57,7 +60,9 @@ async function isChatModuleActive(tenantSlug: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 // Inicialización del servidor Socket.IO con Redis adapter
 // ---------------------------------------------------------------------------
-export async function initializeSocket(httpServer: HttpServer): Promise<Server> {
+export async function initializeSocket(
+  httpServer: HttpServer,
+): Promise<Server> {
   const redis = getRedisClient()
 
   // Socket.IO Redis adapter necesita 2 clientes dedicados: pub y sub
@@ -93,7 +98,9 @@ export async function initializeSocket(httpServer: HttpServer): Promise<Server> 
     if (!token) {
       const cookies = socket.handshake.headers.cookie
       if (cookies) {
-        const tokenCookie = cookies.split(';').find((c) => c.trim().startsWith('token='))
+        const tokenCookie = cookies
+          .split(';')
+          .find((c) => c.trim().startsWith('token='))
         if (tokenCookie) {
           token = tokenCookie.split('=')[1]?.trim()
         }
@@ -115,14 +122,17 @@ export async function initializeSocket(httpServer: HttpServer): Promise<Server> 
 
       if (!chatActive) {
         console.warn(
-          `[Socket] Suscripción al chat no activa para tenant "${tenantSlug}" (usuario: ${decoded.userId})`
+          `[Socket] Suscripción al chat no activa para tenant "${tenantSlug}" (usuario: ${decoded.userId})`,
         )
         return next(new Error('Módulo de chat no contratado'))
       }
 
       next()
     } catch (err) {
-      if (err instanceof Error && err.message === 'Módulo de chat no contratado') {
+      if (
+        err instanceof Error &&
+        err.message === 'Módulo de chat no contratado'
+      ) {
         return next(err)
       }
       next(new Error('Token inválido'))
@@ -133,7 +143,9 @@ export async function initializeSocket(httpServer: HttpServer): Promise<Server> 
   // Manejo de conexiones
   // -----------------------------------------------------------------------
   io.on('connection', (socket) => {
-    console.log(`[Socket] Nueva conexión: ${socket.id} (Usuario: ${socket.data.userId})`)
+    console.log(
+      `[Socket] Nueva conexión: ${socket.id} (Usuario: ${socket.data.userId})`,
+    )
 
     // Unirse a sala personal del usuario
     socket.join(`user:${socket.data.userId}`)

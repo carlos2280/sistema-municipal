@@ -1,12 +1,20 @@
-import { useCrearPlanesCuentaMutation, useActualizarPlanesCuentaMutation, setDrawerOpen, useAppDispatch } from 'mf_store/store';
+import {
+  setDrawerOpen,
+  useActualizarPlanesCuentaMutation,
+  useAppDispatch,
+  useCrearPlanesCuentaMutation,
+} from 'mf_store/store';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import type { PanelMode } from '../../components/planCuentas/organisms/AccountPanel';
-import { formatCodigo, type TreeItemData } from '../../utils/planDeCuentasUtils';
+import {
+  type TreeItemData,
+  formatCodigo,
+} from '../../utils/planDeCuentasUtils';
 import useHookFormSchema from '../useHookFormSchema';
-import { useVerificarCodigo, type CodigoStatus } from './useVerificarCodigo';
+import { type CodigoStatus, useVerificarCodigo } from './useVerificarCodigo';
 
 const MAX_NIVEL_CUENTA = 8;
 
@@ -101,8 +109,11 @@ interface UseAccountPanelOptions {
  * Hook unificado para manejar el panel de crear/editar cuentas.
  * Consolida la lógica de useCreatePlanCuenta y usePlanDeCuentas.
  */
-export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPanelReturn {
-  const { onExpandNode, selectedYear = new Date().getFullYear() } = options ?? {};
+export function useAccountPanel(
+  options?: UseAccountPanelOptions,
+): UseAccountPanelReturn {
+  const { onExpandNode, selectedYear = new Date().getFullYear() } =
+    options ?? {};
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<PanelMode>(null);
@@ -299,7 +310,9 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
             toast.success(`Cuenta ${codigoFmt} creada`, {
               description: data.nombre,
             });
-            toast.info('Nivel máximo alcanzado. No se pueden crear más subcuentas.');
+            toast.info(
+              'Nivel máximo alcanzado. No se pueden crear más subcuentas.',
+            );
             closePanel();
           } else {
             // Reposicionar panel en la cuenta recién creada como nuevo padre
@@ -350,7 +363,19 @@ export function useAccountPanel(options?: UseAccountPanelOptions): UseAccountPan
         setIsLoading(false);
       }
     },
-    [mode, crearPlanesCuenta, actualizarPlanesCuenta, methods, closePanel, openCreatePanel, selectedItem, onExpandNode, codigoYaExiste, codigoExistente, resetVerificacion],
+    [
+      mode,
+      crearPlanesCuenta,
+      actualizarPlanesCuenta,
+      methods,
+      closePanel,
+      openCreatePanel,
+      selectedItem,
+      onExpandNode,
+      codigoYaExiste,
+      codigoExistente,
+      resetVerificacion,
+    ],
   );
 
   return useMemo(

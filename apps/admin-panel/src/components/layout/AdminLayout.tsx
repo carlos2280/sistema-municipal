@@ -1,27 +1,27 @@
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
-import { Outlet } from "react-router-dom";
-import type { ThemeMode } from "../../App";
-import { useAuth } from "../../hooks/useAuth";
-import Sidebar, { DRAWER_WIDTH } from "./Sidebar";
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import LogoutIcon from '@mui/icons-material/Logout'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
+import { Outlet } from 'react-router-dom'
+import type { ThemeMode } from '../../App'
+import { useAuth } from '../../hooks/useAuth'
+import Sidebar, { DRAWER_WIDTH } from './Sidebar'
 
 interface Props {
-  mode: ThemeMode;
-  toggleTheme: () => void;
+  mode: ThemeMode
+  toggleTheme: () => void
 }
 
 export default function AdminLayout({ mode, toggleTheme }: Props) {
-  const { logout } = useAuth();
+  const { logout } = useAuth()
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
         sx={{
@@ -33,9 +33,9 @@ export default function AdminLayout({ mode, toggleTheme }: Props) {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Sistema Municipal
           </Typography>
-          <Tooltip title={mode === "light" ? "Modo oscuro" : "Modo claro"}>
+          <Tooltip title={mode === 'light' ? 'Modo oscuro' : 'Modo claro'}>
             <IconButton color="inherit" onClick={toggleTheme}>
-              {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Cerrar sesión">
@@ -52,12 +52,12 @@ export default function AdminLayout({ mode, toggleTheme }: Props) {
           flexGrow: 1,
           p: 3,
           mt: 8,
-          minHeight: "100vh",
-          bgcolor: "background.default",
+          minHeight: '100vh',
+          bgcolor: 'background.default',
         }}
       >
         <Outlet />
       </Box>
     </Box>
-  );
+  )
 }

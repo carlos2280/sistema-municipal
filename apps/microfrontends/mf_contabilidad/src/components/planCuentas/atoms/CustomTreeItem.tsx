@@ -1,15 +1,9 @@
+import type { TreeItemData } from '@/utils/planDeCuentasUtils';
 import { Box, Typography } from '@mui/material';
 import { alpha, styled, useTheme } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
-import {
-  ChevronRight,
-  Crosshair,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { memo, useCallback, type JSX } from 'react';
-import type { TreeItemData } from '@/utils/planDeCuentasUtils';
+import { ChevronRight, Crosshair, Pencil, Plus, Trash2 } from 'lucide-react';
+import { type JSX, memo, useCallback } from 'react';
 
 export interface TreeNodeProps {
   item: TreeItemData;
@@ -38,7 +32,6 @@ const FONT_SANS = '"DM Sans", sans-serif';
 /* ── MERIDIAN Easing ── */
 const EASING_SPRING = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
-
 /** Mobile border color by level — theme-aware */
 function getMobileBorderColor(level: number, theme: Theme): string {
   if (level === 0) return theme.palette.primary.main;
@@ -55,80 +48,109 @@ function getMobileBorderWidth(level: number): number {
 
 /** Mobile code typography by level — theme-aware */
 function getMobileCodeStyle(level: number, theme: Theme) {
-  if (level === 0) return { fontSize: '0.875rem', fontWeight: 800, color: theme.palette.primary.main };
-  if (level === 1) return { fontSize: '0.8125rem', fontWeight: 700, color: theme.palette.info.main };
-  if (level === 2) return { fontSize: '0.8125rem', fontWeight: 600, color: theme.palette.warning.main };
-  return { fontSize: '0.75rem', fontWeight: 600, color: theme.palette.text.disabled };
+  if (level === 0)
+    return {
+      fontSize: '0.875rem',
+      fontWeight: 800,
+      color: theme.palette.primary.main,
+    };
+  if (level === 1)
+    return {
+      fontSize: '0.8125rem',
+      fontWeight: 700,
+      color: theme.palette.info.main,
+    };
+  if (level === 2)
+    return {
+      fontSize: '0.8125rem',
+      fontWeight: 600,
+      color: theme.palette.warning.main,
+    };
+  return {
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    color: theme.palette.text.disabled,
+  };
 }
 
 /** Mobile name typography by level */
 function getMobileNameStyle(level: number, theme: Theme) {
   if (level === 0)
-    return { fontSize: '0.9375rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.02em' };
-  if (level === 1)
-    return { fontSize: '0.875rem', fontWeight: 600 };
-  if (level === 2)
-    return { fontSize: '0.8125rem', fontWeight: 550 };
-  return { fontSize: '0.8125rem', fontWeight: 400, color: theme.palette.text.secondary };
+    return {
+      fontSize: '0.9375rem',
+      fontWeight: 700,
+      textTransform: 'uppercase' as const,
+      letterSpacing: '0.02em',
+    };
+  if (level === 1) return { fontSize: '0.875rem', fontWeight: 600 };
+  if (level === 2) return { fontSize: '0.8125rem', fontWeight: 550 };
+  return {
+    fontSize: '0.8125rem',
+    fontWeight: 400,
+    color: theme.palette.text.secondary,
+  };
 }
 
 /* ── Styled components ── */
 
 const NodeRow = styled(Box, {
   shouldForwardProp: (p) => p !== 'isSelected' && p !== 'isContext',
-})<{ isSelected?: boolean; isContext?: boolean }>(({ theme, isSelected, isContext }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: '6px 12px',
-  margin: '1px 8px',
-  borderRadius: 6,
-  cursor: 'pointer',
-  gap: 4,
-  position: 'relative',
-  minHeight: 32,
-  transition: 'background-color 80ms', // MERIDIAN: instant hover
+})<{ isSelected?: boolean; isContext?: boolean }>(
+  ({ theme, isSelected, isContext }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: '6px 12px',
+    margin: '1px 8px',
+    borderRadius: 6,
+    cursor: 'pointer',
+    gap: 4,
+    position: 'relative',
+    minHeight: 32,
+    transition: 'background-color 80ms', // MERIDIAN: instant hover
 
-  // Acting state (context — creating/editing) — priority over selected
-  ...(isContext && {
-    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 2,
-      backgroundColor: theme.palette.primary.main,
-      opacity: 0.5,
+    // Acting state (context — creating/editing) — priority over selected
+    ...(isContext && {
+      backgroundColor: alpha(theme.palette.primary.main, 0.05),
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 2,
+        backgroundColor: theme.palette.primary.main,
+        opacity: 0.5,
+      },
+    }),
+
+    // Selected state — only when NOT acting
+    ...(!isContext &&
+      isSelected && {
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 2,
+          backgroundColor: theme.palette.primary.main,
+        },
+      }),
+
+    '&:hover': {
+      backgroundColor: isContext
+        ? alpha(theme.palette.primary.main, 0.08)
+        : isSelected
+          ? alpha(theme.palette.primary.main, 0.12)
+          : theme.meridian.surfaces.s3,
+      '& .tree-actions': {
+        opacity: 1,
+        pointerEvents: 'all' as const,
+      },
     },
   }),
-
-  // Selected state — only when NOT acting
-  ...(!isContext && isSelected && {
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 2,
-      backgroundColor: theme.palette.primary.main,
-    },
-  }),
-
-  '&:hover': {
-    backgroundColor: isContext
-      ? alpha(theme.palette.primary.main, 0.08)
-      : isSelected
-        ? alpha(theme.palette.primary.main, 0.12)
-        : theme.meridian.surfaces.s3,
-    '& .tree-actions': {
-      opacity: 1,
-      pointerEvents: 'all' as const,
-    },
-  },
-}));
+);
 
 const IndentGuide = styled('span')(({ theme }) => ({
   width: 20,
@@ -149,36 +171,38 @@ const IndentGuide = styled('span')(({ theme }) => ({
 
 const ToggleBtn = styled('button', {
   shouldForwardProp: (p) => p !== 'isExpanded' && p !== 'isLeaf',
-})<{ isExpanded?: boolean; isLeaf?: boolean }>(({ theme, isExpanded, isLeaf }) => ({
-  width: 18,
-  height: 18,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: 'none',
-  backgroundColor: 'transparent',
-  color: theme.meridian.text.tx4,
-  cursor: 'pointer',
-  borderRadius: 3,
-  padding: 0,
-  flexShrink: 0,
-  marginRight: 4,
-  transition: `transform 200ms ${EASING_SPRING}, color 150ms`,
+})<{ isExpanded?: boolean; isLeaf?: boolean }>(
+  ({ theme, isExpanded, isLeaf }) => ({
+    width: 18,
+    height: 18,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: theme.meridian.text.tx4,
+    cursor: 'pointer',
+    borderRadius: 3,
+    padding: 0,
+    flexShrink: 0,
+    marginRight: 4,
+    transition: `transform 200ms ${EASING_SPRING}, color 150ms`,
 
-  ...(isExpanded && {
-    transform: 'rotate(90deg)',
-    color: theme.palette.primary.main,
+    ...(isExpanded && {
+      transform: 'rotate(90deg)',
+      color: theme.palette.primary.main,
+    }),
+
+    ...(isLeaf && {
+      visibility: 'hidden' as const,
+    }),
+
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+      color: theme.palette.primary.main,
+    },
   }),
-
-  ...(isLeaf && {
-    visibility: 'hidden' as const,
-  }),
-
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    color: theme.palette.primary.main,
-  },
-}));
+);
 
 const LabelWrap = styled(Box)({
   flex: 1,
@@ -213,8 +237,8 @@ const ActionBtn = styled('button')<{ variant: 'add' | 'edit' | 'delete' }>(
   ({ theme, variant }) => {
     const colorMap = {
       add: { base: theme.palette.primary.main, hoverAlpha: 0.12 },
-      edit: { base: theme.palette.info.main, hoverAlpha: 0.10 },
-      delete: { base: theme.palette.error.main, hoverAlpha: 0.10 },
+      edit: { base: theme.palette.info.main, hoverAlpha: 0.1 },
+      delete: { base: theme.palette.error.main, hoverAlpha: 0.1 },
     };
     const c = colorMap[variant];
     return {
@@ -237,7 +261,6 @@ const ActionBtn = styled('button')<{ variant: 'add' | 'edit' | 'delete' }>(
     };
   },
 );
-
 
 /* ── Component ── */
 
@@ -283,7 +306,16 @@ export const CustomTreeItem = memo(function CustomTreeItem({
   // ── Desktop MERIDIAN typography ──
   const desktopCodeStyle = {
     fontFamily: FONT_MONO,
-    fontSize: level === 0 ? '13px' : level === 1 ? '12px' : level >= 5 ? (level >= 7 ? '10.5px' : '11px') : '11.5px',
+    fontSize:
+      level === 0
+        ? '13px'
+        : level === 1
+          ? '12px'
+          : level >= 5
+            ? level >= 7
+              ? '10.5px'
+              : '11px'
+            : '11.5px',
     fontWeight: level === 0 ? 600 : 400,
     letterSpacing: '0.02em',
     fontFeatureSettings: "'tnum' 1, 'cv01' 1",
@@ -293,9 +325,17 @@ export const CustomTreeItem = memo(function CustomTreeItem({
 
   const desktopNameStyle = {
     fontFamily: FONT_SANS,
-    fontSize: level === 0 ? '13.5px' : level >= 5 ? (level >= 7 ? '12px' : '12.5px') : '13px',
+    fontSize:
+      level === 0
+        ? '13.5px'
+        : level >= 5
+          ? level >= 7
+            ? '12px'
+            : '12.5px'
+          : '13px',
     fontWeight: level === 0 ? 600 : level === 1 ? 500 : 400,
-    color: level >= 5 ? theme.palette.text.secondary : theme.palette.text.primary,
+    color:
+      level >= 5 ? theme.palette.text.secondary : theme.palette.text.primary,
     overflow: 'hidden' as const,
     textOverflow: 'ellipsis' as const,
     whiteSpace: 'nowrap' as const,
@@ -335,9 +375,10 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         onClick={handleRowClick}
         sx={{
           // N1 separator line (prototype: .pc-lv0 > .pc-node-row border-bottom)
-          ...(isN1 && !isMobile && {
-            borderBottom: `1px solid ${theme.meridian.borders.muted}`,
-          }),
+          ...(isN1 &&
+            !isMobile && {
+              borderBottom: `1px solid ${theme.meridian.borders.muted}`,
+            }),
           ...(isMobile && {
             margin: 0,
             borderRadius: 0,
@@ -404,7 +445,11 @@ export const CustomTreeItem = memo(function CustomTreeItem({
         <LabelWrap
           sx={
             isMobile
-              ? { flexDirection: 'column', alignItems: 'flex-start', gap: '1px' }
+              ? {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: '1px',
+                }
               : undefined
           }
         >
@@ -477,15 +522,17 @@ export const CustomTreeItem = memo(function CustomTreeItem({
           className="tree-actions"
           sx={{
             // Selected node: always show actions
-            ...(isSelected && !isMobile && {
-              opacity: 1,
-              pointerEvents: 'all' as const,
-            }),
+            ...(isSelected &&
+              !isMobile && {
+                opacity: 1,
+                pointerEvents: 'all' as const,
+              }),
             // Suppress actions on non-selected nodes when selection is active
-            ...(suppressActions && !isMobile && {
-              opacity: '0 !important',
-              pointerEvents: 'none !important' as const,
-            }),
+            ...(suppressActions &&
+              !isMobile && {
+                opacity: '0 !important',
+                pointerEvents: 'none !important' as const,
+              }),
             ...(isMobile && {
               position: 'relative',
               right: 'auto',
@@ -543,7 +590,8 @@ export const CustomTreeItem = memo(function CustomTreeItem({
       </NodeRow>
 
       {/* Children (recursive) — only mount when expanded */}
-      {hasChildren && isExpanded && (
+      {hasChildren &&
+        isExpanded &&
         item.children!.map((child) => (
           <CustomTreeItem
             key={child.id}
@@ -563,8 +611,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
             onDelete={onDelete}
             highlight={highlight}
           />
-        ))
-      )}
+        ))}
     </Box>
   );
 });

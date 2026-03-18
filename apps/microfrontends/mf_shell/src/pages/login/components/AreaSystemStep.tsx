@@ -6,7 +6,14 @@
  */
 
 import { Box, Typography, alpha, styled } from "@mui/material";
-import { Building2, Check, GraduationCap, HeartPulse, Layers, Package } from "lucide-react";
+import {
+	Building2,
+	Check,
+	GraduationCap,
+	HeartPulse,
+	Layers,
+	Package,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { memo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -15,7 +22,10 @@ import type { AreaOption, SistemaOption } from "../types";
 
 // ── Area Card Icons (mapping by name pattern) ───────────────────────────────
 
-const AREA_ICON_MAP: ReadonlyArray<{ readonly pattern: RegExp; readonly icon: LucideIcon }> = [
+const AREA_ICON_MAP: ReadonlyArray<{
+	readonly pattern: RegExp;
+	readonly icon: LucideIcon;
+}> = [
 	{ pattern: /salud/i, icon: HeartPulse },
 	{ pattern: /educa/i, icon: GraduationCap },
 	{ pattern: /obra/i, icon: Package },
@@ -49,7 +59,8 @@ const AreaCard = styled(Box)<{ ownerState: { selected: boolean } }>(
 			borderRadius: 12,
 			padding: "14px 15px",
 			cursor: "pointer",
-			transition: "border-color 150ms, background 150ms, transform 150ms, box-shadow 150ms",
+			transition:
+				"border-color 150ms, background 150ms, transform 150ms, box-shadow 150ms",
 			display: "flex",
 			flexDirection: "column",
 			gap: 7,
@@ -301,7 +312,13 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 										aria-checked={isSelected}
 										tabIndex={0}
 									>
-										<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+										<Box
+											sx={{
+												display: "flex",
+												justifyContent: "space-between",
+												alignItems: "flex-start",
+											}}
+										>
 											<AreaIcon ownerState={{ selected: isSelected }}>
 												<Icon />
 											</AreaIcon>
@@ -329,7 +346,12 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 					<Box sx={{ py: 1 }}>
 						<LoadingBar />
 						<Typography
-							sx={{ mt: 1, textAlign: "center", fontSize: 12, color: "text.secondary" }}
+							sx={{
+								mt: 1,
+								textAlign: "center",
+								fontSize: 12,
+								color: "text.secondary",
+							}}
 						>
 							Cargando sistemas...
 						</Typography>

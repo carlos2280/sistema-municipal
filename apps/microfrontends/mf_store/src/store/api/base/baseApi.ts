@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/store/baseQueryWithReauth";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 export const baseQueryRefresh = fetchBaseQuery({
@@ -11,5 +11,20 @@ export const baseApi = createApi({
 	reducerPath: "api", // Esta propiedad define el key del reducer
 	baseQuery: baseQueryWithReauth,
 	endpoints: () => ({}),
-	tagTypes: ["autorizacion", "User", "PlanCuentas", "Conversaciones", "Mensajes", "Participantes", "Llamadas", "Reuniones", "Organigrama", "ConfiguracionMfa", "UsuariosMfa", "Presupuestos", "PresupuestosDetalle", "CentrosCosto"],
+	tagTypes: [
+		"autorizacion",
+		"User",
+		"PlanCuentas",
+		"Conversaciones",
+		"Mensajes",
+		"Participantes",
+		"Llamadas",
+		"Reuniones",
+		"Organigrama",
+		"ConfiguracionMfa",
+		"UsuariosMfa",
+		"Presupuestos",
+		"PresupuestosDetalle",
+		"CentrosCosto",
+	],
 });

@@ -1,7 +1,7 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Box, Typography } from "@mui/material";
-import { formatCLP } from "./MontoInput";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { Box, Typography } from '@mui/material';
+import { formatCLP } from './MontoInput';
 
 interface DiscrepanciaChipProps {
   /** null = sin hijos (no mostrar nada) | 0 = OK | !=0 = discrepancia */
@@ -17,27 +17,34 @@ const DiscrepanciaChip = ({ delta }: DiscrepanciaChipProps) => {
 
   if (delta === 0) {
     return (
-      <Box sx={{ display: "inline-flex", alignItems: "center", color: "success.main" }}>
-        <CheckCircleOutlineIcon sx={{ fontSize: "0.875rem" }} />
+      <Box
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          color: 'success.main',
+        }}
+      >
+        <CheckCircleOutlineIcon sx={{ fontSize: '0.875rem' }} />
       </Box>
     );
   }
 
-  const signo = delta > 0 ? "+" : "";
+  const signo = delta > 0 ? '+' : '';
   return (
-    <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.25 }}>
-      <WarningAmberIcon sx={{ fontSize: "0.875rem", color: "error.main" }} />
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25 }}>
+      <WarningAmberIcon sx={{ fontSize: '0.875rem', color: 'error.main' }} />
       <Typography
         variant="caption"
         sx={{
-          fontFamily: "monospace",
+          fontFamily: 'monospace',
           fontWeight: 700,
-          color: "error.main",
-          fontSize: "0.6875rem",
-          whiteSpace: "nowrap",
+          color: 'error.main',
+          fontSize: '0.6875rem',
+          whiteSpace: 'nowrap',
         }}
       >
-        {signo}{formatCLP(delta)}
+        {signo}
+        {formatCLP(delta)}
       </Typography>
     </Box>
   );

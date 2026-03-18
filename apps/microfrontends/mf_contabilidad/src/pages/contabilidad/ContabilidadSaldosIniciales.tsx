@@ -1,5 +1,5 @@
 const ContabilidadSaldosIniciales = () => {
-	return <div>ContabilidadSaldosIniciales</div>;
+  return <div>ContabilidadSaldosIniciales</div>;
 };
 
 export default ContabilidadSaldosIniciales;

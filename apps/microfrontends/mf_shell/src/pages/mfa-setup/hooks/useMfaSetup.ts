@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	useMfaSetupActivarMutation,
 	useMfaSetupIniciarMutation,
 } from "mf_store/store";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import type { MfaSetupPhase } from "../types";
 
 /**

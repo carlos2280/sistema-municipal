@@ -1,4 +1,7 @@
-import { registerRemotes, loadRemote } from "@module-federation/enhanced/runtime";
+import {
+	loadRemote,
+	registerRemotes,
+} from "@module-federation/enhanced/runtime";
 
 export interface ModuleInfo {
 	codigo: string;

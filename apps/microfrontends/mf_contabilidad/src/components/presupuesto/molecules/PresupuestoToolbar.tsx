@@ -1,8 +1,16 @@
-import AddIcon from "@mui/icons-material/Add";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, CircularProgress, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  InputAdornment,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 
 interface PresupuestoToolbarProps {
   searchValue: string;
@@ -29,18 +37,18 @@ const PresupuestoToolbar = ({
 }: PresupuestoToolbarProps) => (
   <Box
     sx={{
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 1.5,
       px: 3,
       py: 1.5,
-      bgcolor: "background.paper",
-      borderBottom: "1px solid",
-      borderColor: "divider",
+      bgcolor: 'background.paper',
+      borderBottom: '1px solid',
+      borderColor: 'divider',
     }}
   >
     {/* Búsqueda */}
-    <Box sx={{ position: "relative", flex: "0 1 320px" }}>
+    <Box sx={{ position: 'relative', flex: '0 1 320px' }}>
       <TextField
         value={searchValue}
         onChange={(e) => onSearchChange(e.target.value)}
@@ -51,33 +59,38 @@ const PresupuestoToolbar = ({
           input: {
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: "0.9375rem", color: "text.disabled" }} />
+                <SearchIcon
+                  sx={{ fontSize: '0.9375rem', color: 'text.disabled' }}
+                />
               </InputAdornment>
             ),
           },
-          htmlInput: { "aria-label": "Buscar en detalle" },
+          htmlInput: { 'aria-label': 'Buscar en detalle' },
         }}
         sx={{
-          "& .MuiOutlinedInput-root": {
-            fontSize: "0.8125rem",
-            "&:hover fieldset": { borderColor: "primary.main" },
-            "&.Mui-focused fieldset": { borderColor: "primary.main", boxShadow: "0 0 0 3px rgba(13,107,94,0.1)" },
+          '& .MuiOutlinedInput-root': {
+            fontSize: '0.8125rem',
+            '&:hover fieldset': { borderColor: 'primary.main' },
+            '&.Mui-focused fieldset': {
+              borderColor: 'primary.main',
+              boxShadow: '0 0 0 3px rgba(13,107,94,0.1)',
+            },
           },
         }}
       />
     </Box>
 
     {/* Separador */}
-    <Box sx={{ width: "1px", height: 20, bgcolor: "divider", flexShrink: 0 }} />
+    <Box sx={{ width: '1px', height: 20, bgcolor: 'divider', flexShrink: 0 }} />
 
     {/* Agregar línea — primero y con color primario */}
     <Button
       size="small"
       variant="contained"
-      startIcon={<AddIcon sx={{ fontSize: "0.875rem" }} />}
+      startIcon={<AddIcon sx={{ fontSize: '0.875rem' }} />}
       onClick={onAgregarLinea}
       disabled={disabled}
-      sx={{ whiteSpace: "nowrap", fontWeight: 600 }}
+      sx={{ whiteSpace: 'nowrap', fontWeight: 600 }}
     >
       Agregar línea
     </Button>
@@ -86,10 +99,10 @@ const PresupuestoToolbar = ({
     <Tooltip
       title={
         loadingCuentas
-          ? "Cargando cuentas presupuestarias..."
+          ? 'Cargando cuentas presupuestarias...'
           : onImportar
-            ? "Importar desde Excel (.xlsx)"
-            : "Importar desde Excel (próximamente)"
+            ? 'Importar desde Excel (.xlsx)'
+            : 'Importar desde Excel (próximamente)'
       }
       arrow
     >
@@ -99,13 +112,19 @@ const PresupuestoToolbar = ({
           variant="outlined"
           color="inherit"
           startIcon={
-            loadingCuentas
-              ? <CircularProgress size={14} color="inherit" />
-              : <FileUploadIcon sx={{ fontSize: "0.875rem" }} />
+            loadingCuentas ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <FileUploadIcon sx={{ fontSize: '0.875rem' }} />
+            )
           }
           onClick={onImportar}
           disabled={disabled || !onImportar || loadingCuentas}
-          sx={{ whiteSpace: "nowrap", color: "text.secondary", borderColor: "divider" }}
+          sx={{
+            whiteSpace: 'nowrap',
+            color: 'text.secondary',
+            borderColor: 'divider',
+          }}
         >
           Importar
         </Button>
@@ -113,7 +132,11 @@ const PresupuestoToolbar = ({
     </Tooltip>
 
     {loadingCuentas && (
-      <Typography variant="caption" color="text.disabled" sx={{ whiteSpace: "nowrap" }}>
+      <Typography
+        variant="caption"
+        color="text.disabled"
+        sx={{ whiteSpace: 'nowrap' }}
+      >
         Cargando cuentas...
       </Typography>
     )}
@@ -125,10 +148,14 @@ const PresupuestoToolbar = ({
           size="small"
           variant="outlined"
           color="inherit"
-          startIcon={<FileDownloadIcon sx={{ fontSize: "0.875rem" }} />}
+          startIcon={<FileDownloadIcon sx={{ fontSize: '0.875rem' }} />}
           onClick={onExportar}
           disabled={disabled || !onExportar}
-          sx={{ whiteSpace: "nowrap", color: "text.secondary", borderColor: "divider" }}
+          sx={{
+            whiteSpace: 'nowrap',
+            color: 'text.secondary',
+            borderColor: 'divider',
+          }}
         >
           Exportar
         </Button>

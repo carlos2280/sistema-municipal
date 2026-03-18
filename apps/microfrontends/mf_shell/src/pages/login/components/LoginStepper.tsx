@@ -131,9 +131,7 @@ export const LoginStepper = memo(function LoginStepper({
 									idx + 1
 								)}
 							</StepNum>
-							<StepLabel ownerState={{ status }}>
-								{label}
-							</StepLabel>
+							<StepLabel ownerState={{ status }}>{label}</StepLabel>
 						</StepGroup>
 					</Box>
 				);

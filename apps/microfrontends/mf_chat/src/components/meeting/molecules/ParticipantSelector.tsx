@@ -3,8 +3,8 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLazyBuscarUsuariosQuery } from 'mf_store/store'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface SelectedParticipant {
   id: number
@@ -19,7 +19,12 @@ export interface GrupoOption {
 
 type AutocompleteOption =
   | { kind: 'usuario'; id: number; nombre: string }
-  | { kind: 'grupo'; id: number; nombre: string; miembros: SelectedParticipant[] }
+  | {
+      kind: 'grupo'
+      id: number
+      nombre: string
+      miembros: SelectedParticipant[]
+    }
 
 interface ParticipantSelectorProps {
   organizadorId: number
@@ -37,7 +42,8 @@ export function ParticipantSelector({
   grupos = [],
 }: ParticipantSelectorProps) {
   const [inputValue, setInputValue] = useState('')
-  const [buscar, { data: usuariosBuscados = [], isFetching }] = useLazyBuscarUsuariosQuery()
+  const [buscar, { data: usuariosBuscados = [], isFetching }] =
+    useLazyBuscarUsuariosQuery()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -58,7 +64,12 @@ export function ParticipantSelector({
 
   const grupoOptions: AutocompleteOption[] = grupos
     .filter((g) => g.miembros.length > 0)
-    .map((g) => ({ kind: 'grupo', id: g.id, nombre: g.nombre, miembros: g.miembros }))
+    .map((g) => ({
+      kind: 'grupo',
+      id: g.id,
+      nombre: g.nombre,
+      miembros: g.miembros,
+    }))
 
   const options: AutocompleteOption[] = [...usuarioOptions, ...grupoOptions]
 
@@ -86,7 +97,7 @@ export function ParticipantSelector({
 
       onChange(expanded)
     },
-    [organizadorId, onChange]
+    [organizadorId, onChange],
   )
 
   // Map current value back to AutocompleteOption[] for the Autocomplete
@@ -132,7 +143,11 @@ export function ParticipantSelector({
         isOptionEqualToValue={(a, b) => a.kind === b.kind && a.id === b.id}
         filterOptions={(x) => x} // disable built-in filter — we handle via API
         loading={isFetching}
-        noOptionsText={inputValue.length < 2 ? 'Escribe 2+ caracteres para buscar' : 'Sin resultados'}
+        noOptionsText={
+          inputValue.length < 2
+            ? 'Escribe 2+ caracteres para buscar'
+            : 'Sin resultados'
+        }
         renderTags={() => null} // chips rendered above
         renderInput={(params) => (
           <TextField
@@ -149,7 +164,11 @@ export function ParticipantSelector({
               <Typography sx={{ fontSize: 13 }}>{opt.nombre}</Typography>
               {opt.kind === 'grupo' && (
                 <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
-                  {(opt as Extract<AutocompleteOption, { kind: 'grupo' }>).miembros.length} miembros
+                  {
+                    (opt as Extract<AutocompleteOption, { kind: 'grupo' }>)
+                      .miembros.length
+                  }{' '}
+                  miembros
                 </Typography>
               )}
             </Box>

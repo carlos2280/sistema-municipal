@@ -1,25 +1,28 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  useObtenerPresupuestoQuery,
-  useCrearPresupuestoMutation,
-  useActualizarPresupuestoMutation,
-  useEliminarPresupuestoMutation,
-  useAgregarLineaMutation,
   useActualizarLineaMutation,
+  useActualizarPresupuestoMutation,
+  useAgregarLineaMutation,
+  useCrearPresupuestoMutation,
   useEliminarLineaMutation,
-  useObtenerCentrosCostoQuery,
+  useEliminarPresupuestoMutation,
   useListarCuentasPresupuestariasQuery,
-} from "mf_store/store";
-import { schemaPresupuestoHeader, type SchemaPresupuestoHeader } from "../../types/zod/presupuesto.zod";
-import type { TipoTab } from "../../types/presupuesto.types";
-import type { DetalleItem } from "mf_store/store";
-import { usePresupuestoDetalle } from "./usePresupuestoDetalle";
-import { useDiscrepancias } from "./useDiscrepancias";
-import { useImportarExcel } from "./useImportarExcel";
-import { useAgregarCuentaDrawer } from "./useAgregarCuentaDrawer";
+  useObtenerCentrosCostoQuery,
+  useObtenerPresupuestoQuery,
+} from 'mf_store/store';
+import type { DetalleItem } from 'mf_store/store';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import type { TipoTab } from '../../types/presupuesto.types';
+import {
+  type SchemaPresupuestoHeader,
+  schemaPresupuestoHeader,
+} from '../../types/zod/presupuesto.zod';
+import { useAgregarCuentaDrawer } from './useAgregarCuentaDrawer';
+import { useDiscrepancias } from './useDiscrepancias';
+import { useImportarExcel } from './useImportarExcel';
+import { usePresupuestoDetalle } from './usePresupuestoDetalle';
 
 /** Estado del toast de confirmación de eliminación de línea */
 export interface DeleteLineaToastState {
@@ -51,13 +54,14 @@ const EMPTY_DELETE_STATE: DeleteLineaToastState = {
  */
 export const usePresupuestoInicial = (presupuestoId?: number) => {
   // ── Estado de UI ─────────────────────────────────────────────────────────────
-  const [tabActivo, setTabActivo] = useState<TipoTab>("ingresos");
+  const [tabActivo, setTabActivo] = useState<TipoTab>('ingresos');
   const [headerCollapsed, setHeaderCollapsed] = useState(true);
-  const [searchIngresos, setSearchIngresos] = useState("");
-  const [searchGastos, setSearchGastos] = useState("");
+  const [searchIngresos, setSearchIngresos] = useState('');
+  const [searchGastos, setSearchGastos] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [deleteLineaToast, setDeleteLineaToast] = useState<DeleteLineaToastState>(EMPTY_DELETE_STATE);
+  const [deleteLineaToast, setDeleteLineaToast] =
+    useState<DeleteLineaToastState>(EMPTY_DELETE_STATE);
 
   // ── Formulario del encabezado ─────────────────────────────────────────────
   const anoActual = new Date().getFullYear();
@@ -68,29 +72,27 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     defaultValues: {
       anoContable: anoActual,
       glosa: `Presupuesto Inicial ${anoActual}`,
-      actaDecreto: "",
+      actaDecreto: '',
     },
   });
 
   // ── Queries RTK ───────────────────────────────────────────────────────────
-  const { data: presupuesto, isLoading: isLoadingPresupuesto } = useObtenerPresupuestoQuery(
-    presupuestoId!,
-    { skip: !presupuestoId },
-  );
+  const { data: presupuesto, isLoading: isLoadingPresupuesto } =
+    useObtenerPresupuestoQuery(presupuestoId!, { skip: !presupuestoId });
 
   const { data: centrosCosto = [] } = useObtenerCentrosCostoQuery();
 
-  const anoContableForm = form.watch("anoContable");
+  const anoContableForm = form.watch('anoContable');
 
   const { data: cuentasIngresos = [], isLoading: loadingCuentasIngresos } =
     useListarCuentasPresupuestariasQuery({
-      tipo: "ingreso",
+      tipo: 'ingreso',
       ano: anoContableForm,
     });
 
   const { data: cuentasGastos = [], isLoading: loadingCuentasGastos } =
     useListarCuentasPresupuestariasQuery({
-      tipo: "gasto",
+      tipo: 'gasto',
       ano: anoContableForm,
     });
 
@@ -104,25 +106,33 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
 
   // ── Detalle por tab ───────────────────────────────────────────────────────
   const detalleIngresos = usePresupuestoDetalle(
-    presupuesto?.detalle.filter((d: DetalleItem) => d.cuenta.codigo.startsWith("115")) ?? [],
+    presupuesto?.detalle.filter((d: DetalleItem) =>
+      d.cuenta.codigo.startsWith('115'),
+    ) ?? [],
   );
   const detalleGastos = usePresupuestoDetalle(
-    presupuesto?.detalle.filter((d: DetalleItem) => d.cuenta.codigo.startsWith("215")) ?? [],
+    presupuesto?.detalle.filter((d: DetalleItem) =>
+      d.cuenta.codigo.startsWith('215'),
+    ) ?? [],
   );
 
   // Sync cuando cambia el presupuesto del servidor
   useEffect(() => {
     if (!presupuesto) return;
     detalleIngresos.resetFromServer(
-      presupuesto.detalle.filter((d: DetalleItem) => d.cuenta.codigo.startsWith("115")),
+      presupuesto.detalle.filter((d: DetalleItem) =>
+        d.cuenta.codigo.startsWith('115'),
+      ),
     );
     detalleGastos.resetFromServer(
-      presupuesto.detalle.filter((d: DetalleItem) => d.cuenta.codigo.startsWith("215")),
+      presupuesto.detalle.filter((d: DetalleItem) =>
+        d.cuenta.codigo.startsWith('215'),
+      ),
     );
     form.reset({
       anoContable: presupuesto.anoContable,
       glosa: presupuesto.glosa,
-      actaDecreto: presupuesto.actaDecreto ?? "",
+      actaDecreto: presupuesto.actaDecreto ?? '',
     });
   }, [presupuesto]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -135,8 +145,10 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
   );
 
   // ── Drawer Agregar Cuenta ──────────────────────────────────────────────
-  const cuentasActivas = tabActivo === "ingresos" ? cuentasIngresos : cuentasGastos;
-  const detalleActivoForDrawer = tabActivo === "ingresos" ? detalleIngresos : detalleGastos;
+  const cuentasActivas =
+    tabActivo === 'ingresos' ? cuentasIngresos : cuentasGastos;
+  const detalleActivoForDrawer =
+    tabActivo === 'ingresos' ? detalleIngresos : detalleGastos;
 
   const agregarDrawer = useAgregarCuentaDrawer(
     cuentasActivas,
@@ -145,25 +157,41 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
 
   const handleAgregarConfirm = useCallback(
     (
-      leaf: import("mf_store/store").CuentaPresupuestaria,
+      leaf: import('mf_store/store').CuentaPresupuestaria,
       monto: number,
-      ancestors: import("mf_store/store").CuentaPresupuestaria[],
+      ancestors: import('mf_store/store').CuentaPresupuestaria[],
       centroCostoId: number | null,
     ) => {
-      detalleActivoForDrawer.agregarCuentaConAncestros(leaf, monto, ancestors, centroCostoId);
+      detalleActivoForDrawer.agregarCuentaConAncestros(
+        leaf,
+        monto,
+        ancestors,
+        centroCostoId,
+      );
     },
     [detalleActivoForDrawer],
   );
 
   // ── Discrepancias y equilibrio ────────────────────────────────────────────
-  const { discrepanciasIngresosMap, discrepanciasGastosMap, totalDiscrepancias, equilibrio } =
-    useDiscrepancias(detalleIngresos.filasDisplay, detalleGastos.filasDisplay);
+  const {
+    discrepanciasIngresosMap,
+    discrepanciasGastosMap,
+    totalDiscrepancias,
+    equilibrio,
+  } = useDiscrepancias(
+    detalleIngresos.filasDisplay,
+    detalleGastos.filasDisplay,
+  );
 
   // ── Detalle activo según tab ──────────────────────────────────────────────
-  const detalleActivo = tabActivo === "ingresos" ? detalleIngresos : detalleGastos;
+  const detalleActivo =
+    tabActivo === 'ingresos' ? detalleIngresos : detalleGastos;
   const discrepanciasActivoMap =
-    tabActivo === "ingresos" ? discrepanciasIngresosMap : discrepanciasGastosMap;
-  const cuentasDisponibles = tabActivo === "ingresos" ? cuentasIngresos : cuentasGastos;
+    tabActivo === 'ingresos'
+      ? discrepanciasIngresosMap
+      : discrepanciasGastosMap;
+  const cuentasDisponibles =
+    tabActivo === 'ingresos' ? cuentasIngresos : cuentasGastos;
 
   const totalIngresos = useMemo(
     () =>
@@ -181,7 +209,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     [detalleGastos.filasDisplay],
   );
 
-  const totalTab = tabActivo === "ingresos" ? totalIngresos : totalGastos;
+  const totalTab = tabActivo === 'ingresos' ? totalIngresos : totalGastos;
 
   // ── Handlers de Tab ───────────────────────────────────────────────────────
   const handleTabNavigation = useCallback(
@@ -195,7 +223,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
       if (targetIdx >= 0 && targetIdx < display.length) {
         const targetId = display[targetIdx]._clientId;
         setTimeout(() => {
-          const el = document.querySelector<HTMLElement>(`[data-monto-id="${targetId}"]`);
+          const el = document.querySelector<HTMLElement>(
+            `[data-monto-id="${targetId}"]`,
+          );
           el?.click();
         }, 10);
         return;
@@ -212,7 +242,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
   // ── Recalcular ───────────────────────────────────────────────────────────
   const handleRecalcular = useCallback(
     (clientId: string) => {
-      const display = detalleActivo.filasDisplay.find((f) => f._clientId === clientId);
+      const display = detalleActivo.filasDisplay.find(
+        (f) => f._clientId === clientId,
+      );
       if (!display) return;
       detalleActivo.recalcularPadre(clientId, display.hijosIds);
     },
@@ -232,7 +264,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     ];
 
     if (todasFilas.length === 0) {
-      toast.error("Agregue al menos una línea de detalle antes de guardar.");
+      toast.error('Agregue al menos una línea de detalle antes de guardar.');
       return;
     }
 
@@ -292,9 +324,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
         }
       }
 
-      toast.success("Presupuesto guardado correctamente.");
+      toast.success('Presupuesto guardado correctamente.');
     } catch {
-      toast.error("Error al guardar el presupuesto.");
+      toast.error('Error al guardar el presupuesto.');
     } finally {
       setIsSaving(false);
     }
@@ -305,10 +337,10 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     if (!presupuestoId) return;
     try {
       await eliminarPresupuesto(presupuestoId).unwrap();
-      toast.success("Presupuesto eliminado.");
+      toast.success('Presupuesto eliminado.');
       setConfirmDelete(false);
     } catch {
-      toast.error("Error al eliminar el presupuesto.");
+      toast.error('Error al eliminar el presupuesto.');
     }
   }, [presupuestoId, eliminarPresupuesto]);
 
@@ -322,7 +354,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
    */
   const handleEliminarLinea = useCallback(
     (clientId: string) => {
-      const fila = detalleActivo.filasDisplay.find((f) => f._clientId === clientId);
+      const fila = detalleActivo.filasDisplay.find(
+        (f) => f._clientId === clientId,
+      );
       if (!fila) return;
 
       const info = detalleActivo.getInfoEliminar(clientId);
@@ -381,12 +415,13 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
       detalleActivo.eliminarConDescendientes(clientId);
 
       const count = deleteLineaToast.subcuentasCount;
-      const msg = count > 0
-        ? `Línea y ${count} subcuenta${count > 1 ? "s" : ""} eliminada${count > 1 ? "s" : ""}.`
-        : "Línea eliminada.";
+      const msg =
+        count > 0
+          ? `Línea y ${count} subcuenta${count > 1 ? 's' : ''} eliminada${count > 1 ? 's' : ''}.`
+          : 'Línea eliminada.';
       toast.success(msg);
     } catch {
-      toast.error("Error al eliminar la línea.");
+      toast.error('Error al eliminar la línea.');
     } finally {
       setIsSaving(false);
       setDeleteLineaToast(EMPTY_DELETE_STATE);
@@ -424,7 +459,8 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     cuentasIngresos,
     cuentasGastos,
     cuentasDisponibles,
-    loadingCuentas: tabActivo === "ingresos" ? loadingCuentasIngresos : loadingCuentasGastos,
+    loadingCuentas:
+      tabActivo === 'ingresos' ? loadingCuentasIngresos : loadingCuentasGastos,
     loadingCuentasIngresos,
     loadingCuentasGastos,
     // Detalle por tab (para render simultáneo)

@@ -33,11 +33,13 @@ export function setupChatHandlers(io: Server, socket: Socket) {
       const esParticipante = await conversacionesService.verificarParticipante(
         socketDb,
         conversacionId,
-        userId
+        userId,
       )
 
       if (!esParticipante) {
-        socket.emit('error', { message: 'No tienes acceso a esta conversación' })
+        socket.emit('error', {
+          message: 'No tienes acceso a esta conversación',
+        })
         return
       }
 
@@ -52,7 +54,7 @@ export function setupChatHandlers(io: Server, socket: Socket) {
           and(
             eq(participantes.conversacionId, conversacionId),
             eq(participantes.usuarioId, userId),
-          )
+          ),
         )
 
       console.log(`[Socket] Usuario ${userId} se unió a ${room}`)
@@ -70,47 +72,63 @@ export function setupChatHandlers(io: Server, socket: Socket) {
   })
 
   // Enviar mensaje
-  socket.on('chat:message', async ({ conversacionId, contenido, tipo = 'texto' }: ChatMessagePayload) => {
-    try {
-      // Verificar acceso
-      const esParticipante = await conversacionesService.verificarParticipante(
-        socketDb,
-        conversacionId,
-        userId
-      )
+  socket.on(
+    'chat:message',
+    async ({
+      conversacionId,
+      contenido,
+      tipo = 'texto',
+    }: ChatMessagePayload) => {
+      try {
+        // Verificar acceso
+        const esParticipante =
+          await conversacionesService.verificarParticipante(
+            socketDb,
+            conversacionId,
+            userId,
+          )
 
-      if (!esParticipante) {
-        socket.emit('error', { message: 'No tienes acceso a esta conversación' })
-        return
-      }
-
-      // Crear mensaje en BD (incluye datos del remitente)
-      const mensaje = await mensajesService.crearMensaje(socketDb, {
-        conversacionId,
-        remitenteId: userId,
-        contenido,
-        tipo,
-      })
-
-      // Emitir a la sala de conversación (quienes la tienen abierta)
-      const room = `conversation:${conversacionId}`
-      io.to(room).emit('chat:message', mensaje)
-
-      // Emitir a las salas personales de TODOS los participantes
-      // para que actualicen su lista de conversaciones (preview, no leídos, orden)
-      const participantesConv = await conversacionesService.obtenerParticipantes(socketDb, conversacionId)
-      for (const p of participantesConv) {
-        if (p.usuarioId !== userId) {
-          io.to(`user:${p.usuarioId}`).emit('chat:message', mensaje)
+        if (!esParticipante) {
+          socket.emit('error', {
+            message: 'No tienes acceso a esta conversación',
+          })
+          return
         }
-      }
 
-      console.log(`[Socket] Mensaje enviado en conversación ${conversacionId}`)
-    } catch (error) {
-      console.error('[Socket] Error en chat:message:', error)
-      socket.emit('error', { message: 'Error al enviar mensaje' })
-    }
-  })
+        // Crear mensaje en BD (incluye datos del remitente)
+        const mensaje = await mensajesService.crearMensaje(socketDb, {
+          conversacionId,
+          remitenteId: userId,
+          contenido,
+          tipo,
+        })
+
+        // Emitir a la sala de conversación (quienes la tienen abierta)
+        const room = `conversation:${conversacionId}`
+        io.to(room).emit('chat:message', mensaje)
+
+        // Emitir a las salas personales de TODOS los participantes
+        // para que actualicen su lista de conversaciones (preview, no leídos, orden)
+        const participantesConv =
+          await conversacionesService.obtenerParticipantes(
+            socketDb,
+            conversacionId,
+          )
+        for (const p of participantesConv) {
+          if (p.usuarioId !== userId) {
+            io.to(`user:${p.usuarioId}`).emit('chat:message', mensaje)
+          }
+        }
+
+        console.log(
+          `[Socket] Mensaje enviado en conversación ${conversacionId}`,
+        )
+      } catch (error) {
+        console.error('[Socket] Error en chat:message:', error)
+        socket.emit('error', { message: 'Error al enviar mensaje' })
+      }
+    },
+  )
 
   // Marcar conversación como leída (cuando el usuario está viendo y llegan mensajes)
   socket.on('chat:read', async ({ conversacionId }: ChatJoinPayload) => {
@@ -122,7 +140,7 @@ export function setupChatHandlers(io: Server, socket: Socket) {
           and(
             eq(participantes.conversacionId, conversacionId),
             eq(participantes.usuarioId, userId),
-          )
+          ),
         )
     } catch (error) {
       console.error('[Socket] Error en chat:read:', error)

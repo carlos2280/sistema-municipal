@@ -2,14 +2,14 @@ import type {
   CentrosCostoItem,
   CuentaPresupuestaria,
   DiscrepanciaItem,
-} from "mf_store/store";
+} from 'mf_store/store';
 
 // Re-exportar tipos del store para uso en componentes
 export type { CentrosCostoItem, CuentaPresupuestaria, DiscrepanciaItem };
 
 // ─── Tab activo ───────────────────────────────────────────────────────────────
 
-export type TipoTab = "ingresos" | "gastos" | "resumen";
+export type TipoTab = 'ingresos' | 'gastos' | 'resumen';
 
 // ─── Fila del grid (estado interno del cliente) ───────────────────────────────
 
@@ -57,7 +57,7 @@ export interface PresupuestoHeaderForm {
 
 // ─── Estado del equilibrio presupuestario ─────────────────────────────────────
 
-export type EstadoEquilibrio = "ok" | "error" | "warning";
+export type EstadoEquilibrio = 'ok' | 'error' | 'warning';
 
 export interface EquilibrioState {
   totalIngresos: number;

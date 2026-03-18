@@ -5,7 +5,12 @@
     "dockerfilePath": "apps/microservices/api-identidad/Dockerfile",
     "watchPatterns": [
       "apps/microservices/api-identidad/**",
-      "packages/seeders/**", "packages/core/**", "packages/db-identidad/**", "packages/db-platform/**", "packages/db-contabilidad/**", "packages/db-mensajeria/**"
+      "packages/seeders/**",
+      "packages/core/**",
+      "packages/db-identidad/**",
+      "packages/db-platform/**",
+      "packages/db-contabilidad/**",
+      "packages/db-mensajeria/**"
     ]
   },
   "deploy": {

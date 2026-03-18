@@ -36,7 +36,9 @@ interface UseMeetingsReturn {
   editarReunion: (id: number, data: UpdateReunionInput) => Promise<Reunion>
   cancelarReunion: (id: number) => Promise<void>
   responderInvitacion: (id: number, estado: EstadoInvitacion) => Promise<void>
-  iniciarReunion: (id: number) => Promise<{ token: string; livekitUrl: string; roomName: string }>
+  iniciarReunion: (
+    id: number,
+  ) => Promise<{ token: string; livekitUrl: string; roomName: string }>
 }
 
 export function useMeetings({
@@ -44,9 +46,13 @@ export function useMeetings({
   onReminder,
   onStarting,
 }: UseMeetingsOptions): UseMeetingsReturn {
-  const { data: reuniones = [], isLoading } = useListarReunionesQuery(conversacionId)
+  const { data: reuniones = [], isLoading } =
+    useListarReunionesQuery(conversacionId)
   const { socket } = useSocket()
-  const dispatch = useAppDispatch() as (action: { type: string; payload?: unknown }) => void
+  const dispatch = useAppDispatch() as (action: {
+    type: string
+    payload?: unknown
+  }) => void
 
   const [crearMutation] = useCrearReunionMutation()
   const [editarMutation] = useEditarReunionMutation()
@@ -56,33 +62,53 @@ export function useMeetings({
 
   // ─── Socket events ─────────────────────────────────────────────────────────
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: dispatch y emit son referencias estables
   useEffect(() => {
     if (!socket) return
 
     const handleCreated = (payload: MeetingCreatedPayload) => {
       if (payload.conversacionId === conversacionId) {
-        dispatch(chatApi.util.invalidateTags([{ type: 'Reuniones' as const, id: conversacionId }]))
+        dispatch(
+          chatApi.util.invalidateTags([
+            { type: 'Reuniones' as const, id: conversacionId },
+          ]),
+        )
       }
     }
 
     const handleUpdated = (payload: MeetingUpdatedPayload) => {
       if (payload.conversacionId === conversacionId) {
-        dispatch(chatApi.util.invalidateTags([{ type: 'Reuniones' as const, id: payload.reunion.id }]))
+        dispatch(
+          chatApi.util.invalidateTags([
+            { type: 'Reuniones' as const, id: payload.reunion.id },
+          ]),
+        )
       }
     }
 
     const handleCancelled = (payload: MeetingCancelledPayload) => {
       if (payload.conversacionId === conversacionId) {
-        dispatch(chatApi.util.invalidateTags([{ type: 'Reuniones' as const, id: payload.reunionId }]))
+        dispatch(
+          chatApi.util.invalidateTags([
+            { type: 'Reuniones' as const, id: payload.reunionId },
+          ]),
+        )
       }
     }
 
     const handleRsvp = (payload: MeetingRsvpPayload) => {
       // Actualizar cache de la reunión específica para todos los dispositivos
-      dispatch(chatApi.util.invalidateTags([{ type: 'Reuniones' as const, id: payload.reunionId }]))
+      dispatch(
+        chatApi.util.invalidateTags([
+          { type: 'Reuniones' as const, id: payload.reunionId },
+        ]),
+      )
     }
 
-    const handleReminder = (payload: { reunion: Reunion; minutosRestantes: number }) => {
+    const handleReminder = (payload: {
+      reunion: Reunion
+      minutosRestantes: number
+    }) => {
       onReminder?.(payload.reunion, payload.minutosRestantes)
     }
 
@@ -90,7 +116,11 @@ export function useMeetings({
       onStarting?.(payload.reunion, payload.llamadaId)
       // Invalidar cache para que todos los dispositivos refetchen la reunión
       // con el llamadaId actualizado (necesario para que "Unirse" funcione)
-      dispatch(chatApi.util.invalidateTags([{ type: 'Reuniones' as const, id: payload.reunion.id }]))
+      dispatch(
+        chatApi.util.invalidateTags([
+          { type: 'Reuniones' as const, id: payload.reunion.id },
+        ]),
+      )
     }
 
     socket.on('meeting:created', handleCreated)
@@ -116,28 +146,28 @@ export function useMeetings({
     async (data: CreateReunionInput): Promise<ReunionConInvitaciones> => {
       return crearMutation({ conversacionId, ...data }).unwrap()
     },
-    [crearMutation, conversacionId]
+    [crearMutation, conversacionId],
   )
 
   const editarReunion = useCallback(
     async (id: number, data: UpdateReunionInput): Promise<Reunion> => {
       return editarMutation({ id, ...data }).unwrap()
     },
-    [editarMutation]
+    [editarMutation],
   )
 
   const cancelarReunion = useCallback(
     async (id: number): Promise<void> => {
       await cancelarMutation(id).unwrap()
     },
-    [cancelarMutation]
+    [cancelarMutation],
   )
 
   const responderInvitacion = useCallback(
     async (id: number, estado: EstadoInvitacion): Promise<void> => {
       await rsvpMutation({ id, estado }).unwrap()
     },
-    [rsvpMutation]
+    [rsvpMutation],
   )
 
   const iniciarReunion = useCallback(
@@ -145,7 +175,7 @@ export function useMeetings({
       const response = await iniciarMutation(id).unwrap()
       return response.llamada
     },
-    [iniciarMutation]
+    [iniciarMutation],
   )
 
   return {

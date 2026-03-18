@@ -19,7 +19,10 @@ export const reunionesService = {
   // ─── Queries ────────────────────────────────────────────────────────────────
 
   async obtenerPorId(db: DbClient, id: number): Promise<Reunion | undefined> {
-    const [result] = await db.select().from(reuniones).where(eq(reuniones.id, id))
+    const [result] = await db
+      .select()
+      .from(reuniones)
+      .where(eq(reuniones.id, id))
     return result
   },
 
@@ -45,20 +48,26 @@ export const reunionesService = {
     return { ...reunion, invitaciones }
   },
 
-  async listarPorConversacion(db: DbClient, conversacionId: number): Promise<Reunion[]> {
+  async listarPorConversacion(
+    db: DbClient,
+    conversacionId: number,
+  ): Promise<Reunion[]> {
     return db
       .select()
       .from(reuniones)
       .where(
         and(
           eq(reuniones.conversacionId, conversacionId),
-          inArray(reuniones.estado, ['programada', 'activa'])
-        )
+          inArray(reuniones.estado, ['programada', 'activa']),
+        ),
       )
       .orderBy(reuniones.fechaInicio)
   },
 
-  async listarProximasDelUsuario(db: DbClient, usuarioId: number): Promise<Reunion[]> {
+  async listarProximasDelUsuario(
+    db: DbClient,
+    usuarioId: number,
+  ): Promise<Reunion[]> {
     const ahora = new Date()
 
     // Obtener reunionIds donde el usuario tiene invitación
@@ -68,8 +77,12 @@ export const reunionesService = {
       .where(
         and(
           eq(invitacionesReunion.usuarioId, usuarioId),
-          inArray(invitacionesReunion.estado, ['pendiente', 'aceptada', 'tentativa'])
-        )
+          inArray(invitacionesReunion.estado, [
+            'pendiente',
+            'aceptada',
+            'tentativa',
+          ]),
+        ),
       )
 
     if (invitacionRows.length === 0) return []
@@ -83,8 +96,8 @@ export const reunionesService = {
         and(
           inArray(reuniones.id, reunionIds),
           inArray(reuniones.estado, ['programada', 'activa']),
-          gte(reuniones.fechaFin, ahora)
-        )
+          gte(reuniones.fechaFin, ahora),
+        ),
       )
       .orderBy(reuniones.fechaInicio)
       .limit(20)
@@ -95,7 +108,7 @@ export const reunionesService = {
   async crearReunion(
     db: DbClient,
     data: NewReunion,
-    participanteIds: number[]
+    participanteIds: number[],
   ): Promise<Reunion & { invitaciones: InvitacionReunion[] }> {
     // 1. Insertar reunión
     const [nuevaReunion] = await db.insert(reuniones).values(data).returning()
@@ -116,12 +129,14 @@ export const reunionesService = {
       .returning()
 
     // 4. Crear invitaciones para todos los participantes
-    const invitacionValues: NewInvitacionReunion[] = participanteIds.map((uid) => ({
-      reunionId: nuevaReunion.id,
-      usuarioId: uid,
-      estado: uid === data.organizadorId ? 'aceptada' : 'pendiente',
-      respondidoEn: uid === data.organizadorId ? new Date() : undefined,
-    }))
+    const invitacionValues: NewInvitacionReunion[] = participanteIds.map(
+      (uid) => ({
+        reunionId: nuevaReunion.id,
+        usuarioId: uid,
+        estado: uid === data.organizadorId ? 'aceptada' : 'pendiente',
+        respondidoEn: uid === data.organizadorId ? new Date() : undefined,
+      }),
+    )
 
     const invitaciones = await db
       .insert(invitacionesReunion)
@@ -129,13 +144,17 @@ export const reunionesService = {
       .returning()
 
     // 5. Crear recordatorios de 15 min para todos los participantes
-    const enviarEn = new Date(nuevaReunion.fechaInicio.getTime() - 15 * 60 * 1000)
-    const recordatorioValues: NewRecordatorioReunion[] = participanteIds.map((uid) => ({
-      reunionId: nuevaReunion.id,
-      usuarioId: uid,
-      minutosAntes: 15,
-      enviarEn,
-    }))
+    const enviarEn = new Date(
+      nuevaReunion.fechaInicio.getTime() - 15 * 60 * 1000,
+    )
+    const recordatorioValues: NewRecordatorioReunion[] = participanteIds.map(
+      (uid) => ({
+        reunionId: nuevaReunion.id,
+        usuarioId: uid,
+        minutosAntes: 15,
+        enviarEn,
+      }),
+    )
 
     await db.insert(recordatoriosReunion).values(recordatorioValues)
 
@@ -146,11 +165,23 @@ export const reunionesService = {
     db: DbClient,
     id: number,
     userId: number,
-    data: Partial<Pick<NewReunion, 'titulo' | 'descripcion' | 'fechaInicio' | 'fechaFin' | 'ubicacion' | 'notas' | 'tipo'>>
+    data: Partial<
+      Pick<
+        NewReunion,
+        | 'titulo'
+        | 'descripcion'
+        | 'fechaInicio'
+        | 'fechaFin'
+        | 'ubicacion'
+        | 'notas'
+        | 'tipo'
+      >
+    >,
   ): Promise<Reunion | null> {
     const reunion = await this.obtenerPorId(db, id)
     if (!reunion || reunion.organizadorId !== userId) return null
-    if (reunion.estado === 'cancelada' || reunion.estado === 'completada') return null
+    if (reunion.estado === 'cancelada' || reunion.estado === 'completada')
+      return null
 
     const [actualizada] = await db
       .update(reuniones)
@@ -160,15 +191,17 @@ export const reunionesService = {
 
     // Si cambia fechaInicio, recalcular enviarEn de los recordatorios pendientes
     if (data.fechaInicio) {
-      const nuevaEnviarEn = new Date(data.fechaInicio.getTime() - 15 * 60 * 1000)
+      const nuevaEnviarEn = new Date(
+        data.fechaInicio.getTime() - 15 * 60 * 1000,
+      )
       await db
         .update(recordatoriosReunion)
         .set({ enviarEn: nuevaEnviarEn })
         .where(
           and(
             eq(recordatoriosReunion.reunionId, id),
-            eq(recordatoriosReunion.estado, 'pendiente')
-          )
+            eq(recordatoriosReunion.estado, 'pendiente'),
+          ),
         )
     }
 
@@ -178,7 +211,7 @@ export const reunionesService = {
   async cancelarReunion(
     db: DbClient,
     id: number,
-    userId: number
+    userId: number,
   ): Promise<Reunion | null> {
     const reunion = await this.obtenerPorId(db, id)
     if (!reunion || reunion.organizadorId !== userId) return null
@@ -197,8 +230,8 @@ export const reunionesService = {
       .where(
         and(
           eq(recordatoriosReunion.reunionId, id),
-          eq(recordatoriosReunion.estado, 'pendiente')
-        )
+          eq(recordatoriosReunion.estado, 'pendiente'),
+        ),
       )
 
     return cancelada
@@ -208,7 +241,7 @@ export const reunionesService = {
     db: DbClient,
     reunionId: number,
     usuarioId: number,
-    estado: InvitacionReunion['estado']
+    estado: InvitacionReunion['estado'],
   ): Promise<InvitacionReunion | null> {
     const [invitacion] = await db
       .select()
@@ -216,8 +249,8 @@ export const reunionesService = {
       .where(
         and(
           eq(invitacionesReunion.reunionId, reunionId),
-          eq(invitacionesReunion.usuarioId, usuarioId)
-        )
+          eq(invitacionesReunion.usuarioId, usuarioId),
+        ),
       )
 
     if (!invitacion) return null
@@ -234,7 +267,7 @@ export const reunionesService = {
   async marcarIniciada(
     db: DbClient,
     id: number,
-    llamadaId: number
+    llamadaId: number,
   ): Promise<Reunion | undefined> {
     const [actualizada] = await db
       .update(reuniones)
@@ -244,7 +277,10 @@ export const reunionesService = {
     return actualizada
   },
 
-  async marcarCompletada(db: DbClient, id: number): Promise<Reunion | undefined> {
+  async marcarCompletada(
+    db: DbClient,
+    id: number,
+  ): Promise<Reunion | undefined> {
     const [actualizada] = await db
       .update(reuniones)
       .set({ estado: 'completada', updatedAt: new Date() })
@@ -255,7 +291,9 @@ export const reunionesService = {
 
   // ─── Recordatorios ──────────────────────────────────────────────────────────
 
-  async obtenerRecordatoriosPendientes(db: DbClient): Promise<RecordatorioReunion[]> {
+  async obtenerRecordatoriosPendientes(
+    db: DbClient,
+  ): Promise<RecordatorioReunion[]> {
     const ahora = new Date()
     return db
       .select()
@@ -264,8 +302,8 @@ export const reunionesService = {
         and(
           eq(recordatoriosReunion.estado, 'pendiente'),
           // enviarEn <= ahora
-          lte(recordatoriosReunion.enviarEn, ahora)
-        )
+          lte(recordatoriosReunion.enviarEn, ahora),
+        ),
       )
       .orderBy(recordatoriosReunion.enviarEn)
   },
@@ -279,7 +317,10 @@ export const reunionesService = {
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-  async obtenerParticipanteIds(db: DbClient, conversacionId: number): Promise<number[]> {
+  async obtenerParticipanteIds(
+    db: DbClient,
+    conversacionId: number,
+  ): Promise<number[]> {
     const rows = await db
       .select({ usuarioId: participantes.usuarioId })
       .from(participantes)
@@ -290,7 +331,7 @@ export const reunionesService = {
   async verificarAcceso(
     db: DbClient,
     reunionId: number,
-    userId: number
+    userId: number,
   ): Promise<boolean> {
     const [inv] = await db
       .select()
@@ -298,8 +339,8 @@ export const reunionesService = {
       .where(
         and(
           eq(invitacionesReunion.reunionId, reunionId),
-          eq(invitacionesReunion.usuarioId, userId)
-        )
+          eq(invitacionesReunion.usuarioId, userId),
+        ),
       )
     return !!inv
   },
@@ -307,7 +348,7 @@ export const reunionesService = {
   minutosRestantes(reunion: Reunion): number {
     return Math.max(
       0,
-      Math.round((reunion.fechaInicio.getTime() - Date.now()) / 60000)
+      Math.round((reunion.fechaInicio.getTime() - Date.now()) / 60000),
     )
   },
 }
@@ -315,7 +356,7 @@ export const reunionesService = {
 // Agrega historial de reuniones pasadas para la lista en el drawer
 export async function listarTodasPorConversacion(
   db: DbClient,
-  conversacionId: number
+  conversacionId: number,
 ): Promise<Reunion[]> {
   return db
     .select()

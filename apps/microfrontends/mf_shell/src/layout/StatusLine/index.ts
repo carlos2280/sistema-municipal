@@ -1,1 +1,1 @@
-export { default } from './StatusLine';
+export { default } from "./StatusLine";

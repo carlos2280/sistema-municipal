@@ -1,6 +1,6 @@
-import { Box, Typography } from '@mui/material';
-import { memo, type JSX } from 'react';
 import type { TreeItemData } from '@/utils/planDeCuentasUtils';
+import { Box, Typography } from '@mui/material';
+import { type JSX, memo } from 'react';
 import { CustomTreeItem } from '../atoms/CustomTreeItem';
 
 interface Props {

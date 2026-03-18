@@ -1,5 +1,5 @@
 import { useObtenerArbolCompletoQuery } from 'mf_store/store';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   type TreeItemData,
@@ -80,7 +80,10 @@ export function usePlanDeCuentasTree() {
     function countExpandable(nodes: TreeItemData[]): number {
       let c = 0;
       for (const n of nodes) {
-        if (n.children?.length) { c++; c += countExpandable(n.children); }
+        if (n.children?.length) {
+          c++;
+          c += countExpandable(n.children);
+        }
       }
       return c;
     }
@@ -126,34 +129,51 @@ export function usePlanDeCuentasTree() {
     [treeData],
   );
 
-  return useMemo(() => ({
-    // Estado
-    searchTerm,
-    expandedItems,
-    autoExpandedItems,
-    treeData,
-    filteredTreeData,
-    isLoading,
-    error,
+  return useMemo(
+    () => ({
+      // Estado
+      searchTerm,
+      expandedItems,
+      autoExpandedItems,
+      treeData,
+      filteredTreeData,
+      isLoading,
+      error,
 
-    // Setters
-    setSearchTerm,
-    setExpandedItems,
+      // Setters
+      setSearchTerm,
+      setExpandedItems,
 
-    // Acciones
-    clearSearch,
-    expandAll,
-    collapseAll,
-    toggleAll,
-    expandNode,
-    findItemById,
+      // Acciones
+      clearSearch,
+      expandAll,
+      collapseAll,
+      toggleAll,
+      expandNode,
+      findItemById,
 
-    // Derivados
-    areAllExpanded,
-    matchCount,
-  }), [
-    searchTerm, expandedItems, autoExpandedItems, treeData, filteredTreeData,
-    isLoading, error, setSearchTerm, setExpandedItems, clearSearch, expandAll,
-    collapseAll, toggleAll, expandNode, findItemById, areAllExpanded, matchCount,
-  ]);
+      // Derivados
+      areAllExpanded,
+      matchCount,
+    }),
+    [
+      searchTerm,
+      expandedItems,
+      autoExpandedItems,
+      treeData,
+      filteredTreeData,
+      isLoading,
+      error,
+      setSearchTerm,
+      setExpandedItems,
+      clearSearch,
+      expandAll,
+      collapseAll,
+      toggleAll,
+      expandNode,
+      findItemById,
+      areAllExpanded,
+      matchCount,
+    ],
+  );
 }

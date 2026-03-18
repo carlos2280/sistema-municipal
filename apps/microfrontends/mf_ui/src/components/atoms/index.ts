@@ -3,12 +3,12 @@
 
 export { LoadingSpinner } from "./LoadingSpinner";
 export {
-  Skeleton,
-  SkeletonText,
-  SkeletonCircle,
-  SkeletonCard,
-  SkeletonTableRow,
-  SkeletonPage,
+	Skeleton,
+	SkeletonText,
+	SkeletonCircle,
+	SkeletonCard,
+	SkeletonTableRow,
+	SkeletonPage,
 } from "./Skeleton";
 export { Badge } from "./Badge";
 export { IconButton } from "./IconButton";

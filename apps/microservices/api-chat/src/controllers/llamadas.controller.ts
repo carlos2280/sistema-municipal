@@ -21,14 +21,14 @@ export const obtenerHistorial: RequestHandler = async (req, res, next) => {
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       Number(conversacionId),
-      usuarioId
+      usuarioId,
     )
     if (!esParticipante)
       throw new AppError('No tienes acceso a esta conversación', 403)
 
     const historial = await llamadasService.obtenerHistorial(
       tenantDb,
-      Number(conversacionId)
+      Number(conversacionId),
     )
     res.json({ success: true, data: historial })
   } catch (error) {
@@ -44,23 +44,33 @@ export const obtenerTokenLlamada: RequestHandler = async (req, res, next) => {
 
     const tenantDb = getDb(req)
 
-    const llamada = await llamadasService.obtenerPorId(tenantDb, Number(llamadaId))
+    const llamada = await llamadasService.obtenerPorId(
+      tenantDb,
+      Number(llamadaId),
+    )
     if (!llamada) throw new AppError('Llamada no encontrada', 404)
 
     if (llamada.estado !== 'activa') {
       // Permitir rejoin si la llamada está vinculada a una reunión activa
       // (ocurre cuando todos salieron pero la reunión sigue programada)
-      const puedeRejoin = await llamadasService.esLlamadaDeReunionActiva(tenantDb, Number(llamadaId))
+      const puedeRejoin = await llamadasService.esLlamadaDeReunionActiva(
+        tenantDb,
+        Number(llamadaId),
+      )
       if (!puedeRejoin) throw new AppError('La llamada no está activa', 400)
       // Reactivar la llamada para permitir rejoin
-      await llamadasService.actualizarEstado(tenantDb, Number(llamadaId), 'activa')
+      await llamadasService.actualizarEstado(
+        tenantDb,
+        Number(llamadaId),
+        'activa',
+      )
     }
 
     // Verificar acceso: participante de la conversación O invitado a la reunión vinculada
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       llamada.conversacionId,
-      usuarioId
+      usuarioId,
     )
 
     if (!esParticipante) {
@@ -72,8 +82,8 @@ export const obtenerTokenLlamada: RequestHandler = async (req, res, next) => {
         .where(
           and(
             eq(reuniones.llamadaId, Number(llamadaId)),
-            eq(invitacionesReunion.usuarioId, usuarioId)
-          )
+            eq(invitacionesReunion.usuarioId, usuarioId),
+          ),
         )
         .limit(1)
 
@@ -86,7 +96,7 @@ export const obtenerTokenLlamada: RequestHandler = async (req, res, next) => {
     const token = await llamadasService.generateToken(
       llamada.livekitRoom,
       usuarioId,
-      user.nombreCompleto
+      user.nombreCompleto,
     )
 
     res.json({

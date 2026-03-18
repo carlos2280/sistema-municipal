@@ -24,11 +24,21 @@ export const getTenant: RequestHandler = async (req, res, next) => {
 
 export const createTenant: RequestHandler = async (req, res, next) => {
   try {
-    const { nombre, slug, dominioBase, rut, direccion, telefono, emailContacto, maxUsuarios } =
-      req.body;
+    const {
+      nombre,
+      slug,
+      dominioBase,
+      rut,
+      direccion,
+      telefono,
+      emailContacto,
+      maxUsuarios,
+    } = req.body;
 
     if (!nombre || !slug || !dominioBase) {
-      return next(new AppError("nombre, slug y dominioBase son requeridos", 400));
+      return next(
+        new AppError("nombre, slug y dominioBase son requeridos", 400),
+      );
     }
 
     const tenant = await tenantsService.createTenant({

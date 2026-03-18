@@ -1,10 +1,10 @@
+import type { CallState } from '@/types/videocall.types'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { Phone, PhoneOff, Video } from 'lucide-react'
-import type { CallState } from '@/types/videocall.types'
 
 interface IncomingCallDialogProps {
   callState: CallState

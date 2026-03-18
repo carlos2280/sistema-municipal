@@ -1,36 +1,36 @@
 // src/routes/router.tsx
-import { useRoutes } from 'react-router-dom';
+import { useRoutes } from "react-router-dom";
 
-import ProtectedRoute from './ProtectedRoute';
-import { useMenu } from '../hooks/useMenu';
-import AppLayout from '../layout/AppLayout';
-import DashboardPage from '../pages/DashboardPage';
-import LoginPage from '../pages/login/LoginPage';
-import { generateRoutesFromMenu } from '../utils/generateRoutesFromMenu';
+import { useMenu } from "../hooks/useMenu";
+import AppLayout from "../layout/AppLayout";
+import DashboardPage from "../pages/DashboardPage";
+import LoginPage from "../pages/login/LoginPage";
+import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
+import ProtectedRoute from "./ProtectedRoute";
 
 export const AppRoutes = () => {
-  const { menu } = useMenu();
+	const { menu } = useMenu();
 
-  const routes = [
-    {
-      path: '/login',
-      element: <LoginPage />,
-    },
-    {
-      path: '/',
-      element: <ProtectedRoute />,
-      children: [
-        {
-          path: '/',
-          element: <AppLayout />,
-          children: [
-            { index: true, element: <DashboardPage /> },
-            ...generateRoutesFromMenu(menu),
-          ],
-        },
-      ],
-    },
-  ];
+	const routes = [
+		{
+			path: "/login",
+			element: <LoginPage />,
+		},
+		{
+			path: "/",
+			element: <ProtectedRoute />,
+			children: [
+				{
+					path: "/",
+					element: <AppLayout />,
+					children: [
+						{ index: true, element: <DashboardPage /> },
+						...generateRoutesFromMenu(menu),
+					],
+				},
+			],
+		},
+	];
 
-  return useRoutes(routes);
+	return useRoutes(routes);
 };

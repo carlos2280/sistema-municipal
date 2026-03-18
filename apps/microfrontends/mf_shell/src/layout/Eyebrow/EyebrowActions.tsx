@@ -6,11 +6,8 @@
  * Priority+: P1 (avatar), P2 (notif badge → dot en mobile)
  */
 
-import { styled, alpha } from "@mui/material/styles";
-import {
-	useAppSelector,
-	selectNombreCompleto,
-} from "mf_store/store";
+import { alpha, styled } from "@mui/material/styles";
+import { selectNombreCompleto, useAppSelector } from "mf_store/store";
 import { UserAvatar } from "mf_ui/components";
 
 // ─── Types ──────────────────────────────────────────────────────

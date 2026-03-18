@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
 import { type EnvConfig, validateEnv } from "@/env/schema";
+import dotenv from "dotenv";
 
 let env: EnvConfig;
 
@@ -11,9 +11,7 @@ export function loadEnv(): EnvConfig {
 
 export function getEnv(): EnvConfig {
   if (!env) {
-    throw new Error(
-      "Environment variables not loaded. Call loadEnv() first.",
-    );
+    throw new Error("Environment variables not loaded. Call loadEnv() first.");
   }
   return env;
 }

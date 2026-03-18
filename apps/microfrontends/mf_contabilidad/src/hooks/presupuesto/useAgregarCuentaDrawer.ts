@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CuentaPresupuestaria } from "mf_store/store";
+import type { CuentaPresupuestaria } from 'mf_store/store';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -23,9 +23,9 @@ const INITIAL_STATE: DrawerState = {
   open: false,
   currentPath: [],
   selectedLeaf: null,
-  searchQuery: "",
+  searchQuery: '',
   searchMode: false,
-  montoInput: "",
+  montoInput: '',
   centroCostoId: null,
   showForm: false,
 };
@@ -106,7 +106,7 @@ export const useAgregarCuentaDrawer = (
   cuentasEnUso: number[],
 ) => {
   const [state, setState] = useState<DrawerState>(INITIAL_STATE);
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // ── Árbol computado ──────────────────────────────────────────────
@@ -125,10 +125,13 @@ export const useAgregarCuentaDrawer = (
     clearTimeout(debounceRef.current);
     const q = state.searchQuery.trim();
     if (!q) {
-      setDebouncedQuery("");
+      setDebouncedQuery('');
       return;
     }
-    debounceRef.current = setTimeout(() => setDebouncedQuery(q), SEARCH_DEBOUNCE_MS);
+    debounceRef.current = setTimeout(
+      () => setDebouncedQuery(q),
+      SEARCH_DEBOUNCE_MS,
+    );
     return () => clearTimeout(debounceRef.current);
   }, [state.searchQuery]);
 
@@ -162,10 +165,14 @@ export const useAgregarCuentaDrawer = (
         exists: cuentasEnUsoSet.has(cuenta.id),
         ancestors,
         childrenCount: node.children.length,
-        priority: cuenta.codigo === q ? 0
-          : cuenta.codigo.startsWith(q) ? 1
-          : matchCode ? 2
-          : 3,
+        priority:
+          cuenta.codigo === q
+            ? 0
+            : cuenta.codigo.startsWith(q)
+              ? 1
+              : matchCode
+                ? 2
+                : 3,
       });
     }
 
@@ -191,12 +198,12 @@ export const useAgregarCuentaDrawer = (
   // ── Acciones ─────────────────────────────────────────────────────
   const open = useCallback(() => {
     setState({ ...INITIAL_STATE, open: true });
-    setDebouncedQuery("");
+    setDebouncedQuery('');
   }, []);
 
   const close = useCallback(() => {
     setState(INITIAL_STATE);
-    setDebouncedQuery("");
+    setDebouncedQuery('');
   }, []);
 
   const setSearchQuery = useCallback((query: string) => {
@@ -213,10 +220,10 @@ export const useAgregarCuentaDrawer = (
       currentPath: [...prev.currentPath, cuentaId],
       selectedLeaf: null,
       showForm: false,
-      searchQuery: "",
+      searchQuery: '',
       searchMode: false,
     }));
-    setDebouncedQuery("");
+    setDebouncedQuery('');
   }, []);
 
   const drillTo = useCallback((cuentaId: number | null) => {
@@ -226,24 +233,25 @@ export const useAgregarCuentaDrawer = (
         currentPath: [],
         selectedLeaf: null,
         showForm: false,
-        searchQuery: "",
+        searchQuery: '',
         searchMode: false,
       }));
     } else {
       setState((prev) => {
         const idx = prev.currentPath.indexOf(cuentaId);
-        const newPath = idx >= 0 ? prev.currentPath.slice(0, idx + 1) : prev.currentPath;
+        const newPath =
+          idx >= 0 ? prev.currentPath.slice(0, idx + 1) : prev.currentPath;
         return {
           ...prev,
           currentPath: newPath,
           selectedLeaf: null,
           showForm: false,
-          searchQuery: "",
+          searchQuery: '',
           searchMode: false,
         };
       });
     }
-    setDebouncedQuery("");
+    setDebouncedQuery('');
   }, []);
 
   const selectLeaf = useCallback(
@@ -256,12 +264,12 @@ export const useAgregarCuentaDrawer = (
         currentPath: fullPath,
         selectedLeaf: cuenta,
         showForm: true,
-        searchQuery: "",
+        searchQuery: '',
         searchMode: false,
-        montoInput: "",
+        montoInput: '',
         centroCostoId: null,
       }));
-      setDebouncedQuery("");
+      setDebouncedQuery('');
     },
     [cuentaMap],
   );
@@ -276,10 +284,10 @@ export const useAgregarCuentaDrawer = (
         currentPath: fullPath,
         selectedLeaf: null,
         showForm: false,
-        searchQuery: "",
+        searchQuery: '',
         searchMode: false,
       }));
-      setDebouncedQuery("");
+      setDebouncedQuery('');
     },
     [cuentaMap],
   );
@@ -293,8 +301,8 @@ export const useAgregarCuentaDrawer = (
   }, []);
 
   const parsedMonto = useMemo(() => {
-    const raw = state.montoInput.replace(/[^\d]/g, "");
-    return raw ? parseInt(raw, 10) : 0;
+    const raw = state.montoInput.replace(/[^\d]/g, '');
+    return raw ? Number.parseInt(raw, 10) : 0;
   }, [state.montoInput]);
 
   // ── Breadcrumb legible ────────────────────────────────────────────

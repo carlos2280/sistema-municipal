@@ -1,93 +1,100 @@
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import InputAdornment from "@mui/material/InputAdornment";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateTenant, useTenants } from "../hooks/useTenants";
-import type { CreateTenantInput } from "../types";
+import AddIcon from '@mui/icons-material/Add'
+import SearchIcon from '@mui/icons-material/Search'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import InputAdornment from '@mui/material/InputAdornment'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import TextField from '@mui/material/TextField'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Typography from '@mui/material/Typography'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useCreateTenant, useTenants } from '../hooks/useTenants'
+import type { CreateTenantInput } from '../types'
 
-type FilterMode = "todos" | "activos" | "inactivos";
+type FilterMode = 'todos' | 'activos' | 'inactivos'
 
 const EMPTY_FORM: CreateTenantInput = {
-  nombre: "",
-  slug: "",
-  dominioBase: "",
-};
+  nombre: '',
+  slug: '',
+  dominioBase: '',
+}
 
 export default function TenantsPage() {
-  const { data: tenants, isLoading, error } = useTenants();
-  const createTenant = useCreateTenant();
-  const navigate = useNavigate();
+  const { data: tenants, isLoading, error } = useTenants()
+  const createTenant = useCreateTenant()
+  const navigate = useNavigate()
 
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterMode>("todos");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<CreateTenantInput>({ ...EMPTY_FORM });
-  const [createError, setCreateError] = useState("");
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<FilterMode>('todos')
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [form, setForm] = useState<CreateTenantInput>({ ...EMPTY_FORM })
+  const [createError, setCreateError] = useState('')
 
   const filtered = tenants?.filter((t) => {
     const matchesSearch =
       !search ||
       t.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      t.slug.toLowerCase().includes(search.toLowerCase());
+      t.slug.toLowerCase().includes(search.toLowerCase())
     const matchesFilter =
-      filter === "todos" ||
-      (filter === "activos" && t.activo !== false) ||
-      (filter === "inactivos" && t.activo === false);
-    return matchesSearch && matchesFilter;
-  });
+      filter === 'todos' ||
+      (filter === 'activos' && t.activo !== false) ||
+      (filter === 'inactivos' && t.activo === false)
+    return matchesSearch && matchesFilter
+  })
 
   const handleCreate = async () => {
     if (!form.nombre || !form.slug || !form.dominioBase) {
-      setCreateError("Nombre, slug y dominio son requeridos");
-      return;
+      setCreateError('Nombre, slug y dominio son requeridos')
+      return
     }
-    setCreateError("");
+    setCreateError('')
     try {
-      const created = await createTenant.mutateAsync(form);
-      setDialogOpen(false);
-      setForm({ ...EMPTY_FORM });
-      navigate(`/tenants/${created.id}`);
+      const created = await createTenant.mutateAsync(form)
+      setDialogOpen(false)
+      setForm({ ...EMPTY_FORM })
+      navigate(`/tenants/${created.id}`)
     } catch (err) {
       setCreateError(
-        err instanceof Error ? err.message : "Error al crear municipalidad",
-      );
+        err instanceof Error ? err.message : 'Error al crear municipalidad',
+      )
     }
-  };
+  }
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (error) {
-    return <Alert severity="error">Error: {error.message}</Alert>;
+    return <Alert severity="error">Error: {error.message}</Alert>
   }
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" fontWeight={700}>
           Municipalidades
         </Typography>
@@ -100,7 +107,7 @@ export default function TenantsPage() {
         </Button>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
         <TextField
           size="small"
           placeholder="Buscar por nombre o slug..."
@@ -144,7 +151,7 @@ export default function TenantsPage() {
             <TableRow
               key={t.id}
               hover
-              sx={{ cursor: "pointer" }}
+              sx={{ cursor: 'pointer' }}
               onClick={() => navigate(`/tenants/${t.id}`)}
             >
               <TableCell>{t.nombre}</TableCell>
@@ -152,13 +159,13 @@ export default function TenantsPage() {
               <TableCell>{t.dominioBase}</TableCell>
               <TableCell>
                 <Chip
-                  label={t.activo !== false ? "Activa" : "Inactiva"}
-                  color={t.activo !== false ? "success" : "default"}
+                  label={t.activo !== false ? 'Activa' : 'Inactiva'}
+                  color={t.activo !== false ? 'success' : 'default'}
                   size="small"
                 />
               </TableCell>
               <TableCell>
-                {new Intl.DateTimeFormat("es-CL").format(new Date(t.createdAt))}
+                {new Intl.DateTimeFormat('es-CL').format(new Date(t.createdAt))}
               </TableCell>
             </TableRow>
           ))}
@@ -179,7 +186,14 @@ export default function TenantsPage() {
         fullWidth
       >
         <DialogTitle>Nueva Municipalidad</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "8px !important" }}>
+        <DialogContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            pt: '8px !important',
+          }}
+        >
           {createError && <Alert severity="error">{createError}</Alert>}
           <TextField
             label="Nombre"
@@ -194,7 +208,7 @@ export default function TenantsPage() {
             onChange={(e) =>
               setForm({
                 ...form,
-                slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''),
               })
             }
             helperText="Solo letras minúsculas, números y guiones"
@@ -208,17 +222,21 @@ export default function TenantsPage() {
           />
           <TextField
             label="RUT (opcional)"
-            value={form.rut ?? ""}
-            onChange={(e) => setForm({ ...form, rut: e.target.value || undefined })}
+            value={form.rut ?? ''}
+            onChange={(e) =>
+              setForm({ ...form, rut: e.target.value || undefined })
+            }
           />
           <TextField
             label="Max Usuarios"
             type="number"
-            value={form.maxUsuarios ?? ""}
+            value={form.maxUsuarios ?? ''}
             onChange={(e) =>
               setForm({
                 ...form,
-                maxUsuarios: e.target.value ? Number(e.target.value) : undefined,
+                maxUsuarios: e.target.value
+                  ? Number(e.target.value)
+                  : undefined,
               })
             }
             helperText="Por defecto: 50"
@@ -231,10 +249,10 @@ export default function TenantsPage() {
             onClick={handleCreate}
             disabled={createTenant.isPending}
           >
-            {createTenant.isPending ? "Creando..." : "Crear"}
+            {createTenant.isPending ? 'Creando...' : 'Crear'}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
-  );
+  )
 }

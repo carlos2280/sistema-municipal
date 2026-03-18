@@ -24,14 +24,18 @@ export function createPlatformClient(config: EnvConfig) {
 export function initializePlatformDB(config: EnvConfig) {
   if (!platformDbInstance) {
     platformDbInstance = createPlatformClient(config);
-    console.log(`[PlatformDB] Connected to database: ${config.PLATFORM_DB_NAME}`);
+    console.log(
+      `[PlatformDB] Connected to database: ${config.PLATFORM_DB_NAME}`,
+    );
   }
   return platformDbInstance;
 }
 
 export function getPlatformDB() {
   if (!platformDbInstance) {
-    throw new Error("Platform DB not initialized. Call initializePlatformDB() first.");
+    throw new Error(
+      "Platform DB not initialized. Call initializePlatformDB() first.",
+    );
   }
   return platformDbInstance;
 }

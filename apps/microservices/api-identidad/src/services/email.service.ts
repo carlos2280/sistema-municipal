@@ -39,7 +39,13 @@ async function sendEmail({
     secure: false,
   });
 
-  const info = await transporter.sendMail({ from: `"Sistema Municipal" <${from}>`, to, subject, html, text });
+  const info = await transporter.sendMail({
+    from: `"Sistema Municipal" <${from}>`,
+    to,
+    subject,
+    html,
+    text,
+  });
   return { messageId: info.messageId };
 }
 

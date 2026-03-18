@@ -1,12 +1,20 @@
+import { MeetingReminder } from '@/components/meeting/molecules/MeetingReminder'
+import { CreateMeetingDialog } from '@/components/meeting/organisms/CreateMeetingDialog'
+import {
+  useChat,
+  useConversaciones,
+  useMeetings,
+  useOnlineUsers,
+} from '@/hooks'
+import type { Reunion } from '@/types/meeting.types'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
+import {
+  useIniciarReunionMutation,
+  useLazyObtenerTokenLlamadaQuery,
+} from 'mf_store/store'
 import { useCallback, useMemo, useState } from 'react'
-import { useIniciarReunionMutation, useLazyObtenerTokenLlamadaQuery } from 'mf_store/store'
-import { useChat, useConversaciones, useMeetings, useOnlineUsers } from '@/hooks'
-import type { Reunion } from '@/types/meeting.types'
-import { CreateMeetingDialog } from '@/components/meeting/organisms/CreateMeetingDialog'
-import { MeetingReminder } from '@/components/meeting/molecules/MeetingReminder'
 import { ChatHeader } from '../molecules/ChatHeader'
 import { MessageInput } from '../molecules/MessageInput'
 import { MessageList } from './MessageList'
@@ -45,13 +53,19 @@ export function ChatWindow({
 
   // ─── Reuniones ─────────────────────────────────────────────────────────────
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [reminder, setReminder] = useState<{ reunion: Reunion; minutos: number } | null>(null)
+  const [reminder, setReminder] = useState<{
+    reunion: Reunion
+    minutos: number
+  } | null>(null)
   const [iniciarMutation] = useIniciarReunionMutation()
   const [obtenerToken] = useLazyObtenerTokenLlamadaQuery()
 
-  const handleReminder = useCallback((reunion: Reunion, minutosRestantes: number) => {
-    setReminder({ reunion, minutos: minutosRestantes })
-  }, [])
+  const handleReminder = useCallback(
+    (reunion: Reunion, minutosRestantes: number) => {
+      setReminder({ reunion, minutos: minutosRestantes })
+    },
+    [],
+  )
 
   const handleStarting = useCallback((reunion: Reunion, llamadaId: number) => {
     // Si es activa y tiene llamadaId podemos notificar al usuario
@@ -63,24 +77,30 @@ export function ChatWindow({
     onStarting: handleStarting,
   })
 
-  const handleIniciarMeeting = useCallback(async (reunionId: number) => {
-    try {
-      const response = await iniciarMutation(reunionId).unwrap()
-      onJoinCall?.(response.llamada.id, response.llamada.token)
-    } catch {
-      // error manejado por RTK Query
-    }
-  }, [iniciarMutation, onJoinCall])
+  const handleIniciarMeeting = useCallback(
+    async (reunionId: number) => {
+      try {
+        const response = await iniciarMutation(reunionId).unwrap()
+        onJoinCall?.(response.llamada.id, response.llamada.token)
+      } catch {
+        // error manejado por RTK Query
+      }
+    },
+    [iniciarMutation, onJoinCall],
+  )
 
   // BUG-02: obtener token LiveKit antes de unirse como participante
-  const handleJoinMeeting = useCallback(async (llamadaId: number) => {
-    try {
-      const result = await obtenerToken(llamadaId).unwrap()
-      onJoinCall?.(llamadaId, result.token)
-    } catch {
-      // error manejado por RTK Query
-    }
-  }, [obtenerToken, onJoinCall])
+  const handleJoinMeeting = useCallback(
+    async (llamadaId: number) => {
+      try {
+        const result = await obtenerToken(llamadaId).unwrap()
+        onJoinCall?.(llamadaId, result.token)
+      } catch {
+        // error manejado por RTK Query
+      }
+    },
+    [obtenerToken, onJoinCall],
+  )
 
   const { conversaciones } = useConversaciones()
   const { isUserOnline } = useOnlineUsers()
@@ -112,11 +132,12 @@ export function ChatWindow({
 
     if (conv.tipo === 'directa' && participantes.length > 0) {
       const otherParticipant = participantes.find(
-        (p) => p.usuarioId !== currentUserId
+        (p) => p.usuarioId !== currentUserId,
       )
       const otherUserId = otherParticipant?.usuarioId
       return {
-        nombre: otherParticipant?.usuario?.nombreCompleto || conv.nombre || 'Chat',
+        nombre:
+          otherParticipant?.usuario?.nombreCompleto || conv.nombre || 'Chat',
         online: otherUserId ? isUserOnline(otherUserId) : false,
         esGrupo: false,
         esSistema: false,
@@ -220,7 +241,9 @@ export function ChatWindow({
       <CreateMeetingDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        onConfirm={async (data) => { await crearReunion(data) }}
+        onConfirm={async (data) => {
+          await crearReunion(data)
+        }}
         organizadorId={currentUserId}
         grupos={gruposParaSelector}
       />

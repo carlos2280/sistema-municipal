@@ -1,7 +1,12 @@
 import { useLazyVerificarCodigoExisteQuery } from 'mf_store/store';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type CodigoStatus = 'idle' | 'checking' | 'available' | 'exists' | 'error';
+export type CodigoStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'exists'
+  | 'error';
 
 /** Datos de cuenta existente */
 export interface CuentaExistenteData {
@@ -33,7 +38,8 @@ interface UseVerificarCodigoReturn {
  */
 export function useVerificarCodigo(debounceMs = 500): UseVerificarCodigoReturn {
   const [status, setStatus] = useState<CodigoStatus>('idle');
-  const [cuentaExistente, setCuentaExistente] = useState<CuentaExistenteData | null>(null);
+  const [cuentaExistente, setCuentaExistente] =
+    useState<CuentaExistenteData | null>(null);
 
   const [triggerVerificar] = useLazyVerificarCodigoExisteQuery();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);

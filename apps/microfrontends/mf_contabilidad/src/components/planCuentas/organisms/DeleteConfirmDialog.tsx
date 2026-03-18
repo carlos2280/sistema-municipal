@@ -34,9 +34,8 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
       // Small delay to trigger CSS transition
       const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
-    } else {
-      setVisible(false);
     }
+    setVisible(false);
   }, [open]);
 
   const handleOverlayClick = useCallback(
@@ -130,8 +129,8 @@ export const DeleteConfirmDialog = memo(function DeleteConfirmDialog({
               >
                 <AlertTriangle size={14} style={{ flexShrink: 0 }} />
                 <Typography variant="body2">
-                  Esta cuenta tiene {childCount} subcuenta{childCount > 1 ? 's' : ''}.
-                  Se eliminarán también.
+                  Esta cuenta tiene {childCount} subcuenta
+                  {childCount > 1 ? 's' : ''}. Se eliminarán también.
                 </Typography>
               </Box>
             ) : (

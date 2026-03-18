@@ -8,11 +8,11 @@
  * Animación: translateX(100%) → 0 en 250ms ease-out.
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
+import { useMenu } from "../../hooks/useMenu";
+import NavPanelFooter from "./NavPanelFooter";
 import NavPanelHeader from "./NavPanelHeader";
 import NavPanelMenu from "./NavPanelMenu";
-import NavPanelFooter from "./NavPanelFooter";
-import { useMenu } from "../../hooks/useMenu";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -62,10 +62,7 @@ const PanelRoot = styled("aside", {
 		width: PANEL_WIDTH,
 		maxWidth: "100vw",
 		zIndex: theme.meridian.zIndex.navPanel,
-		background: alpha(
-			theme.meridian.surfaces.s1,
-			isDark ? 0.97 : 0.98,
-		),
+		background: alpha(theme.meridian.surfaces.s1, isDark ? 0.97 : 0.98),
 		backdropFilter: "blur(20px)",
 		WebkitBackdropFilter: "blur(20px)",
 		borderLeft: `1px solid ${theme.meridian.borders.muted}`,
@@ -97,7 +94,12 @@ const EmptyState = styled("div")(({ theme }) => ({
 
 // ─── Component ──────────────────────────────────────────────────
 
-function NavPanel({ isOpen, onClose, onChangeSistema, onOpenCustomizer }: NavPanelProps) {
+function NavPanel({
+	isOpen,
+	onClose,
+	onChangeSistema,
+	onOpenCustomizer,
+}: NavPanelProps) {
 	const { menu, nombreSistema } = useMenu();
 
 	return (
@@ -111,10 +113,7 @@ function NavPanel({ isOpen, onClose, onChangeSistema, onOpenCustomizer }: NavPan
 				aria-modal="true"
 				aria-hidden={!isOpen}
 			>
-				<NavPanelHeader
-					onClose={onClose}
-					onChangeSistema={onChangeSistema}
-				/>
+				<NavPanelHeader onClose={onClose} onChangeSistema={onChangeSistema} />
 
 				{menu && menu.length > 0 ? (
 					<NavPanelMenu
@@ -128,10 +127,7 @@ function NavPanel({ isOpen, onClose, onChangeSistema, onOpenCustomizer }: NavPan
 					</EmptyState>
 				)}
 
-				<NavPanelFooter
-					onClose={onClose}
-					onOpenCustomizer={onOpenCustomizer}
-				/>
+				<NavPanelFooter onClose={onClose} onOpenCustomizer={onOpenCustomizer} />
 			</PanelRoot>
 		</>
 	);

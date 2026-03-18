@@ -1,3 +1,7 @@
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+import { MessageSquare } from 'lucide-react'
 /**
  * App.tsx - Solo para desarrollo standalone de mf_chat
  *
@@ -8,12 +12,8 @@
  * heredan el tema y contexto del host - NO usan este App.tsx.
  */
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import { MessageSquare } from 'lucide-react'
-import { ChatDrawer } from './components/chat/organisms/ChatDrawer'
 import { ChatButton } from './components/atoms/ChatButton'
+import { ChatDrawer } from './components/chat/organisms/ChatDrawer'
 
 function App() {
   const [drawerOpen, setDrawerOpen] = useState(true)
@@ -31,8 +31,8 @@ function App() {
       </Typography>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Este es el entorno de desarrollo del módulo de chat.
-        Los componentes heredan el tema de mf_ui.
+        Este es el entorno de desarrollo del módulo de chat. Los componentes
+        heredan el tema de mf_ui.
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 4 }}>
@@ -48,10 +48,7 @@ function App() {
         Abrir Chat Drawer
       </Button>
 
-      <ChatDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      />
+      <ChatDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </Box>
   )
 }

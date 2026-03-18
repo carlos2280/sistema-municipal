@@ -1,9 +1,15 @@
 import type { DbClient } from "@/db/client";
-import { type NewPlanesCuentas, planesCuentas } from "@municipal/db-contabilidad";
+import {
+  type NewPlanesCuentas,
+  planesCuentas,
+} from "@municipal/db-contabilidad";
 import { and, eq, like } from "drizzle-orm";
 import * as csService from "./cuentasSubgrupos.service";
 
-export const crearPlanesCuenta = async (db: DbClient, data: NewPlanesCuentas) => {
+export const crearPlanesCuenta = async (
+  db: DbClient,
+  data: NewPlanesCuentas,
+) => {
   const [inserted] = await db.insert(planesCuentas).values(data).returning();
   return inserted;
 };
@@ -167,7 +173,10 @@ export const verificarCodigoExiste = async (
   db: DbClient,
   anoContable: number,
   codigo: string,
-): Promise<{ existe: boolean; cuenta?: { id: number; codigo: string; nombre: string } }> => {
+): Promise<{
+  existe: boolean;
+  cuenta?: { id: number; codigo: string; nombre: string };
+}> => {
   const [row] = await db
     .select({
       id: planesCuentas.id,
