@@ -39,6 +39,12 @@ interface PresupuestoDetalleRowProps {
 
 const NIVEL_INDENT = 18;
 
+/**
+ * Grid template idéntico al header del Grid.
+ * Cuenta(180) | Nombre(1fr) | ÁreaGestión(150) | Monto(170) | Status(36) | Actions(70)
+ */
+const GRID_TEMPLATE = "180px 1fr 150px 170px 36px 70px";
+
 const pulseRecalc = keyframes`
   0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
   50% { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0); }
@@ -49,10 +55,12 @@ const numFontSx = {
   fontFeatureSettings: "'tnum' 1, 'ss01' 1",
 } as const;
 
-const tdBase = {
-  padding: 0,
-  verticalAlign: "middle" as const,
-  border: 0,
+const cellBase: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  minWidth: 0,
+  overflow: "hidden",
+  padding: "0 14px",
 };
 
 // ─── Helpers de estilo (functions puras, sin closures costosas) ─────────────
@@ -64,7 +72,14 @@ function getRowSx(
   isDeleteTarget: boolean,
 ) {
   return (t: Theme) => ({
-    height: 34,
+    display: "grid",
+    gridTemplateColumns: GRID_TEMPLATE,
+    alignItems: "center",
+    height: "34px",
+    // content-visibility: auto → el browser salta layout/paint de filas fuera del viewport.
+    // Equivale a virtualización nativa sin mount/unmount → zero secciones negras.
+    contentVisibility: "auto",
+    containIntrinsicSize: "auto 34px",
     borderBottom: `1px solid ${t.meridian.borders.default}`,
     transition: "background 80ms",
     // Delete target: prioridad máxima
@@ -148,11 +163,10 @@ const PresupuestoDetalleRow = ({
 
   return (
     <Box
-      component="tr"
       sx={getRowSx(depth, hasDiscrepancia, isWarnChild, isDeleteTarget)}
     >
       {/* Col 1: Código */}
-      <td style={{ ...tdBase, paddingLeft: `${14 + depth * NIVEL_INDENT}px`, paddingRight: 14, whiteSpace: "nowrap" }}>
+      <div style={{ ...cellBase, paddingLeft: `${14 + depth * NIVEL_INDENT}px` }}>
         {showPicker ? (
           <CuentaAutocomplete
             value={fila.cuenta ?? null}
@@ -178,10 +192,10 @@ const PresupuestoDetalleRow = ({
             {fila.cuenta?.codigo}
           </Typography>
         )}
-      </td>
+      </div>
 
       {/* Col 2: Nombre */}
-      <td style={{ ...tdBase, paddingLeft: 14, paddingRight: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 0 }}>
+      <div style={{ ...cellBase }}>
         {showPicker ? (
           <Typography component="span" sx={{ color: "text.disabled", fontStyle: "italic", fontSize: "12.5px" }}>
             {fila.cuenta?.nombre ?? ""}
@@ -189,6 +203,7 @@ const PresupuestoDetalleRow = ({
         ) : (
           <Typography
             component="span"
+            noWrap
             sx={{
               fontSize: isLeaf ? "12px" : "12.5px",
               fontWeight: depth === 0 ? 700 : depth === 1 ? 600 : 400,
@@ -198,10 +213,10 @@ const PresupuestoDetalleRow = ({
             {fila.cuenta?.nombre}
           </Typography>
         )}
-      </td>
+      </div>
 
       {/* Col 3: Área Gestión */}
-      <td style={{ ...tdBase, paddingLeft: 14, paddingRight: 14, textAlign: "center" }}>
+      <div style={{ ...cellBase, justifyContent: "center" }}>
         {fila.isNew ? (
           <CentroCostoAutocomplete
             value={fila.centroCosto ?? null}
@@ -237,15 +252,13 @@ const PresupuestoDetalleRow = ({
         ) : (
           <span style={{ color: "var(--mui-palette-text-disabled)", fontSize: "11px" }}>—</span>
         )}
-      </td>
+      </div>
 
       {/* Col 4: Monto */}
-      <td
+      <div
         style={{
-          ...tdBase,
-          paddingLeft: 14,
-          paddingRight: 14,
-          textAlign: "right",
+          ...cellBase,
+          justifyContent: "flex-end",
           ...numFontSx,
           fontSize: "12.5px",
           fontWeight: depth === 0 ? 700 : depth === 1 ? 600 : 500,
@@ -271,10 +284,10 @@ const PresupuestoDetalleRow = ({
             hasError={hasDiscrepancia}
           />
         </Box>
-      </td>
+      </div>
 
       {/* Col 5: Status */}
-      <td style={{ ...tdBase, textAlign: "center" }}>
+      <div style={{ ...cellBase, justifyContent: "center", padding: 0 }}>
         {hasDiscrepancia ? (
           <Tooltip title="Descuadre: hijos no coinciden con padre — click para recalcular" arrow>
             <IconButton
@@ -315,10 +328,10 @@ const PresupuestoDetalleRow = ({
             &#10003;
           </Box>
         )}
-      </td>
+      </div>
 
       {/* Col 6: Actions */}
-      <td style={{ ...tdBase, textAlign: "center", whiteSpace: "nowrap" }}>
+      <div style={{ ...cellBase, justifyContent: "center", padding: 0 }}>
         <Box className="row-actions" sx={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
           <Tooltip title="Editar monto" arrow>
             <IconButton
@@ -361,7 +374,7 @@ const PresupuestoDetalleRow = ({
             </IconButton>
           </Tooltip>
         </Box>
-      </td>
+      </div>
     </Box>
   );
 };

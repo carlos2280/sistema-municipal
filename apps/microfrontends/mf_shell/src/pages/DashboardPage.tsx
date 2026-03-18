@@ -13,7 +13,7 @@
  * └────────────────────────┴─────────────────────────┘
  */
 
-import { Box, Typography, keyframes, styled, useTheme } from "@mui/material";
+import { Box, Typography, keyframes, styled } from "@mui/material";
 import {
   TrendingUp,
   ArrowDownLeft,
@@ -225,7 +225,7 @@ const mockQuickStats = [
 // COMPONENT
 // ============================================================================
 export default function DashboardPage() {
-  const theme = useTheme();
+
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 

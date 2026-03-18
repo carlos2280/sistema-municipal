@@ -12,8 +12,8 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { MessageSquare } from 'lucide-react'
-import { ChatDrawer } from './components/ChatDrawer/ChatDrawer'
-import { ChatButton } from './components/shared/ChatButton'
+import { ChatDrawer } from './components/chat/organisms/ChatDrawer'
+import { ChatButton } from './components/atoms/ChatButton'
 
 function App() {
   const [drawerOpen, setDrawerOpen] = useState(true)

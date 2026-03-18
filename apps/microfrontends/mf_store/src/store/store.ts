@@ -10,8 +10,8 @@ import {
 	persistStore,
 } from "redux-persist";
 import storageSession from "redux-persist/lib/storage/session";
-import { authApi } from "./api/authApi";
-import { baseApi } from "./api/baseApi";
+import { authApi } from "./api/auth/authApi";
+import { baseApi } from "./api/base/baseApi";
 import authReducer from "./features/authSlice";
 import menuReducer from "./features/menuSlice";
 import subscriptionsReducer from "./features/subscriptionsSlice";

@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import { useParams } from 'react-router-dom'
-import { ChatPanel } from '../components/ChatPanel/ChatPanel'
-import { ChatWindow } from '../components/ChatWindow/ChatWindow'
+import { ChatPanel } from '../components/chat/organisms/ChatPanel'
+import { ChatWindow } from '../components/chat/organisms/ChatWindow'
 
 export function ChatPage() {
   const { conversacionId } = useParams<{ conversacionId: string }>()

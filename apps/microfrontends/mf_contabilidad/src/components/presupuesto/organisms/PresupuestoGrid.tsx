@@ -28,15 +28,11 @@ interface PresupuestoGridProps {
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-// Anchos fijos por columna (table-layout: fixed)
-const COL_WIDTHS = {
-  cuenta: 180,
-  nombre: undefined, // flex: toma el espacio restante
-  areaGestion: 150,
-  monto: 170,
-  status: 36,
-  actions: 70,
-} as const;
+/**
+ * CSS Grid template para columnas (compartido con el Row).
+ * Cuenta(180) | Nombre(1fr) | ÁreaGestión(150) | Monto(170) | Status(36) | Actions(70)
+ */
+export const GRID_TEMPLATE = "180px 1fr 150px 170px 36px 70px";
 
 const headerCellBase = {
   fontSize: "9.5px",
@@ -47,30 +43,19 @@ const headerCellBase = {
   py: "7px",
   px: "14px",
   whiteSpace: "nowrap" as const,
-  borderBottom: "none",
+  display: "flex",
+  alignItems: "center",
 };
-
-const colgroup = (
-  <colgroup>
-    <col style={{ width: COL_WIDTHS.cuenta }} />
-    <col />
-    <col style={{ width: COL_WIDTHS.areaGestion }} />
-    <col style={{ width: COL_WIDTHS.monto }} />
-    <col style={{ width: COL_WIDTHS.status }} />
-    <col style={{ width: COL_WIDTHS.actions }} />
-  </colgroup>
-);
 
 /**
  * Organism: grilla del detalle presupuestario.
  *
- * Sin virtualización — ~250 filas con <td> nativo = ~1,500 DOM elements,
- * bien dentro de lo manejable. Elimina los problemas de:
- *   - Secciones negras al scroll rápido
- *   - Temblor por mount/unmount de filas
- *   - Complejidad de spacers + estimateSize
- *
- * table-layout: fixed + colgroup → anchos estables, sin recálculo.
+ * Usa content-visibility: auto en cada fila para que el browser
+ * salte layout/paint de filas fuera del viewport.
+ * - Zero secciones negras: todas las filas están en el DOM
+ * - Zero flickering: no hay mount/unmount durante scroll
+ * - Dark/light switch rápido: browser solo re-pinta filas visibles
+ * - Compatible con cualquier resolución/pantalla
  */
 const PresupuestoGrid = ({
   filas,
@@ -100,21 +85,29 @@ const PresupuestoGrid = ({
     );
   }, [filas, searchFilter]);
 
-  // Set de descendientes de padres con discrepancia
+  // Set de descendientes de padres con discrepancia — O(n) con Map lookup
   const warnChildIds = useMemo(() => {
     const ids = new Set<string>();
+
+    const filaMap = new Map<string, FilaDisplay>();
+    for (const f of filas) filaMap.set(f._clientId, f);
+
     const warnParentCodes: string[] = [];
     for (const [clientId, delta] of discrepanciasMap) {
       if (delta !== null && delta !== 0) {
-        const fila = filas.find((f) => f._clientId === clientId);
+        const fila = filaMap.get(clientId);
         if (fila?.cuenta?.codigo) warnParentCodes.push(fila.cuenta.codigo);
       }
     }
     if (warnParentCodes.length === 0) return ids;
+
+    warnParentCodes.sort((a, b) => a.length - b.length);
+
     for (const f of filas) {
       if (!f.cuenta?.codigo) continue;
+      const code = f.cuenta.codigo;
       for (const parentCode of warnParentCodes) {
-        if (f.cuenta.codigo !== parentCode && f.cuenta.codigo.startsWith(parentCode)) {
+        if (code.length > parentCode.length && code.startsWith(parentCode)) {
           ids.add(f._clientId);
           break;
         }
@@ -148,27 +141,20 @@ const PresupuestoGrid = ({
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* ── Header fijo ── */}
       <Box
-        component="table"
         sx={(t) => ({
-          width: "100%",
-          tableLayout: "fixed",
-          borderCollapse: "collapse",
+          display: "grid",
+          gridTemplateColumns: GRID_TEMPLATE,
           flexShrink: 0,
           bgcolor: t.meridian.surfaces.s1,
           borderBottom: `2px solid ${t.palette.primary.main}`,
         })}
       >
-        {colgroup}
-        <thead>
-          <tr>
-            <Box component="th" sx={{ ...headerCellBase, textAlign: "left" }}>Cuenta</Box>
-            <Box component="th" sx={{ ...headerCellBase, textAlign: "left" }}>Nombre Cuenta</Box>
-            <Box component="th" sx={{ ...headerCellBase, textAlign: "center" }}>Área Gestión</Box>
-            <Box component="th" sx={{ ...headerCellBase, textAlign: "right" }}>Total Anual ($)</Box>
-            <th style={{ padding: 0 }} />
-            <th style={{ padding: 0 }} />
-          </tr>
-        </thead>
+        <Box sx={{ ...headerCellBase }}>Cuenta</Box>
+        <Box sx={{ ...headerCellBase }}>Nombre Cuenta</Box>
+        <Box sx={{ ...headerCellBase, justifyContent: "center" }}>Área Gestión</Box>
+        <Box sx={{ ...headerCellBase, justifyContent: "flex-end" }}>Total Anual ($)</Box>
+        <Box />
+        <Box />
       </Box>
 
       {/* ── Body scrollable ── */}
@@ -180,37 +166,26 @@ const PresupuestoGrid = ({
           bgcolor: "background.default",
         }}
       >
-        <table
-          style={{
-            width: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "collapse",
-          }}
-        >
-          {colgroup}
-          <tbody>
-            {filasFiltradas.map((fila) => (
-              <PresupuestoDetalleRow
-                key={fila._clientId}
-                fila={fila}
-                cuentasDisponibles={cuentasDisponibles}
-                centrosCosto={centrosCosto}
-                cuentasEnUso={cuentasEnUso}
-                discrepanciaDelta={discrepanciasMap.get(fila._clientId) ?? null}
-                isWarnChild={warnChildIds.has(fila._clientId)}
-                isDeleteTarget={deleteTargetIds.has(fila._clientId)}
-                tipoTab={tipoTab}
-                onCuentaChange={onCuentaChange}
-                onCentroCostoChange={onCentroCostoChange}
-                onMontoConfirm={onMontoConfirm}
-                onRecalcular={onRecalcular}
-                onEliminar={onEliminar}
-                onTab={onTab}
-                loading={isSaving}
-              />
-            ))}
-          </tbody>
-        </table>
+        {filasFiltradas.map((fila) => (
+          <PresupuestoDetalleRow
+            key={fila._clientId}
+            fila={fila}
+            cuentasDisponibles={cuentasDisponibles}
+            centrosCosto={centrosCosto}
+            cuentasEnUso={cuentasEnUso}
+            discrepanciaDelta={discrepanciasMap.get(fila._clientId) ?? null}
+            isWarnChild={warnChildIds.has(fila._clientId)}
+            isDeleteTarget={deleteTargetIds.has(fila._clientId)}
+            tipoTab={tipoTab}
+            onCuentaChange={onCuentaChange}
+            onCentroCostoChange={onCentroCostoChange}
+            onMontoConfirm={onMontoConfirm}
+            onRecalcular={onRecalcular}
+            onEliminar={onEliminar}
+            onTab={onTab}
+            loading={isSaving}
+          />
+        ))}
       </Box>
     </Box>
   );

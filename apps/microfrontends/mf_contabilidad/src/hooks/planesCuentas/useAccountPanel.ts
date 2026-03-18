@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import type { PanelMode } from '../../components/planCuentas/AccountPanel';
+import type { PanelMode } from '../../components/planCuentas/organisms/AccountPanel';
 import { formatCodigo, type TreeItemData } from '../../utils/planDeCuentasUtils';
 import useHookFormSchema from '../useHookFormSchema';
 import { useVerificarCodigo, type CodigoStatus } from './useVerificarCodigo';

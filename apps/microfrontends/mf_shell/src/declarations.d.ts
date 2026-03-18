@@ -58,7 +58,7 @@ declare module "mf_ui/components" {
 	export const AppLoader: FC;
 	export const EmptyState: FC<{ message: string; icon?: ReactNode }>;
 
-	// Átomos
+	// ── Átomos ──────────────────────────────────────────────────────────────
 	export const MeridianLogo: FC<{
 		size?: "xs" | "sm" | "md" | "lg" | "xl";
 		color?: string;
@@ -87,8 +87,15 @@ declare module "mf_ui/components" {
 		pulse?: boolean;
 		className?: string;
 	}>;
+	export const SkeletonPage: FC<{ variant?: string }>;
+	export interface StatusChipProps {
+		variant: "pendiente" | "urgente" | "en-revision" | "aprobado";
+		label: string;
+		icon?: ReactNode;
+	}
+	export const StatusChip: FC<StatusChipProps>;
 
-	// Moléculas
+	// ── Moléculas ────────────────────────────────────────────────────────────
 	export const UserAvatar: FC<{
 		name?: string;
 		src?: string;
@@ -100,6 +107,74 @@ declare module "mf_ui/components" {
 		icon?: ReactNode;
 		onClick?: () => void;
 	}>;
+	export interface WelcomeCardProps {
+		greeting: string;
+		message: string;
+		badges?: Array<{ label: string; dot?: boolean }>;
+		time?: string;
+		date?: string;
+	}
+	export const WelcomeCard: FC<WelcomeCardProps>;
+	export interface KpiCardProps {
+		label: string;
+		value: string;
+		icon: ReactNode;
+		iconColor?: string;
+		trend?: { value: string; direction: "up" | "down" | "neutral" };
+		trendLabel?: string;
+		progress?: { value: number; label: string };
+		featured?: boolean;
+		animationDelay?: string;
+	}
+	export const KpiCard: FC<KpiCardProps>;
+	export interface TaskCardProps {
+		title: string;
+		module: string;
+		status: ReactNode;
+		time: string;
+		due?: string;
+		dueVariant?: string;
+		dotColor: string;
+		onClick?: () => void;
+	}
+	export const TaskCard: FC<TaskCardProps>;
+	export interface QuickStatItem {
+		label: string;
+		value: string;
+	}
+	export interface QuickStatsCardProps {
+		title: string;
+		items: QuickStatItem[];
+	}
+	export const QuickStatsCard: FC<QuickStatsCardProps>;
+
+	// ── Organismos ───────────────────────────────────────────────────────────
+	export interface ActivityItem {
+		id: string;
+		user: string;
+		action: string;
+		target: string;
+		time: string;
+		dotColor: "success" | "info" | "warning" | "error";
+	}
+	export interface ActivityFeedProps {
+		title?: string;
+		items: ActivityItem[];
+		onViewAll?: () => void;
+	}
+	export const ActivityFeed: FC<ActivityFeedProps>;
+	export interface ChartBarData {
+		label: string;
+		budget: number;
+		executed: number;
+	}
+	export interface BudgetChartProps {
+		title: string;
+		subtitle?: string;
+		data: ChartBarData[];
+		summary: { budgeted: string; executed: string; percentage: string };
+	}
+	export const BudgetChart: FC<BudgetChartProps>;
 }
 
 declare module "mf_contabilidad/routes" {

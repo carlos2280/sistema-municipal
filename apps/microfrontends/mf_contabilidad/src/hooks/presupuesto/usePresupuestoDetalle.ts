@@ -50,6 +50,71 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     return nueva._clientId;
   }, []);
 
+  /**
+   * Agrega una cuenta hoja al grid junto con todos sus ancestros faltantes.
+   * Replica el flujo del prototipo: piConfirmAdd() → insertar padres + hoja → recalc.
+   *
+   * @param leaf - La cuenta hoja seleccionada
+   * @param monto - Monto anual de la hoja
+   * @param ancestors - Cadena completa de ancestros (raíz → padre directo)
+   * @param centroCostoId - Centro de costo opcional
+   * @returns clientId de la fila hoja insertada
+   */
+  const agregarCuentaConAncestros = useCallback(
+    (
+      leaf: CuentaPresupuestaria,
+      monto: number,
+      ancestors: CuentaPresupuestaria[],
+      centroCostoId?: number | null,
+    ): string => {
+      const leafClientId = uuid();
+
+      setFilas((prev) => {
+        // Detectar qué cuentas ya existen en el grid
+        const existingCuentaIds = new Set(
+          prev.filter((f) => f.cuentaId !== undefined).map((f) => f.cuentaId!),
+        );
+
+        const newFilas: FilaDetalle[] = [];
+
+        // Insertar ancestros faltantes (monto = 0, se recalculará)
+        for (const anc of ancestors) {
+          if (!existingCuentaIds.has(anc.id)) {
+            newFilas.push({
+              _clientId: uuid(),
+              cuentaId: anc.id,
+              cuenta: anc,
+              centroCostoId: centroCostoId ?? null,
+              montoAnual: 0,
+              isNew: true,
+              isDirty: true,
+            });
+          }
+        }
+
+        // Insertar la hoja
+        newFilas.push({
+          _clientId: leafClientId,
+          cuentaId: leaf.id,
+          cuenta: leaf,
+          centroCostoId: centroCostoId ?? null,
+          montoAnual: monto,
+          isNew: true,
+          isDirty: true,
+        });
+
+        const merged = [...prev, ...newFilas];
+
+        // Recalcular ancestros bottom-up
+        const maps = buildTreeMaps(merged);
+        return recalcAncestors(merged, leafClientId, maps);
+      });
+
+      return leafClientId;
+    },
+    [],
+  );
+
   const setCuenta = useCallback((clientId: string, cuenta: CuentaPresupuestaria | null) => {
     setFilas((prev) =>
       prev.map((f) =>
@@ -186,15 +251,22 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   const recalcularTodo = useCallback((displayFilas: FilaDisplay[]) => {
     setFilas((prev) => {
       const newFilas = [...prev];
+      // Índice clientId → index para O(1) lookup
+      const idxMap = new Map<string, number>();
+      for (let i = 0; i < newFilas.length; i++) {
+        idxMap.set(newFilas[i]._clientId, i);
+      }
       // Bottom-up: procesar desde los niveles más profundos hacia la raíz
       const sorted = [...displayFilas].sort((a, b) => b.nivel - a.nivel);
       for (const display of sorted) {
         if (display.hijosIds.length === 0) continue;
-        const sumaHijos = newFilas
-          .filter((f) => display.hijosIds.includes(f._clientId))
-          .reduce((sum, f) => sum + f.montoAnual, 0);
-        const idx = newFilas.findIndex((f) => f._clientId === display._clientId);
-        if (idx !== -1 && newFilas[idx].montoAnual !== sumaHijos) {
+        let sumaHijos = 0;
+        for (const hijoId of display.hijosIds) {
+          const idx = idxMap.get(hijoId);
+          if (idx !== undefined) sumaHijos += newFilas[idx].montoAnual;
+        }
+        const idx = idxMap.get(display._clientId);
+        if (idx !== undefined && newFilas[idx].montoAnual !== sumaHijos) {
           newFilas[idx] = { ...newFilas[idx], montoAnual: sumaHijos, isDirty: true };
         }
       }
@@ -226,6 +298,7 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     setPendingDelete,
     resetFromServer,
     agregarLinea,
+    agregarCuentaConAncestros,
     setCuenta,
     setCentroCosto,
     setMonto,
@@ -251,7 +324,7 @@ function detalleToFila(d: DetalleItem): FilaDetalle {
     montoAnual: d.montoAnual,
     observacion: d.observacion ?? undefined,
     cuenta: d.cuenta,
-    centroCosto: d.centroCosto ?? null,
+    centroCosto: d.centroCosto ? { ...d.centroCosto, activo: true } : null,
     isNew: false,
     isDirty: false,
   };

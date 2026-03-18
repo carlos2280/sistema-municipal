@@ -1,0 +1,1 @@
+export { ChatErrorBoundary } from './ChatErrorBoundary'

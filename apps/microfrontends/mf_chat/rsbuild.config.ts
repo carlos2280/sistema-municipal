@@ -22,8 +22,8 @@ export default defineConfig(() => {
         name: 'mf_chat',
         dts: false,
         exposes: {
-          './ChatButton': './src/components/shared/ChatButton.tsx',
-          './ChatDrawer': './src/components/ChatDrawer/index.ts',
+          './ChatButton': './src/components/atoms/ChatButton.tsx',
+          './ChatDrawer': './src/components/chat/organisms/ChatDrawer.tsx',
         },
         remotes: {
           mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,

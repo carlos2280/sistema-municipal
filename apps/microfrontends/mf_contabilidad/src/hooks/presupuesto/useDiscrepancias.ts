@@ -77,33 +77,26 @@ export const useDiscrepancias = (
 function buildDiscrepanciasMap(filas: FilaDisplay[]): Map<string, number | null> {
   const map = new Map<string, number | null>();
 
-  // Index: cuentaId → clientId
-  const cuentaIdToClientId = new Map<number, string>();
+  // Index O(n): clientId → fila para lookup rápido
+  const filaMap = new Map<string, FilaDisplay>();
   for (const f of filas) {
-    if (f.cuentaId) cuentaIdToClientId.set(f.cuentaId, f._clientId);
+    filaMap.set(f._clientId, f);
   }
 
   for (const fila of filas) {
-    if (!fila.cuenta) {
+    if (!fila.cuenta || fila.hijosIds.length === 0) {
       map.set(fila._clientId, null);
       continue;
     }
 
-    // Detectar si esta fila tiene hijos en el grid
-    const hijosIds = fila.hijosIds;
-    if (hijosIds.length === 0) {
-      // No es padre → no mostrar indicador
-      map.set(fila._clientId, null);
-      continue;
+    // O(k) donde k = hijos directos, usando Map lookup en vez de filter O(n)
+    let sumaHijos = 0;
+    for (const hijoId of fila.hijosIds) {
+      const hijo = filaMap.get(hijoId);
+      if (hijo) sumaHijos += hijo.montoAnual;
     }
 
-    // Calcular suma de hijos
-    const sumaHijos = filas
-      .filter((f) => hijosIds.includes(f._clientId))
-      .reduce((sum, f) => sum + f.montoAnual, 0);
-
-    const delta = sumaHijos - fila.montoAnual;
-    map.set(fila._clientId, delta);
+    map.set(fila._clientId, sumaHijos - fila.montoAnual);
   }
 
   return map;

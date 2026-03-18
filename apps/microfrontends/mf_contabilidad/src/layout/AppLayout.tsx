@@ -25,8 +25,8 @@ import {
   useTheme,
 } from '@mui/material/styles';
 import * as React from 'react';
-import MainCard from '../components/MainCard';
-import PlanDeCuentas from '../page/planDeCuentas/PlanDeCuentas';
+import MainCard from '../components/molecules/MainCard';
+import PlanDeCuentas from '../pages/planDeCuentas/PlanDeCuentas';
 
 const drawerWidth = 240;
 

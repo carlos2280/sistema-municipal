@@ -23,7 +23,7 @@ export default defineConfig(() => {
         dts: false,
         exposes: {
           './routes': './src/routes/routes.tsx',
-          './components': './src/page/index.ts',
+          './components': './src/pages/index.ts',
         },
         remotes: {
           mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,

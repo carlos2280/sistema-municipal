@@ -20,9 +20,7 @@
 import { CssBaseline, GlobalStyles } from "@mui/material";
 import { selectDrawerOpen, useAppSelector } from "mf_store/store";
 import { useState, useCallback, useEffect } from "react";
-import { ChatDrawerWrapper } from "../components/ChatDrawerWrapper";
 import { ThemeCustomizer } from "mf_ui/components";
-import { OrganigramaDialog } from "../components/organigrama/OrganigramaDialog";
 import { useModuleSync } from "../hooks/useModuleSync";
 import { Eyebrow } from "./Eyebrow";
 import { Stage } from "./Stage";
@@ -32,6 +30,8 @@ import { CommandPalette, useCommandPalette } from "./CommandPalette";
 import StatusLine from "./StatusLine";
 import NotificationPanel from "./NotificationPanel";
 import AvatarMenu from "./AvatarMenu";
+import { ChatDrawerWrapper } from "./ChatDrawer";
+import { OrganigramaDialog } from "./Organigrama";
 
 // ============================================================================
 // COMPONENT

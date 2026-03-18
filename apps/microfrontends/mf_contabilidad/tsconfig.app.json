@@ -15,8 +15,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Module Federation type resolution */
+    /* Path aliases */
+    "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "mf_store/store": ["../mf_store/src/store/index.ts"]
     },
 

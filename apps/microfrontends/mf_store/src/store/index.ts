@@ -2,17 +2,13 @@
 // Apis
 //*/
 
-export * from "./api/baseApi";
-export * from "./api/chatApi";
-export * from "./api/contabilidadApi";
-export * from "./api/tesoreriaApi";
-export * from "./api/menuApi";
-export * from "./api/authApi";
-export * from "./api/indicadoresApi";
-export * from "./api/platformApi";
-export * from "./api/identidadApi";
-export * from "./api/configuracionApi";
-export * from "./api/presupuestosApi";
+export * from "./api/base";
+export * from "./api/auth";
+export * from "./api/platform";
+export * from "./api/chat";
+export * from "./api/contabilidad";
+export * from "./api/configuracion";
+export * from "./api/indicadores";
 
 //**
 // Store
@@ -25,8 +21,4 @@ export * from "./hooks";
 // Slice
 //*/
 
-export * from "./features/authSlice";
-export * from "./features/menuSlice";
-export * from "./features/subscriptionsSlice";
-export * from "./features/tenantSlice";
-export * from "./features/uiSlice";
+export * from "./features";

@@ -1,5 +1,5 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import type { MenuItem } from "../../types/login";
+import type { MenuItem } from "../api/auth/auth.types";
 
 type MenuState = {
 	nombreSistema: string;

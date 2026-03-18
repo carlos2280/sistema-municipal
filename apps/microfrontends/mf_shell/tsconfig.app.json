@@ -25,6 +25,7 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".", // permite usar "paths"
     "paths": {
+      "@/*": ["./src/*"],
       "@municipalidad/store": [
         "../../packages/package_store/src"
       ]

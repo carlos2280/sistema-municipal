@@ -81,6 +81,12 @@ export function recalcAncestors(
   startId: string,
   maps: TreeMaps,
 ): FilaDetalle[] {
+  // Construir índice clientId → index para O(1) lookup
+  const idxMap = new Map<string, number>();
+  for (let i = 0; i < filas.length; i++) {
+    idxMap.set(filas[i]._clientId, i);
+  }
+
   let updated = filas;
   let current = startId;
 
@@ -88,15 +94,18 @@ export function recalcAncestors(
     const parentId = maps.childToParent.get(current)!;
     const childrenIds = maps.parentToChildren.get(parentId) ?? [];
 
-    const sumaHijos = updated
-      .filter((f) => childrenIds.includes(f._clientId))
-      .reduce((sum, f) => sum + f.montoAnual, 0);
+    // O(k) suma usando Map lookup en vez de filter O(n)
+    let sumaHijos = 0;
+    for (const childId of childrenIds) {
+      const idx = idxMap.get(childId);
+      if (idx !== undefined) sumaHijos += updated[idx].montoAnual;
+    }
 
-    updated = updated.map((f) =>
-      f._clientId === parentId && f.montoAnual !== sumaHijos
-        ? { ...f, montoAnual: sumaHijos, isDirty: true }
-        : f,
-    );
+    const parentIdx = idxMap.get(parentId);
+    if (parentIdx !== undefined && updated[parentIdx].montoAnual !== sumaHijos) {
+      updated = updated.slice();
+      updated[parentIdx] = { ...updated[parentIdx], montoAnual: sumaHijos, isDirty: true };
+    }
 
     current = parentId;
   }

@@ -19,6 +19,7 @@ import type { DetalleItem } from "mf_store/store";
 import { usePresupuestoDetalle } from "./usePresupuestoDetalle";
 import { useDiscrepancias } from "./useDiscrepancias";
 import { useImportarExcel } from "./useImportarExcel";
+import { useAgregarCuentaDrawer } from "./useAgregarCuentaDrawer";
 
 /** Estado del toast de confirmación de eliminación de línea */
 export interface DeleteLineaToastState {
@@ -131,6 +132,27 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     cuentasGastos,
     detalleIngresos.importarFilas,
     detalleGastos.importarFilas,
+  );
+
+  // ── Drawer Agregar Cuenta ──────────────────────────────────────────────
+  const cuentasActivas = tabActivo === "ingresos" ? cuentasIngresos : cuentasGastos;
+  const detalleActivoForDrawer = tabActivo === "ingresos" ? detalleIngresos : detalleGastos;
+
+  const agregarDrawer = useAgregarCuentaDrawer(
+    cuentasActivas,
+    detalleActivoForDrawer.cuentasEnUso,
+  );
+
+  const handleAgregarConfirm = useCallback(
+    (
+      leaf: import("mf_store/store").CuentaPresupuestaria,
+      monto: number,
+      ancestors: import("mf_store/store").CuentaPresupuestaria[],
+      centroCostoId: number | null,
+    ) => {
+      detalleActivoForDrawer.agregarCuentaConAncestros(leaf, monto, ancestors, centroCostoId);
+    },
+    [detalleActivoForDrawer],
   );
 
   // ── Discrepancias y equilibrio ────────────────────────────────────────────
@@ -411,11 +433,6 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     // Detalle activo (para handlers)
     detalleActivo,
     discrepanciasActivoMap,
-    // Búsqueda por tab
-    searchIngresos,
-    setSearchIngresos,
-    searchGastos,
-    setSearchGastos,
     // Ingresos/Gastos para Resumen
     filasIngresos: detalleIngresos.filasDisplay,
     filasGastos: detalleGastos.filasDisplay,
@@ -441,5 +458,8 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     // Mapas individuales para badges de tabs
     discrepanciasIngresosMap,
     discrepanciasGastosMap,
+    // Drawer agregar cuenta
+    agregarDrawer,
+    handleAgregarConfirm,
   };
 };
