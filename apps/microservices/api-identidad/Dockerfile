@@ -7,14 +7,18 @@ WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
+COPY packages/db-identidad/package.json ./packages/db-identidad/
 COPY apps/microservices/api-identidad/package.json ./apps/microservices/api-identidad/
 RUN pnpm install --frozen-lockfile
 
 # --- Build ---
 FROM deps AS build
 COPY packages/core/ ./packages/core/
+COPY packages/db-identidad/ ./packages/db-identidad/
 COPY apps/microservices/api-identidad/ ./apps/microservices/api-identidad/
-RUN pnpm --filter @municipal/core build && pnpm --filter api-identidad build
+RUN pnpm --filter @municipal/core build && \
+    pnpm --filter @municipal/db-identidad build && \
+    pnpm --filter api-identidad build
 
 # --- Production ---
 FROM base AS runner
@@ -23,9 +27,11 @@ ENV NODE_ENV=production CI=true
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
+COPY packages/db-identidad/package.json ./packages/db-identidad/
 COPY apps/microservices/api-identidad/package.json ./apps/microservices/api-identidad/
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/packages/core/dist ./packages/core/dist
+COPY --from=build /app/packages/db-identidad/dist ./packages/db-identidad/dist
 COPY --from=build /app/apps/microservices/api-identidad/dist ./apps/microservices/api-identidad/dist
 WORKDIR /app/apps/microservices/api-identidad
 EXPOSE 3001
