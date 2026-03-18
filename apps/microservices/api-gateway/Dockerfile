@@ -6,15 +6,15 @@ FROM base AS deps
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
-COPY packages/shared/package.json ./packages/shared/
+COPY packages/core/package.json ./packages/core/
 COPY apps/microservices/api-gateway/package.json ./apps/microservices/api-gateway/
 RUN pnpm install --frozen-lockfile
 
 # --- Build ---
 FROM deps AS build
-COPY packages/shared/ ./packages/shared/
+COPY packages/core/ ./packages/core/
 COPY apps/microservices/api-gateway/ ./apps/microservices/api-gateway/
-RUN pnpm --filter @municipal/shared build && pnpm --filter gateway build
+RUN pnpm --filter @municipal/core build && pnpm --filter gateway build
 
 # --- Production ---
 FROM base AS runner
@@ -22,10 +22,10 @@ WORKDIR /app
 ENV NODE_ENV=production CI=true
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
-COPY packages/shared/package.json ./packages/shared/
+COPY packages/core/package.json ./packages/core/
 COPY apps/microservices/api-gateway/package.json ./apps/microservices/api-gateway/
 RUN pnpm install --frozen-lockfile --prod
-COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=build /app/apps/microservices/api-gateway/dist ./apps/microservices/api-gateway/dist
 WORKDIR /app/apps/microservices/api-gateway
 EXPOSE 3000
