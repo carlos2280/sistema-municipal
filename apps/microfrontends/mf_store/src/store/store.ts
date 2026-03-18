@@ -45,14 +45,24 @@ const subscriptionsPersistConfig = {
 const tenantPersistConfig = {
 	key: "tenant",
 	storage: storageSession,
-	whitelist: ["tenantId", "tenantSlug", "nombre", "logoUrl", "tema", "resolved"],
+	whitelist: [
+		"tenantId",
+		"tenantSlug",
+		"nombre",
+		"logoUrl",
+		"tema",
+		"resolved",
+	],
 };
 const rootReducer = combineReducers({
 	[authApi.reducerPath]: authApi.reducer,
 	[baseApi.reducerPath]: baseApi.reducer,
 	auth: persistReducer(authPersistConfig, authReducer),
 	menu: persistReducer(menuPersistConfig, menuReducer),
-	subscriptions: persistReducer(subscriptionsPersistConfig, subscriptionsReducer),
+	subscriptions: persistReducer(
+		subscriptionsPersistConfig,
+		subscriptionsReducer,
+	),
 	tenant: persistReducer(tenantPersistConfig, tenantReducer),
 	ui: uiReducer,
 });

@@ -14,7 +14,7 @@ import {
   Search,
   UsersRound,
 } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 interface Usuario {
   id: number
@@ -73,7 +73,7 @@ export function NewGroupPanel({
     return usuarios.filter(
       (u) =>
         u.nombreCompleto.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term)
+        u.email.toLowerCase().includes(term),
     )
   }, [usuarios, searchTerm])
 

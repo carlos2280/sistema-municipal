@@ -8,15 +8,18 @@ import {
   Typography,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { AlertCircle, ArrowRightLeft, CheckCircle, Hash, Type } from 'lucide-react';
-import { memo, useEffect, useMemo, useState } from 'react';
 import {
-  Controller,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
+  AlertCircle,
+  ArrowRightLeft,
+  CheckCircle,
+  Hash,
+  Type,
+} from 'lucide-react';
 import { useLazyBuscarCuentasPorPrefijoQuery } from 'mf_store/store';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
+import { formatCodigo } from '@/utils/planDeCuentasUtils';
 import type {
   AccountFormData,
   CodigoStatus,
@@ -24,7 +27,6 @@ import type {
   PanelMode,
 } from './AccountPanel.types';
 import { getContraCuentaPrefijo } from './AccountPanel.types';
-import { formatCodigo } from '@/utils/planDeCuentasUtils';
 
 interface ContraCuentaOption {
   id: number;
@@ -57,9 +59,15 @@ export const AccountFormFields = memo(function AccountFormFields({
   const tipoCuentaId = useWatch({ control, name: 'tipoCuentaId' });
 
   // ── ContraCuenta Autocomplete state ──
-  const [buscarCuentas, { isFetching: buscandoCuentas }] = useLazyBuscarCuentasPorPrefijoQuery();
-  const [contraCuentaOptions, setContraCuentaOptions] = useState<ContraCuentaOption[]>([]);
-  const contraCuentaPrefijo = useMemo(() => getContraCuentaPrefijo(codigoPadre), [codigoPadre]);
+  const [buscarCuentas, { isFetching: buscandoCuentas }] =
+    useLazyBuscarCuentasPorPrefijoQuery();
+  const [contraCuentaOptions, setContraCuentaOptions] = useState<
+    ContraCuentaOption[]
+  >([]);
+  const contraCuentaPrefijo = useMemo(
+    () => getContraCuentaPrefijo(codigoPadre),
+    [codigoPadre],
+  );
 
   // Cargar opciones cuando se muestra el campo de contraCuenta
   useEffect(() => {
@@ -117,7 +125,11 @@ export const AccountFormFields = memo(function AccountFormFields({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
       {/* Campo Código */}
       <Box>
-        <FieldLabel icon={<Hash size={14} />} label="Código de Cuenta" required />
+        <FieldLabel
+          icon={<Hash size={14} />}
+          label="Código de Cuenta"
+          required
+        />
         <Controller
           name="codigo"
           control={control}
@@ -170,7 +182,12 @@ export const AccountFormFields = memo(function AccountFormFields({
                     ),
                     endAdornment: codigoFieldState.icon && (
                       <InputAdornment position="end">
-                        <Box sx={{ color: codigoFieldState.color, display: 'flex' }}>
+                        <Box
+                          sx={{
+                            color: codigoFieldState.color,
+                            display: 'flex',
+                          }}
+                        >
                           {codigoFieldState.icon}
                         </Box>
                       </InputAdornment>
@@ -201,7 +218,11 @@ export const AccountFormFields = memo(function AccountFormFields({
 
       {/* Campo Nombre */}
       <Box>
-        <FieldLabel icon={<Type size={14} />} label="Nombre de la Cuenta" required />
+        <FieldLabel
+          icon={<Type size={14} />}
+          label="Nombre de la Cuenta"
+          required
+        />
         <Controller
           name="nombre"
           control={control}
@@ -235,10 +256,13 @@ export const AccountFormFields = memo(function AccountFormFields({
               <Autocomplete
                 options={contraCuentaOptions}
                 getOptionLabel={(opt) =>
-                  typeof opt === 'string' ? opt : `${formatCodigo(opt.codigo, 4)} - ${opt.nombre}`
+                  typeof opt === 'string'
+                    ? opt
+                    : `${formatCodigo(opt.codigo, 4)} - ${opt.nombre}`
                 }
                 value={
-                  contraCuentaOptions.find((o) => o.codigo === field.value) ?? null
+                  contraCuentaOptions.find((o) => o.codigo === field.value) ??
+                  null
                 }
                 onChange={(_e, newValue) => {
                   field.onChange(newValue ? newValue.codigo : '');
@@ -251,16 +275,35 @@ export const AccountFormFields = memo(function AccountFormFields({
                 isOptionEqualToValue={(opt, val) => opt.codigo === val.codigo}
                 renderOption={(props, opt) => (
                   <li {...props} key={opt.id}>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline', width: '100%' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'baseline',
+                        width: '100%',
+                      }}
+                    >
                       <Typography
                         component="span"
-                        sx={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.8125rem', color: 'primary.main', flexShrink: 0 }}
+                        sx={{
+                          fontFamily: 'monospace',
+                          fontWeight: 700,
+                          fontSize: '0.8125rem',
+                          color: 'primary.main',
+                          flexShrink: 0,
+                        }}
                       >
                         {formatCodigo(opt.codigo, 4)}
                       </Typography>
                       <Typography
                         component="span"
-                        sx={{ fontSize: '0.8125rem', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        sx={{
+                          fontSize: '0.8125rem',
+                          color: 'text.secondary',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
                       >
                         {opt.nombre}
                       </Typography>
@@ -275,7 +318,8 @@ export const AccountFormFields = memo(function AccountFormFields({
                     helperText={error?.message}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        bgcolor: (theme) => alpha(theme.palette.warning.main, 0.02),
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.warning.main, 0.02),
                       },
                     }}
                   />

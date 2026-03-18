@@ -1,6 +1,9 @@
-import * as controller from "@controllers/usuarios.controller";
 import { validate } from "@/libs/middleware/validate";
-import { createUsuarioSchema, updateUsuarioSchema } from "@/libs/schemas/usuarios.schemas";
+import {
+  createUsuarioSchema,
+  updateUsuarioSchema,
+} from "@/libs/schemas/usuarios.schemas";
+import * as controller from "@controllers/usuarios.controller";
 import { Router } from "express";
 
 const router: Router = Router();

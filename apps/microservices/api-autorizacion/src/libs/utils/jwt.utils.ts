@@ -143,7 +143,13 @@ export const generarTokenSetup = (
   tenantDbName: string,
 ): string =>
   jwt.sign(
-    { sub: String(userId), userId, tenantSlug, tenantDbName, tipo: "mfa-setup" },
+    {
+      sub: String(userId),
+      userId,
+      tenantSlug,
+      tenantDbName,
+      tipo: "mfa-setup",
+    },
     JWT_CONFIG.secret,
     { expiresIn: "10m", issuer: JWT_CONFIG.issuer } as jwt.SignOptions,
   );

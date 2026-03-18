@@ -17,7 +17,10 @@ export const obtenerConversaciones: RequestHandler = async (req, res, next) => {
     const tenantDb = getDb(req)
 
     const conversaciones =
-      await conversacionesService.obtenerConversacionesPorUsuario(tenantDb, usuarioId)
+      await conversacionesService.obtenerConversacionesPorUsuario(
+        tenantDb,
+        usuarioId,
+      )
 
     res.json({
       success: true,
@@ -41,7 +44,7 @@ export const obtenerConversacion: RequestHandler = async (req, res, next) => {
 
     const conversacion = await conversacionesService.obtenerConversacionPorId(
       tenantDb,
-      Number(id)
+      Number(id),
     )
 
     if (!conversacion) {
@@ -52,7 +55,7 @@ export const obtenerConversacion: RequestHandler = async (req, res, next) => {
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       Number(id),
-      usuarioId
+      usuarioId,
     )
 
     if (!esParticipante) {
@@ -61,7 +64,7 @@ export const obtenerConversacion: RequestHandler = async (req, res, next) => {
 
     const participantes = await conversacionesService.obtenerParticipantes(
       tenantDb,
-      Number(id)
+      Number(id),
     )
 
     res.json({
@@ -76,7 +79,7 @@ export const obtenerConversacion: RequestHandler = async (req, res, next) => {
 export const crearConversacionDirecta: RequestHandler = async (
   req,
   res,
-  next
+  next,
 ) => {
   try {
     const usuarioId = req.usuario?.id
@@ -95,7 +98,7 @@ export const crearConversacionDirecta: RequestHandler = async (
     const conversacion = await conversacionesService.crearConversacionDirecta(
       tenantDb,
       usuarioId,
-      destinatarioId
+      destinatarioId,
     )
 
     res.status(201).json({
@@ -135,7 +138,7 @@ export const crearGrupo: RequestHandler = async (req, res, next) => {
         descripcion,
         creadorId: usuarioId,
       },
-      allParticipantes
+      allParticipantes,
     )
 
     res.status(201).json({
@@ -150,7 +153,7 @@ export const crearGrupo: RequestHandler = async (req, res, next) => {
 export const obtenerParticipantesConUsuario: RequestHandler = async (
   req,
   res,
-  next
+  next,
 ) => {
   try {
     const { id } = req.params
@@ -162,12 +165,16 @@ export const obtenerParticipantesConUsuario: RequestHandler = async (
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       Number(id),
-      usuarioId
+      usuarioId,
     )
-    if (!esParticipante) throw new AppError('No tienes acceso a esta conversación', 403)
+    if (!esParticipante)
+      throw new AppError('No tienes acceso a esta conversación', 403)
 
     const participantes =
-      await conversacionesService.obtenerParticipantesConUsuario(tenantDb, Number(id))
+      await conversacionesService.obtenerParticipantesConUsuario(
+        tenantDb,
+        Number(id),
+      )
 
     res.json({ success: true, data: participantes })
   } catch (error) {
@@ -189,7 +196,7 @@ export const agregarParticipante: RequestHandler = async (req, res, next) => {
       tenantDb,
       Number(id),
       nuevoUsuarioId,
-      solicitanteId
+      solicitanteId,
     )
 
     if (!result.success) throw new AppError(result.error!, 400)
@@ -212,7 +219,7 @@ export const eliminarParticipante: RequestHandler = async (req, res, next) => {
       tenantDb,
       Number(id),
       Number(targetId),
-      solicitanteId
+      solicitanteId,
     )
 
     if (!result.success) throw new AppError(result.error!, 400)
@@ -237,7 +244,7 @@ export const renombrarGrupo: RequestHandler = async (req, res, next) => {
       tenantDb,
       Number(id),
       nombre,
-      solicitanteId
+      solicitanteId,
     )
 
     if (!result.success) throw new AppError(result.error!, 400)

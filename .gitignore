@@ -63,8 +63,9 @@ mcp-servers/
 # MCP config con tokens (usar .mcp.json.example como plantilla)
 .mcp.json
 
-# Claude settings locales con tokens
-.claude/
+# Claude settings locales con tokens — excluir todo excepto reglas del equipo
+.claude/*
+!.claude/rules/
 
 # NPM registry tokens (si se agregan credenciales, usar .npmrc.local)
 # .npmrc se commitea porque solo tiene config de pnpm (shamefully-hoist)

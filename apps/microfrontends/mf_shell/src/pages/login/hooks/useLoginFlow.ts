@@ -1,17 +1,17 @@
-import { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
 import {
 	selectResolvedTenantSlug,
 	useAppSelector,
 	useLoginAreasMutation,
 	useLoginMutation,
 } from "mf_store/store";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
+import useHookFormSchema from "../../../hooks/useHookFormSchema";
 import type { TSchemaCredenciales } from "../../../types/login.zod";
+import { schemaCredenciales } from "../../../types/login.zod";
 import type { AreaOption, LoginStep } from "../types";
 import { useAreaSistemas } from "./useAreaSistemas";
 import { useLoginFinish } from "./useLoginFinish";
-import useHookFormSchema from "../../../hooks/useHookFormSchema";
-import { schemaCredenciales } from "../../../types/login.zod";
 
 /**
  * Orchestrates the multi-step login flow.

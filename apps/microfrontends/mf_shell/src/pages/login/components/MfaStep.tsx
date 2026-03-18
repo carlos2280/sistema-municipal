@@ -9,13 +9,13 @@
 import { Box, alpha, styled } from "@mui/material";
 import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
 import {
+	type ClipboardEvent,
+	type KeyboardEvent,
 	memo,
 	useCallback,
 	useEffect,
 	useRef,
 	useState,
-	type ClipboardEvent,
-	type KeyboardEvent,
 } from "react";
 
 // ── MFA Icon ────────────────────────────────────────────────────────────────
@@ -272,7 +272,10 @@ export const MfaStep = memo(function MfaStep({
 }: MfaStepProps) {
 	const [useBackupCode, setUseBackupCode] = useState(false);
 	const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
-	const digits = mfaCode.split("").concat(Array<string>(6).fill("")).slice(0, 6);
+	const digits = mfaCode
+		.split("")
+		.concat(Array<string>(6).fill(""))
+		.slice(0, 6);
 
 	// Ref para onAutoSubmit: evita que el useEffect se re-dispare
 	// cuando la referencia del callback cambia por re-renders de Redux.
@@ -290,7 +293,8 @@ export const MfaStep = memo(function MfaStep({
 	useEffect(() => {
 		if (useBackupCode) return;
 		const PERIOD = 30;
-		const tick = () => setTotpSecs(PERIOD - (Math.floor(Date.now() / 1000) % PERIOD));
+		const tick = () =>
+			setTotpSecs(PERIOD - (Math.floor(Date.now() / 1000) % PERIOD));
 		tick();
 		const id = setInterval(tick, 1000);
 		return () => clearInterval(id);
@@ -325,7 +329,10 @@ export const MfaStep = memo(function MfaStep({
 			if (!filtered) return;
 
 			const char = filtered[0];
-			const newDigits = mfaCode.split("").concat(Array<string>(6).fill("")).slice(0, 6);
+			const newDigits = mfaCode
+				.split("")
+				.concat(Array<string>(6).fill(""))
+				.slice(0, 6);
 			newDigits[index] = char;
 			const newCode = newDigits.join("").replace(/\s/g, "");
 			onCodeChange(newCode);
@@ -341,7 +348,10 @@ export const MfaStep = memo(function MfaStep({
 		(index: number, e: KeyboardEvent<HTMLInputElement>) => {
 			if (e.key === "Backspace") {
 				e.preventDefault();
-				const newDigits = mfaCode.split("").concat(Array<string>(6).fill("")).slice(0, 6);
+				const newDigits = mfaCode
+					.split("")
+					.concat(Array<string>(6).fill(""))
+					.slice(0, 6);
 
 				if (newDigits[index]) {
 					newDigits[index] = "";
@@ -513,7 +523,10 @@ export const MfaStep = memo(function MfaStep({
 			{onBack && (
 				<Box sx={{ textAlign: "center", mt: "10px" }}>
 					<BackLink onClick={onBack} tabIndex={0} role="button">
-						<ArrowLeft size={12} style={{ verticalAlign: "middle", marginRight: 4 }} />
+						<ArrowLeft
+							size={12}
+							style={{ verticalAlign: "middle", marginRight: 4 }}
+						/>
 						Cambiar área o sistema
 					</BackLink>
 				</Box>

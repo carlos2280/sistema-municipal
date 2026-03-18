@@ -11,11 +11,8 @@
  */
 
 import { Box, styled } from "@mui/material";
-import { Building2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useWatch } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
-import { Navigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
 import {
 	selectIsAuthenticated,
 	selectTenantNombre,
@@ -23,18 +20,21 @@ import {
 } from "mf_store/store";
 import { useTheme as useMeridianTheme } from "mf_ui/theme";
 import type { ModuleCode } from "mf_ui/theme";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormProvider, useWatch } from "react-hook-form";
+import { Navigate } from "react-router-dom";
+import { AreaSystemStep } from "./components/AreaSystemStep";
+import { AuthCard } from "./components/AuthCard";
+import { AuthFooter } from "./components/AuthFooter";
+import { AuthHeader } from "./components/AuthHeader";
+import { AuthLayout } from "./components/AuthLayout";
+import { CredentialsStep } from "./components/CredentialsStep";
+import { LoginActions } from "./components/LoginActions";
+import { LoginStepper } from "./components/LoginStepper";
+import { MfaSetupPendingNotice } from "./components/MfaSetupPendingNotice";
+import { MfaStep } from "./components/MfaStep";
 import { MFA_PENDING_CONFIG, STEP_CONFIG } from "./constants";
 import { useLoginFlow } from "./hooks/useLoginFlow";
-import { AuthLayout } from "./components/AuthLayout";
-import { AuthCard } from "./components/AuthCard";
-import { AuthHeader } from "./components/AuthHeader";
-import { AuthFooter } from "./components/AuthFooter";
-import { LoginStepper } from "./components/LoginStepper";
-import { LoginActions } from "./components/LoginActions";
-import { CredentialsStep } from "./components/CredentialsStep";
-import { AreaSystemStep } from "./components/AreaSystemStep";
-import { MfaStep } from "./components/MfaStep";
-import { MfaSetupPendingNotice } from "./components/MfaSetupPendingNotice";
 
 // ── Tenant Badge (form panel top) ───────────────────────────────────────────
 
@@ -116,8 +116,16 @@ function LoginFormContent({
 	onSistemaSelect,
 }: {
 	readonly activeStep: 0 | 1 | 2;
-	readonly areas: ReadonlyArray<{ readonly id: number; readonly nombre: string; readonly descripcion: string | null }>;
-	readonly sistemas: ReadonlyArray<{ readonly id: number; readonly nombre: string; readonly codigo: string }>;
+	readonly areas: ReadonlyArray<{
+		readonly id: number;
+		readonly nombre: string;
+		readonly descripcion: string | null;
+	}>;
+	readonly sistemas: ReadonlyArray<{
+		readonly id: number;
+		readonly nombre: string;
+		readonly codigo: string;
+	}>;
 	readonly isLoadingSistemas: boolean;
 	readonly isSubmitting: boolean;
 	readonly loginSuccess: boolean;
@@ -146,10 +154,19 @@ function LoginFormContent({
 		if (activeStep === 1) return !!(areaId && sistemaId);
 		if (activeStep === 2) return mfaCode.trim().length >= 6;
 		return false;
-	}, [activeStep, correo, contrasena, areaId, sistemaId, mfaCode, mfaSetupPending]);
+	}, [
+		activeStep,
+		correo,
+		contrasena,
+		areaId,
+		sistemaId,
+		mfaCode,
+		mfaSetupPending,
+	]);
 
-	const reducedMotion = typeof window !== "undefined"
-		&& window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	const reducedMotion =
+		typeof window !== "undefined" &&
+		window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 	return (
 		<>
@@ -165,10 +182,20 @@ function LoginFormContent({
 				>
 					{activeStep === 0 && <CredentialsStep />}
 					{activeStep === 1 && (
-						<AreaSystemStep areas={areas} sistemas={sistemas} isLoadingSistemas={isLoadingSistemas} onSistemaSelect={onSistemaSelect} />
+						<AreaSystemStep
+							areas={areas}
+							sistemas={sistemas}
+							isLoadingSistemas={isLoadingSistemas}
+							onSistemaSelect={onSistemaSelect}
+						/>
 					)}
 					{activeStep === 2 && (
-						<MfaStep mfaCode={mfaCode} onCodeChange={onCodeChange} onAutoSubmit={onNext} onBack={onBack} />
+						<MfaStep
+							mfaCode={mfaCode}
+							onCodeChange={onCodeChange}
+							onAutoSubmit={onNext}
+							onBack={onBack}
+						/>
 					)}
 				</motion.div>
 			</AnimatePresence>
@@ -245,7 +272,9 @@ export default function LoginPage() {
 			<AuthCard>
 				{/* Tenant context badge */}
 				<TenantBadge>
-					<TenantIcon><Building2 /></TenantIcon>
+					<TenantIcon>
+						<Building2 />
+					</TenantIcon>
 					<TenantOrg>
 						<TenantName>{tenantNombre || "Municipalidad"}</TenantName>
 						Sistema Integrado de Gestión · MERIDIAN
@@ -257,10 +286,7 @@ export default function LoginPage() {
 					mfaSetupPending={mfaSetupPending}
 				/>
 
-				<AuthHeader
-					title={config.title}
-					subtitle={config.subtitle}
-				/>
+				<AuthHeader title={config.title} subtitle={config.subtitle} />
 
 				{mfaSetupPending ? (
 					<MfaSetupPendingNotice />

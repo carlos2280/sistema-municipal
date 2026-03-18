@@ -1,8 +1,15 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery, baseQueryWithReauth } from "@/store/baseQueryWithReauth";
-import { loggedOut, mfaPendingSet, tokenReceived } from "@/store/features/authSlice";
+import {
+	loggedOut,
+	mfaPendingSet,
+	tokenReceived,
+} from "@/store/features/authSlice";
 import { menuReceived, resetMenu } from "@/store/features/menuSlice";
-import { modulosReceived, modulosCleared } from "@/store/features/subscriptionsSlice";
+import {
+	modulosCleared,
+	modulosReceived,
+} from "@/store/features/subscriptionsSlice";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type {
 	Areas,
 	CambiarSistemaResponse,
@@ -48,7 +55,10 @@ export const authApi = createApi({
 			}),
 		}),
 
-		login: builder.mutation<UsuarioConMenuResponse | MfaRequiredResponse | MfaSetupPendingResponse, Login>({
+		login: builder.mutation<
+			UsuarioConMenuResponse | MfaRequiredResponse | MfaSetupPendingResponse,
+			Login
+		>({
 			query: (body) => ({
 				url: "/autorizacion/login",
 				method: "POST",
@@ -96,7 +106,11 @@ export const authApi = createApi({
 			// Usa baseQuery directo (sin reauth) — si la cookie expiró, no tiene
 			// sentido intentar refresh; simplemente redirigimos al login.
 			queryFn: async (_arg, queryApi, _extraOptions) => {
-				const result = await baseQuery("/autorizacion/verificar-token", queryApi, {});
+				const result = await baseQuery(
+					"/autorizacion/verificar-token",
+					queryApi,
+					{},
+				);
 				if (result.error) {
 					queryApi.dispatch(loggedOut());
 					return { error: result.error };
@@ -131,7 +145,10 @@ export const authApi = createApi({
 			query: () => "/autorizacion/mis-sistemas",
 		}),
 
-		cambiarSistema: builder.mutation<CambiarSistemaResponse, { sistemaId: number }>({
+		cambiarSistema: builder.mutation<
+			CambiarSistemaResponse,
+			{ sistemaId: number }
+		>({
 			query: (body) => ({
 				url: "/autorizacion/cambiar-sistema",
 				method: "POST",
@@ -141,16 +158,23 @@ export const authApi = createApi({
 				try {
 					const { data } = await queryFulfilled;
 					dispatch(tokenReceived({ accessToken: "cookie", sistemaId }));
-					dispatch(menuReceived({
-						nombreSistema: data.menu.nombreSistema,
-						codigoSistema: data.menu.codigoSistema,
-						menuRaiz: data.menu.menuRaiz,
-					}));
-				} catch { /* noop */ }
+					dispatch(
+						menuReceived({
+							nombreSistema: data.menu.nombreSistema,
+							codigoSistema: data.menu.codigoSistema,
+							menuRaiz: data.menu.menuRaiz,
+						}),
+					);
+				} catch {
+					/* noop */
+				}
 			},
 		}),
 
-		mfaSetupIniciar: builder.mutation<MfaSetupIniciarResponse, { setupToken: string }>({
+		mfaSetupIniciar: builder.mutation<
+			MfaSetupIniciarResponse,
+			{ setupToken: string }
+		>({
 			query: (body) => ({
 				url: "/autorizacion/mfa-setup/iniciar",
 				method: "POST",

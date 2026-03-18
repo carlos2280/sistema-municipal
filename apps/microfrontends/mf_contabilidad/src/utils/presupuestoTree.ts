@@ -1,4 +1,4 @@
-import type { FilaDetalle } from "../types/presupuesto.types";
+import type { FilaDetalle } from '../types/presupuesto.types';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 
@@ -102,9 +102,16 @@ export function recalcAncestors(
     }
 
     const parentIdx = idxMap.get(parentId);
-    if (parentIdx !== undefined && updated[parentIdx].montoAnual !== sumaHijos) {
+    if (
+      parentIdx !== undefined &&
+      updated[parentIdx].montoAnual !== sumaHijos
+    ) {
       updated = updated.slice();
-      updated[parentIdx] = { ...updated[parentIdx], montoAnual: sumaHijos, isDirty: true };
+      updated[parentIdx] = {
+        ...updated[parentIdx],
+        montoAnual: sumaHijos,
+        isDirty: true,
+      };
     }
 
     current = parentId;
@@ -158,7 +165,8 @@ export function removeWithDescendants(
     updated = recalcAncestors(updated, parentClientId, newMaps);
 
     // El padre directo también necesita recalcular su propio monto
-    const remainingChildren = newMaps.parentToChildren.get(parentClientId) ?? [];
+    const remainingChildren =
+      newMaps.parentToChildren.get(parentClientId) ?? [];
     const sumaHijos = updated
       .filter((f) => remainingChildren.includes(f._clientId))
       .reduce((sum, f) => sum + f.montoAnual, 0);

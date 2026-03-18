@@ -1,9 +1,9 @@
+import { SystemGroupBadge } from '@/components/atoms'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import { Building2, Users } from 'lucide-react'
-import { SystemGroupBadge } from '@/components/atoms'
 
 interface ConversationItemProps {
   id: number
@@ -88,7 +88,11 @@ export function ConversationItem({
           }}
         >
           {tipo === 'grupo' ? (
-            sistema ? <Building2 size={20} /> : <Users size={20} />
+            sistema ? (
+              <Building2 size={20} />
+            ) : (
+              <Users size={20} />
+            )
           ) : (
             getInitials(nombre)
           )}
@@ -118,7 +122,14 @@ export function ConversationItem({
             justifyContent: 'space-between',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              minWidth: 0,
+            }}
+          >
             <Typography
               sx={{
                 fontWeight: noLeidos > 0 ? 600 : 500,

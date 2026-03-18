@@ -1,8 +1,11 @@
-import { startTransition, useCallback, useRef } from "react";
-import { toast } from "sonner";
-import { v4 as uuid } from "uuid";
-import { read, utils } from "xlsx";
-import type { CuentaPresupuestaria, FilaDetalle } from "../../types/presupuesto.types";
+import { startTransition, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
+import { v4 as uuid } from 'uuid';
+import { read, utils } from 'xlsx';
+import type {
+  CuentaPresupuestaria,
+  FilaDetalle,
+} from '../../types/presupuesto.types';
 
 /** Yield al event loop para no bloquear la UI */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -29,12 +32,12 @@ interface ExcelRow {
  *   Nivel 5: +{SSASG:3}               → 16 chars (ej: 1150301001001001)
  */
 function buildCodigo(prefijo: string, row: ExcelRow): string {
-  const st = row.subtitulo.padStart(2, "0");
+  const st = row.subtitulo.padStart(2, '0');
   let code = `${prefijo}${st}`;
-  if (row.nivel >= 2) code += row.item.padStart(2, "0");
-  if (row.nivel >= 3) code += row.asignacion.padStart(3, "0");
-  if (row.nivel >= 4) code += row.subasignacion.padStart(3, "0");
-  if (row.nivel >= 5) code += row.subsubasignacion.padStart(3, "0");
+  if (row.nivel >= 2) code += row.item.padStart(2, '0');
+  if (row.nivel >= 3) code += row.asignacion.padStart(3, '0');
+  if (row.nivel >= 4) code += row.subasignacion.padStart(3, '0');
+  if (row.nivel >= 5) code += row.subsubasignacion.padStart(3, '0');
   return code;
 }
 
@@ -67,11 +70,11 @@ function parseSheet(sheetData: unknown[][]): ExcelRow[] {
   for (let i = 0; i < Math.min(20, sheetData.length); i++) {
     const row = sheetData[i];
     if (!row) continue;
-    const headerText = row.map((c) => String(c ?? "").toUpperCase()).join("|");
+    const headerText = row.map((c) => String(c ?? '').toUpperCase()).join('|');
     if (
-      headerText.includes("SUBTITULO") ||
-      headerText.includes("SUB TIT") ||
-      (headerText.includes("DENOMINACION") && headerText.includes("ITEM"))
+      headerText.includes('SUBTITULO') ||
+      headerText.includes('SUB TIT') ||
+      (headerText.includes('DENOMINACION') && headerText.includes('ITEM'))
     ) {
       headerRow = i;
       break;
@@ -79,29 +82,32 @@ function parseSheet(sheetData: unknown[][]): ExcelRow[] {
   }
 
   if (headerRow === -1) {
-    throw new Error("No se encontró el encabezado en la hoja");
+    throw new Error('No se encontró el encabezado en la hoja');
   }
 
   // Parsear filas de datos (después del encabezado)
   // Propagar clasificación hacia abajo (el Excel solo muestra el valor en la primera fila del grupo)
-  let lastSt = "", lastIt = "", lastAsg = "", lastSasg = "";
+  let lastSt = '';
+  let lastIt = '';
+  let lastAsg = '';
+  let lastSasg = '';
 
   for (let i = headerRow + 1; i < sheetData.length; i++) {
     const row = sheetData[i];
     if (!row || row.length < 7) continue;
 
-    const denominacion = String(row[6] ?? "").trim();
+    const denominacion = String(row[6] ?? '').trim();
     if (!denominacion) continue;
 
     const nivel = inferNivel(row);
     if (nivel === 0) continue;
 
     // Leer clasificadores de esta fila
-    const st = String(row[1] ?? "").trim();
-    const it = String(row[2] ?? "").trim();
-    const asg = String(row[3] ?? "").trim();
-    const sasg = String(row[4] ?? "").trim();
-    const ssasg = String(row[5] ?? "").trim();
+    const st = String(row[1] ?? '').trim();
+    const it = String(row[2] ?? '').trim();
+    const asg = String(row[3] ?? '').trim();
+    const sasg = String(row[4] ?? '').trim();
+    const ssasg = String(row[5] ?? '').trim();
 
     // Propagar clasificadores desde filas anteriores
     if (st) lastSt = st;
@@ -114,10 +120,10 @@ function parseSheet(sheetData: unknown[][]): ExcelRow[] {
     rows.push({
       nivel,
       subtitulo: lastSt,
-      item: nivel >= 2 ? lastIt : "00",
-      asignacion: nivel >= 3 ? lastAsg : "000",
-      subasignacion: nivel >= 4 ? lastSasg : "000",
-      subsubasignacion: nivel >= 5 ? ssasg || "000" : "000",
+      item: nivel >= 2 ? lastIt : '00',
+      asignacion: nivel >= 3 ? lastAsg : '000',
+      subasignacion: nivel >= 4 ? lastSasg : '000',
+      subsubasignacion: nivel >= 5 ? ssasg || '000' : '000',
       denominacion,
       monto,
     });
@@ -178,16 +184,18 @@ export const useImportarExcel = (
   const handleImportar = useCallback(() => {
     // Validar que las cuentas estén cargadas antes de abrir el file picker
     if (cuentasIngresos.length === 0 && cuentasGastos.length === 0) {
-      toast.error("Las cuentas presupuestarias aún no se han cargado. Espere un momento e intente de nuevo.");
+      toast.error(
+        'Las cuentas presupuestarias aún no se han cargado. Espere un momento e intente de nuevo.',
+      );
       return;
     }
 
     // Crear input file dinámico
     if (!inputRef.current) {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".xlsx,.xls";
-      input.style.display = "none";
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.xlsx,.xls';
+      input.style.display = 'none';
       document.body.appendChild(input);
       inputRef.current = input;
     }
@@ -197,9 +205,9 @@ export const useImportarExcel = (
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
-      input.value = ""; // reset para permitir re-importar el mismo archivo
+      input.value = ''; // reset para permitir re-importar el mismo archivo
 
-      const toastId = toast.loading("Leyendo archivo Excel...");
+      const toastId = toast.loading('Leyendo archivo Excel...');
 
       try {
         const buffer = await file.arrayBuffer();
@@ -207,15 +215,17 @@ export const useImportarExcel = (
         // Yield para que el toast se muestre antes del parseo pesado
         await yieldToMain();
 
-        toast.loading("Parseando datos del archivo...", { id: toastId });
-        const wb = read(buffer, { type: "array" });
+        toast.loading('Parseando datos del archivo...', { id: toastId });
+        const wb = read(buffer, { type: 'array' });
 
         // Buscar hojas por nombre parcial
         const hojaIngresos = wb.SheetNames.find((n) =>
-          n.toLowerCase().includes("ingreso"),
+          n.toLowerCase().includes('ingreso'),
         );
         const hojaGastos = wb.SheetNames.find(
-          (n) => n.toLowerCase().includes("gasto") && !n.toLowerCase().includes("(3)"),
+          (n) =>
+            n.toLowerCase().includes('gasto') &&
+            !n.toLowerCase().includes('(3)'),
         );
 
         let totalImportados = 0;
@@ -223,13 +233,17 @@ export const useImportarExcel = (
 
         // Importar ingresos
         if (hojaIngresos) {
-          toast.loading("Procesando ingresos...", { id: toastId });
+          toast.loading('Procesando ingresos...', { id: toastId });
           await yieldToMain();
 
           const sheet = wb.Sheets[hojaIngresos];
           const data = utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
           const excelRows = parseSheet(data);
-          const { filas, noEncontradas } = excelRowsToFilas(excelRows, cuentasIngresos, "115");
+          const { filas, noEncontradas } = excelRowsToFilas(
+            excelRows,
+            cuentasIngresos,
+            '115',
+          );
 
           if (filas.length > 0) {
             startTransition(() => importarFilasIngresos(filas));
@@ -237,20 +251,24 @@ export const useImportarExcel = (
           }
           totalNoEncontradas = [...totalNoEncontradas, ...noEncontradas];
         } else {
-          toast.warning("No se encontró la hoja de Ingresos en el archivo.");
+          toast.warning('No se encontró la hoja de Ingresos en el archivo.');
         }
 
         await yieldToMain();
 
         // Importar gastos
         if (hojaGastos) {
-          toast.loading("Procesando gastos...", { id: toastId });
+          toast.loading('Procesando gastos...', { id: toastId });
           await yieldToMain();
 
           const sheet = wb.Sheets[hojaGastos];
           const data = utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
           const excelRows = parseSheet(data);
-          const { filas, noEncontradas } = excelRowsToFilas(excelRows, cuentasGastos, "215");
+          const { filas, noEncontradas } = excelRowsToFilas(
+            excelRows,
+            cuentasGastos,
+            '215',
+          );
 
           if (filas.length > 0) {
             startTransition(() => importarFilasGastos(filas));
@@ -258,7 +276,7 @@ export const useImportarExcel = (
           }
           totalNoEncontradas = [...totalNoEncontradas, ...noEncontradas];
         } else {
-          toast.warning("No se encontró la hoja de Gastos en el archivo.");
+          toast.warning('No se encontró la hoja de Gastos en el archivo.');
         }
 
         // Feedback
@@ -267,7 +285,7 @@ export const useImportarExcel = (
         if (totalImportados > 0) {
           toast.success(`${totalImportados} líneas importadas desde Excel.`);
         } else {
-          toast.warning("No se encontraron líneas para importar.");
+          toast.warning('No se encontraron líneas para importar.');
         }
 
         if (totalNoEncontradas.length > 0) {
@@ -279,13 +297,20 @@ export const useImportarExcel = (
       } catch (err) {
         toast.dismiss(toastId);
         toast.error(
-          err instanceof Error ? err.message : "Error al leer el archivo Excel.",
+          err instanceof Error
+            ? err.message
+            : 'Error al leer el archivo Excel.',
         );
       }
     };
 
     input.click();
-  }, [cuentasIngresos, cuentasGastos, importarFilasIngresos, importarFilasGastos]);
+  }, [
+    cuentasIngresos,
+    cuentasGastos,
+    importarFilasIngresos,
+    importarFilasGastos,
+  ]);
 
   return { handleImportar };
 };

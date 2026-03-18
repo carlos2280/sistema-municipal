@@ -1,15 +1,15 @@
+import {
+  ControlBar,
+  LiveKitRoom,
+  RoomAudioRenderer,
+  VideoConference,
+} from '@livekit/components-react'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { PhoneOff } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
-import {
-  LiveKitRoom,
-  VideoConference,
-  RoomAudioRenderer,
-  ControlBar,
-} from '@livekit/components-react'
 import '@livekit/components-styles'
 import type { CallState } from '@/types/videocall.types'
 
@@ -30,33 +30,33 @@ const TRANSLATIONS: Record<string, string> = {
 function useLiveKitTranslations(ref: React.RefObject<HTMLDivElement | null>) {
   const translateNode = useCallback((root: HTMLElement) => {
     // Translate text nodes
-    const walker = document.createTreeWalker(
-      root,
-      NodeFilter.SHOW_TEXT,
-      null
-    )
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null)
     let node: Node | null
+    // biome-ignore lint/suspicious/noAssignInExpressions: tree walker pattern idiomático
     while ((node = walker.nextNode())) {
       const text = node.textContent?.trim()
       if (text && TRANSLATIONS[text]) {
+        // biome-ignore lint/style/noNonNullAssertion: node existe por condición del while
         node.textContent = node.textContent!.replace(text, TRANSLATIONS[text])
       }
     }
 
     // Translate placeholders
-    root.querySelectorAll<HTMLInputElement>('input[placeholder]').forEach((input) => {
+    for (const input of root.querySelectorAll<HTMLInputElement>(
+      'input[placeholder]',
+    )) {
       if (TRANSLATIONS[input.placeholder]) {
         input.placeholder = TRANSLATIONS[input.placeholder]
       }
-    })
+    }
 
     // Translate aria-labels and titles
-    root.querySelectorAll<HTMLElement>('[aria-label]').forEach((el) => {
+    for (const el of root.querySelectorAll<HTMLElement>('[aria-label]')) {
       const label = el.getAttribute('aria-label')
       if (label && TRANSLATIONS[label]) {
         el.setAttribute('aria-label', TRANSLATIONS[label])
       }
-    })
+    }
   }, [])
 
   useEffect(() => {

@@ -1,6 +1,6 @@
-import { extractUserFromHeaders } from "@municipal/core/auth";
 import { getEnv } from "@/config/env";
 import type { CustomJwtPayload } from "@/types/express/auth";
+import { extractUserFromHeaders } from "@municipal/core/auth";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 

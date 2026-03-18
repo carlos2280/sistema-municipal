@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
 import { createLogger } from "@municipal/core/logger";
+import type { NextFunction, Request, Response } from "express";
 import { AppError } from "./AppError";
 
 const logger = createLogger("api-identidad:error");

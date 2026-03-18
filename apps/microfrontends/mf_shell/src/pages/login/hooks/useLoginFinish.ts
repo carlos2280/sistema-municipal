@@ -1,10 +1,6 @@
+import { MenuApi, menuReceived, useAppDispatch } from "mf_store/store";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import {
-	MenuApi,
-	menuReceived,
-	useAppDispatch,
-} from "mf_store/store";
 
 interface PostLoginData {
 	modulosActivos?: Array<{
@@ -41,7 +37,9 @@ export const useLoginFinish = (onSuccess?: () => void) => {
 				}
 
 				const menuResponse = await dispatch(
-					MenuApi.endpoints.getMenuSistema.initiate(undefined, { forceRefetch: true }),
+					MenuApi.endpoints.getMenuSistema.initiate(undefined, {
+						forceRefetch: true,
+					}),
 				).unwrap();
 
 				dispatch(

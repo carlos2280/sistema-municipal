@@ -15,7 +15,11 @@ export function ChatPage() {
       }}
     >
       {/* Panel lateral con lista de conversaciones */}
-      <ChatPanel activeConversationId={conversacionId ? Number(conversacionId) : undefined} />
+      <ChatPanel
+        activeConversationId={
+          conversacionId ? Number(conversacionId) : undefined
+        }
+      />
 
       {/* Ventana de chat activo */}
       {conversacionId ? (

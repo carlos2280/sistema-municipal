@@ -92,7 +92,10 @@ export const contabilidadApi = baseApi.injectEndpoints({
 			query: () => "contabilidad/plan-cuentas/arbol-completo",
 			providesTags: ["PlanCuentas"],
 		}),
-		crearPlanesCuenta: builder.mutation<PlanesCuentaResponse, CrearPlanesCuentaRequest>({
+		crearPlanesCuenta: builder.mutation<
+			PlanesCuentaResponse,
+			CrearPlanesCuentaRequest
+		>({
 			query: (data) => ({
 				url: "contabilidad/plan-cuentas",
 				method: "POST",
@@ -100,7 +103,10 @@ export const contabilidadApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: ["PlanCuentas"],
 		}),
-		actualizarPlanesCuenta: builder.mutation<void, ActualizarPlanesCuentaRequest>({
+		actualizarPlanesCuenta: builder.mutation<
+			void,
+			ActualizarPlanesCuentaRequest
+		>({
 			query: ({ id, ...body }) => ({
 				url: `contabilidad/plan-cuentas/${id}`,
 				method: "PATCH",

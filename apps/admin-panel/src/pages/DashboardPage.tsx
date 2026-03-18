@@ -1,21 +1,21 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DomainIcon from "@mui/icons-material/Domain";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
-import Grid from "@mui/material/Grid";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import { useNavigate } from "react-router-dom";
-import { useTenants } from "../hooks/useTenants";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import DomainIcon from '@mui/icons-material/Domain'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import Grid from '@mui/material/Grid'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Typography from '@mui/material/Typography'
+import { useNavigate } from 'react-router-dom'
+import { useTenants } from '../hooks/useTenants'
 
 function StatCard({
   title,
@@ -23,15 +23,15 @@ function StatCard({
   icon,
   color,
 }: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  color: string;
+  title: string
+  value: number
+  icon: React.ReactNode
+  color: string
 }) {
   return (
     <Card>
-      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Box sx={{ color, fontSize: 40, display: "flex" }}>{icon}</Box>
+      <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ color, fontSize: 40, display: 'flex' }}>{icon}</Box>
         <Box>
           <Typography variant="h4" fontWeight={700}>
             {value}
@@ -42,29 +42,31 @@ function StatCard({
         </Box>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 export default function DashboardPage() {
-  const { data: tenants, isLoading, error } = useTenants();
-  const navigate = useNavigate();
+  const { data: tenants, isLoading, error } = useTenants()
+  const navigate = useNavigate()
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (error) {
-    return <Alert severity="error">Error al cargar datos: {error.message}</Alert>;
+    return (
+      <Alert severity="error">Error al cargar datos: {error.message}</Alert>
+    )
   }
 
-  const total = tenants?.length ?? 0;
-  const activas = tenants?.filter((t) => t.activo !== false).length ?? 0;
-  const inactivas = total - activas;
-  const recientes = tenants?.slice(0, 5) ?? [];
+  const total = tenants?.length ?? 0
+  const activas = tenants?.filter((t) => t.activo !== false).length ?? 0
+  const inactivas = total - activas
+  const recientes = tenants?.slice(0, 5) ?? []
 
   return (
     <Box>
@@ -117,7 +119,7 @@ export default function DashboardPage() {
               <TableRow
                 key={t.id}
                 hover
-                sx={{ cursor: "pointer" }}
+                sx={{ cursor: 'pointer' }}
                 onClick={() => navigate(`/tenants/${t.id}`)}
               >
                 <TableCell>{t.nombre}</TableCell>
@@ -125,8 +127,8 @@ export default function DashboardPage() {
                 <TableCell>{t.dominioBase}</TableCell>
                 <TableCell>
                   <Chip
-                    label={t.activo !== false ? "Activa" : "Inactiva"}
-                    color={t.activo !== false ? "success" : "default"}
+                    label={t.activo !== false ? 'Activa' : 'Inactiva'}
+                    color={t.activo !== false ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
@@ -143,5 +145,5 @@ export default function DashboardPage() {
         </Table>
       </Card>
     </Box>
-  );
+  )
 }

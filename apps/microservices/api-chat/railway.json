@@ -5,7 +5,12 @@
     "dockerfilePath": "apps/microservices/api-chat/Dockerfile",
     "watchPatterns": [
       "apps/microservices/api-chat/**",
-      "packages/seeders/**", "packages/core/**", "packages/db-identidad/**", "packages/db-platform/**", "packages/db-contabilidad/**", "packages/db-mensajeria/**"
+      "packages/seeders/**",
+      "packages/core/**",
+      "packages/db-identidad/**",
+      "packages/db-platform/**",
+      "packages/db-contabilidad/**",
+      "packages/db-mensajeria/**"
     ]
   },
   "deploy": {

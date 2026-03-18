@@ -1,5 +1,5 @@
 const DocumentoGarantiaIngresoDocumentos = () => {
-	return <div>DocumentoGarantiaIngresoDocumentos</div>;
+  return <div>DocumentoGarantiaIngresoDocumentos</div>;
 };
 
 export default DocumentoGarantiaIngresoDocumentos;

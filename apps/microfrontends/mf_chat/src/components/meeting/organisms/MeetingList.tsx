@@ -2,8 +2,8 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { ArrowLeft, Calendar, X } from 'lucide-react'
-import { memo } from 'react'
 import { useListarReunionesQuery } from 'mf_store/store'
+import { memo } from 'react'
 
 interface MeetingListProps {
   conversacionId: number
@@ -16,8 +16,15 @@ interface MeetingListProps {
 function formatRange(inicio: string, fin: string): string {
   const d = new Date(inicio)
   const h1 = d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
-  const h2 = new Date(fin).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
-  const fecha = d.toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
+  const h2 = new Date(fin).toLocaleTimeString('es', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  const fecha = d.toLocaleDateString('es', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
   return `${fecha} · ${h1}–${h2}`
 }
 
@@ -34,7 +41,8 @@ export const MeetingList = memo(function MeetingList({
   onBack,
   onClose,
 }: MeetingListProps) {
-  const { data: reuniones = [], isLoading } = useListarReunionesQuery(conversacionId)
+  const { data: reuniones = [], isLoading } =
+    useListarReunionesQuery(conversacionId)
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -68,7 +76,9 @@ export const MeetingList = memo(function MeetingList({
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {isLoading ? (
           <Box sx={{ p: 2 }}>
-            <Typography color="text.secondary" fontSize={13}>Cargando...</Typography>
+            <Typography color="text.secondary" fontSize={13}>
+              Cargando...
+            </Typography>
           </Box>
         ) : reuniones.length === 0 ? (
           <Box
@@ -100,8 +110,16 @@ export const MeetingList = memo(function MeetingList({
                 '&:hover': { bgcolor: 'action.hover' },
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{reunion.titulo}</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography sx={{ fontWeight: 600, fontSize: 13 }}>
+                  {reunion.titulo}
+                </Typography>
                 <Box
                   sx={{
                     width: 8,
@@ -113,7 +131,9 @@ export const MeetingList = memo(function MeetingList({
                   }}
                 />
               </Box>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}>
+              <Typography
+                sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}
+              >
                 {formatRange(reunion.fechaInicio, reunion.fechaFin)}
               </Typography>
             </Box>

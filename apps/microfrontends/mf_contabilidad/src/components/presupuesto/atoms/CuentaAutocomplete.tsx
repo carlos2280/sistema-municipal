@@ -1,17 +1,23 @@
-import { Autocomplete, Box, CircularProgress, TextField, Typography } from "@mui/material";
-import type { CuentaPresupuestaria } from "../../../types/presupuesto.types";
+import {
+  Autocomplete,
+  Box,
+  CircularProgress,
+  TextField,
+  Typography,
+} from '@mui/material';
+import type { CuentaPresupuestaria } from '../../../types/presupuesto.types';
 
 interface CuentaAutocompleteProps {
   value: CuentaPresupuestaria | null;
   options: CuentaPresupuestaria[];
   loading?: boolean;
-  tipo: "ingreso" | "gasto";
+  tipo: 'ingreso' | 'gasto';
   /** Excluir cuentaIds ya presentes en el grid */
   excludeIds?: number[];
   onChange: (cuenta: CuentaPresupuestaria | null) => void;
   onInputChange?: (value: string) => void;
   autoFocus?: boolean;
-  size?: "small" | "medium";
+  size?: 'small' | 'medium';
 }
 
 /**
@@ -26,7 +32,7 @@ const CuentaAutocomplete = ({
   onChange,
   onInputChange,
   autoFocus = false,
-  size = "small",
+  size = 'small',
 }: CuentaAutocompleteProps) => {
   const filtered = options.filter((c) => !excludeIds.includes(c.id));
 
@@ -54,34 +60,46 @@ const CuentaAutocomplete = ({
             ...params.InputProps,
             endAdornment: (
               <>
-                {loading ? <CircularProgress color="inherit" size={14} /> : null}
+                {loading ? (
+                  <CircularProgress color="inherit" size={14} />
+                ) : null}
                 {params.InputProps.endAdornment}
               </>
             ),
           }}
           sx={{
-            "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" },
+            '& .MuiOutlinedInput-root': { fontSize: '0.8125rem' },
           }}
         />
       )}
       renderOption={(props, option) => {
-        const { key, ...rest } = props as { key: React.Key } & React.HTMLAttributes<HTMLLIElement>;
+        const { key, ...rest } = props as {
+          key: React.Key;
+        } & React.HTMLAttributes<HTMLLIElement>;
         const isChild = option.parentId !== null;
         return (
-          <Box component="li" key={key} {...rest} sx={{ pl: isChild ? 4 : 1.5 }}>
+          <Box
+            component="li"
+            key={key}
+            {...rest}
+            sx={{ pl: isChild ? 4 : 1.5 }}
+          >
             <Box>
               <Typography
                 variant="caption"
                 sx={{
-                  fontFamily: "monospace",
+                  fontFamily: 'monospace',
                   fontWeight: 600,
-                  color: "primary.main",
-                  display: "block",
+                  color: 'primary.main',
+                  display: 'block',
                 }}
               >
                 {option.codigo}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'text.secondary', display: 'block' }}
+              >
                 {option.nombre}
               </Typography>
             </Box>

@@ -7,17 +7,17 @@
  * Click fuera o Esc para cerrar.
  */
 
-import { styled, alpha } from "@mui/material/styles";
-import { Palette, Menu, LogOut } from "lucide-react";
-import { useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { usePersistor } from "@/context/PersistorContext";
+import { alpha, styled } from "@mui/material/styles";
+import { LogOut, Menu, Palette } from "lucide-react";
 import {
-	useAppSelector,
-	selectNombreCompleto,
 	selectEmail,
+	selectNombreCompleto,
+	useAppSelector,
 	useLogoutMutation,
 } from "mf_store/store";
-import { usePersistor } from "@/context/PersistorContext";
+import { useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -70,7 +70,9 @@ const MenuRoot = styled("div", {
 		flexDirection: "column",
 		overflow: "hidden",
 		opacity: visible ? 1 : 0,
-		transform: visible ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.98)",
+		transform: visible
+			? "translateY(0) scale(1)"
+			: "translateY(-8px) scale(0.98)",
 		pointerEvents: visible ? "all" : "none",
 		transition: `opacity 180ms ${theme.meridian.easings.out}, transform 180ms ${theme.meridian.easings.out}`,
 
@@ -194,7 +196,12 @@ const IconWrap = styled("span")({
 
 // ─── Component ──────────────────────────────────────────────────
 
-function AvatarMenu({ isOpen, onClose, onOpenNavPanel, onOpenCustomizer }: AvatarMenuProps) {
+function AvatarMenu({
+	isOpen,
+	onClose,
+	onOpenNavPanel,
+	onOpenCustomizer,
+}: AvatarMenuProps) {
 	const menuRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
 	const persistor = usePersistor();

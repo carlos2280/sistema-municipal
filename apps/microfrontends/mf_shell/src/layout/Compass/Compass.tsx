@@ -8,8 +8,8 @@
  * Z-index: 900 (zIndexLayout.compass)
  */
 
-import { styled, alpha } from "@mui/material/styles";
-import { Compass as CompassIcon, X, LayoutGrid } from "lucide-react";
+import { alpha, styled } from "@mui/material/styles";
+import { Compass as CompassIcon, LayoutGrid, X } from "lucide-react";
 import * as icons from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import CompassItem from "./CompassItem";
@@ -221,8 +221,12 @@ function FabIcon({
 	if (isOpen) return <X size={16} strokeWidth={2.5} />;
 	if (isHome) return <CompassIcon size={20} strokeWidth={1.5} />;
 	if (icon) {
-		const pascalName = icon.includes("-") ? toPascalCase(icon) : icon.charAt(0).toUpperCase() + icon.slice(1);
-		const IconComp = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
+		const pascalName = icon.includes("-")
+			? toPascalCase(icon)
+			: icon.charAt(0).toUpperCase() + icon.slice(1);
+		const IconComp = (
+			icons as unknown as Record<string, React.ComponentType<LucideProps>>
+		)[pascalName];
 		if (IconComp) return <IconComp size={20} strokeWidth={1.5} />;
 	}
 	return <LayoutGrid size={20} strokeWidth={1.5} />;
@@ -249,7 +253,9 @@ function Compass({ hidden = false }: CompassProps) {
 							icon={sis.icono}
 							label={sis.nombre}
 							shortcut={`Alt+${i + 1}`}
-							isActive={sis.id === sistemaIdActual || (sis.isHome && !sistemaIdActual)}
+							isActive={
+								sis.id === sistemaIdActual || (sis.isHome && !sistemaIdActual)
+							}
 							onClick={() => goSistema(sis.id)}
 						/>
 					))}

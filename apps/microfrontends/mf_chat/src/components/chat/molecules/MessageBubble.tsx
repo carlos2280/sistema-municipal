@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
-import { memo } from 'react'
 import { FileText } from 'lucide-react'
+import { memo } from 'react'
 
 /** Elimina caracteres de control invisibles (excepto newline/tab) y null bytes */
 function sanitizeContent(text: string): string {
@@ -47,12 +47,17 @@ export const MessageBubble = memo(function MessageBubble({
           borderRadius: 2,
           px: 2,
           py: 1,
-          boxShadow: esPropio
-            ? 'none'
-            : '0 1px 2px rgba(0,0,0,0.08)',
+          boxShadow: esPropio ? 'none' : '0 1px 2px rgba(0,0,0,0.08)',
         }}
       >
-        <Typography sx={{ fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <Typography
+          sx={{
+            fontSize: 14,
+            lineHeight: 1.5,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
           {displayContent}
         </Typography>
 
@@ -65,11 +70,15 @@ export const MessageBubble = memo(function MessageBubble({
               gap: 1,
               mt: 1,
               p: 1.5,
-              bgcolor: esPropio ? alpha(theme.palette.common.white, 0.15) : theme.palette.action.hover,
+              bgcolor: esPropio
+                ? alpha(theme.palette.common.white, 0.15)
+                : theme.palette.action.hover,
               borderRadius: 1.5,
               cursor: 'pointer',
               '&:hover': {
-                bgcolor: esPropio ? alpha(theme.palette.common.white, 0.2) : theme.palette.action.selected,
+                bgcolor: esPropio
+                  ? alpha(theme.palette.common.white, 0.2)
+                  : theme.palette.action.selected,
               },
             }}
           >
@@ -78,7 +87,9 @@ export const MessageBubble = memo(function MessageBubble({
                 width: 40,
                 height: 40,
                 borderRadius: 1,
-                bgcolor: esPropio ? alpha(theme.palette.common.white, 0.2) : alpha(theme.palette.primary.main, 0.1),
+                bgcolor: esPropio
+                  ? alpha(theme.palette.common.white, 0.2)
+                  : alpha(theme.palette.primary.main, 0.1),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -86,7 +97,11 @@ export const MessageBubble = memo(function MessageBubble({
             >
               <FileText
                 size={20}
-                color={esPropio ? theme.palette.common.white : theme.palette.primary.main}
+                color={
+                  esPropio
+                    ? theme.palette.common.white
+                    : theme.palette.primary.main
+                }
               />
             </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>

@@ -1,4 +1,12 @@
-import { Box, Button, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import {
   Calendar,
@@ -13,12 +21,12 @@ import {
   X,
 } from 'lucide-react';
 import { useEliminarPlanesCuentaMutation } from 'mf_store/store';
-import { memo, type JSX, useCallback, useMemo, useRef, useState } from 'react';
+import { type JSX, memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { PlanDeCuentasTree } from '../../components/planCuentas/organisms/PlanDeCuentasTree';
 import { AccountPanel } from '../../components/planCuentas/organisms/AccountPanel';
 import { DeleteConfirmDialog } from '../../components/planCuentas/organisms/DeleteConfirmDialog';
+import { PlanDeCuentasTree } from '../../components/planCuentas/organisms/PlanDeCuentasTree';
 import { useAccountPanel } from '../../hooks/planesCuentas/useAccountPanel';
 import { usePlanDeCuentasTree } from '../../hooks/planesCuentas/usePlanDeCuentasTree';
 import type { TreeItemData } from '../../utils/planDeCuentasUtils';
@@ -263,14 +271,23 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const tree = usePlanDeCuentasTree();
-  const panel = useAccountPanel({ onExpandNode: tree.expandNode, selectedYear });
-  const [eliminarCuenta, { isLoading: isDeleting }] = useEliminarPlanesCuentaMutation();
+  const panel = useAccountPanel({
+    onExpandNode: tree.expandNode,
+    selectedYear,
+  });
+  const [eliminarCuenta, { isLoading: isDeleting }] =
+    useEliminarPlanesCuentaMutation();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ item: TreeItemData } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    item: TreeItemData;
+  } | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const yearOptions = useMemo(() => buildYearOptions(), []);
-  const totalCuentas = useMemo(() => countNodes(tree.treeData), [tree.treeData]);
+  const totalCuentas = useMemo(
+    () => countNodes(tree.treeData),
+    [tree.treeData],
+  );
 
   // ── Stable refs for handlers (avoid breaking memo on 500+ nodes) ──
   const searchTermRef = useRef(tree.searchTerm);
@@ -293,21 +310,16 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
       } else {
         // Normal mode: functional update (stable ref)
         tree.setExpandedItems((prev) =>
-          prev.includes(id)
-            ? prev.filter((i) => i !== id)
-            : [...prev, id],
+          prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
       }
     },
     [tree.setExpandedItems],
   );
 
-  const handleSelectNode = useCallback(
-    (item: TreeItemData) => {
-      setSelectedNodeId(item.id);
-    },
-    [],
-  );
+  const handleSelectNode = useCallback((item: TreeItemData) => {
+    setSelectedNodeId(item.id);
+  }, []);
 
   const handleDelete = useCallback((item: TreeItemData) => {
     setDeleteTarget({ item });
@@ -444,9 +456,24 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
           variant="outlined"
           color="secondary"
           size="small"
-          startIcon={tree.areAllExpanded ? <FoldVertical size={14} /> : <UnfoldVertical size={14} />}
+          startIcon={
+            tree.areAllExpanded ? (
+              <FoldVertical size={14} />
+            ) : (
+              <UnfoldVertical size={14} />
+            )
+          }
           onClick={tree.toggleAll}
-          sx={isSmallPhone ? { minWidth: 36, px: 0, '& .MuiButton-startIcon': { mr: 0 }, '& span:last-child': { display: 'none' } } : undefined}
+          sx={
+            isSmallPhone
+              ? {
+                  minWidth: 36,
+                  px: 0,
+                  '& .MuiButton-startIcon': { mr: 0 },
+                  '& span:last-child': { display: 'none' },
+                }
+              : undefined
+          }
         >
           {!isSmallPhone && (tree.areAllExpanded ? 'Colapsar' : 'Expandir')}
         </Button>
@@ -594,7 +621,11 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
           }
           selectedId={selectedNodeId}
           hasSelection={!!selectedNodeId}
-          contextId={panel.mode === 'crear' ? (panel.selectedItem?.idPlanCuenta?.toString() ?? null) : null}
+          contextId={
+            panel.mode === 'crear'
+              ? (panel.selectedItem?.idPlanCuenta?.toString() ?? null)
+              : null
+          }
           actingId={panel.isOpen ? (panel.selectedItem?.id ?? null) : null}
           searchTerm={tree.searchTerm}
           isMobile={isMobile}

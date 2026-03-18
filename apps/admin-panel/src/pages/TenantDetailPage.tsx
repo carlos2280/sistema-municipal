@@ -1,41 +1,45 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EditIcon from "@mui/icons-material/Edit";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
-import FormControl from "@mui/material/FormControl";
-import Grid from "@mui/material/Grid";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import ConfirmDialog from "../components/shared/ConfirmDialog";
-import StatusChip from "../components/shared/StatusChip";
-import { useModules } from "../hooks/useModules";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import EditIcon from '@mui/icons-material/Edit'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
+import FormControl from '@mui/material/FormControl'
+import Grid from '@mui/material/Grid'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import ConfirmDialog from '../components/shared/ConfirmDialog'
+import StatusChip from '../components/shared/StatusChip'
+import { useModules } from '../hooks/useModules'
 import {
   useCreateSubscription,
   useSubscriptions,
   useUpdateSubscriptionEstado,
-} from "../hooks/useSubscriptions";
-import { useDeactivateTenant, useTenant, useUpdateTenant } from "../hooks/useTenants";
-import type { EstadoSuscripcion, UpdateTenantInput } from "../types";
+} from '../hooks/useSubscriptions'
+import {
+  useDeactivateTenant,
+  useTenant,
+  useUpdateTenant,
+} from '../hooks/useTenants'
+import type { EstadoSuscripcion, UpdateTenantInput } from '../types'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -46,51 +50,53 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
         </Typography>
       </Grid>
       <Grid size={{ xs: 8 }}>
-        <Typography variant="body2">{value || "—"}</Typography>
+        <Typography variant="body2">{value || '—'}</Typography>
       </Grid>
     </Grid>
-  );
+  )
 }
 
 export default function TenantDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const tenantId = Number(id);
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>()
+  const tenantId = Number(id)
+  const navigate = useNavigate()
 
-  const { data: tenant, isLoading, error } = useTenant(tenantId);
-  const { data: subs, isLoading: subsLoading } = useSubscriptions(tenantId);
-  const { data: allModules } = useModules();
-  const updateTenant = useUpdateTenant(tenantId);
-  const deactivateTenant = useDeactivateTenant();
-  const createSubscription = useCreateSubscription(tenantId);
-  const updateEstado = useUpdateSubscriptionEstado(tenantId);
+  const { data: tenant, isLoading, error } = useTenant(tenantId)
+  const { data: subs, isLoading: subsLoading } = useSubscriptions(tenantId)
+  const { data: allModules } = useModules()
+  const updateTenant = useUpdateTenant(tenantId)
+  const deactivateTenant = useDeactivateTenant()
+  const createSubscription = useCreateSubscription(tenantId)
+  const updateEstado = useUpdateSubscriptionEstado(tenantId)
 
-  const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState<UpdateTenantInput>({});
-  const [deactivateOpen, setDeactivateOpen] = useState(false);
-  const [addSubOpen, setAddSubOpen] = useState(false);
-  const [newSubModuloId, setNewSubModuloId] = useState<number>(0);
-  const [estadoDialogOpen, setEstadoDialogOpen] = useState(false);
-  const [selectedSubId, setSelectedSubId] = useState(0);
-  const [newEstado, setNewEstado] = useState<EstadoSuscripcion>("activa");
-  const [motivo, setMotivo] = useState("");
-  const [actionError, setActionError] = useState("");
+  const [editOpen, setEditOpen] = useState(false)
+  const [editForm, setEditForm] = useState<UpdateTenantInput>({})
+  const [deactivateOpen, setDeactivateOpen] = useState(false)
+  const [addSubOpen, setAddSubOpen] = useState(false)
+  const [newSubModuloId, setNewSubModuloId] = useState<number>(0)
+  const [estadoDialogOpen, setEstadoDialogOpen] = useState(false)
+  const [selectedSubId, setSelectedSubId] = useState(0)
+  const [newEstado, setNewEstado] = useState<EstadoSuscripcion>('activa')
+  const [motivo, setMotivo] = useState('')
+  const [actionError, setActionError] = useState('')
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (error || !tenant) {
-    return <Alert severity="error">Municipalidad no encontrada</Alert>;
+    return <Alert severity="error">Municipalidad no encontrada</Alert>
   }
 
-  const subscribedModuleIds = new Set(subs?.map((s) => s.modulo.id) ?? []);
+  const subscribedModuleIds = new Set(subs?.map((s) => s.modulo.id) ?? [])
   const availableModules =
-    allModules?.filter((m) => !subscribedModuleIds.has(m.id) && m.activo !== false) ?? [];
+    allModules?.filter(
+      (m) => !subscribedModuleIds.has(m.id) && m.activo !== false,
+    ) ?? []
 
   const openEdit = () => {
     setEditForm({
@@ -101,97 +107,119 @@ export default function TenantDetailPage() {
       telefono: tenant.telefono ?? undefined,
       emailContacto: tenant.emailContacto ?? undefined,
       maxUsuarios: tenant.maxUsuarios ?? undefined,
-    });
-    setEditOpen(true);
-  };
+    })
+    setEditOpen(true)
+  }
 
   const handleUpdate = async () => {
-    setActionError("");
+    setActionError('')
     try {
-      await updateTenant.mutateAsync(editForm);
-      setEditOpen(false);
+      await updateTenant.mutateAsync(editForm)
+      setEditOpen(false)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Error al actualizar");
+      setActionError(err instanceof Error ? err.message : 'Error al actualizar')
     }
-  };
+  }
 
   const handleDeactivate = async () => {
     try {
-      await deactivateTenant.mutateAsync(tenantId);
-      navigate("/tenants");
+      await deactivateTenant.mutateAsync(tenantId)
+      navigate('/tenants')
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Error al desactivar");
+      setActionError(err instanceof Error ? err.message : 'Error al desactivar')
     }
-  };
+  }
 
   const handleAddSubscription = async () => {
-    if (!newSubModuloId) return;
-    setActionError("");
+    if (!newSubModuloId) return
+    setActionError('')
     try {
       await createSubscription.mutateAsync({
         tenantId,
         moduloId: newSubModuloId,
-        activadoPor: "admin",
-      });
-      setAddSubOpen(false);
-      setNewSubModuloId(0);
+        activadoPor: 'admin',
+      })
+      setAddSubOpen(false)
+      setNewSubModuloId(0)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Error al activar módulo");
+      setActionError(
+        err instanceof Error ? err.message : 'Error al activar módulo',
+      )
     }
-  };
+  }
 
-  const openEstadoDialog = (subId: number, currentEstado: EstadoSuscripcion) => {
-    setSelectedSubId(subId);
-    setNewEstado(currentEstado);
-    setMotivo("");
-    setEstadoDialogOpen(true);
-  };
+  const openEstadoDialog = (
+    subId: number,
+    currentEstado: EstadoSuscripcion,
+  ) => {
+    setSelectedSubId(subId)
+    setNewEstado(currentEstado)
+    setMotivo('')
+    setEstadoDialogOpen(true)
+  }
 
   const handleUpdateEstado = async () => {
-    setActionError("");
+    setActionError('')
     try {
       await updateEstado.mutateAsync({
         id: selectedSubId,
         data: {
           estado: newEstado,
           motivo: motivo || undefined,
-          ejecutadoPor: "admin",
+          ejecutadoPor: 'admin',
         },
-      });
-      setEstadoDialogOpen(false);
+      })
+      setEstadoDialogOpen(false)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Error al cambiar estado");
+      setActionError(
+        err instanceof Error ? err.message : 'Error al cambiar estado',
+      )
     }
-  };
+  }
 
   return (
     <Box>
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/tenants")}
+        onClick={() => navigate('/tenants')}
         sx={{ mb: 2 }}
       >
         Volver
       </Button>
 
       {actionError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setActionError("")}>
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          onClose={() => setActionError('')}
+        >
           {actionError}
         </Alert>
       )}
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Typography variant="h4" fontWeight={700}>
             {tenant.nombre}
           </Typography>
           <Chip
-            label={tenant.activo !== false ? "Activa" : "Inactiva"}
-            color={tenant.activo !== false ? "success" : "default"}
+            label={tenant.activo !== false ? 'Activa' : 'Inactiva'}
+            color={tenant.activo !== false ? 'success' : 'default'}
           />
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button startIcon={<EditIcon />} variant="outlined" onClick={openEdit}>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            startIcon={<EditIcon />}
+            variant="outlined"
+            onClick={openEdit}
+          >
             Editar
           </Button>
           {tenant.activo !== false && (
@@ -218,9 +246,9 @@ export default function TenantDetailPage() {
           <InfoRow label="Max Usuarios" value={tenant.maxUsuarios} />
           <InfoRow
             label="Creado"
-            value={new Intl.DateTimeFormat("es-CL", {
-              dateStyle: "medium",
-              timeStyle: "short",
+            value={new Intl.DateTimeFormat('es-CL', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
             }).format(new Date(tenant.createdAt))}
           />
         </CardContent>
@@ -228,7 +256,14 @@ export default function TenantDetailPage() {
 
       <Divider sx={{ mb: 3 }} />
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
         <Typography variant="h5" fontWeight={600}>
           Suscripciones
         </Typography>
@@ -265,14 +300,14 @@ export default function TenantDetailPage() {
                     <StatusChip estado={s.estado} />
                   </TableCell>
                   <TableCell>
-                    {new Intl.DateTimeFormat("es-CL").format(
+                    {new Intl.DateTimeFormat('es-CL').format(
                       new Date(s.fechaInicio),
                     )}
                   </TableCell>
                   <TableCell>
                     {s.precioMensual
-                      ? `$${Number(s.precioMensual).toLocaleString("es-CL")}`
-                      : "—"}
+                      ? `$${Number(s.precioMensual).toLocaleString('es-CL')}`
+                      : '—'}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -297,47 +332,82 @@ export default function TenantDetailPage() {
       )}
 
       {/* Dialog: Editar Tenant */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Editar Municipalidad</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "8px !important" }}>
+        <DialogContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            pt: '8px !important',
+          }}
+        >
           <TextField
             label="Nombre"
-            value={editForm.nombre ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })}
+            value={editForm.nombre ?? ''}
+            onChange={(e) =>
+              setEditForm({ ...editForm, nombre: e.target.value })
+            }
           />
           <TextField
             label="Dominio Base"
-            value={editForm.dominioBase ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, dominioBase: e.target.value })}
+            value={editForm.dominioBase ?? ''}
+            onChange={(e) =>
+              setEditForm({ ...editForm, dominioBase: e.target.value })
+            }
           />
           <TextField
             label="RUT"
-            value={editForm.rut ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, rut: e.target.value || undefined })}
+            value={editForm.rut ?? ''}
+            onChange={(e) =>
+              setEditForm({ ...editForm, rut: e.target.value || undefined })
+            }
           />
           <TextField
             label="Dirección"
-            value={editForm.direccion ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value || undefined })}
+            value={editForm.direccion ?? ''}
+            onChange={(e) =>
+              setEditForm({
+                ...editForm,
+                direccion: e.target.value || undefined,
+              })
+            }
           />
           <TextField
             label="Teléfono"
-            value={editForm.telefono ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value || undefined })}
+            value={editForm.telefono ?? ''}
+            onChange={(e) =>
+              setEditForm({
+                ...editForm,
+                telefono: e.target.value || undefined,
+              })
+            }
           />
           <TextField
             label="Email de Contacto"
-            value={editForm.emailContacto ?? ""}
-            onChange={(e) => setEditForm({ ...editForm, emailContacto: e.target.value || undefined })}
+            value={editForm.emailContacto ?? ''}
+            onChange={(e) =>
+              setEditForm({
+                ...editForm,
+                emailContacto: e.target.value || undefined,
+              })
+            }
           />
           <TextField
             label="Max Usuarios"
             type="number"
-            value={editForm.maxUsuarios ?? ""}
+            value={editForm.maxUsuarios ?? ''}
             onChange={(e) =>
               setEditForm({
                 ...editForm,
-                maxUsuarios: e.target.value ? Number(e.target.value) : undefined,
+                maxUsuarios: e.target.value
+                  ? Number(e.target.value)
+                  : undefined,
               })
             }
           />
@@ -349,13 +419,18 @@ export default function TenantDetailPage() {
             onClick={handleUpdate}
             disabled={updateTenant.isPending}
           >
-            {updateTenant.isPending ? "Guardando..." : "Guardar"}
+            {updateTenant.isPending ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog: Activar Módulo */}
-      <Dialog open={addSubOpen} onClose={() => setAddSubOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={addSubOpen}
+        onClose={() => setAddSubOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Activar Módulo</DialogTitle>
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 1 }}>
@@ -380,7 +455,7 @@ export default function TenantDetailPage() {
             onClick={handleAddSubscription}
             disabled={!newSubModuloId || createSubscription.isPending}
           >
-            {createSubscription.isPending ? "Activando..." : "Activar"}
+            {createSubscription.isPending ? 'Activando...' : 'Activar'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -393,13 +468,22 @@ export default function TenantDetailPage() {
         fullWidth
       >
         <DialogTitle>Cambiar Estado</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "8px !important" }}>
+        <DialogContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            pt: '8px !important',
+          }}
+        >
           <FormControl fullWidth>
             <InputLabel>Estado</InputLabel>
             <Select
               value={newEstado}
               label="Estado"
-              onChange={(e) => setNewEstado(e.target.value as EstadoSuscripcion)}
+              onChange={(e) =>
+                setNewEstado(e.target.value as EstadoSuscripcion)
+              }
             >
               <MenuItem value="activa">Activa</MenuItem>
               <MenuItem value="trial">Trial</MenuItem>
@@ -422,7 +506,7 @@ export default function TenantDetailPage() {
             onClick={handleUpdateEstado}
             disabled={updateEstado.isPending}
           >
-            {updateEstado.isPending ? "Guardando..." : "Cambiar"}
+            {updateEstado.isPending ? 'Guardando...' : 'Cambiar'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -438,5 +522,5 @@ export default function TenantDetailPage() {
         loading={deactivateTenant.isPending}
       />
     </Box>
-  );
+  )
 }

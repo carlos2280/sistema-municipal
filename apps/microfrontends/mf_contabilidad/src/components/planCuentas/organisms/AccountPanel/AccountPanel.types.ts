@@ -1,9 +1,14 @@
-import type { UseFormReturn } from 'react-hook-form';
 import type { TreeItemData } from '@/utils/planDeCuentasUtils';
+import type { UseFormReturn } from 'react-hook-form';
 
 export type PanelMode = 'crear' | 'editar' | null;
 
-export type CodigoStatus = 'idle' | 'checking' | 'available' | 'exists' | 'error';
+export type CodigoStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'exists'
+  | 'error';
 
 export interface CuentaExistente {
   id: number;

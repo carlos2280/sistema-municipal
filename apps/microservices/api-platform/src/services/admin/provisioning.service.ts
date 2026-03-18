@@ -1,7 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
-import { Pool } from "pg";
 import { getEnv } from "@/config/env";
+import { Pool } from "pg";
 
 /**
  * Base path to the seeders drizzle migration folder.

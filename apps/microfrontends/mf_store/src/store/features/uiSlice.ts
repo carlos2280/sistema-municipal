@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface UiState {
 	drawerOpen: boolean;
@@ -20,7 +20,6 @@ const uiSlice = createSlice({
 
 export const { setDrawerOpen } = uiSlice.actions;
 
-export const selectDrawerOpen = (state: { ui: UiState }) =>
-	state.ui.drawerOpen;
+export const selectDrawerOpen = (state: { ui: UiState }) => state.ui.drawerOpen;
 
 export default uiSlice.reducer;

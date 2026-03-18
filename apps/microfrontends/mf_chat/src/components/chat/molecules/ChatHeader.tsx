@@ -1,8 +1,16 @@
+import { SystemGroupBadge } from '@/components/atoms'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import { ArrowLeft, CalendarPlus, MoreVertical, Phone, Users, Video, X } from 'lucide-react'
-import { SystemGroupBadge } from '@/components/atoms'
+import {
+  ArrowLeft,
+  CalendarPlus,
+  MoreVertical,
+  Phone,
+  Users,
+  Video,
+  X,
+} from 'lucide-react'
 
 interface ChatHeaderProps {
   conversacionId: number
@@ -66,7 +74,11 @@ export function ChatHeader({
       {/* Back button + User Info */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {onBack && (
-          <IconButton size="small" onClick={onBack} sx={{ color: 'text.secondary' }}>
+          <IconButton
+            size="small"
+            onClick={onBack}
+            sx={{ color: 'text.secondary' }}
+          >
             <ArrowLeft size={20} />
           </IconButton>
         )}
@@ -110,9 +122,7 @@ export function ChatHeader({
                 fontSize: 12,
                 color: 'text.secondary',
                 cursor: onShowMembers ? 'pointer' : 'default',
-                '&:hover': onShowMembers
-                  ? { color: 'primary.main' }
-                  : {},
+                '&:hover': onShowMembers ? { color: 'primary.main' } : {},
               }}
             >
               {participantesCount} miembros
@@ -184,7 +194,12 @@ export function ChatHeader({
           <MoreVertical size={20} />
         </IconButton>
         {onClose && (
-          <IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }} title="Cerrar">
+          <IconButton
+            size="small"
+            onClick={onClose}
+            sx={{ color: 'text.secondary' }}
+            title="Cerrar"
+          >
             <X size={20} />
           </IconButton>
         )}

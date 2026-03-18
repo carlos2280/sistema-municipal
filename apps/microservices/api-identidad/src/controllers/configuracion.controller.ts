@@ -23,7 +23,9 @@ export const resetMfa: RequestHandler = async (req, res, next) => {
   }
   try {
     await configuracionService.resetMfaUsuario(getDb(req), id);
-    res.status(200).json({ message: "MFA del usuario restablecido correctamente" });
+    res
+      .status(200)
+      .json({ message: "MFA del usuario restablecido correctamente" });
   } catch (error) {
     next(error);
   }

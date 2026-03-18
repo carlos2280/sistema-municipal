@@ -5,11 +5,11 @@
  * Priority+: P1 (módulo), P4 (sección)
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { useTheme as useMeridianTheme } from "mf_ui/theme";
 import { MODULE_ACCENTS } from "mf_ui/theme";
-import { useMenu } from "../../hooks/useMenu";
 import { useLocation } from "react-router-dom";
+import { useMenu } from "../../hooks/useMenu";
 
 // ─── Types ──────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 const ConsultaDeIngreso = () => {
-  return <div>ConsultaDeIngreso</div>;
+	return <div>ConsultaDeIngreso</div>;
 };
 
 export default ConsultaDeIngreso;

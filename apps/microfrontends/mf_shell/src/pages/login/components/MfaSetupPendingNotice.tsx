@@ -66,8 +66,8 @@ export const MfaSetupPendingNotice = memo(function MfaSetupPendingNotice() {
 					mb: 1.5,
 				}}
 			>
-				Se envió un enlace de configuración MFA a tu correo corporativo.
-				Sigue las instrucciones para activar la verificación en dos pasos.
+				Se envió un enlace de configuración MFA a tu correo corporativo. Sigue
+				las instrucciones para activar la verificación en dos pasos.
 			</Typography>
 			<HighlightBadge>
 				<Clock size={12} />

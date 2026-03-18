@@ -1,9 +1,9 @@
+import type { Reunion } from '@/types/meeting.types'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import { Bell } from 'lucide-react'
 import { memo } from 'react'
-import type { Reunion } from '@/types/meeting.types'
 
 interface MeetingReminderProps {
   open: boolean

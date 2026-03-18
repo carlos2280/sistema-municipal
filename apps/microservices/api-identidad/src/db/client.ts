@@ -1,8 +1,8 @@
 import type { EnvConfig } from "@/env/schema";
 import { getTenantPool } from "@municipal/core/database";
+import * as schema from "@municipal/db-identidad";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "@municipal/db-identidad";
 
 let dbInstance: ReturnType<typeof createDbClient> | null = null;
 
@@ -17,7 +17,9 @@ export function createDbClient(config: EnvConfig) {
 
   // Manejo de errores del pool
   pool.on("error", (err) => {
-    process.stderr.write(`[api-identidad:db] Error inesperado en pool: ${err.message}\n`);
+    process.stderr.write(
+      `[api-identidad:db] Error inesperado en pool: ${err.message}\n`,
+    );
     process.exit(-1);
   });
 

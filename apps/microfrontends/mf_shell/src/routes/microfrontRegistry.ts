@@ -1,11 +1,11 @@
 import { loadRemote } from "@module-federation/enhanced/runtime";
 import type { FC } from "react";
+import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 import {
-	loadWithRetry,
 	type LoadedManifest,
 	type RouteManifest,
+	loadWithRetry,
 } from "../utils/mfLoader";
-import { isRemoteRegistered } from "../modules/dynamicModuleLoader";
 
 // Cache por mfName
 const manifestCache = new Map<string, LoadedManifest>();
@@ -35,7 +35,7 @@ export async function loadManifest(mfName: string): Promise<LoadedManifest> {
 		const manifest = await loadWithRetry(
 			() =>
 				loadRemote<{ default: RouteManifest }>(`${mfName}/routes`).then(
-					(mod) => mod!.default,
+					(mod) => mod?.default,
 				),
 			{ attempts: 3, delay: 1000, moduleName: mfName },
 		);
@@ -49,14 +49,11 @@ export async function loadManifest(mfName: string): Promise<LoadedManifest> {
 		};
 
 		manifestCache.set(mfName, result);
-		console.info(
-			`[MF Registry] ${mfName} cargado (${loadTime.toFixed(0)}ms)`,
-		);
+		console.info(`[MF Registry] ${mfName} cargado (${loadTime.toFixed(0)}ms)`);
 
 		return result;
 	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
 
 		console.error(`[MF Registry] Error cargando ${mfName}:`, errorMessage);
 

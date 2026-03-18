@@ -6,12 +6,12 @@
  * Los ítems de nivel 0 tienen icono Lucide; niveles internos usan dot indicator.
  */
 
-import { styled, alpha } from "@mui/material/styles";
 import Collapse from "@mui/material/Collapse";
+import { alpha, styled } from "@mui/material/styles";
 import { ChevronDown } from "lucide-react";
 import * as icons from "lucide-react";
 import type { LucideProps } from "lucide-react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import slugify from "slugify";
 import type { MenuItem } from "../../types/menu";
@@ -37,7 +37,9 @@ function toPascalCase(str: string): string {
 function SafeIcon({ name, size = 18 }: { name: string | null; size?: number }) {
 	if (!name) return <icons.LayoutGrid size={size} strokeWidth={1.5} />;
 	const pascalName = toPascalCase(name);
-	const IconComp = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
+	const IconComp = (
+		icons as unknown as Record<string, React.ComponentType<LucideProps>>
+	)[pascalName];
 	if (!IconComp) return <icons.LayoutGrid size={size} strokeWidth={1.5} />;
 	return <IconComp size={size} strokeWidth={1.5} />;
 }
@@ -47,12 +49,17 @@ function buildPath(parentPath: string, nombre: string): string {
 	return parentPath ? `${parentPath}/${slug}` : slug;
 }
 
-function isChildActive(children: MenuItem[], basePath: string, currentPath: string): boolean {
+function isChildActive(
+	children: MenuItem[],
+	basePath: string,
+	currentPath: string,
+): boolean {
 	return children.some((child) => {
 		const childPath = buildPath(basePath, child.nombre);
 		return (
 			currentPath === childPath ||
-			(child.hijos.length > 0 && isChildActive(child.hijos, childPath, currentPath))
+			(child.hijos.length > 0 &&
+				isChildActive(child.hijos, childPath, currentPath))
 		);
 	});
 }
@@ -77,7 +84,8 @@ const SectionLabel = styled("div")(({ theme }) => ({
 }));
 
 const ItemButton = styled("button", {
-	shouldForwardProp: (prop) => !["level", "isActive", "hasChildActive"].includes(prop as string),
+	shouldForwardProp: (prop) =>
+		!["level", "isActive", "hasChildActive"].includes(prop as string),
 })<{ level: number; isActive: boolean; hasChildActive: boolean }>(
 	({ theme, level, isActive, hasChildActive }) => ({
 		border: "none",
@@ -198,7 +206,12 @@ interface MenuItemNodeProps {
 	onNavigate?: () => void;
 }
 
-function MenuItemNode({ item, parentPath, level, onNavigate }: MenuItemNodeProps) {
+function MenuItemNode({
+	item,
+	parentPath,
+	level,
+	onNavigate,
+}: MenuItemNodeProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const itemPath = buildPath(parentPath, item.nombre);
@@ -206,7 +219,10 @@ function MenuItemNode({ item, parentPath, level, onNavigate }: MenuItemNodeProps
 
 	const isActive = location.pathname === itemPath;
 	const hasChildActive = useMemo(
-		() => (hasChildren ? isChildActive(item.hijos, itemPath, location.pathname) : false),
+		() =>
+			hasChildren
+				? isChildActive(item.hijos, itemPath, location.pathname)
+				: false,
 		[hasChildren, item.hijos, itemPath, location.pathname],
 	);
 

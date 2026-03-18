@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import type { DbClient } from "@/db/client";
-import { usuarios } from "@municipal/db-identidad";
 import { AppError } from "@/libs/middleware/AppError";
 import { decryptSecret, encryptSecret } from "@/libs/utils/crypto.utils";
+import { usuarios } from "@municipal/db-identidad";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { authenticator } from "otplib";
@@ -167,7 +167,9 @@ export async function enableMfa(
   // Generar y hashear backup codes
   const plaintextCodes = generateBackupCodes();
   const hashedCodes = await Promise.all(
-    plaintextCodes.map((c) => bcrypt.hash(normalizeBackupCode(c), BCRYPT_ROUNDS)),
+    plaintextCodes.map((c) =>
+      bcrypt.hash(normalizeBackupCode(c), BCRYPT_ROUNDS),
+    ),
   );
 
   await db

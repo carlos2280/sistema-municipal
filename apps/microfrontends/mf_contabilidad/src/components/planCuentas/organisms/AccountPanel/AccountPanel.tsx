@@ -1,3 +1,4 @@
+import { formatCodigo } from '@/utils/planDeCuentasUtils';
 import {
   Box,
   Button,
@@ -14,11 +15,14 @@ import { FilePlus, Pencil, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Control } from 'react-hook-form';
 import { FormProvider, useFormState, useWatch } from 'react-hook-form';
-import { formatCodigo } from '@/utils/planDeCuentasUtils';
 
-import type { AccountPanelProps, AccountFormData, CodigoStatus } from './AccountPanel.types';
-import { requiresContraCuenta } from './AccountPanel.types';
 import { AccountFormFields } from './AccountFormFields';
+import type {
+  AccountFormData,
+  AccountPanelProps,
+  CodigoStatus,
+} from './AccountPanel.types';
+import { requiresContraCuenta } from './AccountPanel.types';
 
 /* ── MERIDIAN Typography ── */
 const FONT_DISPLAY = '"Bricolage Grotesque", sans-serif';
@@ -30,8 +34,14 @@ const TABLET_PANEL_WIDTH = 420;
 
 /* ── Level config (nombres SINIM) ── */
 const NIVEL_NOMBRES: Record<number, string> = {
-  1: 'Título', 2: 'Grupo', 3: 'Subgrupo', 4: 'Cuenta',
-  5: 'Subcuenta', 6: 'Sub-subcuenta', 7: 'Auxiliar', 8: 'Subauxiliar',
+  1: 'Título',
+  2: 'Grupo',
+  3: 'Subgrupo',
+  4: 'Cuenta',
+  5: 'Subcuenta',
+  6: 'Sub-subcuenta',
+  7: 'Auxiliar',
+  8: 'Subauxiliar',
 };
 
 function getChildDigits(parentTipoCuentaId: number): number {
@@ -60,11 +70,16 @@ export const AccountPanel = memo(function AccountPanel({
   const isMobile = useMediaQuery(theme.breakpoints.down(640));
 
   const { isValid } = useFormState({ control: methods.control });
-  const codigoPadre = useWatch({ control: methods.control, name: 'valorPadre' }) || '';
-  const tipoCuentaId = useWatch({ control: methods.control, name: 'tipoCuentaId' }) || 0;
+  const codigoPadre =
+    useWatch({ control: methods.control, name: 'valorPadre' }) || '';
+  const tipoCuentaId =
+    useWatch({ control: methods.control, name: 'tipoCuentaId' }) || 0;
 
   const codigoYaExiste = codigoStatus === 'exists';
-  const showContraCuenta = useMemo(() => requiresContraCuenta(codigoPadre), [codigoPadre]);
+  const showContraCuenta = useMemo(
+    () => requiresContraCuenta(codigoPadre),
+    [codigoPadre],
+  );
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -90,7 +105,10 @@ export const AccountPanel = memo(function AccountPanel({
     el.addEventListener('scroll', checkScroll);
     const observer = new ResizeObserver(checkScroll);
     observer.observe(el);
-    return () => { el.removeEventListener('scroll', checkScroll); observer.disconnect(); };
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      observer.disconnect();
+    };
   }, [open, mode]);
 
   const isCreateMode = mode === 'crear';
@@ -100,7 +118,9 @@ export const AccountPanel = memo(function AccountPanel({
   const childNivelNombre = NIVEL_NOMBRES[childTipoCuentaId] ?? '';
   const childDigits = getChildDigits(tipoCuentaId);
 
-  const codigoPadreFormateado = codigoPadre ? formatCodigo(codigoPadre, tipoCuentaId) : '';
+  const codigoPadreFormateado = codigoPadre
+    ? formatCodigo(codigoPadre, tipoCuentaId)
+    : '';
 
   // ── Panel content ──
   const panelContent = (
@@ -114,7 +134,9 @@ export const AccountPanel = memo(function AccountPanel({
         borderRadius: isMobile ? '20px 20px 0 0' : 0,
         overflow: 'hidden',
         bgcolor: theme.meridian.surfaces.s2,
-        borderLeft: isMobile ? 'none' : `1px solid ${theme.meridian.borders.strong}`,
+        borderLeft: isMobile
+          ? 'none'
+          : `1px solid ${theme.meridian.borders.strong}`,
         boxShadow: isMobile
           ? theme.meridian.shadows.lg
           : theme.meridian.shadows.lg,
@@ -123,7 +145,9 @@ export const AccountPanel = memo(function AccountPanel({
       {/* Mobile drag handle */}
       {isMobile && (
         <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1, pb: 0.5 }}>
-          <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: 'divider' }} />
+          <Box
+            sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: 'divider' }}
+          />
         </Box>
       )}
 
@@ -149,8 +173,8 @@ export const AccountPanel = memo(function AccountPanel({
             justifyContent: 'center',
             flexShrink: 0,
             bgcolor: isCreateMode
-              ? alpha(theme.palette.primary.main, 0.10)
-              : alpha(theme.palette.info.main, 0.10),
+              ? alpha(theme.palette.primary.main, 0.1)
+              : alpha(theme.palette.info.main, 0.1),
             color: isCreateMode
               ? theme.palette.primary.main
               : theme.palette.info.main,
@@ -190,8 +214,7 @@ export const AccountPanel = memo(function AccountPanel({
                 : ''
               : selectedItem
                 ? `${NIVEL_NOMBRES[tipoCuentaId] ?? ''} — ${codigoPadreFormateado}`
-                : ''
-            }
+                : ''}
           </Typography>
         </Box>
 
@@ -206,7 +229,7 @@ export const AccountPanel = memo(function AccountPanel({
             flexShrink: 0,
             color: 'text.secondary',
             '&:hover': {
-              bgcolor: alpha(theme.palette.error.main, 0.10),
+              bgcolor: alpha(theme.palette.error.main, 0.1),
               color: theme.palette.error.main,
             },
           }}
@@ -278,15 +301,25 @@ export const AccountPanel = memo(function AccountPanel({
             />
             {isCreateMode ? (
               <span>
-                Nivel <strong style={{ color: theme.palette.text.primary }}>{childTipoCuentaId} · {childNivelNombre}</strong>
+                Nivel{' '}
+                <strong style={{ color: theme.palette.text.primary }}>
+                  {childTipoCuentaId} · {childNivelNombre}
+                </strong>
                 {' — agrega '}
-                <strong style={{ color: theme.palette.text.primary }}>{childDigits} dígito{childDigits > 1 ? 's' : ''}</strong>
+                <strong style={{ color: theme.palette.text.primary }}>
+                  {childDigits} dígito{childDigits > 1 ? 's' : ''}
+                </strong>
               </span>
             ) : (
               <span>
-                Nivel <strong style={{ color: theme.palette.text.primary }}>{tipoCuentaId} · {NIVEL_NOMBRES[tipoCuentaId] ?? ''}</strong>
+                Nivel{' '}
+                <strong style={{ color: theme.palette.text.primary }}>
+                  {tipoCuentaId} · {NIVEL_NOMBRES[tipoCuentaId] ?? ''}
+                </strong>
                 {' — código '}
-                <strong style={{ color: theme.palette.text.primary }}>{codigoPadreFormateado}</strong>
+                <strong style={{ color: theme.palette.text.primary }}>
+                  {codigoPadreFormateado}
+                </strong>
               </span>
             )}
           </Box>
@@ -391,7 +424,8 @@ export const AccountPanel = memo(function AccountPanel({
             zIndex: 100,
             transform: open ? 'translateY(0)' : 'translateY(100%)',
             opacity: open ? 1 : 0,
-            transition: 'transform 300ms cubic-bezier(0.16,1,0.3,1), opacity 300ms cubic-bezier(0.16,1,0.3,1)',
+            transition:
+              'transform 300ms cubic-bezier(0.16,1,0.3,1), opacity 300ms cubic-bezier(0.16,1,0.3,1)',
             pointerEvents: open ? 'auto' : 'none',
           }}
         >
@@ -427,7 +461,7 @@ export const AccountPanel = memo(function AccountPanel({
           width: isTablet ? TABLET_PANEL_WIDTH : PANEL_WIDTH,
           maxWidth: 'calc(100vw - 40px)',
           transform: open ? 'translateX(0)' : 'translateX(100%)',
-          transition: `transform 300ms cubic-bezier(0.16, 1, 0.3, 1)`,
+          transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
           pointerEvents: open ? 'auto' : 'none',
           [theme.breakpoints.down('md')]: {
             top: 44, // mobile Eyebrow height
@@ -450,7 +484,12 @@ interface CodePreviewProps {
   codigoStatus: CodigoStatus;
 }
 
-function CodePreview({ control, tipoCuentaId, isCreateMode, codigoStatus }: CodePreviewProps) {
+function CodePreview({
+  control,
+  tipoCuentaId,
+  isCreateMode,
+  codigoStatus,
+}: CodePreviewProps) {
   const theme = useTheme();
   const valorPadre = useWatch({ control, name: 'valorPadre' }) || '';
   const codigo = useWatch({ control, name: 'codigo' }) || '';
@@ -494,17 +533,19 @@ function CodePreview({ control, tipoCuentaId, isCreateMode, codigoStatus }: Code
   }
 
   // Border color based on state
-  const borderColor = codigoStatus === 'available'
-    ? alpha(theme.palette.success.main, 0.45)
-    : codigoStatus === 'exists'
-      ? alpha(theme.palette.error.main, 0.45)
-      : alpha(theme.palette.primary.main, 0.14);
+  const borderColor =
+    codigoStatus === 'available'
+      ? alpha(theme.palette.success.main, 0.45)
+      : codigoStatus === 'exists'
+        ? alpha(theme.palette.error.main, 0.45)
+        : alpha(theme.palette.primary.main, 0.14);
 
-  const bgColor = codigoStatus === 'available'
-    ? alpha(theme.palette.success.main, 0.05)
-    : codigoStatus === 'exists'
-      ? alpha(theme.palette.error.main, 0.05)
-      : alpha(theme.palette.primary.main, 0.05);
+  const bgColor =
+    codigoStatus === 'available'
+      ? alpha(theme.palette.success.main, 0.05)
+      : codigoStatus === 'exists'
+        ? alpha(theme.palette.error.main, 0.05)
+        : alpha(theme.palette.primary.main, 0.05);
 
   return (
     <Box
@@ -532,7 +573,9 @@ function CodePreview({ control, tipoCuentaId, isCreateMode, codigoStatus }: Code
       >
         Código completo
       </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}
+      >
         <Typography
           sx={{
             fontFamily: FONT_MONO,
@@ -554,7 +597,10 @@ function CodePreview({ control, tipoCuentaId, isCreateMode, codigoStatus }: Code
             fontSize: '10.5px',
             color: hintColor,
             fontFamily: FONT_MONO,
-            fontWeight: codigoStatus === 'available' || codigoStatus === 'exists' ? 600 : 400,
+            fontWeight:
+              codigoStatus === 'available' || codigoStatus === 'exists'
+                ? 600
+                : 400,
             flexShrink: 0,
             whiteSpace: 'nowrap',
             display: 'flex',

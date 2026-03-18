@@ -6,15 +6,19 @@ FROM base AS deps
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
-COPY packages/shared/package.json ./packages/shared/
+COPY packages/core/package.json ./packages/core/
+COPY packages/db-mensajeria/package.json ./packages/db-mensajeria/
 COPY apps/microservices/api-chat/package.json ./apps/microservices/api-chat/
 RUN pnpm install --frozen-lockfile
 
 # --- Build ---
 FROM deps AS build
-COPY packages/shared/ ./packages/shared/
+COPY packages/core/ ./packages/core/
+COPY packages/db-mensajeria/ ./packages/db-mensajeria/
 COPY apps/microservices/api-chat/ ./apps/microservices/api-chat/
-RUN pnpm --filter @municipal/shared build && pnpm --filter api-chat build
+RUN pnpm --filter @municipal/core build && \
+    pnpm --filter @municipal/db-mensajeria build && \
+    pnpm --filter api-chat build
 
 # --- Production ---
 FROM base AS runner
@@ -22,10 +26,12 @@ WORKDIR /app
 ENV NODE_ENV=production CI=true
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
-COPY packages/shared/package.json ./packages/shared/
+COPY packages/core/package.json ./packages/core/
+COPY packages/db-mensajeria/package.json ./packages/db-mensajeria/
 COPY apps/microservices/api-chat/package.json ./apps/microservices/api-chat/
 RUN pnpm install --frozen-lockfile --prod
-COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+COPY --from=build /app/packages/core/dist ./packages/core/dist
+COPY --from=build /app/packages/db-mensajeria/dist ./packages/db-mensajeria/dist
 COPY --from=build /app/apps/microservices/api-chat/dist ./apps/microservices/api-chat/dist
 WORKDIR /app/apps/microservices/api-chat
 EXPOSE 3004

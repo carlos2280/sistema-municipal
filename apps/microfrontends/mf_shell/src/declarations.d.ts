@@ -79,7 +79,14 @@ declare module "mf_ui/components" {
 	export const Badge: FC<{
 		children: ReactNode;
 		variant?: "filled" | "outlined" | "soft";
-		color?: "primary" | "secondary" | "success" | "warning" | "error" | "info" | "neutral";
+		color?:
+			| "primary"
+			| "secondary"
+			| "success"
+			| "warning"
+			| "error"
+			| "info"
+			| "neutral";
 		size?: "small" | "medium" | "large";
 		startIcon?: ReactNode;
 		endIcon?: ReactNode;

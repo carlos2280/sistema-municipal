@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useSocket } from './useSocket'
 import {
-  type CallState,
-  type IncomingCallEvent,
-  type CallCreatedEvent,
   type CallAcceptedEvent,
+  type CallCreatedEvent,
   type CallEndedEvent,
+  type CallState,
   INITIAL_CALL_STATE,
+  type IncomingCallEvent,
 } from '../types/videocall.types'
+import { useSocket } from './useSocket'
 
 interface UseCallReturn {
   callState: CallState
@@ -16,7 +16,13 @@ interface UseCallReturn {
   rejectCall: () => void
   endCall: () => void
   joinCall: (llamadaId: number) => void
-  joinCallDirect: (llamadaId: number, token: string, livekitUrl: string, roomName: string, tipo?: 'voz' | 'video') => void
+  joinCallDirect: (
+    llamadaId: number,
+    token: string,
+    livekitUrl: string,
+    roomName: string,
+    tipo?: 'voz' | 'video',
+  ) => void
 }
 
 export function useCall(): UseCallReturn {
@@ -117,7 +123,7 @@ export function useCall(): UseCallReturn {
       }))
       emit('call:initiate', { conversacionId, tipo })
     },
-    [isConnected, emit]
+    [isConnected, emit],
   )
 
   const acceptCall = useCallback(() => {
@@ -148,11 +154,17 @@ export function useCall(): UseCallReturn {
       if (!isConnected) return
       emit('call:join', { llamadaId })
     },
-    [isConnected, emit]
+    [isConnected, emit],
   )
 
   const joinCallDirect = useCallback(
-    (llamadaId: number, token: string, livekitUrl: string, roomName: string, tipo: 'voz' | 'video' = 'video') => {
+    (
+      llamadaId: number,
+      token: string,
+      livekitUrl: string,
+      roomName: string,
+      tipo: 'voz' | 'video' = 'video',
+    ) => {
       setCallState({
         llamadaId,
         conversacionId: null,
@@ -164,7 +176,7 @@ export function useCall(): UseCallReturn {
         isIncoming: false,
       })
     },
-    []
+    [],
   )
 
   return {

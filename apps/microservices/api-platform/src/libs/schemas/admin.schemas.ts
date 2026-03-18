@@ -2,7 +2,13 @@ import { z } from "zod";
 
 export const createTenantSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
-  slug: z.string().min(1, "Slug requerido").regex(/^[a-z0-9-]+$/, "Slug solo puede contener letras minúsculas, números y guiones"),
+  slug: z
+    .string()
+    .min(1, "Slug requerido")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug solo puede contener letras minúsculas, números y guiones",
+    ),
   dominioBase: z.string().min(1, "Dominio base requerido"),
   rut: z.string().optional(),
   direccion: z.string().optional(),
@@ -25,7 +31,9 @@ export const createSubscriptionSchema = z.object({
 
 export const updateSubscriptionEstadoSchema = z.object({
   estado: z.enum(["activa", "trial", "suspendida", "cancelada"], {
-    errorMap: () => ({ message: "estado debe ser 'activa', 'trial', 'suspendida' o 'cancelada'" }),
+    errorMap: () => ({
+      message: "estado debe ser 'activa', 'trial', 'suspendida' o 'cancelada'",
+    }),
   }),
   ejecutadoPor: z.string().min(1, "ejecutadoPor requerido"),
   motivo: z.string().optional(),

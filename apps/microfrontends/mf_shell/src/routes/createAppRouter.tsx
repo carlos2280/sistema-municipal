@@ -1,20 +1,20 @@
 import type { JSX } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "../layout/AppLayout";
+import {
+	type ModuleInfo,
+	isRemoteRegistered,
+} from "../modules/dynamicModuleLoader";
 import DashboardPage from "../pages/DashboardPage";
+import ModuleUnavailablePage from "../pages/ModuleUnavailablePage";
 import ContrasenaTemporal from "../pages/login/ContrasenaTemporal";
 import LoginPage from "../pages/login/LoginPage";
 import MfaSetupPage from "../pages/mfa-setup/MfaSetupPage";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "../utils/componentsMap";
 import { generateRoutesFromMenu } from "../utils/generateRoutesFromMenu";
+import ProtectedRoute from "./ProtectedRoute";
 import { loadManifest } from "./microfrontRegistry";
-import {
-	isRemoteRegistered,
-	type ModuleInfo,
-} from "../modules/dynamicModuleLoader";
-import ModuleUnavailablePage from "../pages/ModuleUnavailablePage";
 
 interface Props {
 	menuData?: MenuItem[];
@@ -54,9 +54,7 @@ export const createAppRouter = async ({
 	}
 
 	const dynamicRoutes =
-		sistemaId && menuData
-			? generateRoutesFromMenu(menuData, sistemaId)
-			: [];
+		sistemaId && menuData ? generateRoutesFromMenu(menuData, sistemaId) : [];
 
 	// Rutas de chat solo si el módulo está contratado y el remote registrado
 	const chatActive =

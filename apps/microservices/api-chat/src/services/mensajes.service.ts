@@ -22,7 +22,7 @@ export const mensajesService = {
   async obtenerMensajes(
     db: DbClient,
     conversacionId: number,
-    cursor?: number
+    cursor?: number,
   ): Promise<MensajeConRemitente[]> {
     const conditions = [eq(mensajes.conversacionId, conversacionId)]
 
@@ -70,7 +70,10 @@ export const mensajesService = {
     }))
   },
 
-  async crearMensaje(db: DbClient, data: NewMensaje): Promise<MensajeConRemitente> {
+  async crearMensaje(
+    db: DbClient,
+    data: NewMensaje,
+  ): Promise<MensajeConRemitente> {
     const [nuevoMensaje] = await db.insert(mensajes).values(data).returning()
 
     // Actualizar timestamp de la conversación
@@ -99,7 +102,10 @@ export const mensajesService = {
     }
   },
 
-  async obtenerMensajePorId(db: DbClient, id: number): Promise<Mensaje | undefined> {
+  async obtenerMensajePorId(
+    db: DbClient,
+    id: number,
+  ): Promise<Mensaje | undefined> {
     const [result] = await db.select().from(mensajes).where(eq(mensajes.id, id))
     return result
   },
@@ -108,7 +114,7 @@ export const mensajesService = {
     db: DbClient,
     id: number,
     contenido: string,
-    usuarioId: number
+    usuarioId: number,
   ): Promise<Mensaje | null> {
     const [mensaje] = await db
       .select()
@@ -128,7 +134,11 @@ export const mensajesService = {
     return actualizado
   },
 
-  async eliminarMensaje(db: DbClient, id: number, usuarioId: number): Promise<boolean> {
+  async eliminarMensaje(
+    db: DbClient,
+    id: number,
+    usuarioId: number,
+  ): Promise<boolean> {
     const [mensaje] = await db
       .select()
       .from(mensajes)

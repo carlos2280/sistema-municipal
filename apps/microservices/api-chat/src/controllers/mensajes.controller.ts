@@ -24,7 +24,7 @@ export const obtenerMensajes: RequestHandler = async (req, res, next) => {
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       Number(conversacionId),
-      usuarioId
+      usuarioId,
     )
 
     if (!esParticipante) {
@@ -34,7 +34,7 @@ export const obtenerMensajes: RequestHandler = async (req, res, next) => {
     const mensajes = await mensajesService.obtenerMensajes(
       tenantDb,
       Number(conversacionId),
-      cursor ? Number(cursor) : undefined
+      cursor ? Number(cursor) : undefined,
     )
 
     res.json({
@@ -67,7 +67,7 @@ export const crearMensaje: RequestHandler = async (req, res, next) => {
     const esParticipante = await conversacionesService.verificarParticipante(
       tenantDb,
       Number(conversacionId),
-      usuarioId
+      usuarioId,
     )
 
     if (!esParticipante) {
@@ -110,7 +110,7 @@ export const editarMensaje: RequestHandler = async (req, res, next) => {
       tenantDb,
       Number(id),
       contenido,
-      usuarioId
+      usuarioId,
     )
 
     if (!mensaje) {
@@ -140,7 +140,7 @@ export const eliminarMensaje: RequestHandler = async (req, res, next) => {
     const eliminado = await mensajesService.eliminarMensaje(
       tenantDb,
       Number(id),
-      usuarioId
+      usuarioId,
     )
 
     if (!eliminado) {

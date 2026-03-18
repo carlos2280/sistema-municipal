@@ -5,4 +5,7 @@ export type {
   AccountPanelProps,
   PanelMode,
 } from './AccountPanel.types';
-export { requiresContraCuenta, getContraCuentaPrefijo } from './AccountPanel.types';
+export {
+  requiresContraCuenta,
+  getContraCuentaPrefijo,
+} from './AccountPanel.types';

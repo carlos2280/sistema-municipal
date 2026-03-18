@@ -4,9 +4,7 @@ import { getEnv } from "@/config/env";
  * Calls gateway's internal endpoint to invalidate the subscription cache
  * for a specific tenant. Fire-and-forget — does not throw on failure.
  */
-export async function invalidateTenantCache(
-  tenantSlug: string,
-): Promise<void> {
+export async function invalidateTenantCache(tenantSlug: string): Promise<void> {
   const env = getEnv();
   const url = `${env.GATEWAY_INTERNAL_URL}/internal/cache/invalidate`;
 

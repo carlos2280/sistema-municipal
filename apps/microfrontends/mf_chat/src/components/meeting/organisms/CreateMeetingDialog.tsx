@@ -1,3 +1,4 @@
+import type { CreateReunionInput, TipoReunion } from '@/types/meeting.types'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -11,8 +12,11 @@ import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { memo, useCallback, useState } from 'react'
-import type { CreateReunionInput, TipoReunion } from '@/types/meeting.types'
-import { type GrupoOption, type SelectedParticipant, ParticipantSelector } from '../molecules/ParticipantSelector'
+import {
+  type GrupoOption,
+  ParticipantSelector,
+  type SelectedParticipant,
+} from '../molecules/ParticipantSelector'
 
 interface ConvOption {
   id: number
@@ -23,7 +27,10 @@ interface ConvOption {
 interface CreateMeetingDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: CreateReunionInput, conversacionId?: number) => Promise<void>
+  onConfirm: (
+    data: CreateReunionInput,
+    conversacionId?: number,
+  ) => Promise<void>
   isLoading?: boolean
   /** Cuando se provee, muestra un selector de conversación en el formulario */
   conversaciones?: ConvOption[]
@@ -68,7 +75,7 @@ export const CreateMeetingDialog = memo(function CreateMeetingDialog({
   const [ubicacion, setUbicacion] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [selectedConvId, setSelectedConvId] = useState<number | ''>(
-    conversaciones?.[0]?.id ?? ''
+    conversaciones?.[0]?.id ?? '',
   )
   const [participants, setParticipants] = useState<SelectedParticipant[]>([])
 
@@ -94,7 +101,7 @@ export const CreateMeetingDialog = memo(function CreateMeetingDialog({
     }
     const inicio = new Date(fechaInicio)
     const fin = new Date(fechaFin)
-    if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
+    if (Number.isNaN(inicio.getTime()) || Number.isNaN(fin.getTime())) {
       setError('Fechas inválidas')
       return
     }
@@ -126,7 +133,20 @@ export const CreateMeetingDialog = memo(function CreateMeetingDialog({
     } catch {
       setError('Error al crear la reunión. Inténtalo de nuevo.')
     }
-  }, [titulo, descripcion, tipo, fechaInicio, fechaFin, ubicacion, conversaciones, selectedConvId, participants, organizadorId, onConfirm, onClose])
+  }, [
+    titulo,
+    descripcion,
+    tipo,
+    fechaInicio,
+    fechaFin,
+    ubicacion,
+    conversaciones,
+    selectedConvId,
+    participants,
+    organizadorId,
+    onConfirm,
+    onClose,
+  ])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>

@@ -1,19 +1,19 @@
-import { useCallback, useMemo, useState } from "react";
-import { v4 as uuid } from "uuid";
+import type { DetalleItem } from 'mf_store/store';
+import { useCallback, useMemo, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import type {
   CentrosCostoItem,
   CuentaPresupuestaria,
   FilaDetalle,
   FilaDisplay,
-} from "../../types/presupuesto.types";
-import type { DetalleItem } from "mf_store/store";
+} from '../../types/presupuesto.types';
 import {
-  buildTreeMaps,
-  recalcAncestors,
-  getDeleteInfo,
-  removeWithDescendants,
   type DeleteInfo,
-} from "../../utils/presupuestoTree";
+  buildTreeMaps,
+  getDeleteInfo,
+  recalcAncestors,
+  removeWithDescendants,
+} from '../../utils/presupuestoTree';
 
 /**
  * Hook de responsabilidad única: gestión del estado local del grid de detalle.
@@ -115,25 +115,41 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     [],
   );
 
-  const setCuenta = useCallback((clientId: string, cuenta: CuentaPresupuestaria | null) => {
-    setFilas((prev) =>
-      prev.map((f) =>
-        f._clientId === clientId
-          ? { ...f, cuentaId: cuenta?.id, cuenta: cuenta ?? undefined, isDirty: true }
-          : f,
-      ),
-    );
-  }, []);
+  const setCuenta = useCallback(
+    (clientId: string, cuenta: CuentaPresupuestaria | null) => {
+      setFilas((prev) =>
+        prev.map((f) =>
+          f._clientId === clientId
+            ? {
+                ...f,
+                cuentaId: cuenta?.id,
+                cuenta: cuenta ?? undefined,
+                isDirty: true,
+              }
+            : f,
+        ),
+      );
+    },
+    [],
+  );
 
-  const setCentroCosto = useCallback((clientId: string, cc: CentrosCostoItem | null) => {
-    setFilas((prev) =>
-      prev.map((f) =>
-        f._clientId === clientId
-          ? { ...f, centroCostoId: cc?.id ?? null, centroCosto: cc, isDirty: true }
-          : f,
-      ),
-    );
-  }, []);
+  const setCentroCosto = useCallback(
+    (clientId: string, cc: CentrosCostoItem | null) => {
+      setFilas((prev) =>
+        prev.map((f) =>
+          f._clientId === clientId
+            ? {
+                ...f,
+                centroCostoId: cc?.id ?? null,
+                centroCosto: cc,
+                isDirty: true,
+              }
+            : f,
+        ),
+      );
+    },
+    [],
+  );
 
   /**
    * Actualiza el monto de una fila y propaga la suma en cascada
@@ -144,7 +160,9 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
     setFilas((prev) => {
       // 1. Actualizar la fila objetivo
       const updated = prev.map((f) =>
-        f._clientId === clientId ? { ...f, montoAnual: monto, isDirty: true } : f,
+        f._clientId === clientId
+          ? { ...f, montoAnual: monto, isDirty: true }
+          : f,
       );
 
       // 2. Propagar suma hacia ancestros
@@ -156,7 +174,9 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   const setObservacion = useCallback((clientId: string, obs: string) => {
     setFilas((prev) =>
       prev.map((f) =>
-        f._clientId === clientId ? { ...f, observacion: obs, isDirty: true } : f,
+        f._clientId === clientId
+          ? { ...f, observacion: obs, isDirty: true }
+          : f,
       ),
     );
   }, []);
@@ -178,7 +198,9 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
           .filter((f) => childrenOfParent.includes(f._clientId))
           .reduce((sum, f) => sum + f.montoAnual, 0);
         let recalced = filtered.map((f) =>
-          f._clientId === parentId ? { ...f, montoAnual: sumaHijos, isDirty: true } : f,
+          f._clientId === parentId
+            ? { ...f, montoAnual: sumaHijos, isDirty: true }
+            : f,
         );
         recalced = recalcAncestors(recalced, parentId, newMaps);
         return recalced;
@@ -223,7 +245,9 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   const marcarGuardada = useCallback((clientId: string, id: number) => {
     setFilas((prev) =>
       prev.map((f) =>
-        f._clientId === clientId ? { ...f, id, isNew: false, isDirty: false } : f,
+        f._clientId === clientId
+          ? { ...f, id, isNew: false, isDirty: false }
+          : f,
       ),
     );
   }, []);
@@ -236,7 +260,9 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
           .filter((f) => hijosIds.includes(f._clientId))
           .reduce((sum, f) => sum + f.montoAnual, 0);
         let updated = prev.map((f) =>
-          f._clientId === clientId ? { ...f, montoAnual: sumaHijos, isDirty: true } : f,
+          f._clientId === clientId
+            ? { ...f, montoAnual: sumaHijos, isDirty: true }
+            : f,
         );
         // Propagar hacia ancestros superiores
         const maps = buildTreeMaps(updated);
@@ -267,7 +293,11 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
         }
         const idx = idxMap.get(display._clientId);
         if (idx !== undefined && newFilas[idx].montoAnual !== sumaHijos) {
-          newFilas[idx] = { ...newFilas[idx], montoAnual: sumaHijos, isDirty: true };
+          newFilas[idx] = {
+            ...newFilas[idx],
+            montoAnual: sumaHijos,
+            isDirty: true,
+          };
         }
       }
       return newFilas;
@@ -283,11 +313,17 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
   // ── Accesores ────────────────────────────────────────────────────────────────
 
   const cuentasEnUso = useMemo(
-    () => filas.map((f) => f.cuentaId).filter((id): id is number => id !== undefined),
+    () =>
+      filas
+        .map((f) => f.cuentaId)
+        .filter((id): id is number => id !== undefined),
     [filas],
   );
 
-  const filasDirty = useMemo(() => filas.filter((f) => f.isDirty || f.isNew), [filas]);
+  const filasDirty = useMemo(
+    () => filas.filter((f) => f.isDirty || f.isNew),
+    [filas],
+  );
 
   return {
     filas,
@@ -349,7 +385,9 @@ function buildDisplayOrder(filas: FilaDetalle[]): FilaDisplay[] {
       continue;
     }
     const parentClientId =
-      f.cuenta.parentId !== null ? cuentaIdToClientId.get(f.cuenta.parentId) : undefined;
+      f.cuenta.parentId !== null
+        ? cuentaIdToClientId.get(f.cuenta.parentId)
+        : undefined;
 
     if (parentClientId) {
       const existing = childrenMap.get(parentClientId) ?? [];

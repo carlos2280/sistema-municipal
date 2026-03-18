@@ -23,7 +23,8 @@ export default function TenantNotFound() {
 				Municipalidad no encontrada
 			</Typography>
 			<Typography variant="body1" color="text.secondary">
-				La dirección ingresada no corresponde a ninguna municipalidad registrada.
+				La dirección ingresada no corresponde a ninguna municipalidad
+				registrada.
 			</Typography>
 		</Wrapper>
 	);

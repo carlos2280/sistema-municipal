@@ -5,12 +5,16 @@
  * identidad municipal, quote, módulos disponibles y reloj.
  */
 
-import { Box, Typography, alpha, keyframes, styled, useTheme } from "@mui/material";
-import { memo, useEffect, useState } from "react";
 import {
-	selectTenantNombre,
-	useAppSelector,
-} from "mf_store/store";
+	Box,
+	Typography,
+	alpha,
+	keyframes,
+	styled,
+	useTheme,
+} from "@mui/material";
+import { selectTenantNombre, useAppSelector } from "mf_store/store";
+import { memo, useEffect, useState } from "react";
 
 // ── Animations ──────────────────────────────────────────────────────────────
 
@@ -337,9 +341,31 @@ function MeridianLogo({ size = 22 }: { readonly size?: number }) {
 			aria-hidden="true"
 			style={{ color: accent, display: "block", flexShrink: 0 }}
 		>
-			<circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth=".9" opacity=".3" />
-			<ellipse cx="8" cy="8" rx="2.8" ry="6.2" stroke="currentColor" strokeWidth="1.5" />
-			<line x1="1.8" y1="8" x2="14.2" y2="8" stroke="currentColor" strokeWidth=".9" opacity=".3" />
+			<circle
+				cx="8"
+				cy="8"
+				r="6.2"
+				stroke="currentColor"
+				strokeWidth=".9"
+				opacity=".3"
+			/>
+			<ellipse
+				cx="8"
+				cy="8"
+				rx="2.8"
+				ry="6.2"
+				stroke="currentColor"
+				strokeWidth="1.5"
+			/>
+			<line
+				x1="1.8"
+				y1="8"
+				x2="14.2"
+				y2="8"
+				stroke="currentColor"
+				strokeWidth=".9"
+				opacity=".3"
+			/>
 			<circle cx="8" cy="8" r="1.4" fill="currentColor" />
 		</svg>
 	);
@@ -438,7 +464,12 @@ export const BrandingPanel = memo(function BrandingPanel() {
 				<CcAttribution>
 					<CcSeparator />
 					<CcLogo />
-					<CcName sx={{ color: theme.meridian.text.tx4, fontFamily: theme.typography.number?.fontFamily }}>
+					<CcName
+						sx={{
+							color: theme.meridian.text.tx4,
+							fontFamily: theme.typography.number?.fontFamily,
+						}}
+					>
 						C&amp;C Systems
 					</CcName>
 				</CcAttribution>
@@ -465,8 +496,7 @@ export const BrandingPanel = memo(function BrandingPanel() {
 						&ldquo;La interfaz debe desaparecer.
 						<br />
 						Solo debe quedar el trabajo
-						<br />
-						y la persona que lo hace.&rdquo;
+						<br />y la persona que lo hace.&rdquo;
 					</QuoteText>
 					<QuoteAuthor>— MERIDIAN Design Manifesto</QuoteAuthor>
 				</QuoteBlock>

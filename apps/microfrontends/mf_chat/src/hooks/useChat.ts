@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   type Mensaje,
-  useObtenerMensajesQuery,
   useCrearMensajeMutation,
+  useObtenerMensajesQuery,
 } from 'mf_store/store'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSocket } from './useSocket'
 
 const SEND_RATE_LIMIT_MS = 1_000
@@ -30,7 +30,10 @@ interface UseChatReturn {
   hasMore: boolean
 }
 
-export function useChat({ conversacionId, enabled = true }: UseChatOptions): UseChatReturn {
+export function useChat({
+  conversacionId,
+  enabled = true,
+}: UseChatOptions): UseChatReturn {
   const { isConnected, emit, on, off } = useSocket()
   const [localMensajes, setLocalMensajes] = useState<Mensaje[]>([])
   const [isTyping, setIsTypingState] = useState<TypingState>({})
@@ -39,9 +42,12 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
   // Rate limiting refs
   const lastSendTimeRef = useRef(0)
   // Typing auto-clear timeouts per user
-  const typingTimeoutsRef = useRef(new Map<number, ReturnType<typeof setTimeout>>())
+  const typingTimeoutsRef = useRef(
+    new Map<number, ReturnType<typeof setTimeout>>(),
+  )
 
   // Resetear cursor cuando cambia la conversación
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intencional — solo resetear al cambiar conversación
   useEffect(() => {
     setCursor(undefined)
     setLocalMensajes([])
@@ -68,7 +74,7 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
     {
       skip: !enabled || !conversacionId,
       refetchOnMountOrArgChange: true, // Forzar recarga al abrir el chat
-    }
+    },
   )
 
   // Mutation para crear mensaje (fallback si socket falla)
@@ -99,6 +105,7 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
   }, [isConnected, conversacionId, enabled, emit])
 
   // Escuchar nuevos mensajes en tiempo real
+  // biome-ignore lint/correctness/useExhaustiveDependencies: emit es estable por referencia (socket.io)
   useEffect(() => {
     if (!isConnected || !enabled) return
 
@@ -141,7 +148,7 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
           setTimeout(() => {
             setIsTypingState((prev) => ({ ...prev, [userId]: false }))
             timeouts.delete(userId)
-          }, TYPING_AUTO_CLEAR_MS)
+          }, TYPING_AUTO_CLEAR_MS),
         )
       } else {
         timeouts.delete(userId)
@@ -181,7 +188,7 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
         refetch()
       }
     },
-    [isConnected, conversacionId, emit, crearMensaje, refetch]
+    [isConnected, conversacionId, emit, crearMensaje, refetch],
   )
 
   // Indicador de escritura
@@ -194,7 +201,7 @@ export function useChat({ conversacionId, enabled = true }: UseChatOptions): Use
         isTyping: typing,
       })
     },
-    [isConnected, conversacionId, emit]
+    [isConnected, conversacionId, emit],
   )
 
   // Cargar más mensajes (paginación)

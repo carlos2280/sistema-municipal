@@ -1,12 +1,12 @@
-import cors from "cors";
-import express from "express";
-import { sql } from "drizzle-orm";
 import { loadEnv } from "@/config/env";
-import { initializeDB, type DbClient } from "@/db/client";
+import { type DbClient, initializeDB } from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
 import { requireGateway } from "@/libs/middleware/requireGateway";
-import { requestIdMiddleware } from "@municipal/core/logger";
 import apiRouter from "@/routes";
+import { requestIdMiddleware } from "@municipal/core/logger";
+import cors from "cors";
+import { sql } from "drizzle-orm";
+import express from "express";
 
 // 1. Load environment
 const env = loadEnv();
@@ -30,9 +30,17 @@ app.use("/api", apiRouter);
 app.get("/api/health", async (_req, res) => {
   try {
     await db.execute(sql`SELECT 1`);
-    res.json({ status: "ok", service: "api-platform", timestamp: new Date().toISOString() });
+    res.json({
+      status: "ok",
+      service: "api-platform",
+      timestamp: new Date().toISOString(),
+    });
   } catch {
-    res.status(503).json({ status: "unhealthy", service: "api-platform", timestamp: new Date().toISOString() });
+    res.status(503).json({
+      status: "unhealthy",
+      service: "api-platform",
+      timestamp: new Date().toISOString(),
+    });
   }
 });
 

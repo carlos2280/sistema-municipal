@@ -1,5 +1,5 @@
 const DocumentoGarantiaInformes = () => {
-	return <div>DocumentoGarantiaInformes</div>;
+  return <div>DocumentoGarantiaInformes</div>;
 };
 
 export default DocumentoGarantiaInformes;

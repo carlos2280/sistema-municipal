@@ -8,7 +8,10 @@ export const areasSchema = z.object({
 export const sistemasSchema = z.object({
   correo: z.string().email("Correo inválido"),
   contrasena: z.string().min(1, "Contraseña requerida"),
-  areaId: z.coerce.number().int().positive("areaId debe ser un número positivo"),
+  areaId: z.coerce
+    .number()
+    .int()
+    .positive("areaId debe ser un número positivo"),
 });
 
 export const loginSchema = z.object({
@@ -35,11 +38,15 @@ export const mfaSetupActivarSchema = z.object({
 
 export const cambiarContrasenaTemporalSchema = z.object({
   contrasenaTemporal: z.string().min(1, "Contraseña temporal requerida"),
-  contrasenaNueva: z.string().min(8, "La nueva contraseña debe tener al menos 8 caracteres"),
+  contrasenaNueva: z
+    .string()
+    .min(8, "La nueva contraseña debe tener al menos 8 caracteres"),
 });
 
 export const mfaPolicySchema = z.object({
   mfaPolicy: z.enum(["required", "optional", "disabled"], {
-    errorMap: () => ({ message: "mfaPolicy debe ser 'required', 'optional' o 'disabled'" }),
+    errorMap: () => ({
+      message: "mfaPolicy debe ser 'required', 'optional' o 'disabled'",
+    }),
   }),
 });

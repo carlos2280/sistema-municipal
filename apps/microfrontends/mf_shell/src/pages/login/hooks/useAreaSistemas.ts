@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import {
 	selectResolvedTenantSlug,
 	useAppSelector,
 	useLoginSistemasMutation,
 } from "mf_store/store";
+import { useEffect, useRef, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import type { TSchemaCredenciales } from "../../../types/login.zod";
 import type { SistemaOption } from "../types";
 
@@ -13,7 +13,9 @@ import type { SistemaOption } from "../types";
  * Watches areaId changes and fetches sistemas accordingly.
  * Single Responsibility: area → sistemas data fetching.
  */
-export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => {
+export const useAreaSistemas = (
+	methods: UseFormReturn<TSchemaCredenciales>,
+) => {
 	const tenantSlug = useAppSelector(selectResolvedTenantSlug) ?? "default";
 	const [sistemas, setSistemas] = useState<SistemaOption[]>([]);
 	const [isLoadingSistemas, setIsLoadingSistemas] = useState(false);
@@ -24,7 +26,12 @@ export const useAreaSistemas = (methods: UseFormReturn<TSchemaCredenciales>) => 
 		const subscription = methods.watch(async (values) => {
 			const { correo, contrasena, areaId } = values;
 
-			if (areaId && areaId !== previousAreaIdRef.current && correo && contrasena) {
+			if (
+				areaId &&
+				areaId !== previousAreaIdRef.current &&
+				correo &&
+				contrasena
+			) {
 				previousAreaIdRef.current = areaId;
 				setIsLoadingSistemas(true);
 

@@ -1,8 +1,16 @@
 import type { DbClient } from "@/db/client";
-import { type Menu, type MenuUpdate, type NewMenu, menus } from "@municipal/db-identidad";
+import {
+  type Menu,
+  type MenuUpdate,
+  type NewMenu,
+  menus,
+} from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
-export const createMenu = async (db: DbClient, data: NewMenu): Promise<Menu> => {
+export const createMenu = async (
+  db: DbClient,
+  data: NewMenu,
+): Promise<Menu> => {
   try {
     const [createdMenu] = await db.insert(menus).values(data).returning();
     return createdMenu;
@@ -23,7 +31,10 @@ export const getAllMenus = async (db: DbClient): Promise<Menu[]> => {
   }
 };
 
-export const getMenuById = async (db: DbClient, id: number): Promise<Menu | undefined> => {
+export const getMenuById = async (
+  db: DbClient,
+  id: number,
+): Promise<Menu | undefined> => {
   try {
     const [menu] = await db.select().from(menus).where(eq(menus.id, id));
     return menu;
@@ -53,7 +64,10 @@ export const updateMenu = async (
   }
 };
 
-export const deleteMenu = async (db: DbClient, id: number): Promise<Menu | null> => {
+export const deleteMenu = async (
+  db: DbClient,
+  id: number,
+): Promise<Menu | null> => {
   try {
     const [deletedMenu] = await db
       .delete(menus)
@@ -68,7 +82,10 @@ export const deleteMenu = async (db: DbClient, id: number): Promise<Menu | null>
 };
 
 // Obtiene todos los menús asociados a un sistema específico
-export const getMenusBySistema = async (db: DbClient, sistemaId: number): Promise<Menu[]> => {
+export const getMenusBySistema = async (
+  db: DbClient,
+  sistemaId: number,
+): Promise<Menu[]> => {
   try {
     return await db.select().from(menus).where(eq(menus.idSistema, sistemaId));
   } catch (error) {
@@ -79,7 +96,10 @@ export const getMenusBySistema = async (db: DbClient, sistemaId: number): Promis
 };
 
 // Obtiene todos los submenús (menús hijos) de un menú padre
-export const getSubmenus = async (db: DbClient, idPadre: number): Promise<Menu[]> => {
+export const getSubmenus = async (
+  db: DbClient,
+  idPadre: number,
+): Promise<Menu[]> => {
   try {
     return await db.select().from(menus).where(eq(menus.idPadre, idPadre));
   } catch (error) {

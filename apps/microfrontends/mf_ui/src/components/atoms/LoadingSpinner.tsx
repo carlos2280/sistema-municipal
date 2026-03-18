@@ -4,7 +4,14 @@
  * Indicador de carga elegante con animación suave
  */
 
-import { Box, CircularProgress, Typography, alpha, styled, keyframes } from "@mui/material";
+import {
+	Box,
+	CircularProgress,
+	Typography,
+	alpha,
+	keyframes,
+	styled,
+} from "@mui/material";
 import type { ReactNode } from "react";
 
 // ============================================================================
@@ -36,23 +43,23 @@ const fadeIn = keyframes`
 // ============================================================================
 
 const SpinnerContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: theme.spacing(2),
-  animation: `${fadeIn} 0.3s ease-out`,
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: theme.spacing(2),
+	animation: `${fadeIn} 0.3s ease-out`,
 }));
 
 const SpinnerWrapper = styled(Box)(({ theme }) => ({
-  position: "relative",
-  display: "inline-flex",
+	position: "relative",
+	display: "inline-flex",
 }));
 
 const LoadingText = styled(Typography)(({ theme }) => ({
-  animation: `${pulse} 2s ease-in-out infinite`,
-  color: theme.palette.text.secondary,
-  fontWeight: 500,
+	animation: `${pulse} 2s ease-in-out infinite`,
+	color: theme.palette.text.secondary,
+	fontWeight: 500,
 }));
 
 // ============================================================================
@@ -60,16 +67,16 @@ const LoadingText = styled(Typography)(({ theme }) => ({
 // ============================================================================
 
 interface LoadingSpinnerProps {
-  /** Tamaño del spinner */
-  size?: "small" | "medium" | "large";
-  /** Texto a mostrar debajo del spinner */
-  text?: string;
-  /** Color del spinner (usa primary del tema por defecto) */
-  color?: "primary" | "secondary" | "inherit";
-  /** Si debe ocupar toda la pantalla */
-  fullScreen?: boolean;
-  /** Contenido adicional */
-  children?: ReactNode;
+	/** Tamaño del spinner */
+	size?: "small" | "medium" | "large";
+	/** Texto a mostrar debajo del spinner */
+	text?: string;
+	/** Color del spinner (usa primary del tema por defecto) */
+	color?: "primary" | "secondary" | "inherit";
+	/** Si debe ocupar toda la pantalla */
+	fullScreen?: boolean;
+	/** Contenido adicional */
+	children?: ReactNode;
 }
 
 // ============================================================================
@@ -77,9 +84,9 @@ interface LoadingSpinnerProps {
 // ============================================================================
 
 const sizeMap = {
-  small: 24,
-  medium: 40,
-  large: 56,
+	small: 24,
+	medium: 40,
+	large: 56,
 };
 
 // ============================================================================
@@ -87,59 +94,59 @@ const sizeMap = {
 // ============================================================================
 
 export function LoadingSpinner({
-  size = "medium",
-  text,
-  color = "primary",
-  fullScreen = false,
-  children,
+	size = "medium",
+	text,
+	color = "primary",
+	fullScreen = false,
+	children,
 }: LoadingSpinnerProps) {
-  const spinnerSize = sizeMap[size];
+	const spinnerSize = sizeMap[size];
 
-  const content = (
-    <SpinnerContainer>
-      <SpinnerWrapper>
-        <CircularProgress
-          size={spinnerSize}
-          color={color}
-          thickness={4}
-          sx={{
-            "& .MuiCircularProgress-circle": {
-              strokeLinecap: "round",
-            },
-          }}
-        />
-      </SpinnerWrapper>
+	const content = (
+		<SpinnerContainer>
+			<SpinnerWrapper>
+				<CircularProgress
+					size={spinnerSize}
+					color={color}
+					thickness={4}
+					sx={{
+						"& .MuiCircularProgress-circle": {
+							strokeLinecap: "round",
+						},
+					}}
+				/>
+			</SpinnerWrapper>
 
-      {text && (
-        <LoadingText variant={size === "small" ? "caption" : "body2"}>
-          {text}
-        </LoadingText>
-      )}
+			{text && (
+				<LoadingText variant={size === "small" ? "caption" : "body2"}>
+					{text}
+				</LoadingText>
+			)}
 
-      {children}
-    </SpinnerContainer>
-  );
+			{children}
+		</SpinnerContainer>
+	);
 
-  if (fullScreen) {
-    return (
-      <Box
-        sx={{
-          position: "fixed",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: (theme) => alpha(theme.palette.background.default, 0.8),
-          backdropFilter: "blur(4px)",
-          zIndex: (theme) => theme.zIndex.modal + 1,
-        }}
-      >
-        {content}
-      </Box>
-    );
-  }
+	if (fullScreen) {
+		return (
+			<Box
+				sx={{
+					position: "fixed",
+					inset: 0,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					bgcolor: (theme) => alpha(theme.palette.background.default, 0.8),
+					backdropFilter: "blur(4px)",
+					zIndex: (theme) => theme.zIndex.modal + 1,
+				}}
+			>
+				{content}
+			</Box>
+		);
+	}
 
-  return content;
+	return content;
 }
 
 export default LoadingSpinner;

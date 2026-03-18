@@ -7,26 +7,26 @@
  * Secciones: Sistemas, Menú del sistema activo, Acciones Globales.
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import {
-	Search,
 	ArrowRight,
-	LogOut,
-	Palette,
 	Home,
 	LayoutGrid,
+	LogOut,
+	Palette,
+	Search,
 } from "lucide-react";
 import * as icons from "lucide-react";
 import type { LucideProps } from "lucide-react";
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import {
+	selectSistemaId,
+	useAppSelector,
+	useCambiarSistemaMutation,
+	useMisSistemasQuery,
+} from "mf_store/store";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import slugify from "slugify";
-import {
-	useAppSelector,
-	selectSistemaId,
-	useMisSistemasQuery,
-	useCambiarSistemaMutation,
-} from "mf_store/store";
 import { useMenu } from "../../hooks/useMenu";
 import type { MenuItem } from "../../types/menu";
 
@@ -59,13 +59,18 @@ function toPascalCase(str: string): string {
 function SafeIcon({ name, size = 18 }: { name: string | null; size?: number }) {
 	if (!name) return <LayoutGrid size={size} strokeWidth={1.5} />;
 	const pascalName = toPascalCase(name);
-	const IconComp = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
+	const IconComp = (
+		icons as unknown as Record<string, React.ComponentType<LucideProps>>
+	)[pascalName];
 	if (!IconComp) return <LayoutGrid size={size} strokeWidth={1.5} />;
 	return <IconComp size={size} strokeWidth={1.5} />;
 }
 
 /** Aplana el árbol de menú recursivo en items planos con su path */
-function flattenMenu(items: MenuItem[], parentPath: string): { item: MenuItem; path: string }[] {
+function flattenMenu(
+	items: MenuItem[],
+	parentPath: string,
+): { item: MenuItem; path: string }[] {
 	const result: { item: MenuItem; path: string }[] = [];
 	for (const item of items) {
 		const slug = slugify(item.nombre, { lower: true, strict: true });
@@ -279,7 +284,11 @@ const FooterHint = styled("span")({
 
 // ─── Component ──────────────────────────────────────────────────
 
-function CommandPalette({ isOpen, onClose, onOpenCustomizer }: CommandPaletteProps) {
+function CommandPalette({
+	isOpen,
+	onClose,
+	onOpenCustomizer,
+}: CommandPaletteProps) {
 	const navigate = useNavigate();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [query, setQuery] = useState("");
@@ -367,7 +376,16 @@ function CommandPalette({ isOpen, onClose, onOpenCustomizer }: CommandPalettePro
 		});
 
 		return items;
-	}, [misSistemas, sistemaIdActual, menu, nombreSistema, navigate, onClose, cambiarSistema, onOpenCustomizer]);
+	}, [
+		misSistemas,
+		sistemaIdActual,
+		menu,
+		nombreSistema,
+		navigate,
+		onClose,
+		cambiarSistema,
+		onOpenCustomizer,
+	]);
 
 	// ── Filter ────────────────────────────────────────────────────
 	const filtered = useMemo(() => {
@@ -375,8 +393,7 @@ function CommandPalette({ isOpen, onClose, onOpenCustomizer }: CommandPalettePro
 		const q = query.toLowerCase().trim();
 		return allItems.filter(
 			(item) =>
-				item.label.toLowerCase().includes(q) ||
-				(item.keywords && item.keywords.includes(q)),
+				item.label.toLowerCase().includes(q) || item.keywords?.includes(q),
 		);
 	}, [allItems, query]);
 

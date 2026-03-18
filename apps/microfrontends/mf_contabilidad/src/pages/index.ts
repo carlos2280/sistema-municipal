@@ -1,7 +1,7 @@
-import PlanDeCuentas from "./planDeCuentas/PlanDeCuentas";
-import Presupuesto from "./presupuesto/Presupuesto";
+import PlanDeCuentas from './planDeCuentas/PlanDeCuentas';
+import Presupuesto from './presupuesto/Presupuesto';
 
 export default {
-	Presupuesto,
-	PlanDeCuentas,
+  Presupuesto,
+  PlanDeCuentas,
 };

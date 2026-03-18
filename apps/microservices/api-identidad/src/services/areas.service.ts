@@ -1,8 +1,16 @@
 import type { DbClient } from "@/db/client";
-import { type Area, type AreaUpdate, type NewArea, areas } from "@municipal/db-identidad";
+import {
+  type Area,
+  type AreaUpdate,
+  type NewArea,
+  areas,
+} from "@municipal/db-identidad";
 import { eq } from "drizzle-orm";
 
-export const createArea = async (db: DbClient, data: NewArea): Promise<Area> => {
+export const createArea = async (
+  db: DbClient,
+  data: NewArea,
+): Promise<Area> => {
   try {
     const [createdArea] = await db.insert(areas).values(data).returning();
     return createdArea;
@@ -23,7 +31,10 @@ export const getAllAreas = async (db: DbClient): Promise<Area[]> => {
   }
 };
 
-export const getAreaById = async (db: DbClient, id: number): Promise<Area | undefined> => {
+export const getAreaById = async (
+  db: DbClient,
+  id: number,
+): Promise<Area | undefined> => {
   try {
     const [area] = await db.select().from(areas).where(eq(areas.id, id));
     return area;
@@ -53,7 +64,10 @@ export const updateArea = async (
   }
 };
 
-export const deleteArea = async (db: DbClient, id: number): Promise<Area | null> => {
+export const deleteArea = async (
+  db: DbClient,
+  id: number,
+): Promise<Area | null> => {
   try {
     const [deletedArea] = await db
       .delete(areas)

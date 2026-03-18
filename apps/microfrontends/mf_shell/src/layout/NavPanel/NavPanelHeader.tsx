@@ -5,14 +5,14 @@
  * con opción de cambiar (abre el Compass).
  */
 
-import { styled, alpha } from "@mui/material/styles";
-import { X, ChevronRight } from "lucide-react";
+import { alpha, styled } from "@mui/material/styles";
+import { ChevronRight, X } from "lucide-react";
 import * as icons from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import {
-	useAppSelector,
-	selectNombreCompleto,
 	selectEmail,
+	selectNombreCompleto,
+	useAppSelector,
 } from "mf_store/store";
 import { useMenu } from "../../hooks/useMenu";
 
@@ -212,7 +212,9 @@ function NavPanelHeader({ onClose, onChangeSistema }: NavPanelHeaderProps) {
 	// Intentar renderizar icono del sistema activo
 	const sistemaIconName = "layout-grid"; // fallback genérico
 	const pascalName = toPascalCase(sistemaIconName);
-	const IconComp = (icons as unknown as Record<string, React.ComponentType<LucideProps>>)[pascalName];
+	const IconComp = (
+		icons as unknown as Record<string, React.ComponentType<LucideProps>>
+	)[pascalName];
 
 	return (
 		<HeaderRoot>

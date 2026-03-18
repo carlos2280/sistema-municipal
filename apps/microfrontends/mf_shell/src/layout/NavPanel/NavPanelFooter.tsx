@@ -4,10 +4,10 @@
  * Acciones: Personalizar tema + Cerrar sesión.
  */
 
-import { styled, alpha } from "@mui/material/styles";
-import { Palette, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { alpha, styled } from "@mui/material/styles";
+import { LogOut, Palette } from "lucide-react";
 import { useLogoutMutation } from "mf_store/store";
+import { useNavigate } from "react-router-dom";
 import { usePersistor } from "../../context/PersistorContext";
 
 // ─── Types ──────────────────────────────────────────────────────

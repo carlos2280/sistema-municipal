@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import { ArrowLeft, PanelRightClose, Search, UserPlus } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ContactItem } from '../atoms/ContactItem'
 
 interface Usuario {
@@ -48,7 +48,7 @@ export function NewChatPanel({
     return usuarios.filter(
       (u) =>
         u.nombreCompleto.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term)
+        u.email.toLowerCase().includes(term),
     )
   }, [usuarios, searchTerm])
 

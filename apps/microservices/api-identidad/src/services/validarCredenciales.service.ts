@@ -1,5 +1,10 @@
 import type { DbClient } from "@/db/client";
-import { areas, perfilAreaUsuario, perfiles, usuarios } from "@municipal/db-identidad";
+import {
+  areas,
+  perfilAreaUsuario,
+  perfiles,
+  usuarios,
+} from "@municipal/db-identidad";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 

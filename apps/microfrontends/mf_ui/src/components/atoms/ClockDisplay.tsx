@@ -64,7 +64,9 @@ function ClockDisplay({
 	updateInterval = 30_000,
 	className,
 }: ClockDisplayProps) {
-	const [time, setTime] = useState(() => formatTime(new Date(), format, showSeconds));
+	const [time, setTime] = useState(() =>
+		formatTime(new Date(), format, showSeconds),
+	);
 
 	useEffect(() => {
 		const interval = setInterval(() => {

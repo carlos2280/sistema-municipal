@@ -4,7 +4,7 @@
  * Indicador de estado simple y elegante
  */
 
-import { Box, styled, keyframes } from "@mui/material";
+import { Box, keyframes, styled } from "@mui/material";
 
 // ============================================================================
 // ANIMATIONS
@@ -29,14 +29,14 @@ type StatusColor = "success" | "warning" | "error" | "info" | "neutral";
 type StatusSize = "small" | "medium" | "large";
 
 interface StatusDotProps {
-  /** Color del estado */
-  color?: StatusColor;
-  /** Tamaño del punto */
-  size?: StatusSize;
-  /** Si debe tener animación de pulso */
-  pulse?: boolean;
-  /** Texto alternativo para accesibilidad */
-  label?: string;
+	/** Color del estado */
+	color?: StatusColor;
+	/** Tamaño del punto */
+	size?: StatusSize;
+	/** Si debe tener animación de pulso */
+	pulse?: boolean;
+	/** Texto alternativo para accesibilidad */
+	label?: string;
 }
 
 // ============================================================================
@@ -44,9 +44,9 @@ interface StatusDotProps {
 // ============================================================================
 
 const sizeMap: Record<StatusSize, number> = {
-  small: 6,
-  medium: 8,
-  large: 10,
+	small: 6,
+	medium: 8,
+	large: 10,
 };
 
 // ============================================================================
@@ -54,34 +54,34 @@ const sizeMap: Record<StatusSize, number> = {
 // ============================================================================
 
 const Dot = styled(Box, {
-  shouldForwardProp: (prop) =>
-    !["statusColor", "statusSize", "shouldPulse"].includes(prop as string),
+	shouldForwardProp: (prop) =>
+		!["statusColor", "statusSize", "shouldPulse"].includes(prop as string),
 })<{
-  statusColor: StatusColor;
-  statusSize: StatusSize;
-  shouldPulse: boolean;
+	statusColor: StatusColor;
+	statusSize: StatusSize;
+	shouldPulse: boolean;
 }>(({ theme, statusColor, statusSize, shouldPulse }) => {
-  const getColor = () => {
-    if (statusColor === "neutral") {
-      return theme.palette.grey[500];
-    }
-    return theme.palette[statusColor].main;
-  };
+	const getColor = () => {
+		if (statusColor === "neutral") {
+			return theme.palette.grey[500];
+		}
+		return theme.palette[statusColor].main;
+	};
 
-  const color = getColor();
-  const dimension = sizeMap[statusSize];
+	const color = getColor();
+	const dimension = sizeMap[statusSize];
 
-  return {
-    width: dimension,
-    height: dimension,
-    borderRadius: "50%",
-    backgroundColor: color,
-    flexShrink: 0,
-    ...(shouldPulse && {
-      animation: `${pulse} 2s ease-in-out infinite`,
-      boxShadow: `0 0 0 2px ${theme.palette.background.paper}, 0 0 0 4px ${color}20`,
-    }),
-  };
+	return {
+		width: dimension,
+		height: dimension,
+		borderRadius: "50%",
+		backgroundColor: color,
+		flexShrink: 0,
+		...(shouldPulse && {
+			animation: `${pulse} 2s ease-in-out infinite`,
+			boxShadow: `0 0 0 2px ${theme.palette.background.paper}, 0 0 0 4px ${color}20`,
+		}),
+	};
 });
 
 // ============================================================================
@@ -89,20 +89,20 @@ const Dot = styled(Box, {
 // ============================================================================
 
 export function StatusDot({
-  color = "neutral",
-  size = "medium",
-  pulse: shouldPulse = false,
-  label,
+	color = "neutral",
+	size = "medium",
+	pulse: shouldPulse = false,
+	label,
 }: StatusDotProps) {
-  return (
-    <Dot
-      statusColor={color}
-      statusSize={size}
-      shouldPulse={shouldPulse}
-      role="status"
-      aria-label={label}
-    />
-  );
+	return (
+		<Dot
+			statusColor={color}
+			statusSize={size}
+			shouldPulse={shouldPulse}
+			role="status"
+			aria-label={label}
+		/>
+	);
 }
 
 export default StatusDot;

@@ -1,7 +1,7 @@
 import slugify from "slugify";
+import { MicrofrontendErrorBoundary } from "../components/errors";
 import type { MenuItem } from "../types/menu";
 import { componentsBySistemaId } from "./componentsMap";
-import { MicrofrontendErrorBoundary } from "../components/errors";
 
 interface Route {
 	path: string;

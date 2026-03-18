@@ -1,11 +1,13 @@
 import type { DbClient } from "@/db/client";
-import { centrosCosto, type NewCentrosCosto } from "@municipal/db-contabilidad";
+import { type NewCentrosCosto, centrosCosto } from "@municipal/db-contabilidad";
 import { eq } from "drizzle-orm";
 
 export const obtenerCentrosCosto = async (db: DbClient, soloActivos = true) => {
   const query = db.select().from(centrosCosto);
   if (soloActivos) {
-    return query.where(eq(centrosCosto.activo, true)).orderBy(centrosCosto.codigo);
+    return query
+      .where(eq(centrosCosto.activo, true))
+      .orderBy(centrosCosto.codigo);
   }
   return query.orderBy(centrosCosto.codigo);
 };

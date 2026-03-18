@@ -24,11 +24,17 @@ export const updateMfaPolicy: RequestHandler = async (req, res, next) => {
     const validPolicies: MfaPolicy[] = ["required", "optional", "disabled"];
     if (!mfaPolicy || !validPolicies.includes(mfaPolicy as MfaPolicy)) {
       return next(
-        new AppError("Política inválida. Valores: required | optional | disabled", 400),
+        new AppError(
+          "Política inválida. Valores: required | optional | disabled",
+          400,
+        ),
       );
     }
 
-    await configuracionService.updateMfaPolicy(tenantSlug, mfaPolicy as MfaPolicy);
+    await configuracionService.updateMfaPolicy(
+      tenantSlug,
+      mfaPolicy as MfaPolicy,
+    );
     res.status(200).json({ message: "Política MFA actualizada correctamente" });
   } catch (error) {
     next(error);

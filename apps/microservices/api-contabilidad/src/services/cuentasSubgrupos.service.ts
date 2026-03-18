@@ -2,12 +2,15 @@ import type { DbClient } from "@/db/client";
 import { cuentasSubgrupos } from "@municipal/db-contabilidad";
 import { eq } from "drizzle-orm";
 
-export const crearCuentasSubgrupo = async (db: DbClient, data: {
-  codigo: string;
-  nombre: string;
-  tipoCuentaId: number;
-  parentId?: number;
-}) => {
+export const crearCuentasSubgrupo = async (
+  db: DbClient,
+  data: {
+    codigo: string;
+    nombre: string;
+    tipoCuentaId: number;
+    parentId?: number;
+  },
+) => {
   const [inserted] = await db.insert(cuentasSubgrupos).values(data).returning();
   return inserted;
 };

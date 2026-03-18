@@ -9,9 +9,9 @@
  * se conectará cuando exista el backend de notificaciones.
  */
 
-import { styled, alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { Bell, X } from "lucide-react";
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -56,7 +56,9 @@ const PanelRoot = styled("div", {
 		flexDirection: "column",
 		overflow: "hidden",
 		opacity: visible ? 1 : 0,
-		transform: visible ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.98)",
+		transform: visible
+			? "translateY(0) scale(1)"
+			: "translateY(-8px) scale(0.98)",
 		pointerEvents: visible ? "all" : "none",
 		transition: `opacity 180ms ${theme.meridian.easings.out}, transform 180ms ${theme.meridian.easings.out}`,
 

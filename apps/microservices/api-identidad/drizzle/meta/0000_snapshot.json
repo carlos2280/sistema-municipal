@@ -71,12 +71,8 @@
           "tableFrom": "departamentos",
           "tableTo": "direcciones",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "id_direccion"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id_direccion"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -123,12 +119,8 @@
           "tableFrom": "oficinas",
           "tableTo": "departamentos",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "id_departamento"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id_departamento"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -235,12 +227,8 @@
           "tableFrom": "usuarios",
           "tableTo": "oficinas",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "id_oficina"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id_oficina"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -250,9 +238,7 @@
         "usuarios_email_unique": {
           "name": "usuarios_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -309,12 +295,8 @@
           "tableFrom": "tokens_contrasena_temporal",
           "tableTo": "usuarios",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "usuario_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["usuario_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -324,9 +306,7 @@
         "tokens_contrasena_temporal_token_unique": {
           "name": "tokens_contrasena_temporal_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -506,12 +486,8 @@
           "tableFrom": "perfil_area_usuario",
           "tableTo": "perfiles",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "perfil_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["perfil_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -520,12 +496,8 @@
           "tableFrom": "perfil_area_usuario",
           "tableTo": "areas",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["area_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -534,12 +506,8 @@
           "tableFrom": "perfil_area_usuario",
           "tableTo": "usuarios",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "usuario_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["usuario_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -549,11 +517,7 @@
         "perfil_area_usuario_perfil_id_area_id_usuario_id_unique": {
           "name": "perfil_area_usuario_perfil_id_area_id_usuario_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "perfil_id",
-            "area_id",
-            "usuario_id"
-          ]
+          "columns": ["perfil_id", "area_id", "usuario_id"]
         }
       },
       "policies": {},
@@ -604,12 +568,8 @@
           "tableFrom": "sistema_perfil",
           "tableTo": "sistemas",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "sistema_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sistema_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -618,12 +578,8 @@
           "tableFrom": "sistema_perfil",
           "tableTo": "perfiles",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "perfil_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["perfil_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -727,12 +683,8 @@
           "tableFrom": "menu",
           "tableTo": "sistemas",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "id_sistema"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id_sistema"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -741,12 +693,8 @@
           "tableFrom": "menu",
           "tableTo": "menu",
           "schemaTo": "identidad",
-          "columnsFrom": [
-            "id_padre"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id_padre"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

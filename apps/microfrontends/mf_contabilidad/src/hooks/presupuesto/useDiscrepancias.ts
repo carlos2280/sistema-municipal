@@ -1,5 +1,9 @@
-import { useMemo } from "react";
-import type { FilaDetalle, FilaDisplay, EquilibrioState } from "../../types/presupuesto.types";
+import { useMemo } from 'react';
+import type {
+  EquilibrioState,
+  FilaDetalle,
+  FilaDisplay,
+} from '../../types/presupuesto.types';
 
 /**
  * Hook de responsabilidad única: detección de discrepancias padre/hijo
@@ -45,13 +49,13 @@ export const useDiscrepancias = (
     const totalGastos = sumarRaices(filasGastos);
     const diferencia = totalIngresos - totalGastos;
 
-    let estado: EquilibrioState["estado"];
+    let estado: EquilibrioState['estado'];
     if (totalDiscrepancias > 0) {
-      estado = "warning";
+      estado = 'warning';
     } else if (diferencia !== 0) {
-      estado = "error";
+      estado = 'error';
     } else {
-      estado = "ok";
+      estado = 'ok';
     }
 
     return {
@@ -74,7 +78,9 @@ export const useDiscrepancias = (
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-function buildDiscrepanciasMap(filas: FilaDisplay[]): Map<string, number | null> {
+function buildDiscrepanciasMap(
+  filas: FilaDisplay[],
+): Map<string, number | null> {
   const map = new Map<string, number | null>();
 
   // Index O(n): clientId → fila para lookup rápido

@@ -1,1 +1,1 @@
-export { ChatDrawerWrapper, default } from './ChatDrawerWrapper';
+export { ChatDrawerWrapper, default } from "./ChatDrawerWrapper";

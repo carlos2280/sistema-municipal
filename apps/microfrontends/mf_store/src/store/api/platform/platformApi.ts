@@ -1,5 +1,5 @@
-import { baseApi } from "../base/baseApi";
 import type { ActiveModule } from "@/store/features/subscriptionsSlice";
+import { baseApi } from "../base/baseApi";
 
 export const platformApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({

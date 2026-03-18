@@ -5,12 +5,12 @@ import { errorHandler } from "@/libs/middleware/error.middleware";
 import { requireGateway } from "@/libs/middleware/requireGateway";
 import { tenantDbMiddleware } from "@/libs/middleware/tenantDb";
 import router from "@/routes";
+import { requestIdMiddleware } from "@municipal/core/logger";
 import cors from "cors";
+import { sql } from "drizzle-orm";
 import express, { type Express } from "express";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { sql } from "drizzle-orm";
-import { requestIdMiddleware } from "@municipal/core/logger";
 
 // Cargar y validar variables de entorno
 const env = loadEnv();
@@ -33,9 +33,17 @@ app.use("/api", router);
 app.get("/api/health", async (_req, res) => {
   try {
     await db.execute(sql`SELECT 1`);
-    res.json({ status: "ok", service: "api-identidad", timestamp: new Date().toISOString() });
+    res.json({
+      status: "ok",
+      service: "api-identidad",
+      timestamp: new Date().toISOString(),
+    });
   } catch {
-    res.status(503).json({ status: "unhealthy", service: "api-identidad", timestamp: new Date().toISOString() });
+    res.status(503).json({
+      status: "unhealthy",
+      service: "api-identidad",
+      timestamp: new Date().toISOString(),
+    });
   }
 });
 

@@ -1,32 +1,39 @@
+import { CallModal, IncomingCallDialog } from '@/components/call/organisms'
+import { MeetingDetail, MeetingList } from '@/components/meeting/organisms'
+import { ChatErrorBoundary } from '@/components/organisms/ChatErrorBoundary'
+import { useCall, useConversaciones, useOnlineUsers } from '@/hooks'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { ThemeProvider, useTheme, type Theme } from '@mui/material/styles'
+import { type Theme, ThemeProvider, useTheme } from '@mui/material/styles'
 import { MessageSquarePlus, Users } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
 import {
+  selectUsuarioId,
+  useAppSelector,
   useBuscarUsuariosQuery,
   useCrearConversacionDirectaMutation,
   useCrearGrupoMutation,
   useIniciarReunionMutation,
   useLazyObtenerTokenLlamadaQuery,
-  selectUsuarioId,
-  useAppSelector,
 } from 'mf_store/store'
-import { useCall, useConversaciones, useOnlineUsers } from '@/hooks'
-import { CallModal, IncomingCallDialog } from '@/components/call/organisms'
-import { MeetingDetail, MeetingList } from '@/components/meeting/organisms'
+import { useCallback, useMemo, useState } from 'react'
 import { ChatPanel } from './ChatPanel'
 import { ChatWindow } from './ChatWindow'
 import { MembersPanel } from './MembersPanel'
 import { NewChatPanel } from './NewChatPanel'
 import { NewGroupPanel } from './NewGroupPanel'
-import { ChatErrorBoundary } from '@/components/organisms/ChatErrorBoundary'
 
-type ViewType = 'conversations' | 'chat' | 'newChat' | 'newGroup' | 'members' | 'meetings' | 'meetingDetail'
+type ViewType =
+  | 'conversations'
+  | 'chat'
+  | 'newChat'
+  | 'newGroup'
+  | 'members'
+  | 'meetings'
+  | 'meetingDetail'
 
 interface ChatDrawerProps {
   open: boolean
@@ -56,14 +63,24 @@ export function ChatDrawer({
   // RTK Query hooks
   const shouldFetchUsuarios = view === 'newChat' || view === 'newGroup'
   const { data: usuarios = [], isLoading: isLoadingUsuarios } =
-    useBuscarUsuariosQuery({ q: searchTerm, limit: 50 }, { skip: !shouldFetchUsuarios })
+    useBuscarUsuariosQuery(
+      { q: searchTerm, limit: 50 },
+      { skip: !shouldFetchUsuarios },
+    )
 
   // Hook de usuarios online
   const { onlineUsers } = useOnlineUsers()
   const onlineUsersArray = useMemo(() => Array.from(onlineUsers), [onlineUsers])
 
   // Hook de llamadas
-  const { callState, initiateCall, acceptCall, rejectCall, endCall, joinCallDirect } = useCall()
+  const {
+    callState,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    joinCallDirect,
+  } = useCall()
   const [fetchToken] = useLazyObtenerTokenLlamadaQuery()
 
   const [crearConversacionDirecta, { isLoading: isCreatingDirecta }] =
@@ -83,13 +100,13 @@ export function ChatDrawer({
 
   const activeConversacion = useMemo(
     () => conversaciones.find((c) => c.id === activeConversationId),
-    [conversaciones, activeConversationId]
+    [conversaciones, activeConversationId],
   )
 
   const isActiveGroupAdmin = useMemo(() => {
     if (!activeConversacion || activeConversacion.tipo !== 'grupo') return false
     const participante = activeConversacion.participantes.find(
-      (p) => p.usuarioId === currentUserId
+      (p) => p.usuarioId === currentUserId,
     )
     return participante?.rol === 'admin'
   }, [activeConversacion, currentUserId])
@@ -120,15 +137,23 @@ export function ChatDrawer({
     setView('meetingDetail')
   }, [])
 
-  const handleIniciarReunion = useCallback(async (reunionId: number) => {
-    try {
-      const result = await iniciarReunionMutation(reunionId).unwrap()
-      const { llamada } = result
-      joinCallDirect(llamada.id, llamada.token, llamada.livekitUrl, llamada.roomName)
-    } catch {
-      // error manejado por RTK Query
-    }
-  }, [iniciarReunionMutation, joinCallDirect])
+  const handleIniciarReunion = useCallback(
+    async (reunionId: number) => {
+      try {
+        const result = await iniciarReunionMutation(reunionId).unwrap()
+        const { llamada } = result
+        joinCallDirect(
+          llamada.id,
+          llamada.token,
+          llamada.livekitUrl,
+          llamada.roomName,
+        )
+      } catch {
+        // error manejado por RTK Query
+      }
+    },
+    [iniciarReunionMutation, joinCallDirect],
+  )
 
   const handleShowMembers = () => {
     setView('members')
@@ -166,7 +191,7 @@ export function ChatDrawer({
         // error manejado por RTK Query
       }
     },
-    [crearConversacionDirecta]
+    [crearConversacionDirecta],
   )
 
   const handleCreateGroup = useCallback(
@@ -179,7 +204,7 @@ export function ChatDrawer({
         // error manejado por RTK Query
       }
     },
-    [crearGrupo]
+    [crearGrupo],
   )
 
   const handleSearch = (term: string) => {
@@ -190,14 +215,14 @@ export function ChatDrawer({
     (conversacionId: number) => {
       initiateCall(conversacionId, 'voz')
     },
-    [initiateCall]
+    [initiateCall],
   )
 
   const handleVideoCall = useCallback(
     (conversacionId: number) => {
       initiateCall(conversacionId, 'video')
     },
-    [initiateCall]
+    [initiateCall],
   )
 
   const handleJoinCall = useCallback(
@@ -209,7 +234,7 @@ export function ChatDrawer({
         // error manejado por RTK Query
       }
     },
-    [fetchToken, joinCallDirect]
+    [fetchToken, joinCallDirect],
   )
 
   const renderContent = () => {
@@ -290,7 +315,6 @@ export function ChatDrawer({
           />
         )
 
-      case 'conversations':
       default:
         return (
           <ChatPanel
@@ -318,10 +342,7 @@ export function ChatDrawer({
     >
       {renderContent()}
 
-      <CallModal
-        callState={callState}
-        onEndCall={endCall}
-      />
+      <CallModal callState={callState} onEndCall={endCall} />
 
       <IncomingCallDialog
         callState={callState}

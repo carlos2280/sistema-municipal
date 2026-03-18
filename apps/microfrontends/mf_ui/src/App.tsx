@@ -1,5 +1,5 @@
 function App() {
-  return <div>mf_ui</div>
+	return <div>mf_ui</div>;
 }
 
-export default App
+export default App;

@@ -10,12 +10,12 @@
 
 // Framer Motion — instancia compartida
 export {
-  motion,
-  AnimatePresence,
-  useAnimation,
-  useInView,
-  useReducedMotion,
-  LayoutGroup,
+	motion,
+	AnimatePresence,
+	useAnimation,
+	useInView,
+	useReducedMotion,
+	LayoutGroup,
 } from "framer-motion";
 export type { Variants, Transition, AnimationControls } from "framer-motion";
 

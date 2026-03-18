@@ -1,8 +1,13 @@
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { AppError, createErrorResponse } from "@municipal/core/errors";
 import { requestIdMiddleware } from "@municipal/core/logger";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import { env } from "./config/env";
 import { logger } from "./logger";
 import { authenticateToken, stripUserHeaders } from "./middleware/auth";
@@ -86,7 +91,7 @@ export const createApp = (): Express => {
   // INTERNAL: Endpoint para invalidar cache de suscripciones (llamado por api-platform)
   app.post("/internal/cache/invalidate", (req, res) => {
     const adminKey = req.headers["x-admin-key"] as string;
-    const requestId = req.headers["x-request-id"] as string ?? "unknown";
+    const requestId = (req.headers["x-request-id"] as string) ?? "unknown";
     if (!adminKey || adminKey !== env.ADMIN_API_KEY) {
       res.status(401).json({
         success: false,
@@ -120,7 +125,10 @@ export const createApp = (): Express => {
         await checkBackend(url),
       ]),
     );
-    const backends = Object.fromEntries(results) as Record<string, "ok" | "unreachable">;
+    const backends = Object.fromEntries(results) as Record<
+      string,
+      "ok" | "unreachable"
+    >;
     const allOk = Object.values(backends).every((s) => s === "ok");
 
     res.status(allOk ? 200 : 503).json({
@@ -138,18 +146,20 @@ export const createApp = (): Express => {
 
   // ERROR HANDLER: respuesta estándar para errores no manejados
   app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-    const requestId = req.headers["x-request-id"] as string ?? "unknown";
+    const requestId = (req.headers["x-request-id"] as string) ?? "unknown";
     if (err instanceof AppError) {
       res.status(err.statusCode).json(createErrorResponse(err, requestId));
       return;
     }
     logger.error({ err, requestId }, "Error no manejado en api-gateway");
-    res.status(500).json(
-      createErrorResponse(
-        new AppError(500, "INTERNAL_ERROR", "Error interno del servidor"),
-        requestId,
-      ),
-    );
+    res
+      .status(500)
+      .json(
+        createErrorResponse(
+          new AppError(500, "INTERNAL_ERROR", "Error interno del servidor"),
+          requestId,
+        ),
+      );
   });
 
   return app;

@@ -1,8 +1,8 @@
 import type { DbClient } from "@/db/client";
 import {
-  centrosCosto,
   type NewPresupuesto,
   type NewPresupuestoDetalle,
+  centrosCosto,
   planesCuentas,
   presupuestos,
   presupuestosDetalle,
@@ -54,7 +54,10 @@ export interface DiscrepanciaItem {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Siguiente número correlativo de presupuesto para un año dado */
-const siguienteNumero = async (db: DbClient, anoContable: number): Promise<number> => {
+const siguienteNumero = async (
+  db: DbClient,
+  anoContable: number,
+): Promise<number> => {
   const [{ max }] = await db
     .select({ max: sql<number>`COALESCE(MAX(numero), 0)` })
     .from(presupuestos)
@@ -67,20 +70,28 @@ const siguienteNumero = async (db: DbClient, anoContable: number): Promise<numbe
 export const listarPresupuestos = async (db: DbClient, ano?: number) => {
   const query = db.select().from(presupuestos);
   if (ano) {
-    return query.where(eq(presupuestos.anoContable, ano)).orderBy(presupuestos.anoContable);
+    return query
+      .where(eq(presupuestos.anoContable, ano))
+      .orderBy(presupuestos.anoContable);
   }
   return query.orderBy(presupuestos.anoContable);
 };
 
 export const obtenerPresupuestoPorId = async (db: DbClient, id: number) => {
-  const [row] = await db.select().from(presupuestos).where(eq(presupuestos.id, id));
+  const [row] = await db
+    .select()
+    .from(presupuestos)
+    .where(eq(presupuestos.id, id));
   return row ?? null;
 };
 
 export const obtenerPresupuestoConDetalle = async (
   db: DbClient,
   id: number,
-): Promise<{ presupuesto: typeof presupuestos.$inferSelect | null; detalle: DetalleConCuenta[] }> => {
+): Promise<{
+  presupuesto: typeof presupuestos.$inferSelect | null;
+  detalle: DetalleConCuenta[];
+}> => {
   const [presupuesto] = await db
     .select()
     .from(presupuestos)
@@ -114,17 +125,28 @@ export const obtenerPresupuestoConDetalle = async (
       },
     })
     .from(presupuestosDetalle)
-    .innerJoin(planesCuentas, eq(presupuestosDetalle.cuentaId, planesCuentas.id))
-    .leftJoin(centrosCosto, eq(presupuestosDetalle.centroCostoId, centrosCosto.id))
+    .innerJoin(
+      planesCuentas,
+      eq(presupuestosDetalle.cuentaId, planesCuentas.id),
+    )
+    .leftJoin(
+      centrosCosto,
+      eq(presupuestosDetalle.centroCostoId, centrosCosto.id),
+    )
     .where(eq(presupuestosDetalle.presupuestoId, id))
     .orderBy(planesCuentas.codigo);
 
   // Limpiar null de leftJoin en centroCosto
   const detalle: DetalleConCuenta[] = rows.map((r) => ({
     ...r,
-    centroCosto: r.centroCosto?.id != null
-      ? { id: r.centroCosto.id, codigo: r.centroCosto.codigo!, nombre: r.centroCosto.nombre! }
-      : null,
+    centroCosto:
+      r.centroCosto?.id != null
+        ? {
+            id: r.centroCosto.id,
+            codigo: r.centroCosto.codigo!,
+            nombre: r.centroCosto.nombre!,
+          }
+        : null,
   }));
 
   return { presupuesto, detalle };
@@ -145,7 +167,11 @@ export const crearPresupuesto = async (
 export const actualizarPresupuesto = async (
   db: DbClient,
   id: number,
-  updates: Partial<{ glosa: string; actaDecreto: string; usuarioModificacion: number }>,
+  updates: Partial<{
+    glosa: string;
+    actaDecreto: string;
+    usuarioModificacion: number;
+  }>,
 ) => {
   const [row] = await db
     .update(presupuestos)
@@ -178,7 +204,11 @@ export const actualizarLinea = async (
   db: DbClient,
   presupuestoId: number,
   detalleId: number,
-  updates: Partial<{ montoAnual: number; centroCostoId: number | null; observacion: string }>,
+  updates: Partial<{
+    montoAnual: number;
+    centroCostoId: number | null;
+    observacion: string;
+  }>,
 ) => {
   const [row] = await db
     .update(presupuestosDetalle)
@@ -223,14 +253,20 @@ export const calcularEquilibrio = async (
       montoAnual: presupuestosDetalle.montoAnual,
     })
     .from(presupuestosDetalle)
-    .innerJoin(planesCuentas, eq(presupuestosDetalle.cuentaId, planesCuentas.id))
+    .innerJoin(
+      planesCuentas,
+      eq(presupuestosDetalle.cuentaId, planesCuentas.id),
+    )
     .where(eq(presupuestosDetalle.presupuestoId, presupuestoId));
 
   let totalIngresos = 0;
   let totalGastos = 0;
 
   // Mapa cuentaId → { codigo, parentId, monto }
-  const montoMap = new Map<number, { codigo: string; parentId: number | null; monto: number; nombre?: string }>();
+  const montoMap = new Map<
+    number,
+    { codigo: string; parentId: number | null; monto: number; nombre?: string }
+  >();
 
   for (const row of rows) {
     const isIngreso = row.codigo.startsWith("115");
@@ -263,7 +299,11 @@ export const calcularEquilibrio = async (
   if (parentIds.size > 0) {
     const padresIds = Array.from(parentIds);
     const cuentasPadre = await db
-      .select({ id: planesCuentas.id, codigo: planesCuentas.codigo, nombre: planesCuentas.nombre })
+      .select({
+        id: planesCuentas.id,
+        codigo: planesCuentas.codigo,
+        nombre: planesCuentas.nombre,
+      })
       .from(planesCuentas)
       .where(inArray(planesCuentas.id, padresIds));
 

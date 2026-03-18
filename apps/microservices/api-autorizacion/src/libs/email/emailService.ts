@@ -1,6 +1,6 @@
+import { loadEnv } from "@/config/env";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
-import { loadEnv } from "@/config/env";
 
 /**
  * Envía un email usando Resend (producción) o Nodemailer/Mailhog (desarrollo).

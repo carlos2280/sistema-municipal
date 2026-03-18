@@ -4,8 +4,16 @@ import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import { ArrowLeft, Calendar, MapPin, Mic, Monitor, Users, Video, X } from 'lucide-react'
-import { memo, useCallback, useState } from 'react'
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  Mic,
+  Monitor,
+  Users,
+  Video,
+  X,
+} from 'lucide-react'
 import {
   type EstadoInvitacion,
   type TipoReunion,
@@ -14,6 +22,7 @@ import {
   useObtenerReunionQuery,
   useRsvpReunionMutation,
 } from 'mf_store/store'
+import { memo, useCallback, useState } from 'react'
 
 interface MeetingDetailProps {
   reunionId: number
@@ -30,7 +39,10 @@ const TIPO_ICON: Record<TipoReunion, React.ReactNode> = {
   presencial: <MapPin size={16} />,
 }
 
-const RSVP_COLOR: Record<EstadoInvitacion, 'default' | 'success' | 'error' | 'warning'> = {
+const RSVP_COLOR: Record<
+  EstadoInvitacion,
+  'default' | 'success' | 'error' | 'warning'
+> = {
   pendiente: 'default',
   aceptada: 'success',
   rechazada: 'error',
@@ -52,7 +64,12 @@ const RSVP_LABEL: Record<EstadoInvitacion, string> = {
 }
 
 // Orden de estados para mostrar en la lista
-const ESTADO_ORDER: EstadoInvitacion[] = ['aceptada', 'tentativa', 'pendiente', 'rechazada']
+const ESTADO_ORDER: EstadoInvitacion[] = [
+  'aceptada',
+  'tentativa',
+  'pendiente',
+  'rechazada',
+]
 
 function formatFecha(iso: string): string {
   return new Date(iso).toLocaleDateString('es', {
@@ -64,7 +81,10 @@ function formatFecha(iso: string): string {
 }
 
 function formatHora(iso: string): string {
-  return new Date(iso).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('es', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function getInitial(nombre: string): string {
@@ -81,13 +101,17 @@ export const MeetingDetail = memo(function MeetingDetail({
 }: MeetingDetailProps) {
   const { data: reunion, isLoading } = useObtenerReunionQuery(reunionId)
   const [rsvpMutation, { isLoading: isRsvping }] = useRsvpReunionMutation()
-  const [cancelarMutation, { isLoading: isCancelling }] = useCancelarReunionMutation()
+  const [cancelarMutation, { isLoading: isCancelling }] =
+    useCancelarReunionMutation()
   const [editandoRsvp, setEditandoRsvp] = useState(false)
 
   // Obtener participantes de la conversación para mapear nombre
-  const { data: conversacion } = useObtenerConversacionQuery(reunion?.conversacionId ?? 0, {
-    skip: !reunion?.conversacionId,
-  })
+  const { data: conversacion } = useObtenerConversacionQuery(
+    reunion?.conversacionId ?? 0,
+    {
+      skip: !reunion?.conversacionId,
+    },
+  )
 
   const participantesMap: Record<number, string> = {}
   for (const p of conversacion?.participantes ?? []) {
@@ -97,14 +121,16 @@ export const MeetingDetail = memo(function MeetingDetail({
   }
 
   const esOrganizador = reunion?.organizadorId === currentUserId
-  const miInvitacion = reunion?.invitaciones.find((i) => i.usuarioId === currentUserId)
+  const miInvitacion = reunion?.invitaciones.find(
+    (i) => i.usuarioId === currentUserId,
+  )
 
   const handleRsvp = useCallback(
     async (estado: EstadoInvitacion) => {
       await rsvpMutation({ id: reunionId, estado }).unwrap()
       setEditandoRsvp(false)
     },
-    [rsvpMutation, reunionId]
+    [rsvpMutation, reunionId],
   )
 
   const handleCancelar = useCallback(async () => {
@@ -128,7 +154,8 @@ export const MeetingDetail = memo(function MeetingDetail({
     reunion.tipo !== 'presencial'
 
   const puedeUnirse = reunion.estado === 'activa' && !!reunion.llamadaId
-  const inactiva = reunion.estado === 'cancelada' || reunion.estado === 'completada'
+  const inactiva =
+    reunion.estado === 'cancelada' || reunion.estado === 'completada'
 
   // Ordenar invitaciones: organizador primero, luego por estado
   const invitacionesOrdenadas = [...reunion.invitaciones].sort((a, b) => {
@@ -171,7 +198,9 @@ export const MeetingDetail = memo(function MeetingDetail({
 
       <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
         {/* Título + estado */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}
+        >
           <Box sx={{ flex: 1 }}>
             <Typography sx={{ fontWeight: 700, fontSize: 17, lineHeight: 1.3 }}>
               {reunion.titulo}
@@ -181,9 +210,13 @@ export const MeetingDetail = memo(function MeetingDetail({
             label={reunion.estado}
             size="small"
             color={
-              reunion.estado === 'programada' ? 'primary' :
-              reunion.estado === 'activa' ? 'success' :
-              reunion.estado === 'cancelada' ? 'error' : 'default'
+              reunion.estado === 'programada'
+                ? 'primary'
+                : reunion.estado === 'activa'
+                  ? 'success'
+                  : reunion.estado === 'cancelada'
+                    ? 'error'
+                    : 'default'
             }
           />
         </Box>
@@ -206,7 +239,8 @@ export const MeetingDetail = memo(function MeetingDetail({
                 {formatFecha(reunion.fechaInicio)}
               </Typography>
               <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
-                {formatHora(reunion.fechaInicio)} – {formatHora(reunion.fechaFin)}
+                {formatHora(reunion.fechaInicio)} –{' '}
+                {formatHora(reunion.fechaFin)}
               </Typography>
             </Box>
           </Box>
@@ -214,8 +248,11 @@ export const MeetingDetail = memo(function MeetingDetail({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {TIPO_ICON[reunion.tipo]}
             <Typography sx={{ fontSize: 13 }}>
-              {reunion.tipo === 'video' ? 'Videollamada' :
-               reunion.tipo === 'voz' ? 'Llamada de voz' : 'Presencial'}
+              {reunion.tipo === 'video'
+                ? 'Videollamada'
+                : reunion.tipo === 'voz'
+                  ? 'Llamada de voz'
+                  : 'Presencial'}
             </Typography>
           </Box>
 
@@ -239,7 +276,10 @@ export const MeetingDetail = memo(function MeetingDetail({
           </Box>
 
           {invitacionesOrdenadas.map((inv) => {
-            const nombre = inv.nombreUsuario ?? participantesMap[inv.usuarioId] ?? `Usuario ${inv.usuarioId}`
+            const nombre =
+              inv.nombreUsuario ??
+              participantesMap[inv.usuarioId] ??
+              `Usuario ${inv.usuarioId}`
             const esMiFilа = inv.usuarioId === currentUserId
             const esOrg = inv.usuarioId === reunion.organizadorId
 
@@ -277,10 +317,16 @@ export const MeetingDetail = memo(function MeetingDetail({
                 </Box>
 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: esMiFilа ? 600 : 400 }} noWrap>
+                  <Typography
+                    sx={{ fontSize: 13, fontWeight: esMiFilа ? 600 : 400 }}
+                    noWrap
+                  >
                     {nombre}
                     {esOrg && (
-                      <Typography component="span" sx={{ fontSize: 11, color: 'text.secondary', ml: 0.5 }}>
+                      <Typography
+                        component="span"
+                        sx={{ fontSize: 11, color: 'text.secondary', ml: 0.5 }}
+                      >
                         (organizador)
                       </Typography>
                     )}
@@ -289,7 +335,14 @@ export const MeetingDetail = memo(function MeetingDetail({
 
                 {/* Estado RSVP con punto de color */}
                 {!esOrg && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      flexShrink: 0,
+                    }}
+                  >
                     <Box
                       sx={{
                         width: 7,
@@ -309,18 +362,28 @@ export const MeetingDetail = memo(function MeetingDetail({
         </Box>
 
         {/* Mi respuesta actual + Cambiar */}
-        {!esOrganizador && miInvitacion && !editandoRsvp && miInvitacion.estado !== 'pendiente' && !inactiva && (
-          <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip
-              label={RSVP_LABEL[miInvitacion.estado]}
-              size="small"
-              color={RSVP_COLOR[miInvitacion.estado]}
-            />
-            <Button size="small" onClick={() => setEditandoRsvp(true)} sx={{ fontSize: 12 }}>
-              Cambiar mi respuesta
-            </Button>
-          </Box>
-        )}
+        {!esOrganizador &&
+          miInvitacion &&
+          !editandoRsvp &&
+          miInvitacion.estado !== 'pendiente' &&
+          !inactiva && (
+            <Box
+              sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Chip
+                label={RSVP_LABEL[miInvitacion.estado]}
+                size="small"
+                color={RSVP_COLOR[miInvitacion.estado]}
+              />
+              <Button
+                size="small"
+                onClick={() => setEditandoRsvp(true)}
+                sx={{ fontSize: 12 }}
+              >
+                Cambiar mi respuesta
+              </Button>
+            </Box>
+          )}
 
         {/* Botones RSVP */}
         {mostrarBotonesRsvp && (
@@ -358,7 +421,15 @@ export const MeetingDetail = memo(function MeetingDetail({
 
       {/* Footer actions */}
       {reunion.estado !== 'cancelada' && reunion.estado !== 'completada' && (
-        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 1 }}>
+        <Box
+          sx={{
+            p: 2,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            gap: 1,
+          }}
+        >
           {esOrganizador && (
             <Button
               variant="outlined"
@@ -387,6 +458,7 @@ export const MeetingDetail = memo(function MeetingDetail({
               color="success"
               size="small"
               startIcon={<Monitor size={14} />}
+              // biome-ignore lint/style/noNonNullAssertion: button solo se muestra cuando llamadaId existe
               onClick={() => onJoin?.(reunion.llamadaId!)}
               sx={{ ml: 'auto' }}
             >

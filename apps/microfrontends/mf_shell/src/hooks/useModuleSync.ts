@@ -1,14 +1,14 @@
-import { useEffect, useCallback, useRef } from "react";
+import {
+	modulosReceived,
+	selectIsAuthenticated,
+	selectModulosActivos,
+	useAppDispatch,
+	useAppSelector,
+	useGetModulosActivosQuery,
+} from "mf_store/store";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import {
-	useGetModulosActivosQuery,
-	selectModulosActivos,
-	selectIsAuthenticated,
-	modulosReceived,
-	useAppSelector,
-	useAppDispatch,
-} from "mf_store/store";
 import { registerDynamicRemotes } from "../modules/dynamicModuleLoader";
 
 /**
@@ -26,13 +26,10 @@ export function useModuleSync() {
 	const currentModules = useAppSelector(selectModulosActivos);
 	const prevCodesRef = useRef<string>("");
 
-	const { data: freshModules, refetch } = useGetModulosActivosQuery(
-		undefined,
-		{
-			pollingInterval: 60_000,
-			skip: !isAuthenticated,
-		},
-	);
+	const { data: freshModules, refetch } = useGetModulosActivosQuery(undefined, {
+		pollingInterval: 60_000,
+		skip: !isAuthenticated,
+	});
 
 	// Refetch inmediato al recibir 403 MODULE_NOT_SUBSCRIBED
 	const handleModuleNotSubscribed = useCallback(() => {
@@ -40,10 +37,7 @@ export function useModuleSync() {
 	}, [refetch]);
 
 	useEffect(() => {
-		window.addEventListener(
-			"module-not-subscribed",
-			handleModuleNotSubscribed,
-		);
+		window.addEventListener("module-not-subscribed", handleModuleNotSubscribed);
 		return () => {
 			window.removeEventListener(
 				"module-not-subscribed",
@@ -56,8 +50,14 @@ export function useModuleSync() {
 	useEffect(() => {
 		if (!freshModules) return;
 
-		const currentCodes = currentModules.map((m) => m.codigo).sort().join(",");
-		const freshCodes = freshModules.map((m) => m.codigo).sort().join(",");
+		const currentCodes = currentModules
+			.map((m) => m.codigo)
+			.sort()
+			.join(",");
+		const freshCodes = freshModules
+			.map((m) => m.codigo)
+			.sort()
+			.join(",");
 
 		// Sin cambios
 		if (currentCodes === freshCodes) {
@@ -66,7 +66,8 @@ export function useModuleSync() {
 		}
 
 		// Evitar toasts en la carga inicial (cuando el store está vacío)
-		const isInitialLoad = prevCodesRef.current === "" && currentModules.length === 0;
+		const isInitialLoad =
+			prevCodesRef.current === "" && currentModules.length === 0;
 		prevCodesRef.current = freshCodes;
 
 		const currentCodesSet = new Set(currentModules.map((m) => m.codigo));

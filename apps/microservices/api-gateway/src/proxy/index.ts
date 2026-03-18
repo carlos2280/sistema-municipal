@@ -4,9 +4,9 @@ import type http from "node:http";
 import { X_USER_HEADERS } from "@municipal/core/auth";
 import type { Express } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import type { GatewayUserPayload } from "../middleware/auth";
 import { env } from "../config/env";
 import { logger } from "../logger";
+import type { GatewayUserPayload } from "../middleware/auth";
 
 interface RequestWithBody extends IncomingMessage {
   body?: unknown;
@@ -128,10 +128,7 @@ export const configureProxies = (app: Express) => {
                 X_USER_HEADERS.tenantId,
                 String(user.tenantId),
               );
-              proxyReq.setHeader(
-                X_USER_HEADERS.tenantSlug,
-                user.tenantSlug,
-              );
+              proxyReq.setHeader(X_USER_HEADERS.tenantSlug, user.tenantSlug);
               proxyReq.setHeader(
                 X_USER_HEADERS.tenantDbName,
                 user.tenantDbName,
@@ -250,9 +247,7 @@ export const configureProxies = (app: Express) => {
 
   app.use("/socket.io", socketProxy);
 
-  logger.info(
-    `[Gateway] SOCKET.IO: /socket.io → ${env.CHAT_URL}`,
-  );
+  logger.info(`[Gateway] SOCKET.IO: /socket.io → ${env.CHAT_URL}`);
 };
 
 /**

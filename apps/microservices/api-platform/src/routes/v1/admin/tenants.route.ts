@@ -1,6 +1,9 @@
-import * as controller from "@controllers/admin/tenants.controller";
 import { validate } from "@/libs/middleware/validate";
-import { createTenantSchema, updateTenantSchema } from "@/libs/schemas/admin.schemas";
+import {
+  createTenantSchema,
+  updateTenantSchema,
+} from "@/libs/schemas/admin.schemas";
+import * as controller from "@controllers/admin/tenants.controller";
 import { Router } from "express";
 
 const router: Router = Router();

@@ -6,15 +6,15 @@
  * Split-panel layout with branding + form card.
  */
 
-import { AuthLayout } from "../login/components/AuthLayout";
 import { AuthCard } from "../login/components/AuthCard";
-import { AuthHeader } from "../login/components/AuthHeader";
 import { AuthFooter } from "../login/components/AuthFooter";
-import { useMfaSetup } from "./hooks/useMfaSetup";
-import { MfaLoadingPhase } from "./components/MfaLoadingPhase";
+import { AuthHeader } from "../login/components/AuthHeader";
+import { AuthLayout } from "../login/components/AuthLayout";
 import { MfaErrorPhase } from "./components/MfaErrorPhase";
+import { MfaLoadingPhase } from "./components/MfaLoadingPhase";
 import { MfaScanPhase } from "./components/MfaScanPhase";
 import { MfaSuccessPhase } from "./components/MfaSuccessPhase";
+import { useMfaSetup } from "./hooks/useMfaSetup";
 
 // ── Phase header configs ─────────────────────────────────────────────────────
 
@@ -56,10 +56,7 @@ export default function MfaSetupPage() {
 	return (
 		<AuthLayout>
 			<AuthCard>
-				<AuthHeader
-					title={header.title}
-					subtitle={header.subtitle}
-				/>
+				<AuthHeader title={header.title} subtitle={header.subtitle} />
 
 				{phase === "loading" && <MfaLoadingPhase />}
 				{phase === "error" && (
