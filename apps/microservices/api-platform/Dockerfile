@@ -7,14 +7,18 @@ WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
+COPY packages/db-platform/package.json ./packages/db-platform/
 COPY apps/microservices/api-platform/package.json ./apps/microservices/api-platform/
 RUN pnpm install --frozen-lockfile
 
 # --- Build ---
 FROM deps AS build
 COPY packages/core/ ./packages/core/
+COPY packages/db-platform/ ./packages/db-platform/
 COPY apps/microservices/api-platform/ ./apps/microservices/api-platform/
-RUN pnpm --filter @municipal/core build && pnpm --filter api-platform build
+RUN pnpm --filter @municipal/core build && \
+    pnpm --filter @municipal/db-platform build && \
+    pnpm --filter api-platform build
 
 # --- Production ---
 FROM base AS runner
@@ -23,9 +27,11 @@ ENV NODE_ENV=production CI=true
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
+COPY packages/db-platform/package.json ./packages/db-platform/
 COPY apps/microservices/api-platform/package.json ./apps/microservices/api-platform/
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/packages/core/dist ./packages/core/dist
+COPY --from=build /app/packages/db-platform/dist ./packages/db-platform/dist
 COPY --from=build /app/apps/microservices/api-platform/dist ./apps/microservices/api-platform/dist
 WORKDIR /app/apps/microservices/api-platform
 EXPOSE 3006
