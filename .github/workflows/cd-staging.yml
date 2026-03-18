@@ -14,7 +14,7 @@ on:
 
 env:
   NODE_VERSION: '22'
-  PNPM_VERSION: '10'
+
 
 jobs:
   # ============================================
@@ -73,7 +73,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service api-gateway --environment staging
-        working-directory: apps/microservices/api-gateway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -89,7 +88,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service api-identidad --environment staging
-        working-directory: apps/microservices/api-identidad
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -105,7 +103,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service api-autorizacion --environment staging
-        working-directory: apps/microservices/api-autorizacion
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -121,7 +118,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service api-contabilidad --environment staging
-        working-directory: apps/microservices/api-contabilidad
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -140,7 +136,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service mf-shell --environment staging
-        working-directory: apps/microfrontends/mf_shell
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -156,7 +151,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service mf-store --environment staging
-        working-directory: apps/microfrontends/mf_store
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -172,7 +166,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service mf-ui --environment staging
-        working-directory: apps/microfrontends/mf_ui
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -188,7 +181,6 @@ jobs:
         run: npm install -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service mf-contabilidad --environment staging
-        working-directory: apps/microfrontends/mf_contabilidad
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
