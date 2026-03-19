@@ -1,1 +1,299 @@
-IyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIyBTaXN0ZW1hIE11bmljaXBhbCAtIENEIFByb2R1Y3Rpb24gUGlwZWxpbmUKIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIyBEZXBsb3kgYSBwcm9kdWNjacOzbiAtIFNvbG8gbWFudWFsIG8gY29uIHJlbGVhc2UgdGFnCiMgRGVzcGxpZWdhIFRPRE9TIGxvcyBzZXJ2aWNpb3MgKGZ1bGwgZGVwbG95bWVudCkKIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCm5hbWU6IENEIFByb2R1Y3Rpb24KCm9uOgogIHJlbGVhc2U6CiAgICB0eXBlczogW3B1Ymxpc2hlZF0KICB3b3JrZmxvd19kaXNwYXRjaDoKICAgIGlucHV0czoKICAgICAgY29uZmlybToKICAgICAgICBkZXNjcmlwdGlvbjogJ0VzY3JpYmUgImRlcGxveSIgcGFyYSBjb25maXJtYXInCiAgICAgICAgcmVxdWlyZWQ6IHRydWUKICAgICAgICB0eXBlOiBzdHJpbmcKICAgICAgc2VydmljZXM6CiAgICAgICAgZGVzY3JpcHRpb246ICdTZXJ2aWNpb3MgYSBkZXNwbGVnYXIgKGFsbC9jaGFuZ2VkKScKICAgICAgICByZXF1aXJlZDogZmFsc2UKICAgICAgICBkZWZhdWx0OiAnYWxsJwogICAgICAgIHR5cGU6IGNob2ljZQogICAgICAgIG9wdGlvbnM6CiAgICAgICAgICAtIGFsbAogICAgICAgICAgLSBjaGFuZ2VkCgplbnY6CiAgTk9ERV9WRVJTSU9OOiAnMjInCiAgUE5QTV9WRVJTSU9OOiAnMTAnCiAgUkFJTFdBWV9QUk9KRUNUX0lEOiAnOGQ0ZjUyYmQtNmUzNi00ZDA2LThkNWEtYzE1YmM2NDliOWVkJwoKam9iczoKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICMgVmFsaWRhY2nDs24KICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIHZhbGlkYXRlOgogICAgbmFtZTogVmFsaWRhdGUgRGVwbG95bWVudAogICAgcnVucy1vbjogdWJ1bnR1LWxhdGVzdAogICAgb3V0cHV0czoKICAgICAgdmVyc2lvbjogJHt7IHN0ZXBzLnZlcnNpb24ub3V0cHV0cy52ZXJzaW9uIH19CiAgICAgIGRlcGxveS1hbGw6ICR7eyBzdGVwcy5jaGVjay5vdXRwdXRzLmRlcGxveS1hbGwgfX0KICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IENoZWNrIGNvbmZpcm1hdGlvbgogICAgICAgIGlkOiBjaGVjawogICAgICAgIHJ1bjogfAogICAgICAgICAgaWYgWyAiJHt7IGdpdGh1Yi5ldmVudF9uYW1lIH19IiA9PSAid29ya2Zsb3dfZGlzcGF0Y2giIF07IHRoZW4KICAgICAgICAgICAgaWYgWyAiJHt7IGdpdGh1Yi5ldmVudC5pbnB1dHMuY29uZmlybSB9fSIgIT0gImRlcGxveSIgXTsgdGhlbgogICAgICAgICAgICAgIGVjaG8gIuKdjCBDb25maXJtYWNpw7NuIGluY29ycmVjdGEuIEVzY3JpYmUgJ2RlcGxveScgcGFyYSBjb25maXJtYXIuIgogICAgICAgICAgICAgIGV4aXQgMQogICAgICAgICAgICBmaQogICAgICAgICAgICBlY2hvICLinIUgQ29uZmlybWFjacOzbiB2w6FsaWRhIgogICAgICAgICAgICBpZiBbICIke3sgZ2l0aHViLmV2ZW50LmlucHV0cy5zZXJ2aWNlcyB9fSIgPT0gImFsbCIgXTsgdGhlbgogICAgICAgICAgICAgIGVjaG8gImRlcGxveS1hbGw9dHJ1ZSIgPj4gJEdJVEhVQl9PVVRQVVQKICAgICAgICAgICAgZWxzZQogICAgICAgICAgICAgIGVjaG8gImRlcGxveS1hbGw9ZmFsc2UiID4+ICRHSVRIVUJPVVRQVVQKICAGICAGICAGICAGIGZPCIAGICAGICAGICBLBHNLCIAGICAGICAGICAGIGVJAG8gImRlcGxveS1hbGw9dHJ1ZSIgPj4gJEdJVEhVQl9PVVRQVVQKICAgICAgICAgIGZpCgogICAgICAtIG5hbWU6IEdldCB2ZXJzaW9uCiAgICAgICAgaWQ6IHZlcnNpb24KICAgICAgICBydW46IHwKICAgICAgICAgIGlmIFsgIiR7eyBnaXRodWIuZXZlbnRfbmFtZSB9fSIgPT0gInJlbGVhc2UiIF07IHRoZW4KICAgICAgICAgICAgZWNobyAidmVyc2lvbj0ke3sgZ2l0aHViLmV2ZW50LnJlbGVhc2UudGFnX25hbWUgfX0iID4+ICRHSVRIVUJPVVRQVVQKICAGICAGICAGICAGIGVJAG8gIvCfk6YgRGVwbG95aW5nIHJlbGVhc2U6ICR7eyBnaXRodWIuZXZlbnQucmVsZWFzZS50YWdfbmFtZSB9fSIKICAgICAgICAgIGVsc2UKICAgICAgICAgICAgZWNobyAidmVyc2lvbj0kKGRhdGUgKyVZJW0lZCktJChnaXQgcmV2LXBhcnNlIC0tc2hvcnQgSEVBRCkiID4+ICRHSVRIVUJPVVRQVVQKICAGICAGICAGICBMAQOKICAJID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICMgQ0kgQ2hlY2sgKGFzZWd1cmFyIHF1ZSBDSSBwYXPDsykKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIGNpLWNoZWNrOgogICAgbmFtZTogVmVyaWZ5IENJIFB1c3NlZAogICAgcnVucy1vbjogdWJ1bnR1LWxhdGVzdAogICAgbmVlZHM6IHZhbGlkYXRlCiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY0CiAgICAgIC0gbmFtZTogU2V0dXAgcG5wbQogICAgICAgIHVzZXM6IHBucG0vYWN0aW9uLXNldHVwQHY0CiAgICAgICAgd2l0aDoKICAgICAgICAgIHZlcnNpb246ICR7eyBlbnYuUE5QTV9WRVJTSU9OIH19CiAgICAgIC0gbmFtZTogU2V0dXAgTm9kZS5qcwogICAgICAgIHVzZXM6IGFjdGlvbnMvc2V0dXAtbm9kZUB2NAogICAgICAgIHdpdGg6CiAgICAgICAgICBub2RlLXZlcnNpb246ICR7eyBlbnYuTk9ERV9WRVJTSU9OIH19CiAgICAgICAgICBjYWNoZTogJ3BucG0nCiAgICAgIC0gbmFtZTogSW5zdGFsbCBkZXBlbmRlbmNpZXMKICAgICAgICBydW46IHBucG0gaW5zdGFsbCAtLWZyb3plbi1sb2NrZmlsZQogICAgICAtIG5hbWU6IFJ1biBsaW50CiAgICAgICAgcnVuOiBwbnBtIGNoZWNrCiAgICAgIC0gbmFtZTogQnVpbGQKICAgICAgICBydW46IHBucG0gYnVpbGQKICAgICAgLSBuYW1lOiBSdW4gdGVzdHMKICAgICAgICBydW46IHBucG0gdGVzdCB8fCBlY2hvICJUZXN0cyBza2lwcGVkIGlmIG5vdCBjb25maWd1cmVkIgoKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICMgRGVwbG95IE1pY3Jvc2VydmljZXMKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIGRlcGxveS1hcGktZ2F0ZXdheToKICAgIG5hbWU6IERlcGxveSBBUEkgR2F0ZXdheQogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBhcGktZ2F0ZXdheSAtLWVudmlyb25tZW50IHByb2R1Y3Rpb24KICAgICAgICBlbnY6CiAgICAgICAgICBSQUlMV0FZX1RPS0VOOiAke3sgc2VjcmV0cy5SQUlMV0FZX1RPS0VOIH19CgogIGRlcGxveS1hcGktaWRlbnRpZGFkOgogICAgbmFtZTogRGVwbG95IEFQSSBJZGV0aWRhZAogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBhcGktaWRlbnRpZGFkIC0tZW52aXJvbm1lbnQgcHJvZHVjdGlvbgogICAgICAgIGVudjoKICAgICAgICAgIFJBSUxXQVlfVE9LRU46ICR7eyBzZWNyZXRzLlJBSUxXQVlfVE9LRU4gfX0KCiAgZGVwbG95LWFwaS1hdXRvcml6YWNpb246CiAgICBuYW1lOiBEZXBsb3kgQVBJIEF1dG9yaXphY2lvbgogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBhcGktYXV0b3JpemFjaW9uIC0tZW52aXJvbm1lbnQgcHJvZHVjdGlvbgogICAgICAgIGVudjoKICAgICAgICAgIFJBSUxXQVlfVE9LRU46ICR7eyBzZWNyZXRzLlJBSUxXQVlfVE9LRU4gfX0KCiAgZGVwbG95LWFwaS1jb250YWJpbGlkYWQ6CiAgICBuYW1lOiBEZXBsb3kgQVBJIENvbnRhYmlsaWRhZAogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBhcGktY29udGFiaWxpZGFkIC0tZW52aXJvbm1lbnQgcHJvZHVjdGlvbgogICAgICAgIGVudjoKICAgICAgICAgIFJBSUxXQVlfVE9LRU46ICR7eyBzZWNyZXRzLlJBSUxXQVlfVE9LRU4gfX0KCiAgIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAjIERlcGxveSBNaWNyb2Zyb250ZW5kcwogICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgZGVwbG95LW1mLXNoZWxsOgogICAgbmFtZTogRGVwbG95IE1GIFNoZWxsCiAgICBuZWVkczogW3ZhbGlkYXRlLCBjaS1jaGVja10KICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIGVudmlyb25tZW50OiBwcm9kdWN0aW9uCiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY0CiAgICAgIC0gbmFtZTogSW5zdGFsbCBSYWlsd2F5IENMSQOGICB ydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBtZi1zaGVsbCAtLWVudmlyb25tZW50IHByb2R1Y3Rpb24KICAgICAgICBlbnY6CiAgICAgICAgICBSQUlMV0FZX1RPS0VOOiAke3sgc2VjcmV0cy5SQUlMV0FZX1RPS0VOIH19CgogIGRlcGxveS1tZi1zdG9yZToKICAgIG5hbWU6IERlcGxveSBNRiBTdG9yZQogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBtZi1zdG9yZSAtLWVudmlyb25tZW50IHByb2R1Y3Rpb24KICAgICAgICBlbnY6CiAgICAgICAgICBSQUlMV0FZX1RPS0VOOiAke3sgc2VjcmV0cy5SQUlMV0FZX1RPS0VOIH19CgogIGRlcGxveS1tZi11aToKICAgIG5hbWU6IERlcGxveSBNRiBVSQogICAgbmVlZHM6IFt2YWxpZGF0ZSwgY2ktY2hlY2tdCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBlbnZpcm9ubWVudDogcHJvZHVjdGlvbgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBtZi11aSAtLWVudmlyb25tZW50IHByb2R1Y3Rpb24KICAgICAgICBlbnY6CiAgICAgICAgICBSQUlMV0FZX1RPS0VOOiAke3sgc2VjcmV0cy5SQUlMV0FZX1RPS0VOIH19CgogIGRlcGxveS1tZi1jb250YWJpbGlkYWQ6CiAgICBuYW1lOiBEZXBsb3kgTUYgQ29udGFiaWxpZGFkCiAgICBuZWVkczogW3ZhbGlkYXRlLCBjaS1jaGVja10KICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIGVudmlyb25tZW50OiBwcm9kdWN0aW9uCiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY0CiAgICAgIC0gbmFtZTogSW5zdGFsbCBSYWlsd2F5IENMSQOGICB ydW46IG5wbSBpbnN0YWxsIC1nIEByYWlsd2F5L2NsaQogICAgICAtIG5hbWU6IERlcGxveSB0byBSYWlsd2F5CiAgICAgICAgcnVuOiByYWlsd2F5IHVwIC0tc2VydmljZSBtZi1jb250YWJpbGlkYWQgLS1lbnZpcm9ubWVudCBwcm9kdWN0aW9uCiAgICAgICAgZW52OgogICAgICAgICAgUkFJTFdBWV9UT0tFTjogJHt7IHNlY3JldHMuUkFJTFdBWV9UT0tFTiB9fQoKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICMgSGVhbHRoIENoZWNrcwogICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgaGVhbHRoY2hlY2s6CiAgICBuYW1lOiBIZWFsdGggQ2hlY2sKICAgIG5lZWRzOgogICAgICAtIGRlcGxveS1hcGktZ2F0ZXdheQogICAgICAtIGRlcGxveS1hcGktaWRlbnRpZGFkCiAgICAgIC0gZGVwbG95LWFwaS1hdXRvcml6YWNpb24KICAgICAgLSBkZXBsb3ktYXBpLWNvbnRhYmlsaWRhZAogICAgICAtIGRlcGxveS1tZi1zaGVsbAogICAgICAtIGRlcGxveS1tZi1zdG9yZQogICAgICAtIGRlcGxveS1tZi11aQogICAgICAtIGRlcGxveS1tZi1jb250YWJpbGlkYWQKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IFdhaXQgZm9yIGRlcGxveW1lbnRzIHRvIHN0YWJpbGl6ZQogICAgICAgIHJ1bjogc2xlZXAgOTAKCiAgICAgIC0gbmFtZTogQ2hlY2sgQVBJIEdhdGV3YXkKICAgICAgICBydW46IHwKICAgICAgICAgIHJlc3BvbnNlPSQoY3VybCAtcyAtbyAvZGV2L251bGwgLXcgIiV7aHR0cF9jb2RlfSIgJHt7IHZhcnMuUFJPRFVDVElPTl9BUElfVVJMIH19L2hlYWx0aCB8fCBlY2hvICIwMDAiKQogICAgICAgICAgaWYgWyAiJHJlc3BvbnNlIiAhPSAiMjAwIiBdOyB0aGVuCiAgICAgICAgICAgIGVjaG8gIuKao++4jyBBUEkgR2F0ZXdheSBoZWFsdGggY2hlY2s6ICRyZXNwb25zZSIKICAgICAgICAgIGVsc2UKICAgICAgICAgICAgZWNobyAi4pyFIEFQSSBHYXRld2F5IGhlYWx0aHkiCiAgICAgICAgICBmaQoKICAgICAgLSBuYW1lOiBDaGVjayBGcm9udGVuZCBTaGVsbAogICAgICAgIHJ1bjogfAogICAgICAgICAgcmVzcG9uc2U9JChjdXJsIC1zIC1vIC9kZXYvbnVsbCAtdyAiJXtodHRwX2NvZGV9IiAke3sgdmFycy5QUk9EVUNUSU9OX1VSTH19IHx8IGVjaG8gIjAwMCIpCiAgICAgICAgICBpZiBbICIkcmVzcG9uc2UiICE9ICIyMDAiIF07IHRoZW4KICAgICAgICAgICAgZWNobyAi4pqb77iPIEZyb250ZW5kIGhlYWx0aCBjaGVjazogJHJlc3BvbnNlIgogICAgICAgICAgZWxzZQogICAgICAgICAgICBlY2hvICLinIUgRnJvbnRlbmQgaGVhbHRoeSIKICAgICAgICAgIGZpCgogICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgIyBEZXBsb3ltZW50IFN1bW1hcnkKICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIHN1bW1hcnk6CiAgICBuYW1lOiBEZXBsb3ltZW50IFN1bW1hcnkKICAgIG5lZWRzOgogICAgICAtIHZhbGlkYXRlCiAgICAgIC0gZGVwbG95LWFwaS1nYXRld2F5CiAgICAgIC0gZGVwbG95LWFwaS1pZGVudGlkYWQKICAgICAgLSBkZXBsb3ktYXBpLWF1dG9yaXphY2lvbgogICAgICAtIGRlcGxveS1hcGktY29udGFiaWxpZGFkCiAgICAgIC0gZGVwbG95LW1mLXNoZWxsCiAgICAgIC0gZGVwbG95LW1mLXN0b3JlCiAgICAgIC0gZGVwbG95LW1mLXVpCiAgICAgIC0gZGVwbG95LW1mLWNvbnRhYmlsaWRhZAogICAgICAtIGhlYWx0aGNoZWNrCiAgICBpZjogYWx3YXlzKCkKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IFN1bW1hcnkKICAgICAgICBydW46IHwKICAgICAgICAgIGVjaG8gIiMjIPCfmoAgUHJvZHVjdGlvbiBEZXBsb3ltZW50IFN1bW1hcnkiID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIiIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIioqVmVyc2lvbjoqKiAke3sgbmVlZHMudmFsaWRhdGUub3V0cHV0cy52ZXJzaW9uIH19IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiIiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiIyMjIE1pY3Jvc2VydmljZXMiID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgU2VydmljZSB8IFN0YXR1cyB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifC0tLS0tLS0tfC0tLS0tLS0tfCIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgYXBpLWdhdGV3YXkgfCAke3sgbmVlZHMuZGVwbG95LWFwaS1nYXRld2F5LnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBhcGktaWRlbnRpZGFkIHwgJHt7IG5lZWRzLmRlcGxveS1hcGktaWRlbnRpZGFkLnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBhcGktYXV0b3JpemFjaW9uIHwgJHt7IG5lZWRzLmRlcGxveS1hcGktYXV0b3JpemFjaW9uLnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBhcGktY29udGFiaWxpZGFkIHwgJHt7IG5lZWRzLmRlcGxveS1hcGktY29udGFiaWxpZGFkLnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiIiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiIyMjIE1pY3JvZnJvbnRlbmRzIiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBTZXJ2aWNlIHwgU3RhdHVzIHwiID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwtLS0tLS0tLXwtLS0tLS0tLXwiID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgbWYtc2hlbGwgfCAke3sgbmVlZHMuZGVwbG95LW1mLXNoZWxsLnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBtZi1zdG9yZSB8ICR7eyBuZWVkcy5kZXBsb3ktbWYtc3RvcmUucmVzdWx0IH19IHwiID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgbWYtdWkgfCAke3sgbmVlZHMuZGVwbG95LW1mLXVpLnJlc3VsdCB9fSB8IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAifCBtZi1jb250YWJpbGlkYWQgfCAke3sgbmVlZHMuZGVwbG95LW1mLWNvbnRhYmlsaWRhZC5yZXN1bHQgfX0gfCIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIiIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIiMjIyBIZWFsdGggQ2hlY2siID4+ICRHSVRIVUJTVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgQ2hlY2sgfCBTdGF0dXMgfCIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwtLS0tLS0tfC0tLS0tLS0tfCIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gInwgT3ZlcmFsbCB8ICR7eyBuZWVkcy5oZWFsdGhjaGVjay5yZXN1bHQgfX0gfCIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIiIgPj4gJEdJVEhVQl9TVEVQX1NVTU1BUlkKICAgICAgICAgIGVjaG8gIiMjIyBVUkxzIiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiLSAqKkZyb250ZW5kOioqICR7eyB2YXJzLlBST0RVQ1RJT05fVVJMIH19IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQogICAgICAgICAgZWNobyAiLSAqKkFQSSBHYXRld2F5OioqICR7eyB2YXJzLlBST0RVQ1RJT05fQVBJX1VSTH19IiA+PiAkR0lUSFVCX1NURVBfU1VNTUFSWQo=
+# ==================================================================
+# Sistema Municipal - CD Production Pipeline
+# ==================================================================
+# Deploy a producción - Solo manual o con release tag
+# Despliega TODOS los servicios (full deployment)
+# ==================================================================
+
+name: CD Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escribe "deploy" para confirmar'
+        required: true
+        type: string
+      services:
+        description: 'Servicios a desplegar (all/changed)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - changed
+
+env:
+  NODE_VERSION: '22'
+  RAILWAY_PROJECT_ID: '8d4f52bd-6e36-4d06-8d5a-c15bc649b9ed'
+
+jobs:
+  # ==================================================================
+  # Validación
+  # ==================================================================
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      deploy-all: ${{ steps.check.outputs.deploy-all }}
+    steps:
+      - name: Check confirmation
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+              echo "Confirmacion incorrecta. Escribe 'deploy' para confirmar."
+              exit 1
+            fi
+            echo "Confirmacion valida"
+            if [ "${{ github.event.inputs.services }}" == "all" ]; then
+              echo "deploy-all=true" >> $GITHUB_OUTPUT
+            else
+              echo "deploy-all=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "deploy-all=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+            echo "Deploying release: ${{ github.event.release.tag_name }}"
+          else
+            echo "version=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          fi
+
+  # ==================================================================
+  # CI Check (asegurar que CI pasó)
+  # ==================================================================
+  ci-check:
+    name: Verify CI Passed
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run lint
+        run: pnpm check
+      - name: Build
+        run: pnpm build
+      - name: Run tests
+        run: pnpm test || echo "Tests skipped if not configured"
+
+  # ==================================================================
+  # Deploy Microservices
+  # ==================================================================
+  deploy-api-gateway:
+    name: Deploy API Gateway
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-gateway --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-identidad:
+    name: Deploy API Identidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-identidad --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-autorizacion:
+    name: Deploy API Autorizacion
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-autorizacion --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-api-contabilidad:
+    name: Deploy API Contabilidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service api-contabilidad --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ==================================================================
+  # Deploy Microfrontends
+  # ==================================================================
+  deploy-mf-shell:
+    name: Deploy MF Shell
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-shell --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-store:
+    name: Deploy MF Store
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-store --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-ui:
+    name: Deploy MF UI
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-ui --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-mf-contabilidad:
+    name: Deploy MF Contabilidad
+    needs: [validate, ci-check]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service mf-contabilidad --environment production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ==================================================================
+  # Health Checks
+  # ==================================================================
+  healthcheck:
+    name: Health Check
+    needs:
+      - deploy-api-gateway
+      - deploy-api-identidad
+      - deploy-api-autorizacion
+      - deploy-api-contabilidad
+      - deploy-mf-shell
+      - deploy-mf-store
+      - deploy-mf-ui
+      - deploy-mf-contabilidad
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployments to stabilize
+        run: sleep 90
+
+      - name: Check API Gateway
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_API_URL }}/health || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "API Gateway health check: $response"
+          else
+            echo "API Gateway healthy"
+          fi
+
+      - name: Check Frontend Shell
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ vars.PRODUCTION_URL }} || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "Frontend health check: $response"
+          else
+            echo "Frontend healthy"
+          fi
+
+  # ==================================================================
+  # Deployment Summary
+  # ==================================================================
+  summary:
+    name: Deployment Summary
+    needs:
+      - validate
+      - deploy-api-gateway
+      - deploy-api-identidad
+      - deploy-api-autorizacion
+      - deploy-api-contabilidad
+      - deploy-mf-shell
+      - deploy-mf-store
+      - deploy-mf-ui
+      - deploy-mf-contabilidad
+      - healthcheck
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microservices" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| api-gateway | ${{ needs.deploy-api-gateway.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-identidad | ${{ needs.deploy-api-identidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-autorizacion | ${{ needs.deploy-api-autorizacion.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| api-contabilidad | ${{ needs.deploy-api-contabilidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Microfrontends" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-shell | ${{ needs.deploy-mf-shell.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-store | ${{ needs.deploy-mf-store.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-ui | ${{ needs.deploy-mf-ui.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mf-contabilidad | ${{ needs.deploy-mf-contabilidad.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Overall | ${{ needs.healthcheck.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** ${{ vars.PRODUCTION_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Gateway:** ${{ vars.PRODUCTION_API_URL }}" >> $GITHUB_STEP_SUMMARY
