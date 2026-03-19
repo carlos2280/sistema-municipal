@@ -12,7 +12,17 @@ export interface SistemaOption {
 	readonly codigo: string;
 }
 
-export type LoginStep = 0 | 1 | 2;
+/**
+ * Pasos del login dinámicos:
+ * 0 = Credenciales
+ * 1 = Área y sistema
+ * 2 = Verificación MFA (usuario con MFA activo) ó MFA Setup QR (usuario sin MFA)
+ * 3 = Backup codes (solo en flujo de setup inline)
+ */
+export type LoginStep = 0 | 1 | 2 | 3;
+
+/** Fase del MFA setup inline dentro del login */
+export type MfaSetupPhase = "scan" | "backup";
 
 export interface StepConfig {
 	readonly title: string;

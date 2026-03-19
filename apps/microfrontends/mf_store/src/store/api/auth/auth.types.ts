@@ -36,10 +36,11 @@ export type MfaRequiredResponse = {
 	userId: number;
 };
 
-// El backend envió email con link de enrollment; frontend muestra aviso.
+// El backend envió email con link de enrollment y retorna setupToken para setup inline.
 export type MfaSetupPendingResponse = {
 	mfaSetupPending: true;
 	userId: number;
+	setupToken: string;
 };
 
 export type MfaSetupIniciarResponse = {

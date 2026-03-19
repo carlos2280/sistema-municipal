@@ -1,19 +1,33 @@
 /**
- * LoginStepper — 3-step indicator MERIDIAN
+ * LoginStepper — Dynamic step indicator MERIDIAN
  *
- * Numbered circles + labels + connectors.
- * Active step uses accent from theme. Completed steps use accent with opacity.
+ * Steps adapt based on login flow:
+ * - Normal: Credenciales → Área y sistema → Verificación
+ * - MFA Setup: Credenciales → Área y sistema → Configurar MFA → Códigos
+ * - No MFA: Credenciales → Área y sistema (no step 3)
  */
 
 import { Box, alpha, styled } from "@mui/material";
 import { Check } from "lucide-react";
-import { memo } from "react";
-import { STEPPER_LABELS } from "../constants";
+import { memo, useMemo } from "react";
+import {
+	STEPPER_LABELS_BASE,
+	STEPPER_LABEL_BACKUP,
+	STEPPER_LABEL_MFA,
+	STEPPER_LABEL_SETUP,
+} from "../constants";
 import type { LoginStep } from "../types";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
 type StepStatus = "pending" | "active" | "completed";
+
+interface LoginStepperProps {
+	readonly activeStep: LoginStep;
+	readonly mfaSetupPending: boolean;
+	/** Whether step 2 is MFA verification (true) or not shown yet (false) */
+	readonly showMfaStep: boolean;
+}
 
 // ── Styled ──────────────────────────────────────────────────────────────────
 
@@ -99,20 +113,29 @@ const Connector = styled(Box)(({ theme }) => ({
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-interface LoginStepperProps {
-	readonly activeStep: LoginStep;
-	readonly mfaSetupPending: boolean;
-}
-
 export const LoginStepper = memo(function LoginStepper({
 	activeStep,
 	mfaSetupPending,
+	showMfaStep,
 }: LoginStepperProps) {
-	if (mfaSetupPending) return null;
+	const labels = useMemo(() => {
+		const base: string[] = [...STEPPER_LABELS_BASE];
+
+		if (mfaSetupPending) {
+			// MFA setup inline flow: base + "Configurar MFA" + "Códigos"
+			base.push(STEPPER_LABEL_SETUP, STEPPER_LABEL_BACKUP);
+		} else if (showMfaStep) {
+			// Normal MFA verification flow
+			base.push(STEPPER_LABEL_MFA);
+		}
+		// else: no MFA step (disabled/optional without MFA) — just 2 steps
+
+		return base;
+	}, [mfaSetupPending, showMfaStep]);
 
 	return (
 		<StepperRoot>
-			{STEPPER_LABELS.map((label, idx) => {
+			{labels.map((label, idx) => {
 				const status: StepStatus =
 					idx < activeStep
 						? "completed"
@@ -131,7 +154,9 @@ export const LoginStepper = memo(function LoginStepper({
 									idx + 1
 								)}
 							</StepNum>
-							<StepLabel ownerState={{ status }}>{label}</StepLabel>
+							<StepLabel ownerState={{ status }}>
+								{label}
+							</StepLabel>
 						</StepGroup>
 					</Box>
 				);
