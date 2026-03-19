@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, gt } from 'drizzle-orm'
 import type { Server, Socket } from 'socket.io'
 import { db } from '../../db/client.js'
 import { estadoUsuarios } from '../../db/schemas/estadoUsuarios.schema.js'
@@ -96,10 +96,17 @@ export function setupPresenceHandlers(
   // -----------------------------------------------------------------------
   socket.on('presence:get-online', async () => {
     try {
+      const staleThreshold = new Date(Date.now() - 5 * 60 * 1000)
+
       const onlineUsers = await socketDb
         .select({ usuarioId: estadoUsuarios.usuarioId })
         .from(estadoUsuarios)
-        .where(eq(estadoUsuarios.estado, 'online'))
+        .where(
+          and(
+            eq(estadoUsuarios.estado, 'online'),
+            gt(estadoUsuarios.ultimaConexion, staleThreshold),
+          ),
+        )
 
       socket.emit(
         'presence:online-list',

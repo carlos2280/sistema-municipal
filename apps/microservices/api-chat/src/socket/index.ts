@@ -6,8 +6,10 @@ import { env } from '../config/env.js'
 import { createRedisClient, getRedisClient } from '../libs/redis.js'
 import { setupCallHandlers } from './handlers/callHandler.js'
 import { setupChatHandlers } from './handlers/chatHandler.js'
+import { setupHeartbeatHandler } from './handlers/heartbeatHandler.js'
 import { setupMeetingHandlers } from './handlers/meetingHandler.js'
 import { setupPresenceHandlers } from './handlers/presenceHandler.js'
+import { startPresenceCleanup } from './presenceCleanup.js'
 
 interface TokenPayload {
   userId: number
@@ -83,6 +85,9 @@ export async function initializeSocket(
       credentials: true,
     },
     transports: ['websocket', 'polling'],
+    // Heartbeat agresivo: detectar conexiones muertas en ~15s
+    pingInterval: 10_000,
+    pingTimeout: 5_000,
   })
 
   // Configurar Redis adapter para comunicación entre instancias
@@ -155,6 +160,7 @@ export async function initializeSocket(
     setupPresenceHandlers(io, socket, redis)
     setupCallHandlers(io, socket, redis)
     setupMeetingHandlers(io, socket)
+    setupHeartbeatHandler(socket, redis)
 
     socket.on('disconnect', (reason) => {
       console.log(`[Socket] Desconexión: ${socket.id} (Razón: ${reason})`)
@@ -164,6 +170,9 @@ export async function initializeSocket(
       console.error(`[Socket] Error en ${socket.id}:`, error)
     })
   })
+
+  // Cleanup job: detecta y limpia conexiones fantasma cada 2 minutos
+  startPresenceCleanup(io, redis)
 
   console.log('[Socket.IO] Inicializado correctamente')
 

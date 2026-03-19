@@ -16,6 +16,8 @@ interface ChatSocketGlobal {
   listeners: Set<() => void>
   authErrorCount: number
   authRetryTimer: ReturnType<typeof setTimeout> | null
+  _heartbeatInterval: ReturnType<typeof setInterval> | null
+  _handleBeforeUnload: (() => void) | null
 }
 
 const GLOBAL_KEY = '__mf_chat_socket__' as const
@@ -29,6 +31,8 @@ function getGlobal(): ChatSocketGlobal {
       listeners: new Set(),
       authErrorCount: 0,
       authRetryTimer: null,
+      _heartbeatInterval: null,
+      _handleBeforeUnload: null,
     }
   }
   return w[GLOBAL_KEY]
@@ -64,6 +68,20 @@ function getOrCreateSocket(token?: string): Socket {
       reconnectionDelay: 1_000,
       reconnectionDelayMax: 10_000,
     })
+
+    // ── beforeunload: intento de desconexión limpia al cerrar pestaña ──
+    const handleBeforeUnload = () => {
+      g.socket?.disconnect()
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    g._handleBeforeUnload = handleBeforeUnload
+
+    // ── Heartbeat aplicativo: renueva TTL en Redis + ultimaConexion en DB ──
+    g._heartbeatInterval = setInterval(() => {
+      if (g.socket?.connected) {
+        g.socket.emit('heartbeat:ping')
+      }
+    }, 60_000)
 
     g.socket.on('connect', () => {
       g.authErrorCount = 0
@@ -108,6 +126,14 @@ function destroySocket() {
   if (g.authRetryTimer) {
     clearTimeout(g.authRetryTimer)
     g.authRetryTimer = null
+  }
+  if (g._heartbeatInterval) {
+    clearInterval(g._heartbeatInterval)
+    g._heartbeatInterval = null
+  }
+  if (g._handleBeforeUnload) {
+    window.removeEventListener('beforeunload', g._handleBeforeUnload)
+    g._handleBeforeUnload = null
   }
   if (g.socket) {
     g.socket.removeAllListeners()

@@ -12,7 +12,7 @@ import type { RedisClient as Redis } from '../libs/redis.js'
  */
 
 const KEY_PREFIX = 'conn:user:'
-const CONN_TTL = 86400 // 24h safety TTL
+const CONN_TTL = 300 // 5 min safety TTL — el heartbeat renueva constantemente
 
 function userKey(userId: number): string {
   return `${KEY_PREFIX}${userId}`
@@ -61,6 +61,25 @@ export const connectionTracker = {
   async isUserConnected(redis: Redis, userId: number): Promise<boolean> {
     const count = await redis.scard(userKey(userId))
     return count > 0
+  },
+
+  /**
+   * Renueva el TTL de las conexiones del usuario.
+   * Llamado por el heartbeat aplicativo para mantener viva la entrada.
+   */
+  async refreshTTL(redis: Redis, userId: number): Promise<void> {
+    const key = userKey(userId)
+    const exists = await redis.exists(key)
+    if (exists) {
+      await redis.expire(key, CONN_TTL)
+    }
+  },
+
+  /**
+   * Obtiene todas las claves de conexión activas (para cleanup).
+   */
+  async getAllConnectionKeys(redis: Redis): Promise<string[]> {
+    return redis.keys(`${KEY_PREFIX}*`)
   },
 
   /**
