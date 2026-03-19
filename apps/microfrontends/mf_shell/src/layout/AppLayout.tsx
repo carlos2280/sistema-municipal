@@ -18,9 +18,14 @@
  */
 
 import { CssBaseline, GlobalStyles } from "@mui/material";
-import { selectDrawerOpen, useAppSelector } from "mf_store/store";
+import {
+	selectDrawerOpen,
+	selectModulosActivos,
+	useAppSelector,
+	useObtenerConversacionesQuery,
+} from "mf_store/store";
 import { ThemeCustomizer } from "mf_ui/components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useModuleSync } from "../hooks/useModuleSync";
 import AvatarMenu from "./AvatarMenu";
 import { ChatDrawerWrapper } from "./ChatDrawer";
@@ -100,6 +105,27 @@ export default function AppLayout() {
 		setAvatarMenuOpen((prev) => !prev);
 	}, []);
 
+	// ── Chat: solo si el módulo está contratado ─────────────────────
+	const modulosActivos = useAppSelector(selectModulosActivos);
+	const isChatActive = useMemo(
+		() => modulosActivos.some((m) => m.codigo === "chat"),
+		[modulosActivos],
+	);
+	const { data: conversaciones = [] } = useObtenerConversacionesQuery(
+		undefined,
+		{ skip: !isChatActive },
+	);
+	const chatUnreadCount = useMemo(
+		() => conversaciones.reduce((acc, c) => acc + c.mensajesNoLeidos, 0),
+		[conversaciones],
+	);
+
+	const handleChatClick = useCallback(() => {
+		setNotifOpen(false);
+		setAvatarMenuOpen(false);
+		setChatDrawerOpen((prev) => !prev);
+	}, []);
+
 	// Ocultar Compass cuando NavPanel, CommandPalette o un drawer de MF están abiertos
 	const drawerOpen = useAppSelector(selectDrawerOpen);
 	const compassHidden = navPanel.isOpen || cmdPalette.isOpen || drawerOpen;
@@ -124,14 +150,16 @@ export default function AppLayout() {
 			<Eyebrow
 				onModuleClick={navPanel.toggle}
 				onNotificationClick={handleNotifClick}
+				onChatClick={isChatActive ? handleChatClick : undefined}
 				onAvatarClick={handleAvatarClick}
+				chatUnreadCount={isChatActive ? chatUnreadCount : 0}
 			/>
 
 			{/* ── Stage (content area) ─────────────────────────────────── */}
 			<Stage />
 
 			{/* ── Compass FAB ──────────────────────────────────────────── */}
-			<Compass hidden={compassHidden || focusMode} />
+			<Compass hidden={compassHidden || focusMode} chatUnreadCount={isChatActive ? chatUnreadCount : 0} />
 
 			{/* ── StatusLine (2px accent bottom) ───────────────────────── */}
 			<StatusLine />
@@ -168,10 +196,12 @@ export default function AppLayout() {
 				onClose={() => setCustomizerOpen(false)}
 			/>
 
-			<ChatDrawerWrapper
-				open={chatDrawerOpen}
-				onClose={() => setChatDrawerOpen(false)}
-			/>
+			{isChatActive && (
+				<ChatDrawerWrapper
+					open={chatDrawerOpen}
+					onClose={() => setChatDrawerOpen(false)}
+				/>
+			)}
 
 			<OrganigramaDialog open={orgOpen} onClose={() => setOrgOpen(false)} />
 		</>

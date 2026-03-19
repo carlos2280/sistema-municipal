@@ -19,10 +19,14 @@ interface EyebrowProps {
 	onModuleClick?: () => void;
 	/** Callback cuando se hace click en notificaciones */
 	onNotificationClick?: () => void;
+	/** Callback cuando se hace click en el badge de chat */
+	onChatClick?: () => void;
 	/** Callback cuando se hace click en el avatar */
 	onAvatarClick?: () => void;
 	/** Cantidad de notificaciones no leídas */
 	notificationCount?: number;
+	/** Cantidad de mensajes de chat sin leer */
+	chatUnreadCount?: number;
 }
 
 // ─── Constants ──────────────────────────────────────────────────
@@ -66,8 +70,10 @@ const EyebrowRoot = styled("header")(({ theme }) => {
 function Eyebrow({
 	onModuleClick,
 	onNotificationClick,
+	onChatClick,
 	onAvatarClick,
 	notificationCount = 0,
+	chatUnreadCount = 0,
 }: EyebrowProps) {
 	return (
 		<EyebrowRoot role="banner">
@@ -75,7 +81,9 @@ function Eyebrow({
 			<EyebrowContext onModuleClick={onModuleClick} />
 			<EyebrowActions
 				notificationCount={notificationCount}
+				chatUnreadCount={chatUnreadCount}
 				onNotificationClick={onNotificationClick}
+				onChatClick={onChatClick}
 				onAvatarClick={onAvatarClick}
 			/>
 		</EyebrowRoot>

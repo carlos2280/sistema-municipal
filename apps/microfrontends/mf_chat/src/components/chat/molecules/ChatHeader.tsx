@@ -2,6 +2,7 @@ import { SystemGroupBadge } from '@/components/atoms'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import {
   ArrowLeft,
   CalendarPlus,
@@ -11,6 +12,8 @@ import {
   Video,
   X,
 } from 'lucide-react'
+import { UserAvatar } from 'mf_ui/components'
+import { StatusDot } from 'mf_ui/components'
 
 interface ChatHeaderProps {
   conversacionId: number
@@ -28,19 +31,6 @@ interface ChatHeaderProps {
   onScheduleMeeting?: () => void
 }
 
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#7C3AED',
-    '#2563EB',
-    '#059669',
-    '#DC2626',
-    '#D97706',
-    '#7C3AED',
-  ]
-  const index = name.charCodeAt(0) % colors.length
-  return colors[index]
-}
-
 export function ChatHeader({
   conversacionId,
   nombre,
@@ -55,6 +45,7 @@ export function ChatHeader({
   onVideoCall,
   onScheduleMeeting,
 }: ChatHeaderProps) {
+  const theme = useTheme()
   const displayName = nombre || `Conversación ${conversacionId}`
   const isOnline = online ?? false
 
@@ -66,9 +57,8 @@ export function ChatHeader({
         justifyContent: 'space-between',
         px: 1.5,
         py: 1.5,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        bgcolor: 'background.paper',
+        borderBottom: `1px solid ${theme.meridian.borders.default}`,
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Back button + User Info */}
@@ -82,35 +72,21 @@ export function ChatHeader({
             <ArrowLeft size={20} />
           </IconButton>
         )}
-        <Box
-          sx={{
-            width: 44,
-            height: 44,
-            minWidth: 44,
-            flexShrink: 0,
-            borderRadius: esGrupo ? 2 : '50%',
-            bgcolor: getAvatarColor(displayName),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: 600,
-          }}
-        >
-          {esGrupo ? (
-            <Users size={20} />
-          ) : (
-            displayName
-              .split(' ')
-              .map((n: string) => n[0])
-              .join('')
-              .slice(0, 2)
-              .toUpperCase()
-          )}
-        </Box>
+        <UserAvatar
+          name={displayName}
+          size="md"
+          status={esGrupo ? undefined : isOnline ? 'online' : 'offline'}
+          icon={esGrupo ? <Users size={20} /> : undefined}
+        />
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                fontSize: '15px',
+                fontFamily: '"Bricolage Grotesque", sans-serif',
+              }}
+            >
               {displayName}
             </Typography>
             {esSistema && <SystemGroupBadge />}
@@ -119,7 +95,8 @@ export function ChatHeader({
             <Typography
               onClick={onShowMembers}
               sx={{
-                fontSize: 12,
+                fontSize: '12px',
+                fontFamily: '"DM Sans", sans-serif',
                 color: 'text.secondary',
                 cursor: onShowMembers ? 'pointer' : 'default',
                 '&:hover': onShowMembers ? { color: 'primary.main' } : {},
@@ -130,21 +107,17 @@ export function ChatHeader({
           ) : (
             <Typography
               sx={{
-                fontSize: 12,
+                fontSize: '12px',
+                fontFamily: '"DM Sans", sans-serif',
                 color: isOnline ? 'success.main' : 'text.secondary',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
               }}
             >
-              <Box
-                component="span"
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  bgcolor: isOnline ? 'success.main' : 'grey.400',
-                }}
+              <StatusDot
+                color={isOnline ? 'success' : 'neutral'}
+                size="small"
               />
               {isOnline ? 'En línea' : 'Desconectado'}
             </Typography>

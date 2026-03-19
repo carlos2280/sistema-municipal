@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { Calendar, MapPin, Mic, Plus, Video } from 'lucide-react'
 import {
   useCrearReunionMutation,
@@ -81,6 +82,7 @@ export const MeetingsPanel = memo(function MeetingsPanel({
   onSelectConversation,
   onSelectReunion,
 }: MeetingsPanelProps) {
+  const theme = useTheme()
   const [dialogOpen, setDialogOpen] = useState(false)
   const { data: proximas = [], isLoading } = useProximasReunionesQuery()
   const [crearMutation, { isLoading: isCreating }] = useCrearReunionMutation()
@@ -128,8 +130,7 @@ export const MeetingsPanel = memo(function MeetingsPanel({
         sx={{
           px: 2,
           py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
         }}
       >
         <Button
@@ -147,11 +148,18 @@ export const MeetingsPanel = memo(function MeetingsPanel({
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {isLoading ? (
           <Box sx={{ p: 2 }}>
-            <Typography color="text.secondary" fontSize={13}>
+            <Typography
+              sx={{
+                fontSize: '13px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
               Cargando...
             </Typography>
           </Box>
         ) : proximas.length === 0 ? (
+          /* MERIDIAN empty state */
           <Box
             sx={{
               display: 'flex',
@@ -160,17 +168,30 @@ export const MeetingsPanel = memo(function MeetingsPanel({
               justifyContent: 'center',
               height: '60%',
               gap: 1.5,
-              color: 'text.secondary',
               p: 4,
             }}
           >
-            <Calendar size={40} strokeWidth={1.2} />
-            <Typography fontSize={14} fontWeight={500}>
-              Sin reuniones próximas
+            <Calendar
+              size={32}
+              color={theme.palette.text.disabled}
+              strokeWidth={1.5}
+            />
+            <Typography
+              sx={{
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
+              No hay reuniones programadas
             </Typography>
-            <Typography fontSize={12} textAlign="center" color="text.disabled">
-              Programa una reunión para coordinar con tu equipo
-            </Typography>
+            <Button
+              size="small"
+              onClick={() => setDialogOpen(true)}
+              sx={{ textTransform: 'none' }}
+            >
+              Programar reunión
+            </Button>
           </Box>
         ) : (
           grupos.map(([label, items]) => (
@@ -179,12 +200,13 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                 sx={{
                   px: 2,
                   py: 0.75,
-                  fontSize: 11,
+                  fontSize: '11px',
+                  fontFamily: '"DM Mono", monospace',
                   fontWeight: 700,
                   color: 'text.secondary',
                   textTransform: 'uppercase',
                   letterSpacing: 0.6,
-                  bgcolor: 'action.hover',
+                  bgcolor: theme.meridian.surfaces.s3,
                 }}
               >
                 {label}
@@ -201,10 +223,9 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                   sx={{
                     px: 2,
                     py: 1.5,
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: `1px solid ${theme.meridian.borders.muted}`,
                     cursor: 'pointer',
-                    '&:hover': { bgcolor: 'action.hover' },
+                    '&:hover': { bgcolor: theme.meridian.surfaces.s3 },
                   }}
                 >
                   <Box
@@ -216,7 +237,13 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                     }}
                   >
                     <Typography
-                      sx={{ fontWeight: 600, fontSize: 13, flex: 1, pr: 1 }}
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        fontFamily: '"DM Sans", sans-serif',
+                        flex: 1,
+                        pr: 1,
+                      }}
                     >
                       {reunion.titulo}
                     </Typography>
@@ -224,7 +251,12 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                       label={reunion.estado}
                       size="small"
                       color={ESTADO_COLOR[reunion.estado] ?? 'default'}
-                      sx={{ fontSize: 10, height: 18 }}
+                      sx={{
+                        fontSize: '10px',
+                        fontFamily: '"DM Mono", monospace',
+                        height: 18,
+                        textTransform: 'uppercase',
+                      }}
                     />
                   </Box>
 
@@ -237,7 +269,13 @@ export const MeetingsPanel = memo(function MeetingsPanel({
                     }}
                   >
                     {TIPO_ICON[reunion.tipo]}
-                    <Typography fontSize={12}>
+                    <Typography
+                      sx={{
+                        fontSize: '12px',
+                        fontFamily: '"Space Grotesk", sans-serif',
+                        fontFeatureSettings: "'tnum' 1",
+                      }}
+                    >
                       {formatTime(reunion.fechaInicio)} –{' '}
                       {formatTime(reunion.fechaFin)}
                     </Typography>
@@ -245,9 +283,12 @@ export const MeetingsPanel = memo(function MeetingsPanel({
 
                   {reunion.ubicacion && (
                     <Typography
-                      fontSize={11}
-                      color="text.disabled"
-                      sx={{ mt: 0.25 }}
+                      sx={{
+                        fontSize: '11px',
+                        fontFamily: '"DM Sans", sans-serif',
+                        color: 'text.disabled',
+                        mt: 0.25,
+                      }}
                     >
                       {reunion.ubicacion}
                     </Typography>

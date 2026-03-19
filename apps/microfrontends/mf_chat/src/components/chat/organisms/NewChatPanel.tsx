@@ -1,8 +1,6 @@
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
-import InputAdornment from '@mui/material/InputAdornment'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import { ArrowLeft, PanelRightClose, Search, UserPlus } from 'lucide-react'
@@ -59,7 +57,7 @@ export function NewChatPanel({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.paper',
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Header */}
@@ -70,13 +68,18 @@ export function NewChatPanel({
           justifyContent: 'space-between',
           height: 64,
           px: 2.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <UserPlus size={22} color={theme.palette.primary.main} />
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '18px',
+              fontFamily: '"Bricolage Grotesque", sans-serif',
+            }}
+          >
             Nuevo Chat
           </Typography>
         </Box>
@@ -85,8 +88,7 @@ export function NewChatPanel({
             size="small"
             onClick={onBack}
             sx={{
-              border: '1px solid',
-              borderColor: 'divider',
+              border: `1px solid ${theme.meridian.borders.default}`,
               borderRadius: 2,
               width: 32,
               height: 32,
@@ -99,8 +101,7 @@ export function NewChatPanel({
               size="small"
               onClick={onClose}
               sx={{
-                border: '1px solid',
-                borderColor: 'divider',
+                border: `1px solid ${theme.meridian.borders.default}`,
                 borderRadius: 2,
                 width: 32,
                 height: 32,
@@ -112,30 +113,46 @@ export function NewChatPanel({
         </Box>
       </Box>
 
-      {/* Search */}
+      {/* MERIDIAN search input */}
       <Box sx={{ p: 2, px: 2.5 }}>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Buscar contacto..."
-          value={searchTerm}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={16} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-            },
-          }}
+        <Box
           sx={{
-            '& .MuiOutlinedInput-root': {
-              bgcolor: theme.palette.action.hover,
-              '& fieldset': { borderColor: theme.palette.divider },
+            display: 'flex',
+            alignItems: 'center',
+            height: 40,
+            px: 1.5,
+            backgroundColor: theme.meridian.surfaces.s3,
+            border: `1px solid ${theme.meridian.borders.default}`,
+            borderRadius: `${theme.shape.borderRadius}px`,
+            '&:focus-within': {
+              borderColor: theme.palette.primary.main,
+              backgroundColor: theme.meridian.surfaces.s4,
             },
           }}
-        />
+        >
+          <Search size={16} color={theme.palette.text.secondary} />
+          <Box
+            component="input"
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleSearchChange(e.target.value)
+            }
+            placeholder="Buscar contacto..."
+            sx={{
+              flex: 1,
+              ml: 1,
+              border: 'none',
+              background: 'none',
+              outline: 'none',
+              fontSize: '13.5px',
+              fontFamily: '"DM Sans", sans-serif',
+              color: theme.palette.text.primary,
+              '&::placeholder': {
+                color: theme.palette.text.disabled,
+              },
+            }}
+          />
+        </Box>
       </Box>
 
       {/* Contacts List */}
@@ -152,8 +169,29 @@ export function NewChatPanel({
             <CircularProgress size={32} />
           </Box>
         ) : usuariosFiltrados.length === 0 ? (
-          <Box sx={{ p: 2.5, textAlign: 'center' }}>
-            <Typography color="text.secondary" variant="body2">
+          /* MERIDIAN empty state */
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 8,
+              gap: 1.5,
+            }}
+          >
+            <Search
+              size={32}
+              color={theme.palette.text.disabled}
+              strokeWidth={1.5}
+            />
+            <Typography
+              sx={{
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
               {searchTerm
                 ? 'No se encontraron contactos'
                 : 'No hay contactos disponibles'}

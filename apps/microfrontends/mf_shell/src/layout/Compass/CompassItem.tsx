@@ -21,6 +21,8 @@ interface CompassItemProps {
 	shortcut: string;
 	/** Si este módulo está activo */
 	isActive: boolean;
+	/** Si tiene mensajes/notificaciones sin leer */
+	hasUnread?: boolean;
 	/** Handler de click */
 	onClick: () => void;
 }
@@ -119,6 +121,18 @@ const ActiveDot = styled("span")(({ theme }) => ({
 	border: `2px solid ${theme.meridian.surfaces.s3}`,
 }));
 
+const UnreadDot = styled("span")(({ theme }) => ({
+	position: "absolute",
+	top: -2,
+	right: -2,
+	width: 8,
+	height: 8,
+	borderRadius: "50%",
+	background: theme.palette.error.main,
+	border: `2px solid ${theme.meridian.surfaces.s3}`,
+	pointerEvents: "none",
+}));
+
 const Label = styled("span")(({ theme }) => ({
 	position: "absolute",
 	right: 56,
@@ -161,6 +175,7 @@ function CompassItem({
 	label,
 	shortcut,
 	isActive,
+	hasUnread = false,
 	onClick,
 }: CompassItemProps) {
 	return (
@@ -185,6 +200,9 @@ function CompassItem({
 
 			{/* Active module indicator dot */}
 			{isActive && <ActiveDot />}
+
+			{/* Unread indicator dot (e.g. chat messages) */}
+			{hasUnread && !isActive && <UnreadDot />}
 
 			{/* Tooltip label con kbd shortcut */}
 			<Label className="compass-label">

@@ -7,12 +7,19 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Calendar, MessageSquare, Plus, Search, Users, X } from 'lucide-react'
+import {
+  Calendar,
+  MessageCircle,
+  MessageSquare,
+  Plus,
+  Search,
+  Users,
+  X,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ConversationItem } from '../atoms/ConversationItem'
 
@@ -25,7 +32,6 @@ interface ChatPanelProps {
   onNewChat?: (event: React.MouseEvent<HTMLElement>) => void
 }
 
-// Función para formatear la hora del último mensaje
 function formatMessageTime(dateStr: string): string {
   try {
     const date = new Date(dateStr)
@@ -67,10 +73,8 @@ export function ChatPanel({
   const { conversaciones, isLoading, error } = useConversaciones()
   const { isUserOnline } = useOnlineUsers()
 
-  // Transformar conversaciones al formato del componente
   const mappedConversations = useMemo(() => {
     return conversaciones.map((conv) => {
-      // Para conversaciones directas, obtener el nombre del otro participante
       let nombre = conv.nombre || 'Sin nombre'
       let online = false
       let otherUserId: number | undefined
@@ -86,7 +90,6 @@ export function ChatPanel({
         }
       }
 
-      // Construir preview del último mensaje
       let ultimoMensajePreview = 'Sin mensajes'
       if (conv.ultimoMensaje) {
         const msg = conv.ultimoMensaje
@@ -95,7 +98,6 @@ export function ChatPanel({
         else if (msg.tipo === 'archivo') preview = 'Archivo'
         else if (msg.tipo === 'sistema') preview = msg.contenido
 
-        // En grupos, prefijo con nombre del remitente
         if (conv.tipo === 'grupo' && msg.remitente) {
           const firstName = msg.remitente.nombreCompleto.split(' ')[0]
           ultimoMensajePreview = `${firstName}: ${preview}`
@@ -119,7 +121,6 @@ export function ChatPanel({
     })
   }, [conversaciones, currentUserId, isUserOnline])
 
-  // Calcular total de mensajes no leídos
   const totalUnread = mappedConversations.reduce(
     (acc, conv) => acc + conv.noLeidos,
     0,
@@ -147,7 +148,7 @@ export function ChatPanel({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.paper',
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Header */}
@@ -158,13 +159,18 @@ export function ChatPanel({
           justifyContent: 'space-between',
           px: 2,
           py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <MessageSquare size={22} color={theme.palette.primary.main} />
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '18px',
+              fontFamily: '"Bricolage Grotesque", sans-serif',
+            }}
+          >
             Chat
           </Typography>
           {totalUnread > 0 && (
@@ -176,6 +182,8 @@ export function ChatPanel({
                   fontSize: 11,
                   height: 20,
                   minWidth: 20,
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontFeatureSettings: "'tnum' 1",
                 },
               }}
             />
@@ -202,7 +210,11 @@ export function ChatPanel({
       </Box>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box
+        sx={{
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
+        }}
+      >
         <Tabs
           value={tabValue}
           onChange={(_, newValue) => setTabValue(newValue)}
@@ -212,6 +224,8 @@ export function ChatPanel({
               textTransform: 'none',
               minWidth: 'auto',
               px: 2,
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: '13px',
             },
           }}
         >
@@ -243,31 +257,48 @@ export function ChatPanel({
         </Tabs>
       </Box>
 
-      {/* Search — oculto en tab Reuniones */}
+      {/* Search — MERIDIAN spec input */}
       {tabValue !== 3 && (
         <Box sx={{ p: 2 }}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Buscar conversación..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={18} color={theme.palette.text.secondary} />
-                  </InputAdornment>
-                ),
-              },
-            }}
+          <Box
+            component="div"
             sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: theme.palette.action.hover,
-                '& fieldset': { borderColor: theme.palette.divider },
+              display: 'flex',
+              alignItems: 'center',
+              height: 40,
+              px: 1.5,
+              backgroundColor: theme.meridian.surfaces.s3,
+              border: `1px solid ${theme.meridian.borders.default}`,
+              borderRadius: `${theme.shape.borderRadius}px`,
+              '&:focus-within': {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: theme.meridian.surfaces.s4,
               },
             }}
-          />
+          >
+            <Search size={16} color={theme.palette.text.secondary} />
+            <Box
+              component="input"
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
+              placeholder="Buscar conversación..."
+              sx={{
+                flex: 1,
+                ml: 1,
+                border: 'none',
+                background: 'none',
+                outline: 'none',
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: theme.palette.text.primary,
+                '&::placeholder': {
+                  color: theme.palette.text.disabled,
+                },
+              }}
+            />
+          </Box>
         </Box>
       )}
 
@@ -297,15 +328,55 @@ export function ChatPanel({
             </Typography>
           </Box>
         ) : filteredConversations.length === 0 ? (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography color="text.secondary" variant="body2">
-              {searchTerm
-                ? 'No se encontraron conversaciones'
-                : 'No tienes conversaciones aún'}
-            </Typography>
+          /* MERIDIAN empty state: icon + text + action */
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 8,
+              gap: 1.5,
+            }}
+          >
+            {searchTerm ? (
+              <>
+                <Search
+                  size={32}
+                  color={theme.palette.text.disabled}
+                  strokeWidth={1.5}
+                />
+                <Typography
+                  sx={{
+                    fontSize: '13.5px',
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: 'text.secondary',
+                  }}
+                >
+                  Sin resultados para esta búsqueda
+                </Typography>
+              </>
+            ) : (
+              <>
+                <MessageCircle
+                  size={32}
+                  color={theme.palette.text.disabled}
+                  strokeWidth={1.5}
+                />
+                <Typography
+                  sx={{
+                    fontSize: '13.5px',
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: 'text.secondary',
+                  }}
+                >
+                  No tienes conversaciones aún
+                </Typography>
+              </>
+            )}
           </Box>
         ) : (
-          filteredConversations.map((conv) => (
+          filteredConversations.map((conv, index) => (
             <ConversationItem
               key={conv.id}
               id={conv.id}
@@ -318,6 +389,7 @@ export function ChatPanel({
               sistema={conv.sistema}
               isActive={activeConversationId === conv.id}
               onClick={() => handleConversationClick(conv.id)}
+              staggerIndex={index}
             />
           ))
         )}

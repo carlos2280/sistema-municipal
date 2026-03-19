@@ -328,7 +328,23 @@ declare module 'mf_ui/components' {
   export const PageHeader: React.FC<{ title: string; subtitle?: string }>
   export const AppLoader: React.FC
   export const EmptyState: React.FC<{ message: string; icon?: React.ReactNode }>
-  export const UserAvatar: React.FC<{ name: string; size?: number }>
+  export const UserAvatar: React.FC<{
+    name?: string
+    src?: string
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+    status?: 'online' | 'offline' | 'away' | 'busy'
+    showName?: boolean
+    subtitle?: string
+    color?: string
+    icon?: React.ReactNode
+    onClick?: () => void
+  }>
+  export const StatusDot: React.FC<{
+    color?: 'success' | 'warning' | 'error' | 'info' | 'neutral'
+    size?: 'small' | 'medium' | 'large'
+    pulse?: boolean
+    label?: string
+  }>
   export const SearchInput: React.FC<{
     value: string
     onChange: (value: string) => void
