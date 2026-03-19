@@ -26,7 +26,7 @@ app.use(requireGateway)
 app.use(tenantDbMiddleware)
 
 // Health check
-app.get('/health', async (_req, res) => {
+app.get('/api/health', async (_req, res) => {
   try {
     const { getRedisClient } = await import('./libs/redis.js')
     await getRedisClient().ping()
