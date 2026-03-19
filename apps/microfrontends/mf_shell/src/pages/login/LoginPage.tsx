@@ -18,9 +18,7 @@ import {
 	selectTenantNombre,
 	useAppSelector,
 } from "mf_store/store";
-import { useTheme as useMeridianTheme } from "mf_ui/theme";
-import type { ModuleCode } from "mf_ui/theme";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
 import { Navigate } from "react-router-dom";
 import { AreaSystemStep } from "./components/AreaSystemStep";
@@ -113,7 +111,6 @@ function LoginFormContent({
 	onCodeChange,
 	onNext,
 	onBack,
-	onSistemaSelect,
 }: {
 	readonly activeStep: 0 | 1 | 2;
 	readonly areas: ReadonlyArray<{
@@ -134,7 +131,6 @@ function LoginFormContent({
 	readonly onCodeChange: (code: string) => void;
 	readonly onNext: () => void;
 	readonly onBack: () => void;
-	readonly onSistemaSelect: (codigo: string) => void;
 }) {
 	const correo = useWatch({ name: "correo" }) as string | undefined;
 	const contrasena = useWatch({ name: "contrasena" }) as string | undefined;
@@ -186,7 +182,6 @@ function LoginFormContent({
 							areas={areas}
 							sistemas={sistemas}
 							isLoadingSistemas={isLoadingSistemas}
-							onSistemaSelect={onSistemaSelect}
 						/>
 					)}
 					{activeStep === 2 && (
@@ -232,20 +227,6 @@ export default function LoginPage() {
 		handleNext,
 		handleBack,
 	} = useLoginFlow();
-
-	const { setActiveModule, activeModule } = useMeridianTheme();
-
-	// Resetear al color "home" al llegar al login (limpia residuo de sesión anterior)
-	useEffect(() => {
-		if (activeModule !== "home" && !isAuthenticated) {
-			setActiveModule("home");
-		}
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps -- solo al montar
-
-	const handleSistemaSelect = useCallback(
-		(codigo: string) => setActiveModule(codigo as ModuleCode),
-		[setActiveModule],
-	);
 
 	const config = mfaSetupPending ? MFA_PENDING_CONFIG : STEP_CONFIG[activeStep];
 
@@ -304,7 +285,6 @@ export default function LoginPage() {
 							onCodeChange={setMfaCode}
 							onNext={handleNext}
 							onBack={handleBack}
-							onSistemaSelect={handleSistemaSelect}
 						/>
 					</FormProvider>
 				)}

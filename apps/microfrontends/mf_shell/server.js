@@ -17,12 +17,12 @@ if (fs.existsSync(distPath)) {
 	const files = fs.readdirSync(distPath);
 	console.log(`[mf_shell] dist folder contents: ${files.join(", ")}`);
 
-	const assetsPath = path.join(distPath, "assets");
-	if (fs.existsSync(assetsPath)) {
-		const assetFiles = fs.readdirSync(assetsPath);
-		console.log(`[mf_shell] assets folder contents: ${assetFiles.slice(0, 10).join(", ")}${assetFiles.length > 10 ? '...' : ''}`);
+	const staticPath = path.join(distPath, "static");
+	if (fs.existsSync(staticPath)) {
+		const staticFiles = fs.readdirSync(staticPath);
+		console.log(`[mf_shell] static folder contents: ${staticFiles.slice(0, 10).join(", ")}${staticFiles.length > 10 ? '...' : ''}`);
 	} else {
-		console.error(`[mf_shell] ERROR: assets folder does not exist!`);
+		console.warn(`[mf_shell] WARN: static folder does not exist (rsbuild outputs to dist/static/)`);
 	}
 
 	if (fs.existsSync(indexPath)) {
