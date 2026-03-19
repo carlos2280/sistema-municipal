@@ -382,7 +382,12 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 												ownerState={{ selected: isSelected }}
 												onClick={() => {
 													field.onChange(sistema.id);
-													onSistemaSelect?.(sistema.codigo);
+													// Defer theme change to avoid React 19 batching
+													// field.onChange + setActiveModule in the same event
+													// crashes MUI's createTheme deepmerge in production
+													queueMicrotask(() =>
+														onSistemaSelect?.(sistema.codigo),
+													);
 												}}
 												role="radio"
 												aria-checked={isSelected}
