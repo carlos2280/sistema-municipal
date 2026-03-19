@@ -570,7 +570,7 @@ export function createMeridianTheme(mode: "dark" | "light"): Theme {
 export function getModuleThemeOverrides(
 	moduleCode: ModuleCode,
 ): Partial<ThemeOptions> {
-	const mod = MODULE_ACCENTS[moduleCode];
+	const mod = MODULE_ACCENTS[moduleCode] ?? MODULE_ACCENTS.home;
 	const contrastText = getContrastText(mod.main);
 
 	return {

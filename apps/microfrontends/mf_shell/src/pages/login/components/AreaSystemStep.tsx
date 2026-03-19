@@ -277,14 +277,12 @@ interface AreaSystemStepProps {
 	readonly areas: ReadonlyArray<AreaOption>;
 	readonly sistemas: ReadonlyArray<SistemaOption>;
 	readonly isLoadingSistemas: boolean;
-	readonly onSistemaSelect?: (codigo: string) => void;
 }
 
 export const AreaSystemStep = memo(function AreaSystemStep({
 	areas,
 	sistemas,
 	isLoadingSistemas,
-	onSistemaSelect,
 }: AreaSystemStepProps) {
 	const { control, watch } = useFormContext<TSchemaCredenciales>();
 	const selectedArea = watch("areaId");
@@ -382,12 +380,6 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 												ownerState={{ selected: isSelected }}
 												onClick={() => {
 													field.onChange(sistema.id);
-													// Defer theme change to avoid React 19 batching
-													// field.onChange + setActiveModule in the same event
-													// crashes MUI's createTheme deepmerge in production
-													queueMicrotask(() =>
-														onSistemaSelect?.(sistema.codigo),
-													);
 												}}
 												role="radio"
 												aria-checked={isSelected}
