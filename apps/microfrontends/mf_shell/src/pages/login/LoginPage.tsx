@@ -250,7 +250,7 @@ function LoginFormContent({
 			</AnimatePresence>
 
 			{/* Hide actions during MFA setup scan phase (auto-submit handles it) */}
-			{!(mfaSetupPending && activeStep === 2) && (
+			{!(mfaSetupPending && activeStep >= 2) && (
 				<LoginActions
 					activeStep={activeStep}
 					disabled={!isStepValid}
