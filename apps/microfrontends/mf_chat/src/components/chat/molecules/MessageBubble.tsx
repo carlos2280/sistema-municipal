@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
 import { FileText } from 'lucide-react'
 import { memo } from 'react'
+import { motion } from 'framer-motion'
 
 /** Elimina caracteres de control invisibles (excepto newline/tab) y null bytes */
 function sanitizeContent(text: string): string {
@@ -21,6 +22,8 @@ interface MessageBubbleProps {
   }
 }
 
+const MotionBox = motion.create(Box)
+
 export const MessageBubble = memo(function MessageBubble({
   contenido,
   esPropio,
@@ -32,27 +35,34 @@ export const MessageBubble = memo(function MessageBubble({
   const displayContent = sanitizeContent(contenido)
 
   return (
-    <Box
+    <MotionBox
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.0, 0.0, 0.2, 1.0] }}
       sx={{
         display: 'flex',
         justifyContent: esPropio ? 'flex-end' : 'flex-start',
         mb: 1,
+        '@media (prefers-reduced-motion: reduce)': {
+          animation: 'none',
+        },
       }}
     >
       <Box
         sx={{
           maxWidth: '70%',
-          bgcolor: esPropio ? 'primary.main' : 'background.paper',
+          bgcolor: esPropio ? 'primary.main' : theme.meridian.surfaces.s2,
           color: esPropio ? 'white' : 'text.primary',
           borderRadius: 2,
           px: 2,
           py: 1,
-          boxShadow: esPropio ? 'none' : '0 1px 2px rgba(0,0,0,0.08)',
+          boxShadow: esPropio ? 'none' : theme.meridian.shadows.sm,
         }}
       >
         <Typography
           sx={{
-            fontSize: 14,
+            fontSize: '13.5px',
+            fontFamily: '"DM Sans", sans-serif',
             lineHeight: 1.5,
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
@@ -107,7 +117,8 @@ export const MessageBubble = memo(function MessageBubble({
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontSize: 13,
+                  fontSize: '13px',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -118,8 +129,12 @@ export const MessageBubble = memo(function MessageBubble({
               </Typography>
               <Typography
                 sx={{
-                  fontSize: 11,
-                  color: esPropio ? 'rgba(255,255,255,0.7)' : 'text.secondary',
+                  fontSize: '11px',
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontFeatureSettings: "'tnum' 1",
+                  color: esPropio
+                    ? alpha(theme.palette.common.white, 0.7)
+                    : 'text.secondary',
                 }}
               >
                 {archivo.tamanio}
@@ -130,8 +145,12 @@ export const MessageBubble = memo(function MessageBubble({
 
         <Typography
           sx={{
-            fontSize: 11,
-            color: esPropio ? 'rgba(255,255,255,0.7)' : 'text.secondary',
+            fontSize: '11px',
+            fontFamily: '"Space Grotesk", sans-serif',
+            fontFeatureSettings: "'tnum' 1",
+            color: esPropio
+              ? alpha(theme.palette.common.white, 0.7)
+              : 'text.secondary',
             textAlign: 'right',
             mt: 0.5,
           }}
@@ -139,6 +158,6 @@ export const MessageBubble = memo(function MessageBubble({
           {hora}
         </Typography>
       </Box>
-    </Box>
+    </MotionBox>
   )
 })

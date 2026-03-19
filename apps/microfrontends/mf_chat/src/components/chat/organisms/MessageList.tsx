@@ -2,6 +2,8 @@ import { MeetingCard } from '@/components/meeting/molecules/MeetingCard'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
+import { MessageSquare } from 'lucide-react'
 import type { Mensaje } from 'mf_store/store'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MessageBubble } from '../molecules/MessageBubble'
@@ -16,7 +18,6 @@ interface MessageListProps {
   onIniciarMeeting?: (reunionId: number) => void
 }
 
-// Función para formatear fecha
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
   const today = new Date()
@@ -36,7 +37,6 @@ function formatDate(dateStr: string): string {
   })
 }
 
-// Función para formatear hora
 function formatTime(dateStr: string): string {
   return new Date(dateStr).toLocaleTimeString('es', {
     hour: '2-digit',
@@ -44,7 +44,6 @@ function formatTime(dateStr: string): string {
   })
 }
 
-// Agrupar mensajes por fecha
 function groupMessagesByDate(mensajes: Mensaje[]): Record<string, Mensaje[]> {
   return mensajes.reduce(
     (acc, msg) => {
@@ -66,10 +65,10 @@ export function MessageList({
   onJoinMeeting,
   onIniciarMeeting,
 }: MessageListProps) {
+  const theme = useTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const [visibleCount, setVisibleCount] = useState(MESSAGES_PER_PAGE)
 
-  // Resetear visible count cuando cambia la conversación (mensajes se vacían)
   const prevLengthRef = useRef(mensajes.length)
   useEffect(() => {
     if (mensajes.length < prevLengthRef.current) {
@@ -78,8 +77,6 @@ export function MessageList({
     prevLengthRef.current = mensajes.length
   }, [mensajes.length])
 
-  // Scroll al final cuando llegan nuevos mensajes.
-  // Se hace scroll inmediato + diferido para capturar contenido async (ej: MeetingCard).
   // biome-ignore lint/correctness/useExhaustiveDependencies: containerRef.current es estable, no necesita ser dep
   useEffect(() => {
     const el = containerRef.current
@@ -91,7 +88,6 @@ export function MessageList({
     return () => clearTimeout(timer)
   }, [mensajes.length])
 
-  // Solo renderizar los últimos N mensajes para evitar degradación del DOM
   const visibleMensajes = useMemo(() => {
     if (mensajes.length <= visibleCount) return mensajes
     return mensajes.slice(mensajes.length - visibleCount)
@@ -107,13 +103,27 @@ export function MessageList({
         sx={{
           flex: 1,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: 'background.default',
+          bgcolor: theme.meridian.surfaces.ground,
+          gap: 1.5,
         }}
       >
-        <Typography color="text.secondary">
-          No hay mensajes aún. ¡Inicia la conversación!
+        {/* MERIDIAN empty state */}
+        <MessageSquare
+          size={32}
+          color={theme.palette.text.disabled}
+          strokeWidth={1.5}
+        />
+        <Typography
+          sx={{
+            fontSize: '13.5px',
+            fontFamily: '"DM Sans", sans-serif',
+            color: 'text.secondary',
+          }}
+        >
+          Envía el primer mensaje
         </Typography>
       </Box>
     )
@@ -127,7 +137,7 @@ export function MessageList({
         overflow: 'auto',
         px: { xs: 1.5, sm: 2.5 },
         py: 2,
-        bgcolor: 'background.default',
+        bgcolor: theme.meridian.surfaces.ground,
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
@@ -139,7 +149,11 @@ export function MessageList({
             size="small"
             variant="text"
             onClick={() => setVisibleCount((prev) => prev + MESSAGES_PER_PAGE)}
-            sx={{ fontSize: 12, textTransform: 'none' }}
+            sx={{
+              fontSize: 12,
+              textTransform: 'none',
+              fontFamily: '"DM Sans", sans-serif',
+            }}
           >
             Cargar mensajes anteriores
           </Button>
@@ -159,13 +173,15 @@ export function MessageList({
           >
             <Typography
               sx={{
-                fontSize: 12,
+                fontSize: '12px',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontFeatureSettings: "'tnum' 1",
                 color: 'text.secondary',
-                bgcolor: 'background.paper',
+                bgcolor: theme.meridian.surfaces.s2,
                 px: 2,
                 py: 0.5,
                 borderRadius: 2,
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                boxShadow: theme.meridian.shadows.sm,
               }}
             >
               {fecha}
@@ -213,12 +229,43 @@ export function MessageList({
         </Box>
       ))}
 
-      {/* Typing Indicator */}
+      {/* Typing Indicator — MERIDIAN motion */}
       {typingUsers.length > 0 && (
-        <Box sx={{ px: 1, py: 0.5 }}>
+        <Box
+          sx={{
+            px: 1,
+            py: 0.5,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: '3px' }}>
+            {[0, 1, 2].map((i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  bgcolor: 'text.disabled',
+                  animation: 'typingBounce 600ms ease-in-out infinite',
+                  animationDelay: `${i * 150}ms`,
+                  '@keyframes typingBounce': {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-4px)' },
+                  },
+                  '@media (prefers-reduced-motion: reduce)': {
+                    animation: 'none',
+                  },
+                }}
+              />
+            ))}
+          </Box>
           <Typography
             sx={{
-              fontSize: 12,
+              fontSize: '12px',
+              fontFamily: '"DM Sans", sans-serif',
               color: 'text.secondary',
               fontStyle: 'italic',
             }}

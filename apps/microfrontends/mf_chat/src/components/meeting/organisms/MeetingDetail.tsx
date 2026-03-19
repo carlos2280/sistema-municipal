@@ -4,6 +4,7 @@ import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +23,7 @@ import {
   useObtenerReunionQuery,
   useRsvpReunionMutation,
 } from 'mf_store/store'
+import { UserAvatar } from 'mf_ui/components'
 import { memo, useCallback, useState } from 'react'
 
 interface MeetingDetailProps {
@@ -49,13 +51,6 @@ const RSVP_COLOR: Record<
   tentativa: 'warning',
 }
 
-const RSVP_DOT: Record<EstadoInvitacion, string> = {
-  aceptada: '#2e7d32',
-  rechazada: '#d32f2f',
-  tentativa: '#ed6c02',
-  pendiente: '#9e9e9e',
-}
-
 const RSVP_LABEL: Record<EstadoInvitacion, string> = {
   aceptada: 'Aceptó',
   rechazada: 'Rechazó',
@@ -63,7 +58,6 @@ const RSVP_LABEL: Record<EstadoInvitacion, string> = {
   pendiente: 'Sin responder',
 }
 
-// Orden de estados para mostrar en la lista
 const ESTADO_ORDER: EstadoInvitacion[] = [
   'aceptada',
   'tentativa',
@@ -87,10 +81,6 @@ function formatHora(iso: string): string {
   })
 }
 
-function getInitial(nombre: string): string {
-  return nombre.charAt(0).toUpperCase()
-}
-
 export const MeetingDetail = memo(function MeetingDetail({
   reunionId,
   currentUserId,
@@ -99,13 +89,13 @@ export const MeetingDetail = memo(function MeetingDetail({
   onIniciar,
   onJoin,
 }: MeetingDetailProps) {
+  const theme = useTheme()
   const { data: reunion, isLoading } = useObtenerReunionQuery(reunionId)
   const [rsvpMutation, { isLoading: isRsvping }] = useRsvpReunionMutation()
   const [cancelarMutation, { isLoading: isCancelling }] =
     useCancelarReunionMutation()
   const [editandoRsvp, setEditandoRsvp] = useState(false)
 
-  // Obtener participantes de la conversación para mapear nombre
   const { data: conversacion } = useObtenerConversacionQuery(
     reunion?.conversacionId ?? 0,
     {
@@ -123,6 +113,20 @@ export const MeetingDetail = memo(function MeetingDetail({
   const esOrganizador = reunion?.organizadorId === currentUserId
   const miInvitacion = reunion?.invitaciones.find(
     (i) => i.usuarioId === currentUserId,
+  )
+
+  /** Mapeo RSVP → color semántico del theme */
+  const getRsvpDotColor = useCallback(
+    (estado: EstadoInvitacion): string => {
+      const map: Record<EstadoInvitacion, string> = {
+        aceptada: theme.palette.success.main,
+        rechazada: theme.palette.error.main,
+        tentativa: theme.palette.warning.main,
+        pendiente: theme.palette.text.disabled,
+      }
+      return map[estado]
+    },
+    [theme],
   )
 
   const handleRsvp = useCallback(
@@ -157,7 +161,6 @@ export const MeetingDetail = memo(function MeetingDetail({
   const inactiva =
     reunion.estado === 'cancelada' || reunion.estado === 'completada'
 
-  // Ordenar invitaciones: organizador primero, luego por estado
   const invitacionesOrdenadas = [...reunion.invitaciones].sort((a, b) => {
     if (a.usuarioId === reunion.organizadorId) return -1
     if (b.usuarioId === reunion.organizadorId) return 1
@@ -178,15 +181,21 @@ export const MeetingDetail = memo(function MeetingDetail({
           alignItems: 'center',
           px: 1.5,
           py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
+          bgcolor: theme.meridian.surfaces.s1,
         }}
       >
         <IconButton size="small" onClick={onBack} sx={{ mr: 1 }}>
           <ArrowLeft size={18} />
         </IconButton>
-        <Typography sx={{ fontWeight: 600, fontSize: 15, flex: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '18px',
+            fontFamily: '"Bricolage Grotesque", sans-serif',
+            flex: 1,
+          }}
+        >
           Detalle de reunión
         </Typography>
         {onClose && (
@@ -202,7 +211,14 @@ export const MeetingDetail = memo(function MeetingDetail({
           sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}
         >
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: 700, fontSize: 17, lineHeight: 1.3 }}>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '17px',
+                fontFamily: '"Bricolage Grotesque", sans-serif',
+                lineHeight: 1.3,
+              }}
+            >
               {reunion.titulo}
             </Typography>
           </Box>
@@ -223,7 +239,14 @@ export const MeetingDetail = memo(function MeetingDetail({
 
         {/* Descripción */}
         {reunion.descripcion && (
-          <Typography sx={{ fontSize: 13, color: 'text.secondary', mb: 2 }}>
+          <Typography
+            sx={{
+              fontSize: '13px',
+              fontFamily: '"DM Sans", sans-serif',
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             {reunion.descripcion}
           </Typography>
         )}
@@ -235,10 +258,23 @@ export const MeetingDetail = memo(function MeetingDetail({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Calendar size={16} />
             <Box>
-              <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
+              <Typography
+                sx={{
+                  fontSize: '13px',
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: 500,
+                }}
+              >
                 {formatFecha(reunion.fechaInicio)}
               </Typography>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+              <Typography
+                sx={{
+                  fontSize: '12px',
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontFeatureSettings: "'tnum' 1",
+                  color: 'text.secondary',
+                }}
+              >
                 {formatHora(reunion.fechaInicio)} –{' '}
                 {formatHora(reunion.fechaFin)}
               </Typography>
@@ -247,7 +283,12 @@ export const MeetingDetail = memo(function MeetingDetail({
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {TIPO_ICON[reunion.tipo]}
-            <Typography sx={{ fontSize: 13 }}>
+            <Typography
+              sx={{
+                fontSize: '13px',
+                fontFamily: '"DM Sans", sans-serif',
+              }}
+            >
               {reunion.tipo === 'video'
                 ? 'Videollamada'
                 : reunion.tipo === 'voz'
@@ -259,7 +300,14 @@ export const MeetingDetail = memo(function MeetingDetail({
           {reunion.ubicacion && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <MapPin size={16} />
-              <Typography sx={{ fontSize: 13 }}>{reunion.ubicacion}</Typography>
+              <Typography
+                sx={{
+                  fontSize: '13px',
+                  fontFamily: '"DM Sans", sans-serif',
+                }}
+              >
+                {reunion.ubicacion}
+              </Typography>
             </Box>
           )}
         </Box>
@@ -270,8 +318,24 @@ export const MeetingDetail = memo(function MeetingDetail({
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
             <Users size={15} />
-            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
-              Participantes ({reunion.invitaciones.length})
+            <Typography
+              sx={{
+                fontSize: '13px',
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: 600,
+              }}
+            >
+              Participantes
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontFeatureSettings: "'tnum' 1",
+                color: 'text.secondary',
+              }}
+            >
+              ({reunion.invitaciones.length})
             </Typography>
           </Box>
 
@@ -280,7 +344,7 @@ export const MeetingDetail = memo(function MeetingDetail({
               inv.nombreUsuario ??
               participantesMap[inv.usuarioId] ??
               `Usuario ${inv.usuarioId}`
-            const esMiFilа = inv.usuarioId === currentUserId
+            const esMiFila = inv.usuarioId === currentUserId
             const esOrg = inv.usuarioId === reunion.organizadorId
 
             return (
@@ -291,41 +355,40 @@ export const MeetingDetail = memo(function MeetingDetail({
                   alignItems: 'center',
                   gap: 1.5,
                   py: 0.75,
-                  px: esMiFilа ? 1 : 0,
-                  borderRadius: esMiFilа ? 1 : 0,
-                  bgcolor: esMiFilа ? 'action.hover' : 'transparent',
+                  px: esMiFila ? 1 : 0,
+                  borderRadius: esMiFila ? 1 : 0,
+                  bgcolor: esMiFila
+                    ? theme.meridian.surfaces.s3
+                    : 'transparent',
                   mb: 0.25,
                 }}
               >
-                {/* Avatar inicial */}
-                <Box
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: '50%',
-                    bgcolor: esOrg ? 'primary.main' : 'action.selected',
-                    color: esOrg ? 'primary.contrastText' : 'text.secondary',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    flexShrink: 0,
-                  }}
-                >
-                  {getInitial(nombre)}
-                </Box>
+                {/* Avatar — reutiliza UserAvatar de mf_ui */}
+                <UserAvatar
+                  name={nombre}
+                  size="xs"
+                  color={esOrg ? theme.palette.primary.main : undefined}
+                />
 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    sx={{ fontSize: 13, fontWeight: esMiFilа ? 600 : 400 }}
+                    sx={{
+                      fontSize: '13px',
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontWeight: esMiFila ? 600 : 400,
+                    }}
                     noWrap
                   >
                     {nombre}
                     {esOrg && (
                       <Typography
                         component="span"
-                        sx={{ fontSize: 11, color: 'text.secondary', ml: 0.5 }}
+                        sx={{
+                          fontSize: '11px',
+                          fontFamily: '"DM Sans", sans-serif',
+                          color: 'text.secondary',
+                          ml: 0.5,
+                        }}
                       >
                         (organizador)
                       </Typography>
@@ -333,7 +396,7 @@ export const MeetingDetail = memo(function MeetingDetail({
                   </Typography>
                 </Box>
 
-                {/* Estado RSVP con punto de color */}
+                {/* Estado RSVP con punto de color semántico */}
                 {!esOrg && (
                   <Box
                     sx={{
@@ -348,10 +411,16 @@ export const MeetingDetail = memo(function MeetingDetail({
                         width: 7,
                         height: 7,
                         borderRadius: '50%',
-                        bgcolor: RSVP_DOT[inv.estado],
+                        bgcolor: getRsvpDotColor(inv.estado),
                       }}
                     />
-                    <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+                    <Typography
+                      sx={{
+                        fontSize: '11px',
+                        fontFamily: '"DM Sans", sans-serif',
+                        color: 'text.secondary',
+                      }}
+                    >
                       {RSVP_LABEL[inv.estado]}
                     </Typography>
                   </Box>
@@ -424,8 +493,7 @@ export const MeetingDetail = memo(function MeetingDetail({
         <Box
           sx={{
             p: 2,
-            borderTop: '1px solid',
-            borderColor: 'divider',
+            borderTop: `1px solid ${theme.meridian.borders.default}`,
             display: 'flex',
             gap: 1,
           }}

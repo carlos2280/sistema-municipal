@@ -10,8 +10,6 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import IconButton from '@mui/material/IconButton'
-import InputAdornment from '@mui/material/InputAdornment'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import {
@@ -22,6 +20,7 @@ import {
   Search,
   Shield,
   UserMinus,
+  Users as UsersIcon,
   X,
 } from 'lucide-react'
 import {
@@ -29,6 +28,7 @@ import {
   useObtenerParticipantesQuery,
   useRenombrarGrupoMutation,
 } from 'mf_store/store'
+import { UserAvatar } from 'mf_ui/components'
 import { useCallback, useMemo, useState } from 'react'
 
 interface MembersPanelProps {
@@ -39,28 +39,6 @@ interface MembersPanelProps {
   nombreGrupo?: string
   onBack: () => void
   onClose?: () => void
-}
-
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#7C3AED',
-    '#2563EB',
-    '#059669',
-    '#DC2626',
-    '#D97706',
-    '#7C3AED',
-  ]
-  const index = name.charCodeAt(0) % colors.length
-  return colors[index]
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
 }
 
 export function MembersPanel({
@@ -138,7 +116,7 @@ export function MembersPanel({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        bgcolor: 'background.paper',
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Header */}
@@ -149,8 +127,7 @@ export function MembersPanel({
           justifyContent: 'space-between',
           px: 1.5,
           py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -161,8 +138,25 @@ export function MembersPanel({
           >
             <ArrowLeft size={20} />
           </IconButton>
-          <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
-            Miembros ({participantes.length})
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '18px',
+              fontFamily: '"Bricolage Grotesque", sans-serif',
+            }}
+          >
+            Miembros
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '12px',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontFeatureSettings: "'tnum' 1",
+              color: 'text.secondary',
+              fontWeight: 500,
+            }}
+          >
+            ({participantes.length})
           </Typography>
         </Box>
         {onClose && (
@@ -182,27 +176,42 @@ export function MembersPanel({
           sx={{
             px: 2,
             py: 1.5,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            borderBottom: `1px solid ${theme.meridian.borders.default}`,
           }}
         >
           {isEditingName ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TextField
+              <Box
+                component="input"
                 value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                size="small"
-                fullWidth
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setEditedName(e.target.value)
+                }
                 autoFocus
                 disabled={isRenaming}
-                onKeyDown={(e) => {
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === 'Enter') handleSaveName()
                   if (e.key === 'Escape') {
                     setIsEditingName(false)
                     setEditedName(nombreGrupo || '')
                   }
                 }}
-                sx={{ '& .MuiOutlinedInput-root': { fontSize: 14 } }}
+                sx={{
+                  flex: 1,
+                  height: 40,
+                  px: 1.5,
+                  backgroundColor: theme.meridian.surfaces.s3,
+                  border: `1px solid ${theme.meridian.borders.default}`,
+                  borderRadius: `${theme.shape.borderRadius}px`,
+                  fontSize: '13.5px',
+                  fontFamily: '"DM Sans", sans-serif',
+                  color: theme.palette.text.primary,
+                  outline: 'none',
+                  '&:focus': {
+                    borderColor: theme.palette.primary.main,
+                    backgroundColor: theme.meridian.surfaces.s4,
+                  },
+                }}
               />
               <IconButton
                 size="small"
@@ -227,7 +236,13 @@ export function MembersPanel({
                 '&:hover': { color: 'primary.main' },
               }}
             >
-              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+              <Typography
+                sx={{
+                  fontSize: '14px',
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: 500,
+                }}
+              >
                 {nombreGrupo}
               </Typography>
               <Pencil size={14} />
@@ -247,30 +262,46 @@ export function MembersPanel({
         </Alert>
       )}
 
-      {/* Buscar miembro */}
+      {/* MERIDIAN search input */}
       <Box sx={{ px: 2, py: 1.5 }}>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Buscar miembro..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={18} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-            },
-          }}
+        <Box
           sx={{
-            '& .MuiOutlinedInput-root': {
-              bgcolor: theme.palette.action.hover,
-              '& fieldset': { borderColor: theme.palette.divider },
+            display: 'flex',
+            alignItems: 'center',
+            height: 40,
+            px: 1.5,
+            backgroundColor: theme.meridian.surfaces.s3,
+            border: `1px solid ${theme.meridian.borders.default}`,
+            borderRadius: `${theme.shape.borderRadius}px`,
+            '&:focus-within': {
+              borderColor: theme.palette.primary.main,
+              backgroundColor: theme.meridian.surfaces.s4,
             },
           }}
-        />
+        >
+          <Search size={16} color={theme.palette.text.secondary} />
+          <Box
+            component="input"
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
+            placeholder="Buscar miembro..."
+            sx={{
+              flex: 1,
+              ml: 1,
+              border: 'none',
+              background: 'none',
+              outline: 'none',
+              fontSize: '13.5px',
+              fontFamily: '"DM Sans", sans-serif',
+              color: theme.palette.text.primary,
+              '&::placeholder': {
+                color: theme.palette.text.disabled,
+              },
+            }}
+          />
+        </Box>
       </Box>
 
       {/* Lista de miembros */}
@@ -286,9 +317,32 @@ export function MembersPanel({
             <CircularProgress size={32} />
           </Box>
         ) : filteredParticipantes.length === 0 ? (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography color="text.secondary" variant="body2">
-              {searchTerm ? 'No se encontraron miembros' : 'No hay miembros'}
+          /* MERIDIAN empty state */
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 8,
+              gap: 1.5,
+            }}
+          >
+            <UsersIcon
+              size={32}
+              color={theme.palette.text.disabled}
+              strokeWidth={1.5}
+            />
+            <Typography
+              sx={{
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
+              {searchTerm
+                ? 'No se encontraron miembros'
+                : 'No hay miembros'}
             </Typography>
           </Box>
         ) : (
@@ -306,40 +360,17 @@ export function MembersPanel({
                   gap: 1.5,
                   px: 2,
                   py: 1,
-                  '&:hover': { bgcolor: theme.palette.action.hover },
+                  '&:hover': {
+                    bgcolor: theme.meridian.surfaces.s3,
+                  },
                 }}
               >
-                {/* Avatar */}
-                <Box sx={{ position: 'relative', flexShrink: 0 }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      bgcolor: getAvatarColor(p.usuario.nombreCompleto),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: 14,
-                    }}
-                  >
-                    {getInitials(p.usuario.nombreCompleto)}
-                  </Box>
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      right: 0,
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      bgcolor: online ? 'success.main' : 'grey.400',
-                      border: `2px solid ${theme.palette.background.paper}`,
-                    }}
-                  />
-                </Box>
+                {/* Avatar — reutiliza UserAvatar de mf_ui */}
+                <UserAvatar
+                  name={p.usuario.nombreCompleto}
+                  size="md"
+                  status={online ? 'online' : 'offline'}
+                />
 
                 {/* Info */}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -352,7 +383,8 @@ export function MembersPanel({
                   >
                     <Typography
                       sx={{
-                        fontSize: 13,
+                        fontSize: '13px',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontWeight: 500,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -371,7 +403,9 @@ export function MembersPanel({
                         variant="outlined"
                         sx={{
                           height: 18,
-                          fontSize: 10,
+                          fontSize: '10px',
+                          fontFamily: '"DM Mono", monospace',
+                          textTransform: 'uppercase',
                           '& .MuiChip-icon': { fontSize: 10 },
                           '& .MuiChip-label': { px: 0.5 },
                         }}
@@ -380,7 +414,8 @@ export function MembersPanel({
                   </Box>
                   <Typography
                     sx={{
-                      fontSize: 11,
+                      fontSize: '11px',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: 'text.secondary',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',

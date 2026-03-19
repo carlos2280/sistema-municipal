@@ -3,8 +3,6 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
-import InputAdornment from '@mui/material/InputAdornment'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import {
@@ -14,6 +12,7 @@ import {
   Search,
   UsersRound,
 } from 'lucide-react'
+import { UserAvatar } from 'mf_ui/components'
 import { useMemo, useState } from 'react'
 
 interface Usuario {
@@ -29,29 +28,6 @@ interface NewGroupPanelProps {
   onBack: () => void
   onClose?: () => void
   isCreating?: boolean
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#10B981',
-    '#7928CA',
-    '#F59E0B',
-    '#6366F1',
-    '#EF4444',
-    '#EC4899',
-    '#2563EB',
-  ]
-  const index = name.charCodeAt(0) % colors.length
-  return colors[index]
 }
 
 export function NewGroupPanel({
@@ -104,7 +80,7 @@ export function NewGroupPanel({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.paper',
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Header */}
@@ -115,13 +91,18 @@ export function NewGroupPanel({
           justifyContent: 'space-between',
           height: 64,
           px: 2.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <UsersRound size={22} color={theme.palette.primary.main} />
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '18px',
+              fontFamily: '"Bricolage Grotesque", sans-serif',
+            }}
+          >
             Crear Grupo
           </Typography>
         </Box>
@@ -130,8 +111,7 @@ export function NewGroupPanel({
             size="small"
             onClick={onBack}
             sx={{
-              border: '1px solid',
-              borderColor: 'divider',
+              border: `1px solid ${theme.meridian.borders.default}`,
               borderRadius: 2,
               width: 32,
               height: 32,
@@ -144,8 +124,7 @@ export function NewGroupPanel({
               size="small"
               onClick={onClose}
               sx={{
-                border: '1px solid',
-                borderColor: 'divider',
+                border: `1px solid ${theme.meridian.borders.default}`,
                 borderRadius: 2,
                 width: 32,
                 height: 32,
@@ -182,42 +161,66 @@ export function NewGroupPanel({
               width: 80,
               height: 80,
               borderRadius: '50%',
-              border: '2px dashed',
-              borderColor: 'divider',
+              border: `2px dashed ${theme.meridian.borders.default}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               '&:hover': {
                 borderColor: 'primary.main',
-                bgcolor: 'action.hover',
+                bgcolor: theme.meridian.surfaces.s3,
               },
             }}
           >
             <Camera size={28} color={theme.palette.text.secondary} />
           </Box>
           <Typography
-            variant="body2"
-            sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer' }}
+            sx={{
+              color: 'primary.main',
+              fontWeight: 500,
+              fontSize: '13.5px',
+              fontFamily: '"DM Sans", sans-serif',
+              cursor: 'pointer',
+            }}
           >
             Agregar foto del grupo
           </Typography>
         </Box>
 
-        {/* Name Section */}
+        {/* Name Section — MERIDIAN input */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          <Typography
+            sx={{
+              fontWeight: 500,
+              fontSize: '13.5px',
+              fontFamily: '"DM Sans", sans-serif',
+            }}
+          >
             Nombre del grupo
           </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Ej: Equipo Contabilidad"
+          <Box
+            component="input"
             value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setGroupName(e.target.value)
+            }
+            placeholder="Ej: Equipo Contabilidad"
             sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: theme.palette.action.hover,
+              height: 40,
+              px: 1.5,
+              backgroundColor: theme.meridian.surfaces.s3,
+              border: `1px solid ${theme.meridian.borders.default}`,
+              borderRadius: `${theme.shape.borderRadius}px`,
+              fontSize: '13.5px',
+              fontFamily: '"DM Sans", sans-serif',
+              color: theme.palette.text.primary,
+              outline: 'none',
+              '&::placeholder': {
+                color: theme.palette.text.disabled,
+              },
+              '&:focus': {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: theme.meridian.surfaces.s4,
               },
             }}
           />
@@ -233,7 +236,6 @@ export function NewGroupPanel({
             minHeight: 0,
           }}
         >
-          {/* Participants Header */}
           <Box
             sx={{
               display: 'flex',
@@ -241,44 +243,73 @@ export function NewGroupPanel({
               justifyContent: 'space-between',
             }}
           >
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            <Typography
+              sx={{
+                fontWeight: 500,
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+              }}
+            >
               Participantes
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontFeatureSettings: "'tnum' 1",
+                color: 'text.secondary',
+              }}
+            >
               {selectedIds.size} seleccionados
             </Typography>
           </Box>
 
-          {/* Search Participants */}
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Buscar participantes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={16} color={theme.palette.text.secondary} />
-                  </InputAdornment>
-                ),
-              },
-            }}
+          {/* Search Participants — MERIDIAN input */}
+          <Box
             sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: theme.palette.action.hover,
+              display: 'flex',
+              alignItems: 'center',
+              height: 40,
+              px: 1.5,
+              backgroundColor: theme.meridian.surfaces.s3,
+              border: `1px solid ${theme.meridian.borders.default}`,
+              borderRadius: `${theme.shape.borderRadius}px`,
+              '&:focus-within': {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: theme.meridian.surfaces.s4,
               },
             }}
-          />
+          >
+            <Search size={16} color={theme.palette.text.secondary} />
+            <Box
+              component="input"
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
+              placeholder="Buscar participantes..."
+              sx={{
+                flex: 1,
+                ml: 1,
+                border: 'none',
+                background: 'none',
+                outline: 'none',
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: theme.palette.text.primary,
+                '&::placeholder': {
+                  color: theme.palette.text.disabled,
+                },
+              }}
+            />
+          </Box>
 
           {/* Participants List */}
           <Box
             sx={{
               flex: 1,
               overflow: 'auto',
-              border: '1px solid',
-              borderColor: 'divider',
+              border: `1px solid ${theme.meridian.borders.default}`,
               borderRadius: 1,
             }}
           >
@@ -294,8 +325,27 @@ export function NewGroupPanel({
                 <CircularProgress size={32} />
               </Box>
             ) : usuariosFiltrados.length === 0 ? (
-              <Box sx={{ p: 2, textAlign: 'center' }}>
-                <Typography color="text.secondary" variant="body2">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  py: 4,
+                  gap: 1,
+                }}
+              >
+                <Search
+                  size={32}
+                  color={theme.palette.text.disabled}
+                  strokeWidth={1.5}
+                />
+                <Typography
+                  sx={{
+                    fontSize: '13.5px',
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: 'text.secondary',
+                  }}
+                >
                   No se encontraron usuarios
                 </Typography>
               </Box>
@@ -311,39 +361,24 @@ export function NewGroupPanel({
                     px: 1.5,
                     py: 1.25,
                     cursor: 'pointer',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: `1px solid ${theme.meridian.borders.muted}`,
                     '&:last-child': { borderBottom: 'none' },
-                    '&:hover': { bgcolor: 'action.hover' },
+                    '&:hover': { bgcolor: theme.meridian.surfaces.s3 },
                     bgcolor: selectedIds.has(usuario.id)
-                      ? 'primary.light'
+                      ? theme.meridian.surfaces.s3
                       : 'transparent',
                   }}
                 >
-                  {/* Avatar */}
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: '50%',
-                      bgcolor: getAvatarColor(usuario.nombreCompleto),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: 12,
-                    }}
-                  >
-                    {getInitials(usuario.nombreCompleto)}
-                  </Box>
+                  {/* Avatar — reutiliza UserAvatar de mf_ui */}
+                  <UserAvatar name={usuario.nombreCompleto} size="sm" />
 
                   {/* Info */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
                       sx={{
                         fontWeight: 500,
-                        fontSize: 13,
+                        fontSize: '13px',
+                        fontFamily: '"DM Sans", sans-serif',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -353,7 +388,8 @@ export function NewGroupPanel({
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: 11,
+                        fontSize: '11px',
+                        fontFamily: '"DM Sans", sans-serif',
                         color: 'text.secondary',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -364,7 +400,6 @@ export function NewGroupPanel({
                     </Typography>
                   </Box>
 
-                  {/* Checkbox */}
                   <Checkbox
                     size="small"
                     checked={selectedIds.has(usuario.id)}

@@ -2,7 +2,6 @@ import Box from '@mui/material/Box'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import IconButton from '@mui/material/IconButton'
 import Popper from '@mui/material/Popper'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -34,7 +33,6 @@ export function MessageInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMensaje(e.target.value)
 
-    // Notificar estado de escritura
     if (onTyping) {
       if (e.target.value && !isTyping) {
         setIsTyping(true)
@@ -50,7 +48,6 @@ export function MessageInput({
     if (mensaje.trim() && !disabled) {
       onSendMessage(mensaje.trim())
       setMensaje('')
-      // Limpiar estado de typing
       if (onTyping && isTyping) {
         setIsTyping(false)
         onTyping(false)
@@ -76,31 +73,43 @@ export function MessageInput({
     <Box
       sx={{
         p: 2,
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        bgcolor: 'background.paper',
+        borderTop: `1px solid ${theme.meridian.borders.default}`,
+        bgcolor: theme.meridian.surfaces.s1,
       }}
     >
       {/* Input Row */}
       <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-        {/* Text Field */}
-        <TextField
-          fullWidth
-          multiline
-          maxRows={4}
-          placeholder="Escribe un mensaje..."
+        {/* MERIDIAN-spec input */}
+        <Box
+          component="input"
+          ref={inputRef}
           value={mensaje}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
+          onChange={handleChange as unknown as React.ChangeEventHandler<HTMLInputElement>}
+          onKeyDown={handleKeyDown as unknown as React.KeyboardEventHandler<HTMLInputElement>}
           disabled={disabled}
-          inputRef={inputRef}
+          placeholder="Escribe un mensaje..."
           sx={{
-            '& .MuiOutlinedInput-root': {
-              bgcolor: theme.palette.action.hover,
-              borderRadius: 2,
-              '& fieldset': {
-                borderColor: theme.palette.divider,
-              },
+            flex: 1,
+            height: 40,
+            px: 1.5,
+            py: 0,
+            backgroundColor: theme.meridian.surfaces.s3,
+            border: `1px solid ${theme.meridian.borders.default}`,
+            borderRadius: `${theme.shape.borderRadius}px`,
+            fontSize: '13.5px',
+            fontFamily: '"DM Sans", sans-serif',
+            color: theme.palette.text.primary,
+            outline: 'none',
+            '&::placeholder': {
+              color: theme.palette.text.disabled,
+            },
+            '&:focus': {
+              borderColor: theme.palette.primary.main,
+              backgroundColor: theme.meridian.surfaces.s4,
+            },
+            '&:disabled': {
+              opacity: 0.5,
+              cursor: 'not-allowed',
             },
           }}
         />
@@ -112,6 +121,8 @@ export function MessageInput({
           sx={{
             bgcolor: 'primary.main',
             color: 'white',
+            width: 40,
+            height: 40,
             '&:hover': { bgcolor: 'primary.dark' },
             '&:disabled': {
               bgcolor: theme.palette.action.disabledBackground,
@@ -146,7 +157,11 @@ export function MessageInput({
         >
           <Paperclip size={16} />
           <Typography
-            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+            sx={{
+              fontSize: '12px',
+              fontFamily: '"DM Sans", sans-serif',
+              display: { xs: 'none', sm: 'block' },
+            }}
           >
             Adjuntar
           </Typography>
@@ -163,7 +178,11 @@ export function MessageInput({
         >
           <Image size={16} />
           <Typography
-            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+            sx={{
+              fontSize: '12px',
+              fontFamily: '"DM Sans", sans-serif',
+              display: { xs: 'none', sm: 'block' },
+            }}
           >
             Imagen
           </Typography>
@@ -182,7 +201,11 @@ export function MessageInput({
         >
           <Smile size={16} />
           <Typography
-            sx={{ fontSize: 12, display: { xs: 'none', sm: 'block' } }}
+            sx={{
+              fontSize: '12px',
+              fontFamily: '"DM Sans", sans-serif',
+              display: { xs: 'none', sm: 'block' },
+            }}
           >
             Emoji
           </Typography>
@@ -202,7 +225,11 @@ export function MessageInput({
               theme={emojiTheme}
               onEmojiClick={handleEmojiClick}
               searchPlaceHolder="Buscar emoji..."
-              width={isMobile ? Math.min(window.innerWidth - 16, 320) : 350}
+              width={
+                isMobile
+                  ? Math.min(window.innerWidth - 48, 320)
+                  : 350
+              }
               height={isMobile ? 320 : 400}
               previewConfig={{ showPreview: false }}
               lazyLoadEmojis

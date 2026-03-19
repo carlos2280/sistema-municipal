@@ -2,8 +2,10 @@ import { SystemGroupBadge } from '@/components/atoms'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import { Building2, Users } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { getAvatarColor } from '@/utils'
 
 interface ConversationItemProps {
   id: number
@@ -16,6 +18,8 @@ interface ConversationItemProps {
   sistema?: boolean
   isActive?: boolean
   onClick?: () => void
+  /** Índice para stagger animation (max 6) */
+  staggerIndex?: number
 }
 
 function getInitials(name: string): string {
@@ -27,18 +31,7 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
-function getAvatarColor(name: string): string {
-  const colors = [
-    '#7C3AED',
-    '#2563EB',
-    '#059669',
-    '#DC2626',
-    '#D97706',
-    '#7C3AED',
-  ]
-  const index = name.charCodeAt(0) % colors.length
-  return colors[index]
-}
+const MotionBox = motion.create(Box)
 
 export function ConversationItem({
   nombre,
@@ -50,11 +43,20 @@ export function ConversationItem({
   sistema,
   isActive,
   onClick,
+  staggerIndex = 0,
 }: ConversationItemProps) {
   const theme = useTheme()
+  const avatarColor = getAvatarColor(nombre, theme)
 
   return (
-    <Box
+    <MotionBox
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        delay: Math.min(staggerIndex, 5) * 0.06,
+        ease: [0.0, 0.0, 0.2, 1.0],
+      }}
       onClick={onClick}
       sx={{
         display: 'flex',
@@ -63,11 +65,25 @@ export function ConversationItem({
         px: 2.5,
         py: 1.5,
         cursor: 'pointer',
-        bgcolor: isActive ? 'primary.light' : 'transparent',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
+        bgcolor: isActive
+          ? alpha(theme.palette.primary.main, 0.12)
+          : 'transparent',
+        borderBottom: `1px solid ${theme.meridian.borders.muted}`,
+        transition: 'transform 150ms, background-color 0s',
         '&:hover': {
-          bgcolor: isActive ? 'primary.light' : theme.palette.action.hover,
+          bgcolor: isActive
+            ? alpha(theme.palette.primary.main, 0.12)
+            : theme.meridian.surfaces.s3,
+          transform: 'translateY(-2px)',
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          transition: 'none',
+          '&:hover': {
+            bgcolor: isActive
+              ? alpha(theme.palette.primary.main, 0.12)
+              : theme.meridian.surfaces.s3,
+            transform: 'none',
+          },
         },
       }}
     >
@@ -78,7 +94,7 @@ export function ConversationItem({
             width: 48,
             height: 48,
             borderRadius: tipo === 'grupo' ? 2 : '50%',
-            bgcolor: getAvatarColor(nombre),
+            bgcolor: avatarColor,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -106,8 +122,8 @@ export function ConversationItem({
               width: 12,
               height: 12,
               borderRadius: '50%',
-              bgcolor: online ? 'success.main' : 'grey.400',
-              border: `2px solid ${theme.palette.background.paper}`,
+              bgcolor: online ? 'success.main' : theme.palette.grey[500],
+              border: `2px solid ${theme.meridian.surfaces.ground}`,
             }}
           />
         )}
@@ -133,7 +149,8 @@ export function ConversationItem({
             <Typography
               sx={{
                 fontWeight: noLeidos > 0 ? 600 : 500,
-                fontSize: 14,
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
                 color: 'text.primary',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -146,7 +163,9 @@ export function ConversationItem({
           </Box>
           <Typography
             sx={{
-              fontSize: 12,
+              fontSize: '11px',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontFeatureSettings: "'tnum' 1",
               color: noLeidos > 0 ? 'primary.main' : 'text.secondary',
               fontWeight: noLeidos > 0 ? 600 : 400,
               flexShrink: 0,
@@ -166,7 +185,8 @@ export function ConversationItem({
         >
           <Typography
             sx={{
-              fontSize: 13,
+              fontSize: '12px',
+              fontFamily: '"DM Sans", sans-serif',
               color: noLeidos > 0 ? 'text.primary' : 'text.secondary',
               fontWeight: noLeidos > 0 ? 500 : 400,
               overflow: 'hidden',
@@ -186,12 +206,14 @@ export function ConversationItem({
                   fontSize: 11,
                   height: 18,
                   minWidth: 18,
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontFeatureSettings: "'tnum' 1",
                 },
               }}
             />
           )}
         </Box>
       </Box>
-    </Box>
+    </MotionBox>
   )
 }

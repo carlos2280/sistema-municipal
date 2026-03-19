@@ -179,7 +179,7 @@ export function ChatWindow({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        bgcolor: 'background.paper',
+        bgcolor: (theme) => theme.meridian.surfaces.s1,
       }}
     >
       <ChatHeader

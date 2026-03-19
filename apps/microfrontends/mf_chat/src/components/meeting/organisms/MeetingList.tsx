@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { ArrowLeft, Calendar, X } from 'lucide-react'
 import { useListarReunionesQuery } from 'mf_store/store'
 import { memo } from 'react'
@@ -28,21 +29,26 @@ function formatRange(inicio: string, fin: string): string {
   return `${fecha} · ${h1}–${h2}`
 }
 
-const ESTADO_COLOR: Record<string, string> = {
-  programada: '#2563EB',
-  activa: '#16A34A',
-  completada: '#6B7280',
-  cancelada: '#DC2626',
-}
-
 export const MeetingList = memo(function MeetingList({
   conversacionId,
   onSelectReunion,
   onBack,
   onClose,
 }: MeetingListProps) {
+  const theme = useTheme()
   const { data: reuniones = [], isLoading } =
     useListarReunionesQuery(conversacionId)
+
+  /** Color semántico para el dot de estado */
+  const getEstadoColor = (estado: string): string => {
+    const map: Record<string, string> = {
+      programada: theme.palette.info.main,
+      activa: theme.palette.success.main,
+      completada: theme.palette.text.disabled,
+      cancelada: theme.palette.error.main,
+    }
+    return map[estado] ?? theme.palette.text.disabled
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -53,9 +59,8 @@ export const MeetingList = memo(function MeetingList({
           alignItems: 'center',
           px: 1.5,
           py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
+          borderBottom: `1px solid ${theme.meridian.borders.default}`,
+          bgcolor: theme.meridian.surfaces.s1,
         }}
       >
         {onBack && (
@@ -63,7 +68,14 @@ export const MeetingList = memo(function MeetingList({
             <ArrowLeft size={18} />
           </IconButton>
         )}
-        <Typography sx={{ fontWeight: 600, fontSize: 15, flex: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '18px',
+            fontFamily: '"Bricolage Grotesque", sans-serif',
+            flex: 1,
+          }}
+        >
           Reuniones
         </Typography>
         {onClose && (
@@ -76,11 +88,18 @@ export const MeetingList = memo(function MeetingList({
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {isLoading ? (
           <Box sx={{ p: 2 }}>
-            <Typography color="text.secondary" fontSize={13}>
+            <Typography
+              color="text.secondary"
+              sx={{
+                fontSize: '13px',
+                fontFamily: '"DM Sans", sans-serif',
+              }}
+            >
               Cargando...
             </Typography>
           </Box>
         ) : reuniones.length === 0 ? (
+          /* MERIDIAN empty state */
           <Box
             sx={{
               flex: 1,
@@ -89,12 +108,23 @@ export const MeetingList = memo(function MeetingList({
               alignItems: 'center',
               justifyContent: 'center',
               p: 4,
-              gap: 1,
-              color: 'text.secondary',
+              gap: 1.5,
             }}
           >
-            <Calendar size={32} strokeWidth={1.5} />
-            <Typography fontSize={13}>No hay reuniones programadas</Typography>
+            <Calendar
+              size={32}
+              color={theme.palette.text.disabled}
+              strokeWidth={1.5}
+            />
+            <Typography
+              sx={{
+                fontSize: '13.5px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
+              No hay reuniones programadas
+            </Typography>
           </Box>
         ) : (
           reuniones.map((reunion) => (
@@ -104,10 +134,9 @@ export const MeetingList = memo(function MeetingList({
               sx={{
                 px: 2,
                 py: 1.5,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
+                borderBottom: `1px solid ${theme.meridian.borders.muted}`,
                 cursor: 'pointer',
-                '&:hover': { bgcolor: 'action.hover' },
+                '&:hover': { bgcolor: theme.meridian.surfaces.s3 },
               }}
             >
               <Box
@@ -117,7 +146,13 @@ export const MeetingList = memo(function MeetingList({
                   justifyContent: 'space-between',
                 }}
               >
-                <Typography sx={{ fontWeight: 600, fontSize: 13 }}>
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    fontFamily: '"DM Sans", sans-serif',
+                  }}
+                >
                   {reunion.titulo}
                 </Typography>
                 <Box
@@ -125,14 +160,20 @@ export const MeetingList = memo(function MeetingList({
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    bgcolor: ESTADO_COLOR[reunion.estado] ?? '#6B7280',
+                    bgcolor: getEstadoColor(reunion.estado),
                     mt: 0.5,
                     flexShrink: 0,
                   }}
                 />
               </Box>
               <Typography
-                sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}
+                sx={{
+                  fontSize: '12px',
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontFeatureSettings: "'tnum' 1",
+                  color: 'text.secondary',
+                  mt: 0.25,
+                }}
               >
                 {formatRange(reunion.fechaInicio, reunion.fechaFin)}
               </Typography>

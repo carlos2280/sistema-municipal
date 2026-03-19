@@ -4,6 +4,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
 import { Phone, PhoneOff, Video } from 'lucide-react'
 
 interface IncomingCallDialogProps {
@@ -17,6 +18,7 @@ export function IncomingCallDialog({
   onAccept,
   onReject,
 }: IncomingCallDialogProps) {
+  const theme = useTheme()
   const isOpen = callState.estado === 'ringing' && callState.isIncoming
   const isVideo = callState.tipo === 'video'
 
@@ -53,11 +55,21 @@ export function IncomingCallDialog({
             color: 'white',
             fontSize: 28,
             fontWeight: 700,
-            animation: 'pulse 1.5s infinite',
-            '@keyframes pulse': {
-              '0%': { boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.4)' },
-              '70%': { boxShadow: '0 0 0 20px rgba(25, 118, 210, 0)' },
-              '100%': { boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)' },
+            fontFamily: '"Bricolage Grotesque", sans-serif',
+            // MERIDIAN pulse: scale 1→1.05→1, 2s ease-inOut loop
+            animation: 'incomingPulse 2s ease-in-out infinite',
+            '@keyframes incomingPulse': {
+              '0%, 100%': {
+                transform: 'scale(1)',
+                boxShadow: `0 0 0 0 ${alpha(theme.palette.primary.main, 0.4)}`,
+              },
+              '50%': {
+                transform: 'scale(1.05)',
+                boxShadow: `0 0 0 20px ${alpha(theme.palette.primary.main, 0)}`,
+              },
+            },
+            '@media (prefers-reduced-motion: reduce)': {
+              animation: 'none',
             },
           }}
         >
@@ -69,11 +81,23 @@ export function IncomingCallDialog({
             .toUpperCase() || '?'}
         </Box>
 
-        <Typography variant="h6" fontWeight={600}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            fontFamily: '"Bricolage Grotesque", sans-serif',
+          }}
+        >
           {callState.callerName || 'Llamada entrante'}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          sx={{
+            fontSize: '13.5px',
+            fontFamily: '"DM Sans", sans-serif',
+            color: 'text.secondary',
+          }}
+        >
           {isVideo ? 'Videollamada entrante...' : 'Llamada de voz entrante...'}
         </Typography>
 
@@ -98,7 +122,13 @@ export function IncomingCallDialog({
             >
               <PhoneOff size={24} />
             </IconButton>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
               Rechazar
             </Typography>
           </Box>
@@ -123,7 +153,13 @@ export function IncomingCallDialog({
             >
               {isVideo ? <Video size={24} /> : <Phone size={24} />}
             </IconButton>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
               Aceptar
             </Typography>
           </Box>

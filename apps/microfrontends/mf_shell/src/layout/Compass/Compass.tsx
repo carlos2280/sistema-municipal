@@ -20,6 +20,8 @@ import useCompass from "./useCompass";
 interface CompassProps {
 	/** Ocultar el compass (cuando NavPanel o CommandPalette están abiertos) */
 	hidden?: boolean;
+	/** Total de mensajes de chat sin leer (para dot en CompassItem del chat) */
+	chatUnreadCount?: number;
 }
 
 // ─── Styled Components ──────────────────────────────────────────
@@ -234,7 +236,7 @@ function FabIcon({
 
 // ─── Component ──────────────────────────────────────────────────
 
-function Compass({ hidden = false }: CompassProps) {
+function Compass({ hidden = false, chatUnreadCount = 0 }: CompassProps) {
 	const { isOpen, toggle, close, goSistema, sistemaIdActual, sistemas } =
 		useCompass();
 
@@ -255,6 +257,9 @@ function Compass({ hidden = false }: CompassProps) {
 							shortcut={`Alt+${i + 1}`}
 							isActive={
 								sis.id === sistemaIdActual || (sis.isHome && !sistemaIdActual)
+							}
+							hasUnread={
+								sis.icono === "message-square" && chatUnreadCount > 0
 							}
 							onClick={() => goSistema(sis.id)}
 						/>

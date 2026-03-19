@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { Calendar, MapPin, Mic, Monitor, Video } from 'lucide-react'
 import {
   type EstadoInvitacion,
@@ -31,13 +32,6 @@ const TIPO_LABEL: Record<TipoReunion, string> = {
   presencial: 'Presencial',
 }
 
-const ESTADO_ACCENT: Record<Reunion['estado'], string> = {
-  programada: '#1976d2',
-  activa: '#2e7d32',
-  completada: '#9e9e9e',
-  cancelada: '#d32f2f',
-}
-
 const ESTADO_CHIP_COLOR: Record<
   Reunion['estado'],
   'default' | 'primary' | 'success' | 'error'
@@ -46,13 +40,6 @@ const ESTADO_CHIP_COLOR: Record<
   activa: 'success',
   completada: 'default',
   cancelada: 'error',
-}
-
-const RSVP_DOT: Record<EstadoInvitacion, string> = {
-  aceptada: '#2e7d32',
-  rechazada: '#d32f2f',
-  tentativa: '#ed6c02',
-  pendiente: '#9e9e9e',
 }
 
 const RSVP_LABEL: Record<EstadoInvitacion, string> = {
@@ -88,6 +75,7 @@ export const MeetingCard = memo(function MeetingCard({
   onJoin,
   onIniciar,
 }: MeetingCardProps) {
+  const theme = useTheme()
   const { data: reunion } = useObtenerReunionQuery(reunionId)
   const [rsvpMutation, { isLoading: isRsvping }] = useRsvpReunionMutation()
   const [editandoRsvp, setEditandoRsvp] = useState(false)
@@ -96,6 +84,34 @@ export const MeetingCard = memo(function MeetingCard({
     (i) => i.usuarioId === currentUserId,
   )
   const esOrganizador = reunion?.organizadorId === currentUserId
+
+  /** Mapeo de estado RSVP → color semántico del theme */
+  const getRsvpColor = useCallback(
+    (estado: EstadoInvitacion): string => {
+      const map: Record<EstadoInvitacion, string> = {
+        aceptada: theme.palette.success.main,
+        rechazada: theme.palette.error.main,
+        tentativa: theme.palette.warning.main,
+        pendiente: theme.palette.text.disabled,
+      }
+      return map[estado]
+    },
+    [theme],
+  )
+
+  /** Mapeo de estado reunión → color accent semántico */
+  const getEstadoAccent = useCallback(
+    (estado: Reunion['estado']): string => {
+      const map: Record<Reunion['estado'], string> = {
+        programada: theme.palette.info.main,
+        activa: theme.palette.success.main,
+        completada: theme.palette.text.disabled,
+        cancelada: theme.palette.error.main,
+      }
+      return map[estado]
+    },
+    [theme],
+  )
 
   const handleRsvp = useCallback(
     async (estado: EstadoInvitacion) => {
@@ -124,7 +140,7 @@ export const MeetingCard = memo(function MeetingCard({
   const completada = reunion.estado === 'completada'
   const inactiva = cancelada || completada
   const countdown = !inactiva ? formatCountdown(reunion.fechaInicio) : null
-  const accentColor = ESTADO_ACCENT[reunion.estado]
+  const accentColor = getEstadoAccent(reunion.estado)
 
   // BUG-01: excluir al organizador del conteo RSVP
   const invitadosReales = reunion.invitaciones.filter(
@@ -142,22 +158,20 @@ export const MeetingCard = memo(function MeetingCard({
   const yaRespondio =
     miInvitacion && miInvitacion.estado !== 'pendiente' && !esOrganizador
 
-  // Mostrar botones RSVP si está pendiente O si está cambiando respuesta
   const mostrarBotonesRsvp =
     (rsvpPendiente || (yaRespondio && editandoRsvp)) && !inactiva
 
   return (
     <Box
       sx={{
-        border: '1px solid',
-        borderColor: cancelada ? 'divider' : 'primary.light',
+        border: `1px solid ${theme.meridian.borders.default}`,
         borderRadius: 2,
         overflow: 'hidden',
         my: 0.5,
         maxWidth: 320,
         opacity: inactiva ? 0.65 : 1,
-        bgcolor: 'background.paper',
-        boxShadow: inactiva ? 'none' : '0 1px 4px rgba(0,0,0,0.08)',
+        bgcolor: theme.meridian.surfaces.s2,
+        boxShadow: inactiva ? 'none' : theme.meridian.shadows.sm,
       }}
     >
       {/* Accent strip */}
@@ -181,7 +195,8 @@ export const MeetingCard = memo(function MeetingCard({
           <Typography
             sx={{
               fontWeight: 700,
-              fontSize: 13,
+              fontSize: '13px',
+              fontFamily: '"DM Sans", sans-serif',
               lineHeight: 1.3,
               flex: 1,
               color: inactiva ? 'text.disabled' : 'text.primary',
@@ -193,7 +208,13 @@ export const MeetingCard = memo(function MeetingCard({
             label={reunion.estado}
             size="small"
             color={ESTADO_CHIP_COLOR[reunion.estado]}
-            sx={{ fontSize: 10, height: 18, flexShrink: 0 }}
+            sx={{
+              fontSize: '10px',
+              fontFamily: '"DM Mono", monospace',
+              height: 18,
+              flexShrink: 0,
+              textTransform: 'uppercase',
+            }}
           />
         </Box>
 
@@ -215,19 +236,27 @@ export const MeetingCard = memo(function MeetingCard({
             }}
           >
             <Calendar size={12} />
-            <Typography sx={{ fontSize: 12 }}>
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontFeatureSettings: "'tnum' 1",
+              }}
+            >
               {formatRange(reunion.fechaInicio, reunion.fechaFin)}
             </Typography>
           </Box>
           {countdown && (
             <Typography
               sx={{
-                fontSize: 11,
+                fontSize: '11px',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontFeatureSettings: "'tnum' 1",
                 fontWeight: 600,
                 color:
                   reunion.estado === 'activa' ? 'success.main' : 'primary.main',
                 bgcolor:
-                  reunion.estado === 'activa' ? 'success.50' : 'primary.50',
+                  reunion.estado === 'activa' ? 'success.light' : 'primary.light',
                 px: 0.75,
                 py: 0.25,
                 borderRadius: 1,
@@ -241,7 +270,14 @@ export const MeetingCard = memo(function MeetingCard({
         </Box>
 
         {/* Tipo + ubicación */}
-        <Typography sx={{ fontSize: 11, color: 'text.disabled', mb: 1 }}>
+        <Typography
+          sx={{
+            fontSize: '11px',
+            fontFamily: '"DM Sans", sans-serif',
+            color: 'text.disabled',
+            mb: 1,
+          }}
+        >
           {TIPO_LABEL[reunion.tipo]}
           {reunion.ubicacion ? ` · ${reunion.ubicacion}` : ''}
         </Typography>
@@ -261,16 +297,29 @@ export const MeetingCard = memo(function MeetingCard({
                       width: 7,
                       height: 7,
                       borderRadius: '50%',
-                      bgcolor: RSVP_DOT[estado],
+                      bgcolor: getRsvpColor(estado),
                       flexShrink: 0,
                     }}
                   />
-                  <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+                  <Typography
+                    sx={{
+                      fontSize: '11px',
+                      fontFamily: '"Space Grotesk", sans-serif',
+                      fontFeatureSettings: "'tnum' 1",
+                      color: 'text.secondary',
+                    }}
+                  >
                     {n}
                   </Typography>
                 </Box>
               ))}
-            <Typography sx={{ fontSize: 11, color: 'text.disabled' }}>
+            <Typography
+              sx={{
+                fontSize: '11px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.disabled',
+              }}
+            >
               · {invitadosReales.length}{' '}
               {invitadosReales.length === 1 ? 'invitado' : 'invitados'}
             </Typography>
@@ -286,11 +335,17 @@ export const MeetingCard = memo(function MeetingCard({
                 height: 7,
                 borderRadius: '50%',
                 // biome-ignore lint/style/noNonNullAssertion: renderizado condicional garantiza miInvitacion
-                bgcolor: RSVP_DOT[miInvitacion!.estado],
+                bgcolor: getRsvpColor(miInvitacion!.estado),
                 flexShrink: 0,
               }}
             />
-            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+            <Typography
+              sx={{
+                fontSize: '11px',
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'text.secondary',
+              }}
+            >
               {/* biome-ignore lint/style/noNonNullAssertion: renderizado condicional garantiza miInvitacion */}
               {RSVP_LABEL[miInvitacion!.estado]}
             </Typography>

@@ -8,7 +8,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { type Theme, ThemeProvider, useTheme } from '@mui/material/styles'
+import { type Theme, ThemeProvider, alpha, useTheme } from '@mui/material/styles'
 import { MessageSquarePlus, Users } from 'lucide-react'
 import {
   selectUsuarioId,
@@ -68,11 +68,9 @@ export function ChatDrawer({
       { skip: !shouldFetchUsuarios },
     )
 
-  // Hook de usuarios online
   const { onlineUsers } = useOnlineUsers()
   const onlineUsersArray = useMemo(() => Array.from(onlineUsers), [onlineUsers])
 
-  // Hook de llamadas
   const {
     callState,
     initiateCall,
@@ -95,7 +93,6 @@ export function ChatDrawer({
     setView('chat')
   }
 
-  // Hook de conversaciones para derivar info del grupo activo
   const { conversaciones } = useConversaciones()
 
   const activeConversacion = useMemo(
@@ -116,7 +113,6 @@ export function ChatDrawer({
       setView('chat')
     } else if (view === 'meetingDetail') {
       setActiveReunionId(undefined)
-      // Si hay conversación activa, volver a su lista de reuniones; si no, al panel principal
       setView(activeConversationId ? 'meetings' : 'conversations')
     } else if (view === 'meetings') {
       setView('chat')
@@ -336,7 +332,6 @@ export function ChatDrawer({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.paper',
         color: 'text.primary',
       }}
     >
@@ -384,10 +379,17 @@ export function ChatDrawer({
           sx: {
             width: { xs: '100vw', sm: DRAWER_WIDTH },
             boxSizing: 'border-box',
-            bgcolor: theme.palette.background.paper,
+            // MERIDIAN glassmorphism
+            background: alpha(theme.meridian.surfaces.ground, 0.92),
+            backdropFilter: 'blur(24px) saturate(1.4)',
+            borderLeft: `1px solid ${theme.meridian.borders.default}`,
             color: theme.palette.text.primary,
           },
         },
+      }}
+      transitionDuration={{
+        enter: 250,
+        exit: 200,
       }}
     >
       <ThemeProvider theme={theme}>
