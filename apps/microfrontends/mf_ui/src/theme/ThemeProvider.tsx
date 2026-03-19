@@ -104,12 +104,21 @@ function getSystemPreference(): "light" | "dark" {
 		: "light";
 }
 
+function isValidModuleCode(code: unknown): code is ModuleCode {
+	return typeof code === "string" && code in MODULE_ACCENTS;
+}
+
 function loadPreferences(): MeridianPreferences {
 	if (typeof window === "undefined") return defaultPreferences;
 	try {
 		const saved = localStorage.getItem(STORAGE_KEY);
 		if (saved) {
-			return { ...defaultPreferences, ...JSON.parse(saved) };
+			const parsed = { ...defaultPreferences, ...JSON.parse(saved) };
+			// Validate activeModule against MODULE_ACCENTS keys
+			if (!isValidModuleCode(parsed.activeModule)) {
+				parsed.activeModule = defaultPreferences.activeModule;
+			}
+			return parsed;
 		}
 	} catch {
 		// silently fall through
@@ -214,7 +223,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
 	// Aura — cambiar body background tint + CSS custom properties según módulo
 	useEffect(() => {
-		const mod = MODULE_ACCENTS[preferences.activeModule];
+		const mod = MODULE_ACCENTS[preferences.activeModule] ?? MODULE_ACCENTS.home;
 		const root = document.documentElement;
 
 		document.body.setAttribute("data-module", preferences.activeModule);
@@ -246,7 +255,8 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 	}, []);
 
 	const setActiveModule = useCallback((code: ModuleCode) => {
-		setPreferences((p) => ({ ...p, activeModule: code }));
+		const validCode = isValidModuleCode(code) ? code : "home";
+		setPreferences((p) => ({ ...p, activeModule: validCode }));
 	}, []);
 
 	const setTextSize = useCallback((size: TextSize) => {
