@@ -1,11 +1,19 @@
-import { Building2, LogIn, MailCheck, ShieldCheck } from "lucide-react";
+import {
+	Building2,
+	LogIn,
+	MailCheck,
+	QrCode,
+	ShieldCheck,
+} from "lucide-react";
 import type { LoginStep, StepConfig } from "./types";
 
-export const STEPPER_LABELS = [
-	"Credenciales",
-	"Área y sistema",
-	"Verificación",
-] as const;
+/** Labels base del stepper (2 fijos + dinámicos según flujo) */
+export const STEPPER_LABELS_BASE = ["Credenciales", "Área y sistema"] as const;
+
+/** Labels adicionales según el flujo */
+export const STEPPER_LABEL_MFA = "Verificación";
+export const STEPPER_LABEL_SETUP = "Configurar MFA";
+export const STEPPER_LABEL_BACKUP = "Códigos";
 
 export const STEP_CONFIG: Record<LoginStep, StepConfig> = {
 	0: {
@@ -22,10 +30,33 @@ export const STEP_CONFIG: Record<LoginStep, StepConfig> = {
 	},
 	2: {
 		title: "Verificación en dos pasos",
-		subtitle: "Ingresa el código de 6 dígitos de tu aplicación autenticadora",
+		subtitle:
+			"Ingresa el código de 6 dígitos de tu aplicación autenticadora",
 		buttonLabel: "Verificar",
 		icon: ShieldCheck,
 	},
+	3: {
+		title: "Códigos de respaldo",
+		subtitle: "Guarda estos códigos en un lugar seguro",
+		buttonLabel: "Continuar al sistema",
+		icon: ShieldCheck,
+	},
+};
+
+/** Config para el paso de MFA setup inline (fase scan) */
+export const MFA_SETUP_SCAN_CONFIG: StepConfig = {
+	title: "Configura tu autenticador",
+	subtitle: "Escanea el código QR con tu app de autenticación",
+	buttonLabel: "Verificar y activar",
+	icon: QrCode,
+};
+
+/** Config para el paso de MFA setup inline (fase backup codes) */
+export const MFA_SETUP_BACKUP_CONFIG: StepConfig = {
+	title: "Códigos de respaldo",
+	subtitle: "Guarda estos códigos en un lugar seguro",
+	buttonLabel: "Continuar al sistema",
+	icon: ShieldCheck,
 };
 
 export const MFA_PENDING_CONFIG: StepConfig = {

@@ -3,13 +3,20 @@
  *
  * Primary button usa accent del tema (no hardcoded).
  * Ghost button para "Volver".
- * Keyboard hint integrado.
+ * Supports dynamic steps (0-3) for MFA setup inline flow.
  */
 
 import { Box, alpha, keyframes, styled } from "@mui/material";
-import { ArrowLeft, ArrowRight, Check, LogIn, ShieldCheck } from "lucide-react";
+import {
+	ArrowLeft,
+	ArrowRight,
+	Check,
+	LogIn,
+	QrCode,
+	ShieldCheck,
+} from "lucide-react";
 import { memo, useMemo } from "react";
-import { STEP_CONFIG } from "../constants";
+import type { StepConfig } from "../types";
 import type { LoginStep } from "../types";
 
 // ── Spinner (matches prototype .spin) ────────────────────────────────────────
@@ -132,6 +139,7 @@ const STEP_ICONS: Readonly<Record<LoginStep, React.ReactNode>> = {
 	0: <ArrowRight size={15} />,
 	1: <LogIn size={15} />,
 	2: <ShieldCheck size={15} />,
+	3: <LogIn size={15} />,
 };
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -141,6 +149,7 @@ interface LoginActionsProps {
 	readonly disabled: boolean;
 	readonly isSubmitting?: boolean;
 	readonly loginSuccess?: boolean;
+	readonly config: StepConfig;
 	readonly onNext: () => void;
 	readonly onBack: () => void;
 }
@@ -150,53 +159,67 @@ export const LoginActions = memo(function LoginActions({
 	disabled,
 	isSubmitting,
 	loginSuccess,
+	config,
 	onNext,
 	onBack,
 }: LoginActionsProps) {
-	const config = useMemo(() => STEP_CONFIG[activeStep], [activeStep]);
 	const icon = STEP_ICONS[activeStep];
 
-	// Step 1: row layout (ghost compact + primary flex) matching prototype
+	// Step 1: row layout (ghost compact + primary flex)
 	// Step 0: single primary button
-	// Step 2: single primary button (back link is inline in MfaStep)
+	// Step 2/3: single primary button (back link is inline in MfaStep)
 	const showBackButton = activeStep === 1 && !loginSuccess && !isSubmitting;
 
-	// Button content: success > submitting > default (matches prototype flow)
-	const buttonContent = loginSuccess ? (
-		<>
-			<Check size={16} />
-			<span>Acceso concedido</span>
-		</>
-	) : isSubmitting ? (
-		<>
-			<Spinner />
-			<span>Verificando…</span>
-		</>
-	) : (
-		<>
-			{activeStep > 0 && icon}
-			<span>{config.buttonLabel}</span>
-			{activeStep === 0 && icon}
-		</>
-	);
+	const buttonContent = useMemo(() => {
+		if (loginSuccess) {
+			return (
+				<>
+					<Check size={16} />
+					<span>Acceso concedido</span>
+				</>
+			);
+		}
+		if (isSubmitting) {
+			return (
+				<>
+					<Spinner />
+					<span>Verificando…</span>
+				</>
+			);
+		}
+		return (
+			<>
+				{activeStep > 0 && icon}
+				<span>{config.buttonLabel}</span>
+				{activeStep === 0 && icon}
+			</>
+		);
+	}, [loginSuccess, isSubmitting, activeStep, icon, config.buttonLabel]);
 
-	// Button content for step 1 row layout (icon always before label)
-	const buttonContentRow = loginSuccess ? (
-		<>
-			<Check size={16} />
-			<span>Acceso concedido</span>
-		</>
-	) : isSubmitting ? (
-		<>
-			<Spinner />
-			<span>Verificando…</span>
-		</>
-	) : (
-		<>
-			{icon}
-			<span>{config.buttonLabel}</span>
-		</>
-	);
+	const buttonContentRow = useMemo(() => {
+		if (loginSuccess) {
+			return (
+				<>
+					<Check size={16} />
+					<span>Acceso concedido</span>
+				</>
+			);
+		}
+		if (isSubmitting) {
+			return (
+				<>
+					<Spinner />
+					<span>Verificando…</span>
+				</>
+			);
+		}
+		return (
+			<>
+				{icon}
+				<span>{config.buttonLabel}</span>
+			</>
+		);
+	}, [loginSuccess, isSubmitting, icon, config.buttonLabel]);
 
 	const isDisabled = (disabled && !loginSuccess) || isSubmitting;
 
@@ -207,7 +230,11 @@ export const LoginActions = memo(function LoginActions({
 					<GhostButton
 						onClick={onBack}
 						type="button"
-						style={{ flex: "0 0 auto", padding: "12px 16px", width: "auto" }}
+						style={{
+							flex: "0 0 auto",
+							padding: "12px 16px",
+							width: "auto",
+						}}
 					>
 						<ArrowLeft size={15} />
 						Volver

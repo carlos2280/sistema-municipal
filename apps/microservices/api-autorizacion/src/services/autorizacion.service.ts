@@ -46,6 +46,7 @@ export type MfaRequiredResult = {
 export type MfaSetupPendingResult = {
   mfaSetupPending: true;
   userId: number;
+  setupToken: string;
 };
 
 type LoginProps = {
@@ -137,7 +138,7 @@ export const login = async ({
         }).catch((err) =>
           console.error("[Email] Error al enviar enrollment MFA:", err),
         );
-        return { mfaSetupPending: true, userId: usuario.id };
+        return { mfaSetupPending: true, userId: usuario.id, setupToken };
       }
 
       // MFA activo en el usuario (required o optional con MFA configurado)

@@ -4,6 +4,9 @@
  * Split-panel: BrandingPanel (left) + form (right).
  * Tenant badge + stepper + step content + actions.
  *
+ * Supports inline MFA setup flow (QR + backup codes) when
+ * mfa_policy = "required" and user has no MFA configured.
+ *
  * Re-render strategy:
  *   - Step components are React.memo'd
  *   - Validation uses useWatch (subscribes to specific fields only)
@@ -29,9 +32,13 @@ import { AuthLayout } from "./components/AuthLayout";
 import { CredentialsStep } from "./components/CredentialsStep";
 import { LoginActions } from "./components/LoginActions";
 import { LoginStepper } from "./components/LoginStepper";
-import { MfaSetupPendingNotice } from "./components/MfaSetupPendingNotice";
+import { MfaSetupInline } from "./components/MfaSetupInline";
 import { MfaStep } from "./components/MfaStep";
-import { MFA_PENDING_CONFIG, STEP_CONFIG } from "./constants";
+import {
+	MFA_SETUP_BACKUP_CONFIG,
+	MFA_SETUP_SCAN_CONFIG,
+	STEP_CONFIG,
+} from "./constants";
 import { useLoginFlow } from "./hooks/useLoginFlow";
 
 // ── Tenant Badge (form panel top) ───────────────────────────────────────────
@@ -108,11 +115,13 @@ function LoginFormContent({
 	loginSuccess,
 	mfaCode,
 	mfaSetupPending,
+	mfaSetupInline,
 	onCodeChange,
+	onMfaSetupCodeChange,
 	onNext,
 	onBack,
 }: {
-	readonly activeStep: 0 | 1 | 2;
+	readonly activeStep: 0 | 1 | 2 | 3;
 	readonly areas: ReadonlyArray<{
 		readonly id: number;
 		readonly nombre: string;
@@ -128,7 +137,17 @@ function LoginFormContent({
 	readonly loginSuccess: boolean;
 	readonly mfaCode: string;
 	readonly mfaSetupPending: boolean;
+	readonly mfaSetupInline: {
+		readonly phase: "scan" | "backup";
+		readonly qrDataUrl: string;
+		readonly secret: string;
+		readonly code: string;
+		readonly errorMsg: string;
+		readonly isActivating: boolean;
+		readonly backupCodes: readonly string[];
+	};
 	readonly onCodeChange: (code: string) => void;
+	readonly onMfaSetupCodeChange: (code: string) => void;
 	readonly onNext: () => void;
 	readonly onBack: () => void;
 }) {
@@ -145,10 +164,18 @@ function LoginFormContent({
 	}, [activeStep]);
 
 	const isStepValid = useMemo(() => {
-		if (mfaSetupPending) return false;
 		if (activeStep === 0) return !!(correo?.trim() && contrasena);
 		if (activeStep === 1) return !!(areaId && sistemaId);
-		if (activeStep === 2) return mfaCode.trim().length >= 6;
+		if (activeStep === 2) {
+			if (mfaSetupPending) {
+				return (
+					mfaSetupInline.code.length === 6 &&
+					!mfaSetupInline.isActivating
+				);
+			}
+			return mfaCode.trim().length >= 6;
+		}
+		if (activeStep === 3) return true; // Backup codes — always can continue
 		return false;
 	}, [
 		activeStep,
@@ -158,7 +185,16 @@ function LoginFormContent({
 		sistemaId,
 		mfaCode,
 		mfaSetupPending,
+		mfaSetupInline.code.length,
+		mfaSetupInline.isActivating,
 	]);
+
+	// Determine the step config for LoginActions
+	const config = useMemo(() => {
+		if (mfaSetupPending && activeStep === 2) return MFA_SETUP_SCAN_CONFIG;
+		if (mfaSetupPending && activeStep === 3) return MFA_SETUP_BACKUP_CONFIG;
+		return STEP_CONFIG[activeStep];
+	}, [activeStep, mfaSetupPending]);
 
 	const reducedMotion =
 		typeof window !== "undefined" &&
@@ -168,7 +204,11 @@ function LoginFormContent({
 		<>
 			<AnimatePresence mode="wait" custom={direction}>
 				<motion.div
-					key={activeStep}
+					key={
+						mfaSetupPending
+							? `setup-${mfaSetupInline.phase}`
+							: activeStep
+					}
 					custom={direction}
 					variants={reducedMotion ? undefined : stepVariants}
 					initial="enter"
@@ -184,7 +224,7 @@ function LoginFormContent({
 							isLoadingSistemas={isLoadingSistemas}
 						/>
 					)}
-					{activeStep === 2 && (
+					{activeStep === 2 && !mfaSetupPending && (
 						<MfaStep
 							mfaCode={mfaCode}
 							onCodeChange={onCodeChange}
@@ -192,17 +232,48 @@ function LoginFormContent({
 							onBack={onBack}
 						/>
 					)}
+					{activeStep >= 2 && mfaSetupPending && (
+						<MfaSetupInline
+							phase={mfaSetupInline.phase}
+							qrDataUrl={mfaSetupInline.qrDataUrl}
+							secret={mfaSetupInline.secret}
+							code={mfaSetupInline.code}
+							errorMsg={mfaSetupInline.errorMsg}
+							isActivating={mfaSetupInline.isActivating}
+							backupCodes={mfaSetupInline.backupCodes}
+							onCodeChange={onMfaSetupCodeChange}
+							onActivar={onNext}
+							onContinue={onNext}
+						/>
+					)}
 				</motion.div>
 			</AnimatePresence>
 
-			<LoginActions
-				activeStep={activeStep}
-				disabled={!isStepValid}
-				isSubmitting={isSubmitting}
-				loginSuccess={loginSuccess}
-				onNext={onNext}
-				onBack={onBack}
-			/>
+			{/* Hide actions during MFA setup scan phase (auto-submit handles it) */}
+			{!(mfaSetupPending && activeStep === 2) && (
+				<LoginActions
+					activeStep={activeStep}
+					disabled={!isStepValid}
+					isSubmitting={isSubmitting}
+					loginSuccess={loginSuccess}
+					config={config}
+					onNext={onNext}
+					onBack={onBack}
+				/>
+			)}
+
+			{/* Show "Continuar al sistema" button only on backup phase */}
+			{mfaSetupPending && activeStep === 3 && (
+				<LoginActions
+					activeStep={activeStep}
+					disabled={false}
+					isSubmitting={isSubmitting}
+					loginSuccess={loginSuccess}
+					config={MFA_SETUP_BACKUP_CONFIG}
+					onNext={onNext}
+					onBack={onBack}
+				/>
+			)}
 		</>
 	);
 }
@@ -224,11 +295,18 @@ export default function LoginPage() {
 		mfaCode,
 		setMfaCode,
 		mfaSetupPending,
+		mfaSetupInline,
+		setMfaSetupCode,
 		handleNext,
 		handleBack,
 	} = useLoginFlow();
 
-	const config = mfaSetupPending ? MFA_PENDING_CONFIG : STEP_CONFIG[activeStep];
+	// Determine header config based on flow state
+	const config = useMemo(() => {
+		if (mfaSetupPending && activeStep === 2) return MFA_SETUP_SCAN_CONFIG;
+		if (mfaSetupPending && activeStep === 3) return MFA_SETUP_BACKUP_CONFIG;
+		return STEP_CONFIG[activeStep];
+	}, [activeStep, mfaSetupPending]);
 
 	// Trigger exit animation 800ms after success
 	const [exiting, setExiting] = useState(false);
@@ -239,14 +317,13 @@ export default function LoginPage() {
 	}, [loginSuccess]);
 
 	// ── Redirects (después de todos los hooks) ────────────────────────────
-	// 1. Usuario ya autenticado que navega a /login directamente → redirigir.
-	//    Solo en step 0 para no interrumpir un flujo de login activo
-	//    (tokenReceived se despacha ANTES de que finishLogin complete).
 	if (isAuthenticated && !loginSuccess && activeStep === 0)
 		return <Navigate to="/" replace />;
 
-	// 2. Flujo de login completado → redirigir tras la animación de salida.
 	if (exiting) return <Navigate to="/" replace />;
+
+	// Show MFA step in stepper when we're on step 2 with normal MFA flow
+	const showMfaStep = activeStep >= 2 && !mfaSetupPending;
 
 	return (
 		<AuthLayout exiting={exiting}>
@@ -257,7 +334,9 @@ export default function LoginPage() {
 						<Building2 />
 					</TenantIcon>
 					<TenantOrg>
-						<TenantName>{tenantNombre || "Municipalidad"}</TenantName>
+						<TenantName>
+							{tenantNombre || "Municipalidad"}
+						</TenantName>
 						Sistema Integrado de Gestión · MERIDIAN
 					</TenantOrg>
 				</TenantBadge>
@@ -265,29 +344,28 @@ export default function LoginPage() {
 				<LoginStepper
 					activeStep={activeStep}
 					mfaSetupPending={mfaSetupPending}
+					showMfaStep={showMfaStep}
 				/>
 
 				<AuthHeader title={config.title} subtitle={config.subtitle} />
 
-				{mfaSetupPending ? (
-					<MfaSetupPendingNotice />
-				) : (
-					<FormProvider {...methods}>
-						<LoginFormContent
-							activeStep={activeStep}
-							areas={areas}
-							sistemas={sistemas}
-							isLoadingSistemas={isLoadingSistemas}
-							isSubmitting={isSubmitting}
-							loginSuccess={loginSuccess}
-							mfaCode={mfaCode}
-							mfaSetupPending={mfaSetupPending}
-							onCodeChange={setMfaCode}
-							onNext={handleNext}
-							onBack={handleBack}
-						/>
-					</FormProvider>
-				)}
+				<FormProvider {...methods}>
+					<LoginFormContent
+						activeStep={activeStep}
+						areas={areas}
+						sistemas={sistemas}
+						isLoadingSistemas={isLoadingSistemas}
+						isSubmitting={isSubmitting}
+						loginSuccess={loginSuccess}
+						mfaCode={mfaCode}
+						mfaSetupPending={mfaSetupPending}
+						mfaSetupInline={mfaSetupInline}
+						onCodeChange={setMfaCode}
+						onMfaSetupCodeChange={setMfaSetupCode}
+						onNext={handleNext}
+						onBack={handleBack}
+					/>
+				</FormProvider>
 
 				<AuthFooter />
 			</AuthCard>
