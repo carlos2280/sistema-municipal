@@ -7,7 +7,7 @@ paths:
 # Microservicios Node.js — Convenciones
 
 ## Express 5: async errors sin try/catch en routes
-Express 5 propaga errores async automáticamente. Patrón obligatorio:
+Express 5 propaga errores async automaticamente. Patron obligatorio:
 
 ```typescript
 // ✅ Correcto — Express 5 captura el error y lo pasa al error handler
@@ -23,9 +23,9 @@ export const getById = async (req: Request, res: Response, next: NextFunction) =
 };
 ```
 
-## Validación: Zod siempre antes del controller
+## Validacion: Zod siempre antes del controller
 ```typescript
-// middleware de validación → luego el controller
+// middleware de validacion → luego el controller
 router.post('/', validate(createSchema), controller.create);
 ```
 - `z.infer<typeof schema>` como tipo del body validado
@@ -34,10 +34,10 @@ router.post('/', validate(createSchema), controller.create);
 ## Estructura interna de cada microservicio
 ```
 src/
-├── routes/       → Solo definición de rutas + middleware
+├── routes/       → Solo definicion de rutas + middleware
 ├── controllers/  → Request/Response, delegar a services
-├── services/     → Lógica de negocio, llaman a DB
-├── middleware/   → Auth, validación, errores
+├── services/     → Logica de negocio, llaman a DB
+├── middleware/   → Auth, validacion, errores
 ├── types/        → Tipos locales del servicio
 └── config/       → Variables de entorno (con Zod parse al inicio)
 ```
@@ -46,7 +46,7 @@ src/
 ```typescript
 import { logger } from '@municipal/core/logger';
 logger.info({ userId, action: 'login' }, 'Usuario autenticado');  // structured
-logger.error({ err, userId }, 'Error en autenticación');
+logger.error({ err, userId }, 'Error en autenticacion');
 ```
 
 ## Errores: usar clases de @municipal/core
@@ -59,5 +59,5 @@ throw new NotFoundError('Usuario no encontrado');
 ## Seguridad (OWASP — aplicar siempre)
 - JWT verificado en middleware, nunca en el controller directamente
 - Rate limiting en rutas de auth (ya configurado en api-gateway)
-- NUNCA loguear contraseñas, tokens, ni datos sensibles
-- Principio de mínimo privilegio: verificar permisos RBAC antes de la operación
+- NUNCA loguear contrasenas, tokens, ni datos sensibles
+- Principio de minimo privilegio: verificar permisos RBAC antes de la operacion

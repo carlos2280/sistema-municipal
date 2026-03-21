@@ -1,6 +1,3 @@
-# Claude
-CLAUDE.md
-
 # Dependencies
 node_modules/
 .pnpm-store/
@@ -22,7 +19,7 @@ out/
 .env.development
 .env.infra
 
-# Excepciones - Templates y configs compartidas (SÍ commitear)
+# Excepciones - Templates y configs compartidas (SI commitear)
 !.env.example
 !.env.development.example
 !**/.env.example
@@ -63,19 +60,18 @@ mcp-servers/
 # MCP config con tokens (usar .mcp.json.example como plantilla)
 .mcp.json
 
-# Claude settings locales con tokens — excluir todo excepto reglas del equipo
-.claude/*
-!.claude/rules/
+# Claude — compartir settings, skills, hooks, agents, rules con el equipo
+# Solo excluir settings locales (tokens personales, permisos extra)
+.claude/settings.local.json
 
-# NPM registry tokens (si se agregan credenciales, usar .npmrc.local)
-# .npmrc se commitea porque solo tiene config de pnpm (shamefully-hoist)
+# NPM registry tokens
 .npmrc.local
 
-
-#documentacióm
-docs/.claude/skills/
-
-documentacion/
-.claude/skills/
+# Memory de Claude (vive en ~/.claude/projects/, no en el repo)
 memory/
+
+# Documentacion personal (disenos, prototipos, notas)
+documentacion/
+
+# Specs (personal por ahora)
 specs/

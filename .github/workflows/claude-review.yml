@@ -1,0 +1,96 @@
+# ============================================
+# Sistema Municipal - Claude Code Review
+# ============================================
+# Ejecuta review automatico con Claude en PRs
+# Claude carga automaticamente CLAUDE.md, rules/,
+# settings.json, skills/ y agents/ del repo.
+# ============================================
+
+name: Claude Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  claude-review:
+    name: Claude Code Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Get PR diff
+        id: diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
+          echo "lines=$(wc -l < /tmp/pr-diff.txt)" >> $GITHUB_OUTPUT
+
+      - name: Run Claude Review
+        if: steps.diff.outputs.lines > 0
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          DIFF=$(cat /tmp/pr-diff.txt)
+
+          claude -p "Eres el revisor de codigo del Sistema Municipal.
+
+          Revisa los cambios del PR #${{ github.event.pull_request.number }}.
+          Titulo: ${{ github.event.pull_request.title }}
+
+          DIFF:
+          $DIFF
+
+          Instrucciones:
+          1. Lee CLAUDE.md para entender las convenciones del proyecto
+          2. Aplica las rules del directorio .claude/rules/ segun los archivos tocados
+          3. Reporta hallazgos con este formato:
+             [CRITICO] archivo:linea — descripcion (bloquea merge)
+             [WARNING] archivo:linea — descripcion (sugerir mejora)
+             [SUGERENCIA] archivo:linea — descripcion (opcional)
+
+          Prioridades de revision:
+          - Seguridad: secrets, SQL injection, validacion de inputs
+          - TypeScript: zero any, zero unused, tipos correctos
+          - React: Atomic Design, componente en carpeta correcta
+          - Backend: Zod validation, error handling, Pino logging
+          - Theme: no hardcodear colores, usar theme.palette/meridian
+
+          Si todo esta bien:
+          ✅ Review limpio. No se encontraron problemas criticos.
+
+          Se breve y directo. Solo reporta problemas reales." \
+          --output-format text > /tmp/review-result.txt
+
+      - name: Comment on PR
+        if: always() && steps.diff.outputs.lines > 0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REVIEW=$(cat /tmp/review-result.txt 2>/dev/null || echo "Review no pudo ejecutarse")
+
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "## 🔍 Claude Code Review
+
+          $REVIEW
+
+          ---
+          *Review automatico — Claude carga las rules del proyecto automaticamente*"
