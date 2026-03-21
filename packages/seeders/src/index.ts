@@ -8,6 +8,7 @@ import { seedCuentasSubgrupos } from "./mod_contabilidad/cuentasSubgrupos.seeder
 import { seedPlanesCuentas } from "./mod_contabilidad/planesCuentas.seeder";
 import { seedTitulosCuentas } from "./mod_contabilidad/titulosCuentas.seeder";
 import { seedCentrosCosto } from "./mod_contabilidad/seedCentrosCosto";
+import { seedSubprogramas } from "./mod_contabilidad/seedSubprogramas";
 import { seedPresupuestoCuentas2026 } from "./mod_contabilidad/seedPresupuestoCuentas2026";
 import { seedConfiguracion } from "./mod_configuracion/configuracion.seeder";
 import { seedOficinas } from "./oficinas.seeder";
@@ -42,6 +43,7 @@ export async function runAllSeeders() {
             await seedCuentasSubgrupos(tx);
             await seedPlanesCuentas(tx);
             await seedCentrosCosto(tx);
+            await seedSubprogramas(tx);
             await seedPresupuestoCuentas2026(tx);
 
             console.log("🎉 Todos los seeders ejecutados correctamente");

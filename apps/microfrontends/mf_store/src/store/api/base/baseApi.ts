@@ -26,5 +26,6 @@ export const baseApi = createApi({
 		"Presupuestos",
 		"PresupuestosDetalle",
 		"CentrosCosto",
+		"Subprogramas",
 	],
 });

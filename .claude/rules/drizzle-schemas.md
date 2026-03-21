@@ -12,12 +12,12 @@ Los archivos en `packages/db-*/drizzle/` son generados por drizzle-kit.
 Flujo correcto:
 1. Editar schema en `packages/db-*/src/schemas/*.ts`
 2. `pnpm --filter db-<dominio> exec drizzle-kit generate`
-3. Revisar la migración generada
+3. Revisar la migracion generada
 4. `pnpm --filter db-<dominio> exec drizzle-kit migrate`
 
 ## Tipos inferidos: siempre usar `$inferSelect` y `$inferInsert`
 ```typescript
-// ✅ Correcto — tipos inferidos automáticamente
+// ✅ Correcto — tipos inferidos automaticamente
 export type Usuario = typeof usuarios.$inferSelect;
 export type NuevoUsuario = typeof usuarios.$inferInsert;
 
@@ -25,7 +25,7 @@ export type NuevoUsuario = typeof usuarios.$inferInsert;
 interface Usuario { id: string; email: string; ... }
 ```
 
-## Convenciones de definición
+## Convenciones de definicion
 ```typescript
 // IDs: siempre UUID
 id: uuid('id').primaryKey().defaultRandom(),
@@ -34,11 +34,11 @@ id: uuid('id').primaryKey().defaultRandom(),
 creadoEn: timestamp('creado_en').notNull().defaultNow(),
 actualizadoEn: timestamp('actualizado_en').notNull().defaultNow(),
 
-// Soft delete (preferir sobre borrado físico en datos críticos)
+// Soft delete (preferir sobre borrado fisico en datos criticos)
 activo: boolean('activo').notNull().default(true),
 ```
-- Nombres de tabla en código: `camelCase` → en PostgreSQL: `snake_case` (Drizzle mapea automáticamente)
-- Columnas en código: `camelCase` → en DB: `snake_case`
+- Nombres de tabla en codigo: `camelCase` → en PostgreSQL: `snake_case` (Drizzle mapea automaticamente)
+- Columnas en codigo: `camelCase` → en DB: `snake_case`
 
 ## Queries: usar operadores de drizzle-orm
 ```typescript
@@ -53,4 +53,4 @@ import { eq, and, or, inArray, isNull } from 'drizzle-orm';
 | `packages/db-identidad` | Auth, usuarios, perfiles, departamentos |
 | `packages/db-contabilidad` | Presupuestos, plan de cuentas, centros de costo |
 | `packages/db-mensajeria` | Conversaciones, archivos, llamadas |
-| `packages/db-platform` | Módulos, sistemas, entidades de plataforma |
+| `packages/db-platform` | Modulos, sistemas, entidades de plataforma |

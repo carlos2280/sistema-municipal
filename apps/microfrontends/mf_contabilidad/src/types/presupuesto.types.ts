@@ -2,10 +2,11 @@ import type {
   CentrosCostoItem,
   CuentaPresupuestaria,
   DiscrepanciaItem,
+  SubprogramaItem,
 } from 'mf_store/store';
 
 // Re-exportar tipos del store para uso en componentes
-export type { CentrosCostoItem, CuentaPresupuestaria, DiscrepanciaItem };
+export type { CentrosCostoItem, CuentaPresupuestaria, DiscrepanciaItem, SubprogramaItem };
 
 // ─── Tab activo ───────────────────────────────────────────────────────────────
 
@@ -24,11 +25,13 @@ export interface FilaDetalle {
   id?: number;
   cuentaId?: number;
   centroCostoId?: number | null;
+  subprogramaId?: number | null;
   montoAnual: number;
   observacion?: string;
   // Datos enriquecidos (join del servidor)
   cuenta?: CuentaPresupuestaria;
   centroCosto?: CentrosCostoItem | null;
+  subprograma?: Omit<SubprogramaItem, 'orden'> | null;
   // Estado de UI
   isNew: boolean;
   isDirty: boolean;
@@ -45,6 +48,16 @@ export interface FilaDisplay extends FilaDetalle {
   nivel: number;
   /** IDs de hijos directos en el detalle actual */
   hijosIds: string[];
+}
+
+// ─── Fila de la Adaptive Financial Matrix (tab GASTOS) ──────────────────────
+
+/** Fila de la Adaptive Financial Matrix — una fila por cuenta con distribución por áreas */
+export interface FilaMatrix extends FilaDisplay {
+  /** Distribución por área — Map<subprogramaId, monto en pesos> */
+  distribucion: Map<number, number>;
+  /** Total calculado = Σ distribucion.values() */
+  totalDistribucion: number;
 }
 
 // ─── Encabezado del presupuesto (formulario) ──────────────────────────────────

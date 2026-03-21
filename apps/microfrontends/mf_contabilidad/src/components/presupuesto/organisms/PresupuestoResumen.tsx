@@ -10,7 +10,9 @@ import { useMemo } from 'react';
 import type {
   EquilibrioState,
   FilaDisplay,
-} from '../../../types/presupuesto.types';
+  FilaMatrix,
+  SubprogramaItem,
+} from '@/types/presupuesto.types';
 import { formatCLP } from '../atoms/MontoInput';
 
 const numFontSx = {
@@ -24,6 +26,8 @@ interface PresupuestoResumenProps {
   discrepanciasIngresosMap: Map<string, number | null>;
   discrepanciasGastosMap: Map<string, number | null>;
   equilibrio: EquilibrioState;
+  subprogramas?: SubprogramaItem[];
+  filasMatrixGastos?: FilaMatrix[];
 }
 
 interface ResumenGrupo {
@@ -313,6 +317,8 @@ const PresupuestoResumen = ({
   discrepanciasIngresosMap,
   discrepanciasGastosMap,
   equilibrio,
+  subprogramas = [],
+  filasMatrixGastos = [],
 }: PresupuestoResumenProps) => {
   const gruposIngresos = useMemo(
     () => sumarFilasRaiz(filasIngresos, discrepanciasIngresosMap),
@@ -326,6 +332,27 @@ const PresupuestoResumen = ({
     () => agruparPorCC(filasIngresos, filasGastos),
     [filasIngresos, filasGastos],
   );
+
+  // Distribución por subprograma
+  const distribucionSubprogramas = useMemo(() => {
+    if (subprogramas.length === 0 || filasMatrixGastos.length === 0) return [];
+    const totales = new Map<number, number>();
+    for (const fila of filasMatrixGastos) {
+      if (fila.nivel !== 0) continue;
+      for (const [subId, monto] of fila.distribucion) {
+        totales.set(subId, (totales.get(subId) ?? 0) + monto);
+      }
+    }
+    const totalGeneral = [...totales.values()].reduce((a, b) => a + b, 0);
+    return subprogramas
+      .filter((s) => (totales.get(s.id) ?? 0) > 0)
+      .map((s) => ({
+        ...s,
+        total: totales.get(s.id) ?? 0,
+        pct: totalGeneral > 0 ? ((totales.get(s.id) ?? 0) / totalGeneral) * 100 : 0,
+      }))
+      .sort((a, b) => b.pct - a.pct);
+  }, [subprogramas, filasMatrixGastos]);
 
   const { totalIngresos, totalGastos, diferencia, estado } = equilibrio;
   const isOk = estado === 'ok';
@@ -733,6 +760,152 @@ const PresupuestoResumen = ({
           </Box>
         </Box>
       </Box>
+      {/* ── Distribución por Subprograma (Gastos) ── */}
+      {distribucionSubprogramas.length > 0 && (
+        <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+          <Box
+            sx={(t) => ({
+              bgcolor: t.meridian?.surfaces?.s1 ?? 'background.paper',
+              borderRadius: 2,
+              border: `1px solid ${t.palette.divider}`,
+              overflow: 'hidden',
+            })}
+          >
+            <Box
+              sx={{
+                px: 2.5,
+                py: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                borderBottom: 1,
+                borderColor: 'divider',
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 700, color: 'text.primary' }}
+              >
+                Distribución por Subprograma (Gastos)
+              </Typography>
+            </Box>
+
+            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
+              <Box component="thead">
+                <Box component="tr" sx={{ bgcolor: 'action.hover' }}>
+                  <Box
+                    component="th"
+                    sx={{ px: 2.5, py: 1, textAlign: 'left', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled' }}
+                  >
+                    Subprograma
+                  </Box>
+                  <Box
+                    component="th"
+                    sx={{ px: 2, py: 1, textAlign: 'right', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled' }}
+                  >
+                    Monto (M$)
+                  </Box>
+                  <Box
+                    component="th"
+                    sx={{ px: 2, py: 1, textAlign: 'right', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled', width: 80 }}
+                  >
+                    %
+                  </Box>
+                  <Box
+                    component="th"
+                    sx={{ px: 2, py: 1, textAlign: 'left', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled', width: 200 }}
+                  >
+                    Distribución
+                  </Box>
+                </Box>
+              </Box>
+
+              <Box component="tbody">
+                {distribucionSubprogramas.map((sub) => {
+                  const maxPct = distribucionSubprogramas[0]?.pct ?? 100;
+                  const barWidth = maxPct > 0 ? (sub.pct / maxPct) * 100 : 0;
+                  const paletteColor = sub.color === 'default' ? 'grey' : sub.color;
+                  return (
+                    <Box
+                      key={sub.id}
+                      component="tr"
+                      sx={{ '&:hover': { bgcolor: 'action.hover' }, borderBottom: 1, borderColor: 'divider' }}
+                    >
+                      <Box component="td" sx={{ px: 2.5, py: 1.25, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: `${paletteColor}.main`,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography
+                          component="span"
+                          sx={{
+                            fontFamily: "'DM Mono', monospace",
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            color: 'text.disabled',
+                            mr: 0.5,
+                          }}
+                        >
+                          {sub.abreviatura}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {sub.nombre}
+                        </Typography>
+                      </Box>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 2,
+                          py: 1.25,
+                          textAlign: 'right',
+                          ...numFontSx,
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: 'text.primary',
+                        }}
+                      >
+                        {Math.round(sub.total / 1000).toLocaleString('es-CL')}
+                      </Box>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 2,
+                          py: 1.25,
+                          textAlign: 'right',
+                          ...numFontSx,
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {sub.pct.toFixed(1)}%
+                      </Box>
+                      <Box component="td" sx={{ px: 2, py: 1.25 }}>
+                        <Box
+                          sx={(t) => ({
+                            height: 6,
+                            borderRadius: 3,
+                            width: `${barWidth}%`,
+                            bgcolor:
+                              (t.palette[paletteColor as keyof typeof t.palette] as { main: string })?.main ??
+                              t.palette.primary.main,
+                            minWidth: barWidth > 0 ? 4 : 0,
+                          })}
+                        />
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

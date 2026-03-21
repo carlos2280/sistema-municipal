@@ -11,8 +11,10 @@ export const actualizarPresupuestoSchema = crearPresupuestoSchema.partial();
 
 export const agregarLineaSchema = z.object({
   cuentaId: z.number().int().positive("cuentaId inválido"),
-  monto: z.number().nonnegative("El monto no puede ser negativo"),
-  descripcion: z.string().optional(),
+  montoAnual: z.number().nonnegative("El monto no puede ser negativo"),
+  centroCostoId: z.number().int().positive().nullable().optional(),
+  subprogramaId: z.number().int().positive().nullable().optional(),
+  observacion: z.string().optional(),
 });
 
 export const actualizarLineaSchema = agregarLineaSchema.partial();
