@@ -5,7 +5,8 @@ import { read, utils } from 'xlsx';
 import type {
   CuentaPresupuestaria,
   FilaDetalle,
-} from '../../types/presupuesto.types';
+  SubprogramaItem,
+} from '@/types/presupuesto.types';
 
 /** Yield al event loop para no bloquear la UI */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -132,6 +133,102 @@ function parseSheet(sheetData: unknown[][]): ExcelRow[] {
   return rows;
 }
 
+// ─── Mapeo de headers Excel → códigos de subprograma ────────────────────────
+
+const AREA_HEADER_MAP: Array<{ pattern: RegExp; codigo: string }> = [
+  { pattern: /gesti[oó]n/i, codigo: 'GESTION' },
+  { pattern: /serv(?:icios)?[\s._]*com(?:unitarios)?/i, codigo: 'SERV_COM' },
+  { pattern: /act(?:ividades)?[\s._]*mun(?:icipales)?/i, codigo: 'ACT_MUN' },
+  { pattern: /prog(?:ramas)?[\s._]*soc(?:iales)?/i, codigo: 'PROG_SOC' },
+  { pattern: /prog(?:ramas)?[\s._]*dep(?:ortivos)?/i, codigo: 'PROG_DEP' },
+  { pattern: /prog(?:ramas)?[\s._]*cul(?:turales)?/i, codigo: 'PROG_CUL' },
+];
+
+/** Detecta columnas de áreas en el header del Excel */
+function detectAreaColumns(
+  headerRow: unknown[],
+): Array<{ colIdx: number; codigo: string }> {
+  const areas: Array<{ colIdx: number; codigo: string }> = [];
+  for (let col = 7; col < headerRow.length; col++) {
+    const header = String(headerRow[col] ?? '').trim();
+    if (!header) continue;
+    for (const { pattern, codigo } of AREA_HEADER_MAP) {
+      if (pattern.test(header)) {
+        areas.push({ colIdx: col, codigo });
+        break;
+      }
+    }
+  }
+  return areas;
+}
+
+/** Parsea una hoja de gastos con columnas de áreas */
+function parseSheetConAreas(
+  sheetData: unknown[][],
+  subprogramas: SubprogramaItem[],
+): {
+  excelRows: ExcelRow[];
+  areaMontos: Map<number, Map<number, number>>; // rowIndex → Map<subprogramaId, monto M$>
+} {
+  const excelRows = parseSheet(sheetData);
+
+  // Find header row to detect area columns
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(20, sheetData.length); i++) {
+    const row = sheetData[i];
+    if (!row) continue;
+    const headerText = row.map((c) => String(c ?? '').toUpperCase()).join('|');
+    if (
+      headerText.includes('SUBTITULO') ||
+      headerText.includes('SUB TIT') ||
+      (headerText.includes('DENOMINACION') && headerText.includes('ITEM'))
+    ) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+
+  const areaMontos = new Map<number, Map<number, number>>();
+  if (headerRowIdx === -1) return { excelRows, areaMontos };
+
+  const areaCols = detectAreaColumns(sheetData[headerRowIdx]);
+  if (areaCols.length === 0) return { excelRows, areaMontos };
+
+  // Map código → subprogramaId
+  const codigoToId = new Map(subprogramas.map((s) => [s.codigo, s.id]));
+
+  // Parse area montos for each data row
+  let dataRowIdx = 0;
+  for (let i = headerRowIdx + 1; i < sheetData.length; i++) {
+    const row = sheetData[i];
+    if (!row || row.length < 7) continue;
+
+    const denominacion = String(row[6] ?? '').trim();
+    if (!denominacion) continue;
+
+    const nivel = inferNivel(row);
+    if (nivel === 0) continue;
+
+    // This data row corresponds to excelRows[dataRowIdx]
+    if (dataRowIdx >= excelRows.length) break;
+
+    const dist = new Map<number, number>();
+    for (const { colIdx, codigo } of areaCols) {
+      const monto = Number(row[colIdx]) || 0;
+      if (monto <= 0) continue;
+      const subId = codigoToId.get(codigo);
+      if (subId) dist.set(subId, monto); // Still in M$ at this point
+    }
+
+    if (dist.size > 0) {
+      areaMontos.set(dataRowIdx, dist);
+    }
+    dataRowIdx++;
+  }
+
+  return { excelRows, areaMontos };
+}
+
 /**
  * Convierte filas del Excel en FilaDetalle[] mapeadas a cuentas existentes.
  * Montos en M$ se convierten a pesos (×1000).
@@ -169,6 +266,66 @@ function excelRowsToFilas(
   return { filas, noEncontradas };
 }
 
+/** Convierte filas Excel con áreas en FilaDetalle[] + distribuciones */
+function excelRowsConAreasToFilas(
+  excelRows: ExcelRow[],
+  areaMontos: Map<number, Map<number, number>>,
+  cuentas: CuentaPresupuestaria[],
+  prefijo: string,
+): {
+  filas: FilaDetalle[];
+  distribuciones: Map<string, Map<number, number>>;
+  noEncontradas: string[];
+} {
+  const cuentaMap = new Map(cuentas.map((c) => [c.codigo, c]));
+  const filas: FilaDetalle[] = [];
+  const distribuciones = new Map<string, Map<number, number>>();
+  const noEncontradas: string[] = [];
+
+  for (let i = 0; i < excelRows.length; i++) {
+    const row = excelRows[i];
+    const codigo = buildCodigo(prefijo, row);
+    const cuenta = cuentaMap.get(codigo);
+
+    if (!cuenta) {
+      noEncontradas.push(`${codigo} - ${row.denominacion}`);
+      continue;
+    }
+
+    const clientId = uuid();
+    const areaDist = areaMontos.get(i);
+
+    // Convert area montos from M$ to pesos
+    const distPesos = new Map<number, number>();
+    if (areaDist) {
+      for (const [subId, montoMiles] of areaDist) {
+        distPesos.set(subId, Math.round(montoMiles * 1000));
+      }
+    }
+
+    const totalFromAreas = distPesos.size > 0
+      ? [...distPesos.values()].reduce((a, b) => a + b, 0)
+      : Math.round(row.monto * 1000);
+
+    filas.push({
+      _clientId: clientId,
+      cuentaId: cuenta.id,
+      cuenta,
+      centroCostoId: null,
+      centroCosto: null,
+      montoAnual: totalFromAreas,
+      isNew: true,
+      isDirty: true,
+    });
+
+    if (distPesos.size > 0) {
+      distribuciones.set(clientId, distPesos);
+    }
+  }
+
+  return { filas, distribuciones, noEncontradas };
+}
+
 /**
  * Hook para importar presupuesto desde Excel.
  * Encapsula: file picker, parseo xlsx, mapeo a FilaDetalle[].
@@ -177,7 +334,8 @@ export const useImportarExcel = (
   cuentasIngresos: CuentaPresupuestaria[],
   cuentasGastos: CuentaPresupuestaria[],
   importarFilasIngresos: (filas: FilaDetalle[]) => void,
-  importarFilasGastos: (filas: FilaDetalle[]) => void,
+  importarFilasGastos: (filas: FilaDetalle[], distribuciones?: Map<string, Map<number, number>>) => void,
+  subprogramas: SubprogramaItem[] = [],
 ) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -256,25 +414,44 @@ export const useImportarExcel = (
 
         await yieldToMain();
 
-        // Importar gastos
+        // Importar gastos (con detección de columnas de áreas)
         if (hojaGastos) {
           toast.loading('Procesando gastos...', { id: toastId });
           await yieldToMain();
 
           const sheet = wb.Sheets[hojaGastos];
           const data = utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
-          const excelRows = parseSheet(data);
-          const { filas, noEncontradas } = excelRowsToFilas(
-            excelRows,
-            cuentasGastos,
-            '215',
-          );
 
-          if (filas.length > 0) {
-            startTransition(() => importarFilasGastos(filas));
-            totalImportados += filas.length;
+          if (subprogramas.length > 0) {
+            // Parseo con áreas
+            const { excelRows, areaMontos } = parseSheetConAreas(data, subprogramas);
+            const { filas, distribuciones, noEncontradas } = excelRowsConAreasToFilas(
+              excelRows,
+              areaMontos,
+              cuentasGastos,
+              '215',
+            );
+
+            if (filas.length > 0) {
+              startTransition(() => importarFilasGastos(filas, distribuciones));
+              totalImportados += filas.length;
+            }
+            totalNoEncontradas = [...totalNoEncontradas, ...noEncontradas];
+          } else {
+            // Parseo sin áreas (fallback)
+            const excelRows = parseSheet(data);
+            const { filas, noEncontradas } = excelRowsToFilas(
+              excelRows,
+              cuentasGastos,
+              '215',
+            );
+
+            if (filas.length > 0) {
+              startTransition(() => importarFilasGastos(filas));
+              totalImportados += filas.length;
+            }
+            totalNoEncontradas = [...totalNoEncontradas, ...noEncontradas];
           }
-          totalNoEncontradas = [...totalNoEncontradas, ...noEncontradas];
         } else {
           toast.warning('No se encontró la hoja de Gastos en el archivo.');
         }
@@ -310,6 +487,7 @@ export const useImportarExcel = (
     cuentasGastos,
     importarFilasIngresos,
     importarFilasGastos,
+    subprogramas,
   ]);
 
   return { handleImportar };

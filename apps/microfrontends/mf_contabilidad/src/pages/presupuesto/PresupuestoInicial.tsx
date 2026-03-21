@@ -30,13 +30,14 @@ import {
 import { type Theme, alpha } from '@mui/material/styles';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { FormProvider } from 'react-hook-form';
-import DeleteConfirmToast from '../../components/presupuesto/molecules/DeleteConfirmToast';
-import DeleteLineaDialog from '../../components/presupuesto/molecules/DeleteLineaDialog';
-import PresupuestoHeader from '../../components/presupuesto/molecules/PresupuestoHeader';
-import AgregarCuentaDrawer from '../../components/presupuesto/organisms/AgregarCuentaDrawer';
-import PresupuestoGrid from '../../components/presupuesto/organisms/PresupuestoGrid';
-import PresupuestoResumen from '../../components/presupuesto/organisms/PresupuestoResumen';
-import { usePresupuestoInicial } from '../../hooks/presupuesto/usePresupuestoInicial';
+import DeleteConfirmToast from '@/components/presupuesto/molecules/DeleteConfirmToast';
+import DeleteLineaDialog from '@/components/presupuesto/molecules/DeleteLineaDialog';
+import PresupuestoHeader from '@/components/presupuesto/molecules/PresupuestoHeader';
+import AgregarCuentaDrawer from '@/components/presupuesto/organisms/AgregarCuentaDrawer';
+import PresupuestoGrid from '@/components/presupuesto/organisms/PresupuestoGrid';
+import PresupuestoMatrixGrid from '@/components/presupuesto/organisms/PresupuestoMatrixGrid';
+import PresupuestoResumen from '@/components/presupuesto/organisms/PresupuestoResumen';
+import { usePresupuestoInicial } from '@/hooks/presupuesto/usePresupuestoInicial';
 
 // ─── Tipos ────────────────────────────────────────────────────────
 type TabValue = 'ingresos' | 'gastos' | 'resumen';
@@ -105,6 +106,8 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
     loadingCuentasGastos,
     detalleIngresos,
     detalleGastos,
+    matrixGastos,
+    subprogramas,
     discrepanciasIngresosMap,
     discrepanciasGastosMap,
     filasIngresos,
@@ -735,7 +738,7 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
             />
           </Box>
 
-          {/* Gastos — siempre montado, oculto con display:none */}
+          {/* Gastos — Adaptive Financial Matrix con columnas por subprograma */}
           <Box
             sx={{
               display: tabActivo === 'gastos' ? 'flex' : 'none',
@@ -744,21 +747,28 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
               minHeight: 0,
             }}
           >
-            <PresupuestoGrid
-              filas={detalleGastos.filasDisplay}
-              cuentasDisponibles={cuentasGastos}
-              centrosCosto={centrosCosto}
-              cuentasEnUso={detalleGastos.cuentasEnUso}
+            <PresupuestoMatrixGrid
+              filas={matrixGastos.filasMatrix}
+              subprogramas={subprogramas}
               discrepanciasMap={discrepanciasGastosMap}
               deleteTargetIds={deleteTargetIds}
-              tipoTab="gastos"
               searchFilter={searchGastos}
-              onCuentaChange={detalleGastos.setCuenta}
-              onCentroCostoChange={detalleGastos.setCentroCosto}
-              onMontoConfirm={detalleGastos.setMonto}
+              onMontoConfirm={matrixGastos.setMonto}
+              onMontoAreaConfirm={matrixGastos.setMontoArea}
               onRecalcular={handleRecalcular}
               onEliminar={handleEliminarLinea}
               onTab={handleTabNavigation}
+              onTabArea={(clientId, areaIdx, shiftKey) => {
+                const nextIdx = shiftKey ? areaIdx - 1 : areaIdx + 1;
+                const visibleAreas = subprogramas.filter((s) => s.codigo !== 'SIN_ASIG');
+                if (nextIdx >= 0 && nextIdx < visibleAreas.length) {
+                  return;
+                }
+                handleTabNavigation(clientId, shiftKey);
+              }}
+              onEnterArea={(clientId) => {
+                handleTabNavigation(clientId, false);
+              }}
               isSaving={isSaving}
             />
           </Box>
@@ -772,6 +782,8 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
                 discrepanciasIngresosMap={discrepanciasIngresosMap}
                 discrepanciasGastosMap={discrepanciasGastosMap}
                 equilibrio={equilibrio}
+                subprogramas={subprogramas}
+                filasMatrixGastos={matrixGastos.filasMatrix}
               />
             </Box>
           )}

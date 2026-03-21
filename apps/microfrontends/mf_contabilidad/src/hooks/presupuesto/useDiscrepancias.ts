@@ -3,7 +3,8 @@ import type {
   EquilibrioState,
   FilaDetalle,
   FilaDisplay,
-} from '../../types/presupuesto.types';
+  FilaMatrix,
+} from '@/types/presupuesto.types';
 
 /**
  * Hook de responsabilidad única: detección de discrepancias padre/hijo
@@ -28,7 +29,7 @@ export const useDiscrepancias = (
   );
 
   const discrepanciasGastosMap = useMemo(
-    () => buildDiscrepanciasMap(filasGastos),
+    () => buildDiscrepanciasMap(filasGastos, true),
     [filasGastos],
   );
 
@@ -80,6 +81,7 @@ export const useDiscrepancias = (
 
 function buildDiscrepanciasMap(
   filas: FilaDisplay[],
+  checkDistribucion = false,
 ): Map<string, number | null> {
   const map = new Map<string, number | null>();
 
@@ -90,22 +92,35 @@ function buildDiscrepanciasMap(
   }
 
   for (const fila of filas) {
-    if (!fila.cuenta || fila.hijosIds.length === 0) {
-      map.set(fila._clientId, null);
+    // Discrepancia jerárquica (padre vs Σ hijos)
+    if (fila.cuenta && fila.hijosIds.length > 0) {
+      let sumaHijos = 0;
+      for (const hijoId of fila.hijosIds) {
+        const hijo = filaMap.get(hijoId);
+        if (hijo) sumaHijos += hijo.montoAnual;
+      }
+      map.set(fila._clientId, sumaHijos - fila.montoAnual);
       continue;
     }
 
-    // O(k) donde k = hijos directos, usando Map lookup en vez de filter O(n)
-    let sumaHijos = 0;
-    for (const hijoId of fila.hijosIds) {
-      const hijo = filaMap.get(hijoId);
-      if (hijo) sumaHijos += hijo.montoAnual;
+    // Discrepancia de distribución (Σ áreas ≠ total fila) para FilaMatrix
+    if (checkDistribucion && isFilaMatrix(fila)) {
+      const dist = fila.distribucion;
+      if (dist.size > 0) {
+        const delta = fila.totalDistribucion - fila.montoAnual;
+        map.set(fila._clientId, delta !== 0 ? delta : null);
+        continue;
+      }
     }
 
-    map.set(fila._clientId, sumaHijos - fila.montoAnual);
+    map.set(fila._clientId, null);
   }
 
   return map;
+}
+
+function isFilaMatrix(fila: FilaDisplay): fila is FilaMatrix {
+  return 'distribucion' in fila && fila.distribucion instanceof Map;
 }
 
 function sumarRaices(filas: FilaDetalle[]): number {

@@ -6,6 +6,7 @@ import {
   planesCuentas,
   presupuestos,
   presupuestosDetalle,
+  subprogramasPresupuestarios,
 } from "@municipal/db-contabilidad";
 import { and, eq, inArray, like, sql } from "drizzle-orm";
 
@@ -16,6 +17,7 @@ export interface DetalleConCuenta {
   presupuestoId: number;
   cuentaId: number;
   centroCostoId: number | null;
+  subprogramaId: number | null;
   montoAnual: number;
   observacion: string | null;
   createdAt: Date;
@@ -32,6 +34,13 @@ export interface DetalleConCuenta {
     id: number;
     codigo: string;
     nombre: string;
+  } | null;
+  subprograma: {
+    id: number;
+    codigo: string;
+    nombre: string;
+    abreviatura: string;
+    color: string;
   } | null;
 }
 
@@ -99,13 +108,14 @@ export const obtenerPresupuestoConDetalle = async (
 
   if (!presupuesto) return { presupuesto: null, detalle: [] };
 
-  // Join con planes_cuentas y centros_costo
+  // Join con planes_cuentas, centros_costo y subprogramas
   const rows = await db
     .select({
       id: presupuestosDetalle.id,
       presupuestoId: presupuestosDetalle.presupuestoId,
       cuentaId: presupuestosDetalle.cuentaId,
       centroCostoId: presupuestosDetalle.centroCostoId,
+      subprogramaId: presupuestosDetalle.subprogramaId,
       montoAnual: presupuestosDetalle.montoAnual,
       observacion: presupuestosDetalle.observacion,
       createdAt: presupuestosDetalle.createdAt,
@@ -123,6 +133,13 @@ export const obtenerPresupuestoConDetalle = async (
         codigo: centrosCosto.codigo,
         nombre: centrosCosto.nombre,
       },
+      subprograma: {
+        id: subprogramasPresupuestarios.id,
+        codigo: subprogramasPresupuestarios.codigo,
+        nombre: subprogramasPresupuestarios.nombre,
+        abreviatura: subprogramasPresupuestarios.abreviatura,
+        color: subprogramasPresupuestarios.color,
+      },
     })
     .from(presupuestosDetalle)
     .innerJoin(
@@ -133,10 +150,14 @@ export const obtenerPresupuestoConDetalle = async (
       centrosCosto,
       eq(presupuestosDetalle.centroCostoId, centrosCosto.id),
     )
+    .leftJoin(
+      subprogramasPresupuestarios,
+      eq(presupuestosDetalle.subprogramaId, subprogramasPresupuestarios.id),
+    )
     .where(eq(presupuestosDetalle.presupuestoId, id))
     .orderBy(planesCuentas.codigo);
 
-  // Limpiar null de leftJoin en centroCosto
+  // Limpiar null de leftJoin en centroCosto y subprograma
   const detalle: DetalleConCuenta[] = rows.map((r) => ({
     ...r,
     centroCosto:
@@ -145,6 +166,16 @@ export const obtenerPresupuestoConDetalle = async (
             id: r.centroCosto.id,
             codigo: r.centroCosto.codigo!,
             nombre: r.centroCosto.nombre!,
+          }
+        : null,
+    subprograma:
+      r.subprograma?.id != null
+        ? {
+            id: r.subprograma.id,
+            codigo: r.subprograma.codigo!,
+            nombre: r.subprograma.nombre!,
+            abreviatura: r.subprograma.abreviatura!,
+            color: r.subprograma.color!,
           }
         : null,
   }));
@@ -207,6 +238,7 @@ export const actualizarLinea = async (
   updates: Partial<{
     montoAnual: number;
     centroCostoId: number | null;
+    subprogramaId: number | null;
     observacion: string;
   }>,
 ) => {

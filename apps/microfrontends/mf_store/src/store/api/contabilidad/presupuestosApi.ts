@@ -18,17 +18,28 @@ export interface CuentaPresupuestaria {
 	subgrupoId: number;
 }
 
+export interface SubprogramaItem {
+	id: number;
+	codigo: string;
+	nombre: string;
+	abreviatura: string;
+	color: string;
+	orden: number;
+}
+
 export interface DetalleItem {
 	id: number;
 	presupuestoId: number;
 	cuentaId: number;
 	centroCostoId: number | null;
+	subprogramaId: number | null;
 	montoAnual: number;
 	observacion: string | null;
 	createdAt: string;
 	updatedAt: string;
 	cuenta: CuentaPresupuestaria;
 	centroCosto: { id: number; codigo: string; nombre: string } | null;
+	subprograma: Omit<SubprogramaItem, "orden"> | null;
 }
 
 export interface PresupuestoResumen {
@@ -83,6 +94,7 @@ export interface AgregarLineaRequest {
 	presupuestoId: number;
 	cuentaId: number;
 	centroCostoId?: number | null;
+	subprogramaId?: number | null;
 	montoAnual: number;
 	observacion?: string;
 }
@@ -92,6 +104,7 @@ export interface ActualizarLineaRequest {
 	detalleId: number;
 	montoAnual?: number;
 	centroCostoId?: number | null;
+	subprogramaId?: number | null;
 	observacion?: string;
 }
 
@@ -99,6 +112,12 @@ export interface ActualizarLineaRequest {
 
 export const presupuestosApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
+		// ── Subprogramas ──
+		obtenerSubprogramas: builder.query<SubprogramaItem[], void>({
+			query: () => "contabilidad/subprogramas",
+			providesTags: ["Subprogramas"],
+		}),
+
 		// ── Centros de Costo ──
 		obtenerCentrosCosto: builder.query<CentrosCostoItem[], void>({
 			query: () => "contabilidad/centros-costo",
@@ -221,6 +240,7 @@ export const presupuestosApi = baseApi.injectEndpoints({
 });
 
 export const {
+	useObtenerSubprogramasQuery,
 	useObtenerCentrosCostoQuery,
 	useListarPresupuestosQuery,
 	useObtenerPresupuestoQuery,

@@ -9,20 +9,22 @@ import {
   useListarCuentasPresupuestariasQuery,
   useObtenerCentrosCostoQuery,
   useObtenerPresupuestoQuery,
+  useObtenerSubprogramasQuery,
 } from 'mf_store/store';
 import type { DetalleItem } from 'mf_store/store';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import type { TipoTab } from '../../types/presupuesto.types';
+import type { TipoTab } from '@/types/presupuesto.types';
 import {
   type SchemaPresupuestoHeader,
   schemaPresupuestoHeader,
-} from '../../types/zod/presupuesto.zod';
+} from '@/types/zod/presupuesto.zod';
 import { useAgregarCuentaDrawer } from './useAgregarCuentaDrawer';
 import { useDiscrepancias } from './useDiscrepancias';
 import { useImportarExcel } from './useImportarExcel';
 import { usePresupuestoDetalle } from './usePresupuestoDetalle';
+import { usePresupuestoMatrix } from './usePresupuestoMatrix';
 
 /** Estado del toast de confirmación de eliminación de línea */
 export interface DeleteLineaToastState {
@@ -81,6 +83,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     useObtenerPresupuestoQuery(presupuestoId!, { skip: !presupuestoId });
 
   const { data: centrosCosto = [] } = useObtenerCentrosCostoQuery();
+  const { data: subprogramas = [] } = useObtenerSubprogramasQuery();
 
   const anoContableForm = form.watch('anoContable');
 
@@ -110,11 +113,13 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
       d.cuenta.codigo.startsWith('115'),
     ) ?? [],
   );
-  const detalleGastos = usePresupuestoDetalle(
+  const matrixGastos = usePresupuestoMatrix(
     presupuesto?.detalle.filter((d: DetalleItem) =>
       d.cuenta.codigo.startsWith('215'),
     ) ?? [],
   );
+  // Alias para mantener compatibilidad con el código existente que usa detalleGastos
+  const detalleGastos = matrixGastos;
 
   // Sync cuando cambia el presupuesto del servidor
   useEffect(() => {
@@ -142,6 +147,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     cuentasGastos,
     detalleIngresos.importarFilas,
     detalleGastos.importarFilas,
+    subprogramas,
   );
 
   // ── Drawer Agregar Cuenta ──────────────────────────────────────────────
@@ -466,6 +472,9 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
     // Detalle por tab (para render simultáneo)
     detalleIngresos,
     detalleGastos,
+    // Matrix de gastos (para PresupuestoMatrixGrid)
+    matrixGastos,
+    subprogramas,
     // Detalle activo (para handlers)
     detalleActivo,
     discrepanciasActivoMap,
