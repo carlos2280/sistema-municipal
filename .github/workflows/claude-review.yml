@@ -51,9 +51,17 @@ jobs:
         run: |
           PROMPT="Revisa los cambios del PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }}). Ejecuta: gh pr diff ${{ github.event.pull_request.number }} para ver el diff. Lee CLAUDE.md y las rules del proyecto. Reporta: [CRITICO] archivo:linea (bloquea merge), [WARNING] (sugerir mejora), [SUGERENCIA] (opcional). Prioridades: seguridad, TypeScript zero any, Atomic Design, Zod validation, no hardcodear colores. Se breve."
 
+          echo "Claude CLI version:"
+          claude --version || echo "claude not found"
+          echo "Running review..."
           claude -p "$PROMPT" \
             --dangerously-skip-permissions \
-            --output-format text > /tmp/review-result.txt
+            --output-format text > /tmp/review-result.txt 2>&1 || {
+            echo "Claude exited with code $?"
+            echo "Output:"
+            cat /tmp/review-result.txt 2>/dev/null || echo "No output"
+            exit 1
+          }
 
       - name: Comment on PR
         if: always() && steps.diff.outputs.lines > 0
