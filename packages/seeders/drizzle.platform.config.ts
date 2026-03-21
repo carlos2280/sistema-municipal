@@ -16,7 +16,11 @@ const {
 } = process.env;
 
 export default defineConfig({
-  schema: "../db-platform/src/schemas/*.schema.ts",
+  schema: [
+    "../db-platform/src/schemas/*.schema.ts",
+    "../db-mesa-ayuda/src/schemas.ts",
+    "../db-mesa-ayuda/src/schemas/*.schema.ts",
+  ],
   out: "./drizzle/platform",
   dialect: "postgresql",
   migrations: {

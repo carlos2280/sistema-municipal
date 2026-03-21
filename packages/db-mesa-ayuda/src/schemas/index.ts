@@ -1,0 +1,6 @@
+export * from "./categorias.schema";
+export * from "./prioridades.schema";
+export * from "./tickets.schema";
+export * from "./comentarios.schema";
+export * from "./adjuntos.schema";
+export * from "./historialEstados.schema";

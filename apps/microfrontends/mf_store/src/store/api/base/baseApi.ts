@@ -27,5 +27,10 @@ export const baseApi = createApi({
 		"PresupuestosDetalle",
 		"CentrosCosto",
 		"Subprogramas",
+		"Ticket",
+		"TicketStats",
+		"Comentario",
+		"CategoriaMesaAyuda",
+		"Prioridad",
 	],
 });

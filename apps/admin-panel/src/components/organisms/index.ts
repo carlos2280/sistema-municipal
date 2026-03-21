@@ -1,0 +1,5 @@
+export { CategoriasTable } from './CategoriasTable'
+export { SlaRiskTable } from './SlaRiskTable'
+export { TendenciaChart } from './TendenciaChart'
+export { TenantSummaryTable } from './TenantSummaryTable'
+export { TicketsTable } from './TicketsTable'

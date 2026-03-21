@@ -1,7 +1,10 @@
 import type { EnvConfig } from "@/env/schema";
-import * as schema from "@municipal/db-platform";
+import * as mesaAyudaSchema from "@municipal/db-mesa-ayuda";
+import * as platformSchema from "@municipal/db-platform";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+
+const schema = { ...platformSchema, ...mesaAyudaSchema };
 
 let dbInstance: ReturnType<typeof createDbClient> | null = null;
 

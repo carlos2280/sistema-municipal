@@ -56,6 +56,12 @@ export const configureProxies = (app: Express) => {
       pathRewrite: "/api/v1/identidad",
       timeout: 10000,
     },
+    mesa_ayuda: {
+      baseUrl: env.MESA_AYUDA_URL,
+      path: "/api/v1/mesa-ayuda",
+      pathRewrite: "/api/v1",
+      timeout: 10000,
+    },
     platform: {
       baseUrl: env.PLATFORM_URL,
       path: "/api/v1/platform",

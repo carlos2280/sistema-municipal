@@ -52,7 +52,7 @@ install: ## Instala dependencias del proyecto
 	pnpm install
 
 dev-kill-ports: ## Mata procesos residuales en puertos de desarrollo
-	@for port in 5030 5010 5011 5020 5021 5041 5050 3000 3001 3002 3003 3004 3006; do \
+	@for port in 5030 5010 5011 5020 5021 5041 5050 5055 3000 3001 3002 3003 3004 3006 4050; do \
 		pid=$$(lsof -ti :$$port 2>/dev/null); \
 		if [ -n "$$pid" ]; then \
 			echo "$(YELLOW)Matando proceso en puerto $$port (PID $$pid)$(NC)"; \
@@ -65,20 +65,22 @@ dev: dev-infra dev-kill-ports ## Inicia entorno de desarrollo (infra + apps en o
 	@echo "$(GREEN)Iniciando aplicaciones en modo desarrollo...$(NC)"
 	@echo "$(CYAN)Orden: 1) gateway + APIs (esperan postgres)  2) MFs remotos  3) Shell (espera remotes)$(NC)"
 	@npx concurrently -k \
-		-n "gateway,api-id,api-auth,api-cont,api-chat,api-plat,mf-store,mf-ui,mf-cont,mf-chat,mf-conf,shell" \
-		-c "blue,blue,blue,blue,magenta,blue,green,green,green,cyan,magenta,yellow" \
+		-n "gateway,api-id,api-auth,api-cont,api-chat,api-plat,api-mesa,mf-store,mf-ui,mf-cont,mf-chat,mf-conf,mf-mesa,shell" \
+		-c "blue,blue,blue,blue,magenta,blue,blue,green,green,green,cyan,magenta,green,yellow" \
 		"npx wait-on tcp:5434 && pnpm --filter gateway dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-identidad dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-autorizacion dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-contabilidad dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-chat dev" \
 		"npx wait-on tcp:5434 && pnpm --filter api-platform dev" \
+		"npx wait-on tcp:5434 && pnpm --filter api-mesa-ayuda dev" \
 		"pnpm --filter mf-store dev" \
 		"pnpm --filter mf-ui dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-contabilidad dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json && pnpm --filter mf-chat dev" \
 		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-configuracion dev" \
-		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json http-get://localhost:5020/mf-manifest.json http-get://localhost:5021/mf-manifest.json http-get://localhost:5041/mf-manifest.json && pnpm --filter mf-shell dev"
+		"npx wait-on http-get://localhost:5010/mf-manifest.json && pnpm --filter mf-mesa-ayuda dev" \
+		"npx wait-on http-get://localhost:5010/mf-manifest.json http-get://localhost:5011/mf-manifest.json http-get://localhost:5020/mf-manifest.json http-get://localhost:5021/mf-manifest.json http-get://localhost:5041/mf-manifest.json http-get://localhost:5050/mf-manifest.json && pnpm --filter mf-shell dev"
 
 dev-turbo: dev-infra ## Inicia con turbo (sin orden garantizado)
 	@echo "$(GREEN)Iniciando aplicaciones con turbo...$(NC)"
@@ -271,6 +273,13 @@ dev-chat: dev-infra ## Desarrollo solo del módulo chat
 		-c "magenta,cyan" \
 		"pnpm --filter api-chat dev" \
 		"pnpm --filter mf-chat dev"
+
+dev-mesa-ayuda: dev-infra ## Desarrollo solo del módulo mesa de ayuda
+	@echo "$(GREEN)Iniciando módulo mesa de ayuda...$(NC)"
+	@npx concurrently -k -n "api-mesa,mf-mesa" \
+		-c "blue,green" \
+		"pnpm --filter api-mesa-ayuda dev" \
+		"pnpm --filter mf-mesa-ayuda dev"
 
 dev-admin: dev-infra ## Desarrollo del panel de administración
 	@echo "$(GREEN)Iniciando panel de administración...$(NC)"

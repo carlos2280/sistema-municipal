@@ -9,6 +9,7 @@ export * from "./api/chat";
 export * from "./api/contabilidad";
 export * from "./api/configuracion";
 export * from "./api/indicadores";
+export * from "./api/mesa-ayuda";
 
 //**
 // Store
