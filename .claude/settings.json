@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(pnpm *)",
@@ -12,7 +15,10 @@
       "Bash(git checkout *)",
       "Bash(git stash *)",
       "Bash(npx drizzle-kit:*)",
-      "Bash(npx @biomejs/biome check *)"
+      "Bash(npx @biomejs/biome check *)",
+      "Bash(find /home/carlos/projects/sistema-municipal/apps/admin-panel/src -type f \\\\\\(-name *.tsx -o -name *.ts -o -name *.json \\\\\\))",
+      "Bash(find /home/carlos/projects/sistema-municipal -name *THEME* -o -name *theme* -o -name *DESIGN*)",
+      "Bash(find /home/carlos/projects/sistema-municipal/documentacion -name *.md -o -name *.css)"
     ],
     "deny": [
       "Bash(rm -rf *)",
