@@ -49,15 +49,18 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          DIFF=$(cat /tmp/pr-diff.txt)
-
-          claude -p "Eres el revisor de codigo del Sistema Municipal.
+          cat <<'PROMPT_EOF' > /tmp/review-prompt.txt
+          Eres el revisor de codigo del Sistema Municipal.
 
           Revisa los cambios del PR #${{ github.event.pull_request.number }}.
           Titulo: ${{ github.event.pull_request.title }}
 
           DIFF:
-          $DIFF
+          PROMPT_EOF
+
+          cat /tmp/pr-diff.txt >> /tmp/review-prompt.txt
+
+          cat <<'PROMPT_EOF' >> /tmp/review-prompt.txt
 
           Instrucciones:
           1. Lee CLAUDE.md para entender las convenciones del proyecto
@@ -74,11 +77,13 @@ jobs:
           - Backend: Zod validation, error handling, Pino logging
           - Theme: no hardcodear colores, usar theme.palette/meridian
 
-          Si todo esta bien:
-          ✅ Review limpio. No se encontraron problemas criticos.
+          Si todo esta bien: Review limpio. No se encontraron problemas criticos.
 
-          Se breve y directo. Solo reporta problemas reales." \
-          --output-format text > /tmp/review-result.txt
+          Se breve y directo. Solo reporta problemas reales.
+          PROMPT_EOF
+
+          claude -p "$(cat /tmp/review-prompt.txt)" \
+            --output-format text > /tmp/review-result.txt
 
       - name: Comment on PR
         if: always() && steps.diff.outputs.lines > 0
