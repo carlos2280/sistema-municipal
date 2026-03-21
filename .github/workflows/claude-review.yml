@@ -49,40 +49,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          cat <<'PROMPT_EOF' > /tmp/review-prompt.txt
-          Eres el revisor de codigo del Sistema Municipal.
+          PROMPT="Revisa los cambios del PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }}). Ejecuta: gh pr diff ${{ github.event.pull_request.number }} para ver el diff. Lee CLAUDE.md y las rules del proyecto. Reporta: [CRITICO] archivo:linea (bloquea merge), [WARNING] (sugerir mejora), [SUGERENCIA] (opcional). Prioridades: seguridad, TypeScript zero any, Atomic Design, Zod validation, no hardcodear colores. Se breve."
 
-          Revisa los cambios del PR #${{ github.event.pull_request.number }}.
-          Titulo: ${{ github.event.pull_request.title }}
-
-          DIFF:
-          PROMPT_EOF
-
-          cat /tmp/pr-diff.txt >> /tmp/review-prompt.txt
-
-          cat <<'PROMPT_EOF' >> /tmp/review-prompt.txt
-
-          Instrucciones:
-          1. Lee CLAUDE.md para entender las convenciones del proyecto
-          2. Aplica las rules del directorio .claude/rules/ segun los archivos tocados
-          3. Reporta hallazgos con este formato:
-             [CRITICO] archivo:linea — descripcion (bloquea merge)
-             [WARNING] archivo:linea — descripcion (sugerir mejora)
-             [SUGERENCIA] archivo:linea — descripcion (opcional)
-
-          Prioridades de revision:
-          - Seguridad: secrets, SQL injection, validacion de inputs
-          - TypeScript: zero any, zero unused, tipos correctos
-          - React: Atomic Design, componente en carpeta correcta
-          - Backend: Zod validation, error handling, Pino logging
-          - Theme: no hardcodear colores, usar theme.palette/meridian
-
-          Si todo esta bien: Review limpio. No se encontraron problemas criticos.
-
-          Se breve y directo. Solo reporta problemas reales.
-          PROMPT_EOF
-
-          claude -p "$(cat /tmp/review-prompt.txt)" \
+          claude -p "$PROMPT" \
+            --dangerously-skip-permissions \
             --output-format text > /tmp/review-result.txt
 
       - name: Comment on PR
