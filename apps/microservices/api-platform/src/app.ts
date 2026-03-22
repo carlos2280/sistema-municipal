@@ -1,5 +1,10 @@
 import { loadEnv } from "@/config/env";
-import { type DbClient, initializeDB } from "@/db/client";
+import {
+  type DbClient,
+  type TransversalDbClient,
+  initializeDB,
+  initializeTransversalDB,
+} from "@/db/client";
 import { errorHandler } from "@/libs/middleware/error.middleware";
 import { requireGateway } from "@/libs/middleware/requireGateway";
 import apiRouter from "@/routes";
@@ -11,8 +16,9 @@ import express from "express";
 // 1. Load environment
 const env = loadEnv();
 
-// 2. Initialize database
+// 2. Initialize databases
 export const db: DbClient = initializeDB(env);
+export const transversalDb: TransversalDbClient = initializeTransversalDB(env);
 
 // 3. Create Express app
 const app = express();

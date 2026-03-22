@@ -1,4 +1,4 @@
-import { db } from "@/app";
+import { db, transversalDb } from "@/app";
 import { AppError } from "@/libs/middleware/AppError";
 import type {
   AgregarComentarioInput,
@@ -159,27 +159,55 @@ export interface TenantResumen {
 }
 
 export interface SlaMonitoreo {
-  vencidos: number;
-  enRiesgo: number;
-  compliancePorPrioridad: CompliancePrioridad[];
-  compliancePorTenant: ComplianceTenant[];
+  global: {
+    totalTickets: number;
+    totalVencidos: number;
+    complianceGlobal: number;
+    tiempoPromedioResolucionHoras: number;
+  };
+  porPrioridad: SlaPrioridadResumen[];
+  porTenant: SlaTenantResumen[];
+  ticketsVencidos: SlaTicketResumen[];
+  ticketsEnRiesgo: SlaTicketResumen[];
 }
 
-interface CompliancePrioridad {
-  prioridadId: number;
+interface SlaPrioridadResumen {
+  prioridadCodigo: string;
   prioridadNombre: string;
-  total: number;
+  slaHoras: number;
+  totalTickets: number;
+  cumplidos: number;
   vencidos: number;
   compliance: number;
 }
 
-interface ComplianceTenant {
+interface SlaTenantResumen {
   tenantId: number;
   tenantSlug: string;
-  nombre: string;
-  total: number;
-  vencidos: number;
+  tenantNombre: string;
+  totalTickets: number;
   compliance: number;
+  vencidos: number;
+}
+
+interface SlaTicketResumen {
+  ticketId: number;
+  tenantSlug: string;
+  tenantNombre: string;
+  numero: string;
+  titulo: string;
+  prioridadNombre: string;
+  fechaLimite: string;
+  horasVencido?: number;
+  horasRestantes?: number;
+}
+
+// ─── Tipo auxiliar para el mapa de municipalidades ────────────────────────────
+
+interface MuniInfo {
+  id: number;
+  slug: string;
+  nombre: string;
 }
 
 // ─── Constantes de transición de estados ──────────────────────────────────────
@@ -197,17 +225,18 @@ const TRANSICIONES_VALIDAS: Record<EstadoTicket, EstadoTicket[]> = {
 export const getDashboard = async (): Promise<DashboardData> => {
   const estadosAbiertos = ["abierto", "en_progreso", "en_espera"];
 
+  // Paso 1: todas las queries a transversalDb (solo tablas mesa_ayuda)
   const [
     statsByEstado,
     vencidosResult,
     totalResult,
     tiempoPromedioResult,
     tendenciaResult,
-    porMunicipalidadResult,
+    porMunicipalidadRaw,
     porCategoriaResult,
     porPrioridadResult,
   ] = await Promise.all([
-    db
+    transversalDb
       .select({
         estado: tickets.estado,
         cantidad: count(),
@@ -215,7 +244,7 @@ export const getDashboard = async (): Promise<DashboardData> => {
       .from(tickets)
       .groupBy(tickets.estado),
 
-    db
+    transversalDb
       .select({ cantidad: count() })
       .from(tickets)
       .where(
@@ -225,9 +254,9 @@ export const getDashboard = async (): Promise<DashboardData> => {
         ),
       ),
 
-    db.select({ cantidad: count() }).from(tickets),
+    transversalDb.select({ cantidad: count() }).from(tickets),
 
-    db
+    transversalDb
       .select({
         promedioHoras: sql<number>`
           COALESCE(
@@ -241,7 +270,7 @@ export const getDashboard = async (): Promise<DashboardData> => {
       .from(tickets)
       .where(eq(tickets.estado, "resuelto")),
 
-    db
+    transversalDb
       .select({
         fecha: sql<string>`DATE(created_at)::text`.as("fecha"),
         creados: count(),
@@ -254,11 +283,10 @@ export const getDashboard = async (): Promise<DashboardData> => {
       .groupBy(sql`DATE(created_at)`)
       .orderBy(sql`DATE(created_at)`),
 
-    db
+    // Agregados por tenantId — sin JOIN a municipalidades (cross-DB no permitido)
+    transversalDb
       .select({
         tenantId: tickets.tenantId,
-        tenantSlug: municipalidades.slug,
-        nombre: municipalidades.nombre,
         total: count(),
         abiertos: sql<number>`
           COUNT(*) FILTER (WHERE ${tickets.estado} = ANY(ARRAY['abierto','en_progreso','en_espera']))::int
@@ -271,10 +299,9 @@ export const getDashboard = async (): Promise<DashboardData> => {
         `.as("vencidos"),
       })
       .from(tickets)
-      .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
-      .groupBy(tickets.tenantId, municipalidades.slug, municipalidades.nombre),
+      .groupBy(tickets.tenantId),
 
-    db
+    transversalDb
       .select({
         categoriaId: tickets.categoriaId,
         nombre: categorias.nombre,
@@ -285,7 +312,7 @@ export const getDashboard = async (): Promise<DashboardData> => {
       .groupBy(tickets.categoriaId, categorias.nombre)
       .orderBy(desc(count())),
 
-    db
+    transversalDb
       .select({
         prioridadId: tickets.prioridadId,
         nombre: prioridades.nombre,
@@ -297,6 +324,22 @@ export const getDashboard = async (): Promise<DashboardData> => {
       .orderBy(desc(count())),
   ]);
 
+  // Paso 2: enriquecer porMunicipalidad con datos de platform DB
+  const tenantIds = porMunicipalidadRaw.map((r) => r.tenantId);
+  const munis =
+    tenantIds.length > 0
+      ? await db
+          .select({
+            id: municipalidades.id,
+            slug: municipalidades.slug,
+            nombre: municipalidades.nombre,
+          })
+          .from(municipalidades)
+          .where(inArray(municipalidades.id, tenantIds))
+      : [];
+  const muniMap = new Map<number, MuniInfo>(munis.map((m) => [m.id, m]));
+
+  // Cálculos finales
   const totalTickets = totalResult[0]?.cantidad ?? 0;
   const vencidos = vencidosResult[0]?.cantidad ?? 0;
 
@@ -327,24 +370,25 @@ export const getDashboard = async (): Promise<DashboardData> => {
     resueltos: r.resueltos,
   }));
 
-  const porMunicipalidad: MunicipalidadResumen[] = porMunicipalidadResult.map(
-    (r) => {
-      const total = r.total;
-      const mVencidos = r.vencidos;
+  const porMunicipalidad: MunicipalidadResumen[] = porMunicipalidadRaw
+    .map((r) => {
+      const muni = muniMap.get(r.tenantId);
+      if (!muni) return null;
       const totalActiv = r.abiertos;
+      const mVencidos = r.vencidos;
       const mCompliance =
         totalActiv > 0
           ? Math.round(((totalActiv - mVencidos) / totalActiv) * 100)
           : 100;
       return {
-        tenantSlug: r.tenantSlug,
-        nombre: r.nombre,
-        totalTickets: total,
+        tenantSlug: muni.slug,
+        nombre: muni.nombre,
+        totalTickets: r.total,
         abiertos: r.abiertos,
         slaCompliance: mCompliance,
       };
-    },
-  );
+    })
+    .filter((r): r is MunicipalidadResumen => r !== null);
 
   const porCategoria: CategoriaResumen[] = porCategoriaResult.map((r) => ({
     categoria: r.nombre,
@@ -374,13 +418,24 @@ export const getDashboard = async (): Promise<DashboardData> => {
 // ─── SLA Monitoreo ────────────────────────────────────────────────────────────
 
 export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
+  const now = new Date();
+
+  // Paso 1: queries paralelas a transversalDb
   const [
+    totalResult,
     vencidosResult,
-    enRiesgoResult,
-    compliancePrioridadResult,
-    complianceTenantResult,
+    enRiesgoTickets,
+    vencidosTickets,
+    promedioResult,
+    prioridadResult,
+    tenantRaw,
   ] = await Promise.all([
-    db
+    transversalDb
+      .select({ cantidad: count() })
+      .from(tickets)
+      .where(notInArray(tickets.estado, ["resuelto", "cerrado"])),
+
+    transversalDb
       .select({ cantidad: count() })
       .from(tickets)
       .where(
@@ -390,9 +445,18 @@ export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
         ),
       ),
 
-    db
-      .select({ cantidad: count() })
+    // Tickets en riesgo (vencen en las próximas 4 horas)
+    transversalDb
+      .select({
+        id: tickets.id,
+        tenantId: tickets.tenantId,
+        numero: tickets.numero,
+        titulo: tickets.titulo,
+        fechaLimite: tickets.fechaLimite,
+        prioridadNombre: prioridades.nombre,
+      })
       .from(tickets)
+      .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
       .where(
         and(
           sql`${tickets.fechaLimite} BETWEEN now() AND now() + interval '4 hours'`,
@@ -400,76 +464,184 @@ export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
         ),
       ),
 
-    db
+    // Tickets vencidos
+    transversalDb
       .select({
-        prioridadId: tickets.prioridadId,
-        nombre: prioridades.nombre,
-        total: count(),
-        vencidos: sql<number>`
-            COUNT(*) FILTER (
-              WHERE ${tickets.fechaLimite} < now()
-              AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
-            )::int
-          `.as("vencidos"),
+        id: tickets.id,
+        tenantId: tickets.tenantId,
+        numero: tickets.numero,
+        titulo: tickets.titulo,
+        fechaLimite: tickets.fechaLimite,
+        prioridadNombre: prioridades.nombre,
       })
       .from(tickets)
       .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
-      .groupBy(tickets.prioridadId, prioridades.nombre, prioridades.nivel)
-      .orderBy(prioridades.nivel),
+      .where(
+        and(
+          lt(tickets.fechaLimite, sql`now()`),
+          notInArray(tickets.estado, ["resuelto", "cerrado"]),
+        ),
+      ),
 
-    db
+    transversalDb
       .select({
-        tenantId: tickets.tenantId,
-        tenantSlug: municipalidades.slug,
-        nombre: municipalidades.nombre,
-        total: count(),
-        vencidos: sql<number>`
-            COUNT(*) FILTER (
-              WHERE ${tickets.fechaLimite} < now()
-              AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
-            )::int
-          `.as("vencidos"),
+        promedio: sql<number>`
+          COALESCE(AVG(EXTRACT(EPOCH FROM (fecha_resolucion - created_at)) / 3600)::numeric(10,2), 0)
+        `.as("promedio"),
       })
       .from(tickets)
-      .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
-      .groupBy(tickets.tenantId, municipalidades.slug, municipalidades.nombre),
+      .where(eq(tickets.estado, "resuelto")),
+
+    transversalDb
+      .select({
+        prioridadId: tickets.prioridadId,
+        codigo: prioridades.codigo,
+        nombre: prioridades.nombre,
+        slaHoras: prioridades.slaHoras,
+        total: count(),
+        vencidos: sql<number>`
+          COUNT(*) FILTER (
+            WHERE ${tickets.fechaLimite} < now()
+            AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
+          )::int
+        `.as("vencidos"),
+      })
+      .from(tickets)
+      .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
+      .groupBy(
+        tickets.prioridadId,
+        prioridades.codigo,
+        prioridades.nombre,
+        prioridades.slaHoras,
+        prioridades.nivel,
+      )
+      .orderBy(prioridades.nivel),
+
+    transversalDb
+      .select({
+        tenantId: tickets.tenantId,
+        total: count(),
+        vencidos: sql<number>`
+          COUNT(*) FILTER (
+            WHERE ${tickets.fechaLimite} < now()
+            AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
+          )::int
+        `.as("vencidos"),
+      })
+      .from(tickets)
+      .groupBy(tickets.tenantId),
   ]);
 
-  const compliancePorPrioridad: CompliancePrioridad[] =
-    compliancePrioridadResult.map((r) => {
-      const total = r.total;
-      const venc = r.vencidos;
-      return {
-        prioridadId: r.prioridadId,
-        prioridadNombre: r.nombre,
-        total,
-        vencidos: venc,
-        compliance:
-          total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
-      };
-    });
+  // Paso 2: enriquecer con municipalidades de platform DB
+  const allTenantIds = [
+    ...new Set([
+      ...tenantRaw.map((r) => r.tenantId),
+      ...vencidosTickets.map((t) => t.tenantId),
+      ...enRiesgoTickets.map((t) => t.tenantId),
+    ]),
+  ];
+  const munis =
+    allTenantIds.length > 0
+      ? await db
+          .select({
+            id: municipalidades.id,
+            slug: municipalidades.slug,
+            nombre: municipalidades.nombre,
+          })
+          .from(municipalidades)
+          .where(inArray(municipalidades.id, allTenantIds))
+      : [];
+  const muniMap = new Map<number, MuniInfo>(munis.map((m) => [m.id, m]));
 
-  const compliancePorTenant: ComplianceTenant[] = complianceTenantResult.map(
-    (r) => {
+  const totalTickets = totalResult[0]?.cantidad ?? 0;
+  const totalVencidos = vencidosResult[0]?.cantidad ?? 0;
+  const complianceGlobal =
+    totalTickets > 0
+      ? Math.round(((totalTickets - totalVencidos) / totalTickets) * 100)
+      : 100;
+
+  const porPrioridad: SlaPrioridadResumen[] = prioridadResult.map((r) => {
+    const total = r.total;
+    const venc = r.vencidos;
+    return {
+      prioridadCodigo: r.codigo,
+      prioridadNombre: r.nombre,
+      slaHoras: r.slaHoras ?? 0,
+      totalTickets: total,
+      cumplidos: total - venc,
+      vencidos: venc,
+      compliance:
+        total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
+    };
+  });
+
+  const porTenant: SlaTenantResumen[] = tenantRaw
+    .map((r) => {
+      const muni = muniMap.get(r.tenantId);
+      if (!muni) return null;
       const total = r.total;
       const venc = r.vencidos;
       return {
         tenantId: r.tenantId,
-        tenantSlug: r.tenantSlug,
-        nombre: r.nombre,
-        total,
+        tenantSlug: muni.slug,
+        tenantNombre: muni.nombre,
+        totalTickets: total,
         vencidos: venc,
         compliance:
           total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
       };
-    },
-  );
+    })
+    .filter((r): r is SlaTenantResumen => r !== null);
+
+  const ticketsVencidosRes: SlaTicketResumen[] = vencidosTickets.map((t) => {
+    const muni = muniMap.get(t.tenantId);
+    const horasVencido = t.fechaLimite
+      ? Math.round(
+          (now.getTime() - new Date(t.fechaLimite).getTime()) / 3600000,
+        )
+      : 0;
+    return {
+      ticketId: t.id,
+      tenantSlug: muni?.slug ?? "",
+      tenantNombre: muni?.nombre ?? "",
+      numero: t.numero,
+      titulo: t.titulo,
+      prioridadNombre: t.prioridadNombre,
+      fechaLimite: t.fechaLimite?.toISOString() ?? "",
+      horasVencido,
+    };
+  });
+
+  const ticketsEnRiesgoRes: SlaTicketResumen[] = enRiesgoTickets.map((t) => {
+    const muni = muniMap.get(t.tenantId);
+    const horasRestantes = t.fechaLimite
+      ? Math.round(
+          (new Date(t.fechaLimite).getTime() - now.getTime()) / 3600000,
+        )
+      : 0;
+    return {
+      ticketId: t.id,
+      tenantSlug: muni?.slug ?? "",
+      tenantNombre: muni?.nombre ?? "",
+      numero: t.numero,
+      titulo: t.titulo,
+      prioridadNombre: t.prioridadNombre,
+      fechaLimite: t.fechaLimite?.toISOString() ?? "",
+      horasRestantes,
+    };
+  });
 
   return {
-    vencidos: vencidosResult[0]?.cantidad ?? 0,
-    enRiesgo: enRiesgoResult[0]?.cantidad ?? 0,
-    compliancePorPrioridad,
-    compliancePorTenant,
+    global: {
+      totalTickets,
+      totalVencidos,
+      complianceGlobal,
+      tiempoPromedioResolucionHoras: Number(promedioResult[0]?.promedio ?? 0),
+    },
+    porPrioridad,
+    porTenant,
+    ticketsVencidos: ticketsVencidosRes,
+    ticketsEnRiesgo: ticketsEnRiesgoRes,
   };
 };
 
@@ -483,6 +655,8 @@ export const getTickets = async (
 
   const conditions = [];
 
+  // Lookup de tenantSlug → tenantId en platform DB
+  let tenantIdFilter: number | undefined;
   if (filters.tenantSlug) {
     const [muni] = await db
       .select({ id: municipalidades.id })
@@ -491,6 +665,7 @@ export const getTickets = async (
     if (!muni) {
       return { tickets: [], total: 0, page, pageSize };
     }
+    tenantIdFilter = muni.id;
     conditions.push(eq(tickets.tenantId, muni.id));
   }
 
@@ -498,8 +673,9 @@ export const getTickets = async (
     conditions.push(eq(tickets.estado, filters.estado));
   }
 
+  // Lookup de prioridad/categoria en transversalDb
   if (filters.prioridad) {
-    const [prio] = await db
+    const [prio] = await transversalDb
       .select({ id: prioridades.id })
       .from(prioridades)
       .where(eq(prioridades.codigo, filters.prioridad));
@@ -507,7 +683,7 @@ export const getTickets = async (
   }
 
   if (filters.categoria) {
-    const [cat] = await db
+    const [cat] = await transversalDb
       .select({ id: categorias.id })
       .from(categorias)
       .where(eq(categorias.codigo, filters.categoria));
@@ -543,14 +719,13 @@ export const getTickets = async (
 
   const orderFn = sortOrder === "asc" ? asc : desc;
 
+  // Paso 1: queries a transversalDb (tickets con sus relaciones internas)
   const [rows, countResult] = await Promise.all([
-    db
+    transversalDb
       .select({
         id: tickets.id,
         numero: tickets.numero,
         tenantId: tickets.tenantId,
-        tenantSlug: municipalidades.slug,
-        tenantNombre: municipalidades.nombre,
         titulo: tickets.titulo,
         estado: tickets.estado,
         prioridadId: tickets.prioridadId,
@@ -566,7 +741,6 @@ export const getTickets = async (
         createdAt: tickets.createdAt,
       })
       .from(tickets)
-      .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
       .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
       .innerJoin(categorias, eq(tickets.categoriaId, categorias.id))
       .where(whereClause)
@@ -574,38 +748,60 @@ export const getTickets = async (
       .limit(pageSize)
       .offset(offset),
 
-    db
+    transversalDb
       .select({ total: count() })
       .from(tickets)
-      .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
       .where(whereClause),
   ]);
 
+  // Paso 2: enriquecer con municipalidades desde platform DB
+  const tenantIdsEnPagina = [...new Set(rows.map((r) => r.tenantId))];
+  const munis =
+    tenantIdsEnPagina.length > 0
+      ? await db
+          .select({
+            id: municipalidades.id,
+            slug: municipalidades.slug,
+            nombre: municipalidades.nombre,
+          })
+          .from(municipalidades)
+          .where(inArray(municipalidades.id, tenantIdsEnPagina))
+      : [];
+  const muniMap = new Map<number, MuniInfo>(munis.map((m) => [m.id, m]));
+
+  // Paso 3: combinar
   const now = new Date();
-  const items: TicketListItem[] = rows.map((r) => ({
-    id: r.id,
-    numero: r.numero,
-    tenantId: r.tenantId,
-    tenantSlug: r.tenantSlug,
-    tenantNombre: r.tenantNombre,
-    titulo: r.titulo,
-    estado: r.estado,
-    prioridadId: r.prioridadId,
-    prioridadNombre: r.prioridadNombre,
-    prioridadColor: r.prioridadColor,
-    prioridadCodigo: r.prioridadCodigo,
-    categoriaId: r.categoriaId,
-    categoriaNombre: r.categoriaNombre,
-    categoriaColor: r.categoriaColor,
-    solicitante: r.solicitante,
-    asignado: r.asignado,
-    slaVencido:
-      r.fechaLimite !== null &&
-      r.fechaLimite < now &&
-      !["resuelto", "cerrado"].includes(r.estado),
-    fechaLimite: r.fechaLimite?.toISOString() ?? null,
-    createdAt: r.createdAt.toISOString(),
-  }));
+  const items: TicketListItem[] = rows.map((r) => {
+    const muni = muniMap.get(r.tenantId);
+    return {
+      id: r.id,
+      numero: r.numero,
+      tenantId: r.tenantId,
+      tenantSlug: muni?.slug ?? String(r.tenantId),
+      tenantNombre: muni?.nombre ?? String(r.tenantId),
+      titulo: r.titulo,
+      estado: r.estado,
+      prioridadId: r.prioridadId,
+      prioridadNombre: r.prioridadNombre,
+      prioridadColor: r.prioridadColor,
+      prioridadCodigo: r.prioridadCodigo,
+      categoriaId: r.categoriaId,
+      categoriaNombre: r.categoriaNombre,
+      categoriaColor: r.categoriaColor,
+      solicitante: r.solicitante,
+      asignado: r.asignado,
+      slaVencido:
+        r.fechaLimite !== null &&
+        r.fechaLimite < now &&
+        !["resuelto", "cerrado"].includes(r.estado),
+      fechaLimite: r.fechaLimite?.toISOString() ?? null,
+      createdAt: r.createdAt.toISOString(),
+    };
+  });
+
+  // Si se filtró por tenant y no hubo resultados del filtro tenantIdFilter,
+  // el total ya no incluye el JOIN a municipalidades — es correcto.
+  void tenantIdFilter;
 
   return {
     tickets: items,
@@ -619,6 +815,7 @@ export const getTicketDetail = async (
   tenantSlug: string,
   ticketId: number,
 ): Promise<TicketDetail> => {
+  // Paso 1: buscar municipalidad en platform DB
   const [muni] = await db
     .select({
       id: municipalidades.id,
@@ -630,7 +827,8 @@ export const getTicketDetail = async (
 
   if (!muni) throw new AppError(`Tenant '${tenantSlug}' no encontrado`, 404);
 
-  const [ticket] = await db
+  // Paso 2: buscar ticket con sus relaciones en transversalDb
+  const [ticket] = await transversalDb
     .select({
       id: tickets.id,
       numero: tickets.numero,
@@ -659,14 +857,15 @@ export const getTicketDetail = async (
 
   if (!ticket) throw new AppError("Ticket no encontrado", 404);
 
+  // Paso 3: comentarios e historial en transversalDb
   const [comsRows, histRows] = await Promise.all([
-    db
+    transversalDb
       .select()
       .from(comentarios)
       .where(eq(comentarios.ticketId, ticketId))
       .orderBy(asc(comentarios.createdAt)),
 
-    db
+    transversalDb
       .select()
       .from(historialEstados)
       .where(eq(historialEstados.ticketId, ticketId))
@@ -727,6 +926,7 @@ async function resolveTicketConTenant(
   tenantSlug: string,
   ticketId: number,
 ): Promise<{ ticket: typeof tickets.$inferSelect; tenantId: number }> {
+  // municipalidades vive en platform DB
   const [muni] = await db
     .select({ id: municipalidades.id })
     .from(municipalidades)
@@ -734,7 +934,8 @@ async function resolveTicketConTenant(
 
   if (!muni) throw new AppError(`Tenant '${tenantSlug}' no encontrado`, 404);
 
-  const [ticket] = await db
+  // ticket vive en transversal DB
+  const [ticket] = await transversalDb
     .select()
     .from(tickets)
     .where(and(eq(tickets.id, ticketId), eq(tickets.tenantId, muni.id)));
@@ -787,7 +988,7 @@ export const cambiarEstado = async (
     updates.fechaResolucion = null;
   }
 
-  await db.transaction(async (tx) => {
+  await transversalDb.transaction(async (tx) => {
     await tx.update(tickets).set(updates).where(eq(tickets.id, ticketId));
 
     await tx.insert(historialEstados).values({
@@ -811,7 +1012,7 @@ export const asignarTicket = async (
     throw new AppError("No se puede asignar un ticket cerrado", 400);
   }
 
-  await db
+  await transversalDb
     .update(tickets)
     .set({
       asignadoId: input.asignadoId,
@@ -835,7 +1036,7 @@ export const cambiarPrioridad = async (
     );
   }
 
-  const [prio] = await db
+  const [prio] = await transversalDb
     .select()
     .from(prioridades)
     .where(eq(prioridades.id, input.prioridadId));
@@ -853,7 +1054,10 @@ export const cambiarPrioridad = async (
     updates.fechaLimite = nuevaFechaLimite;
   }
 
-  await db.update(tickets).set(updates).where(eq(tickets.id, ticketId));
+  await transversalDb
+    .update(tickets)
+    .set(updates)
+    .where(eq(tickets.id, ticketId));
 };
 
 export const cambiarCategoria = async (
@@ -870,7 +1074,7 @@ export const cambiarCategoria = async (
     );
   }
 
-  const [cat] = await db
+  const [cat] = await transversalDb
     .select({ id: categorias.id })
     .from(categorias)
     .where(
@@ -879,7 +1083,7 @@ export const cambiarCategoria = async (
 
   if (!cat) throw new AppError("Categoría no encontrada o inactiva", 404);
 
-  await db
+  await transversalDb
     .update(tickets)
     .set({ categoriaId: input.categoriaId, updatedAt: new Date() })
     .where(eq(tickets.id, ticketId));
@@ -898,7 +1102,7 @@ export const agregarComentario = async (
     throw new AppError("No se puede comentar en un ticket cerrado", 400);
   }
 
-  const [nuevo] = await db
+  const [nuevo] = await transversalDb
     .insert(comentarios)
     .values({
       ticketId,
@@ -909,7 +1113,7 @@ export const agregarComentario = async (
     })
     .returning();
 
-  await db
+  await transversalDb
     .update(tickets)
     .set({ updatedAt: new Date() })
     .where(eq(tickets.id, ticketId));
@@ -926,12 +1130,10 @@ export const agregarComentario = async (
 // ─── Tenants resumen ──────────────────────────────────────────────────────────
 
 export const getTenantsSummary = async (): Promise<TenantResumen[]> => {
-  const rows = await db
+  // Paso 1: agregados por tenantId en transversalDb
+  const rows = await transversalDb
     .select({
       tenantId: tickets.tenantId,
-      tenantSlug: municipalidades.slug,
-      nombre: municipalidades.nombre,
-      activo: municipalidades.activo,
       total: count(),
       abiertos:
         sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} = 'abierto')::int`.as(
@@ -957,46 +1159,63 @@ export const getTenantsSummary = async (): Promise<TenantResumen[]> => {
         ),
     })
     .from(tickets)
-    .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
-    .groupBy(
-      tickets.tenantId,
-      municipalidades.slug,
-      municipalidades.nombre,
-      municipalidades.activo,
-    );
+    .groupBy(tickets.tenantId);
 
-  return rows.map((r) => {
-    const totalActiv = r.activos;
-    const venc = r.vencidos;
-    const slaCompliance =
-      totalActiv > 0
-        ? Math.round(((totalActiv - venc) / totalActiv) * 100)
-        : 100;
-    return {
-      tenantId: r.tenantId,
-      tenantSlug: r.tenantSlug,
-      nombre: r.nombre,
-      totalTickets: r.total,
-      abiertos: r.abiertos,
-      enProgreso: r.enProgreso,
-      resueltos: r.resueltos,
-      slaCompliance,
-      activo: r.activo,
-    };
-  });
+  // Paso 2: enriquecer con datos de platform DB
+  const tenantIds = rows.map((r) => r.tenantId);
+  const munis =
+    tenantIds.length > 0
+      ? await db
+          .select({
+            id: municipalidades.id,
+            slug: municipalidades.slug,
+            nombre: municipalidades.nombre,
+            activo: municipalidades.activo,
+          })
+          .from(municipalidades)
+          .where(inArray(municipalidades.id, tenantIds))
+      : [];
+  const muniMap = new Map(
+    munis.map((m) => [m.id, m]),
+  );
+
+  // Paso 3: combinar
+  return rows
+    .map((r) => {
+      const muni = muniMap.get(r.tenantId);
+      if (!muni) return null;
+      const totalActiv = r.activos;
+      const venc = r.vencidos;
+      const slaCompliance =
+        totalActiv > 0
+          ? Math.round(((totalActiv - venc) / totalActiv) * 100)
+          : 100;
+      return {
+        tenantId: r.tenantId,
+        tenantSlug: muni.slug,
+        nombre: muni.nombre,
+        totalTickets: r.total,
+        abiertos: r.abiertos,
+        enProgreso: r.enProgreso,
+        resueltos: r.resueltos,
+        slaCompliance,
+        activo: muni.activo,
+      };
+    })
+    .filter((r): r is TenantResumen => r !== null);
 };
 
 // ─── Categorías ───────────────────────────────────────────────────────────────
 
 export const getCategorias = async () => {
-  return db
+  return transversalDb
     .select()
     .from(categorias)
     .orderBy(asc(categorias.orden), asc(categorias.nombre));
 };
 
 export const createCategoria = async (input: CreateCategoriaInput) => {
-  const [existing] = await db
+  const [existing] = await transversalDb
     .select({ id: categorias.id })
     .from(categorias)
     .where(eq(categorias.codigo, input.codigo));
@@ -1008,7 +1227,10 @@ export const createCategoria = async (input: CreateCategoriaInput) => {
     );
   }
 
-  const [nueva] = await db.insert(categorias).values(input).returning();
+  const [nueva] = await transversalDb
+    .insert(categorias)
+    .values(input)
+    .returning();
   return nueva;
 };
 
@@ -1016,14 +1238,14 @@ export const updateCategoria = async (
   id: number,
   input: UpdateCategoriaInput,
 ) => {
-  const [existing] = await db
+  const [existing] = await transversalDb
     .select({ id: categorias.id })
     .from(categorias)
     .where(eq(categorias.id, id));
 
   if (!existing) throw new AppError("Categoría no encontrada", 404);
 
-  const [updated] = await db
+  const [updated] = await transversalDb
     .update(categorias)
     .set({ ...input, updatedAt: new Date() })
     .where(eq(categorias.id, id))
@@ -1033,7 +1255,7 @@ export const updateCategoria = async (
 };
 
 export const deleteCategoria = async (id: number): Promise<void> => {
-  const [existing] = await db
+  const [existing] = await transversalDb
     .select({ id: categorias.id })
     .from(categorias)
     .where(eq(categorias.id, id));
@@ -1041,7 +1263,7 @@ export const deleteCategoria = async (id: number): Promise<void> => {
   if (!existing) throw new AppError("Categoría no encontrada", 404);
 
   // Verificar si hay tickets usando esta categoría
-  const [usage] = await db
+  const [usage] = await transversalDb
     .select({ cantidad: count() })
     .from(tickets)
     .where(
@@ -1059,7 +1281,7 @@ export const deleteCategoria = async (id: number): Promise<void> => {
   }
 
   // Soft delete
-  await db
+  await transversalDb
     .update(categorias)
     .set({ activo: false, updatedAt: new Date() })
     .where(eq(categorias.id, id));
@@ -1068,14 +1290,17 @@ export const deleteCategoria = async (id: number): Promise<void> => {
 // ─── Prioridades ──────────────────────────────────────────────────────────────
 
 export const getPrioridades = async () => {
-  return db.select().from(prioridades).orderBy(asc(prioridades.nivel));
+  return transversalDb
+    .select()
+    .from(prioridades)
+    .orderBy(asc(prioridades.nivel));
 };
 
 export const updatePrioridad = async (
   id: number,
   input: UpdatePrioridadInput,
 ) => {
-  const [existing] = await db
+  const [existing] = await transversalDb
     .select({ id: prioridades.id })
     .from(prioridades)
     .where(eq(prioridades.id, id));
@@ -1089,7 +1314,7 @@ export const updatePrioridad = async (
   if (input.color !== undefined) updateData.color = input.color;
   if (input.slaHoras !== undefined) updateData.slaHoras = input.slaHoras;
 
-  const [updated] = await db
+  const [updated] = await transversalDb
     .update(prioridades)
     .set(updateData)
     .where(eq(prioridades.id, id))
