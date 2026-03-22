@@ -14,10 +14,6 @@ function DetalleTicket({ ticketId, onBack }: DetalleTicketProps) {
   const {
     ticket,
     isLoading,
-    cambiarEstado,
-    isChangingEstado,
-    asignar,
-    isAssigning,
     agregarComentario,
     isAddingComentario,
   } = useTicketDetalle(ticketId);
@@ -41,10 +37,6 @@ function DetalleTicket({ ticketId, onBack }: DetalleTicketProps) {
       <TicketDetail
         ticket={ticket}
         isLoading={isLoading}
-        onCambiarEstado={cambiarEstado}
-        isChangingEstado={isChangingEstado}
-        onAsignar={asignar}
-        isAssigning={isAssigning}
         onAgregarComentario={agregarComentario}
         isAddingComentario={isAddingComentario}
       />

@@ -15,10 +15,7 @@
       "Bash(git checkout *)",
       "Bash(git stash *)",
       "Bash(npx drizzle-kit:*)",
-      "Bash(npx @biomejs/biome check *)",
-      "Bash(find /home/carlos/projects/sistema-municipal/apps/admin-panel/src -type f \\\\\\(-name *.tsx -o -name *.ts -o -name *.json \\\\\\))",
-      "Bash(find /home/carlos/projects/sistema-municipal -name *THEME* -o -name *theme* -o -name *DESIGN*)",
-      "Bash(find /home/carlos/projects/sistema-municipal/documentacion -name *.md -o -name *.css)"
+      "Bash(npx @biomejs/biome check *)"
     ],
     "deny": [
       "Bash(rm -rf *)",
