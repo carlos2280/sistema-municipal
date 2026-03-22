@@ -72,12 +72,9 @@ export default function TenantDetailPage() {
 
   const openEdit = () => {
     setEditForm({
-      nombre: tenant.nombre,
-      dominioBase: tenant.dominioBase,
-      rut: tenant.rut ?? undefined,
-      direccion: tenant.direccion ?? undefined,
-      telefono: tenant.telefono ?? undefined,
-      emailContacto: tenant.emailContacto ?? undefined,
+      nombre: tenant.nombre, dominioBase: tenant.dominioBase,
+      rut: tenant.rut ?? undefined, direccion: tenant.direccion ?? undefined,
+      telefono: tenant.telefono ?? undefined, emailContacto: tenant.emailContacto ?? undefined,
       maxUsuarios: tenant.maxUsuarios ?? undefined,
     })
     setEditOpen(true)
@@ -95,12 +92,8 @@ export default function TenantDetailPage() {
   }
 
   const handleDeactivate = async () => {
-    try {
-      await deactivateTenant.mutateAsync(tenantId)
-      navigate('/tenants')
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Error al desactivar')
-    }
+    try { await deactivateTenant.mutateAsync(tenantId); navigate('/tenants') }
+    catch (err) { setActionError(err instanceof Error ? err.message : 'Error al desactivar') }
   }
 
   const handleAddSubscription = async () => {
@@ -122,14 +115,8 @@ export default function TenantDetailPage() {
     }
   }
 
-  const openEstadoDialog = (
-    subId: number,
-    currentEstado: EstadoSuscripcion,
-  ) => {
-    setSelectedSubId(subId)
-    setNewEstado(currentEstado)
-    setMotivo('')
-    setEstadoDialogOpen(true)
+  const openEstadoDialog = (subId: number, currentEstado: EstadoSuscripcion) => {
+    setSelectedSubId(subId); setNewEstado(currentEstado); setMotivo(''); setEstadoDialogOpen(true)
   }
 
   const handleUpdateEstado = async () => {
