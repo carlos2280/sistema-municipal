@@ -31,7 +31,11 @@ export async function obtener(req: Request, res: Response, next: NextFunction) {
   try {
     const user = requireUser(req)
     const id = Number(req.params.id)
-    const ticket = await ticketsService.obtenerTicket(getDB(), user.tenantId, id)
+    const ticket = await ticketsService.obtenerTicket(
+      getDB(),
+      user.tenantId,
+      id,
+    )
     res.json(ticket)
   } catch (err) {
     next(err)

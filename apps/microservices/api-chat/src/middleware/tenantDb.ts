@@ -1,6 +1,6 @@
 import { createLogger } from '@municipal/core/logger'
 import type { NextFunction, Request, Response } from 'express'
-import { db, createTenantDbClient } from '../db/client.js'
+import { createTenantDbClient, db } from '../db/client.js'
 
 const logger = createLogger('api-chat:tenantDb')
 
@@ -21,7 +21,10 @@ export const tenantDbMiddleware = (
 ): void => {
   const transversalDbName = req.headers['x-transversal-db-name']
 
-  if (typeof transversalDbName === 'string' && transversalDbName.trim() !== '') {
+  if (
+    typeof transversalDbName === 'string' &&
+    transversalDbName.trim() !== ''
+  ) {
     logger.debug(
       { transversalDbName },
       'Conectando a DB transversal del tenant',

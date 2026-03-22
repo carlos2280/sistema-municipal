@@ -1,10 +1,10 @@
 import type { Server as HttpServer } from 'node:http'
-import { createAdapter } from '@socket.io/redis-adapter'
 import { createLogger } from '@municipal/core/logger'
+import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
 import { Server } from 'socket.io'
 import { env } from '../config/env.js'
-import { db, createTenantDbClient } from '../db/client.js'
+import { createTenantDbClient, db } from '../db/client.js'
 import type { DbClient } from '../db/client.js'
 import { resolveTransversalDbName } from '../libs/platformClient.js'
 import { createRedisClient, getRedisClient } from '../libs/redis.js'
@@ -196,8 +196,7 @@ export async function initializeSocket(
       }
 
       // Resolver DB transversal del tenant
-      const handshakeDbName =
-        socket.handshake.headers['x-transversal-db-name']
+      const handshakeDbName = socket.handshake.headers['x-transversal-db-name']
       const dbNameFromHeader = Array.isArray(handshakeDbName)
         ? handshakeDbName[0]
         : handshakeDbName
@@ -243,10 +242,7 @@ export async function initializeSocket(
     setupHeartbeatHandler(socket, redis)
 
     socket.on('disconnect', (reason) => {
-      logger.info(
-        { socketId: socket.id, reason },
-        'Desconexión Socket.IO',
-      )
+      logger.info({ socketId: socket.id, reason }, 'Desconexión Socket.IO')
     })
 
     socket.on('error', (error) => {

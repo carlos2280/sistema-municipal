@@ -2,7 +2,6 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { AccessToken } from 'livekit-server-sdk'
 import { env } from '../config/env.js'
 import type { DbClient } from '../db/client.js'
-import { obtenerUsuarioPorId } from '../libs/identidadClient.js'
 import { reuniones } from '../db/schemas/index.js'
 import {
   type Llamada,
@@ -10,6 +9,7 @@ import {
   llamadas,
 } from '../db/schemas/llamadas.schema.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
+import { obtenerUsuarioPorId } from '../libs/identidadClient.js'
 import { mensajesService } from './mensajes.service.js'
 
 export const llamadasService = {

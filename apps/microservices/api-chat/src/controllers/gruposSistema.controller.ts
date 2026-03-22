@@ -21,7 +21,10 @@ export const sincronizarGruposSistema: RequestHandler = async (
   try {
     const tenantDb = getDb(req)
     const dbName = getDbName(req)
-    const result = await gruposSistemaService.sincronizarGrupos(tenantDb, dbName)
+    const result = await gruposSistemaService.sincronizarGrupos(
+      tenantDb,
+      dbName,
+    )
 
     res.json({
       success: true,

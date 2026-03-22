@@ -1,10 +1,10 @@
-import { and, eq } from 'drizzle-orm'
-import type { Server, Socket } from 'socket.io'
 import { db } from '@/db/client.js'
 import type { DbClient } from '@/db/client.js'
 import { participantes } from '@/db/schemas/participantes.schema.js'
 import { conversacionesService } from '@/services/conversaciones.service.js'
 import { mensajesService } from '@/services/mensajes.service.js'
+import { and, eq } from 'drizzle-orm'
+import type { Server, Socket } from 'socket.io'
 
 interface ChatJoinPayload {
   conversacionId: number

@@ -1,9 +1,9 @@
-import { and, eq, gt } from 'drizzle-orm'
-import type { Server, Socket } from 'socket.io'
 import { db } from '@/db/client.js'
 import type { DbClient } from '@/db/client.js'
 import { estadoUsuarios } from '@/db/schemas/estadoUsuarios.schema.js'
 import type { RedisClient as Redis } from '@/libs/redis.js'
+import { and, eq, gt } from 'drizzle-orm'
+import type { Server, Socket } from 'socket.io'
 import { connectionTracker } from '../connectionTracker.js'
 
 export function setupPresenceHandlers(

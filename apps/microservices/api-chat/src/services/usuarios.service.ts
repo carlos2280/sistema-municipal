@@ -1,7 +1,7 @@
 import {
+  type UsuarioResumen,
   buscarUsuarios as identidadBuscarUsuarios,
   obtenerUsuarioPorId as identidadObtenerUsuarioPorId,
-  type UsuarioResumen,
 } from '../libs/identidadClient.js'
 
 export const usuariosService = {

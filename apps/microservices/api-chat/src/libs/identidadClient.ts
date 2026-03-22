@@ -166,7 +166,7 @@ export async function obtenerDepartamentosConUsuarios(
   dbName: string,
 ): Promise<DepartamentoConUsuarios[]> {
   const resultado = await fetchIdentidad<OrganigramaRaw>(
-    `/api/v1/identidad/organigrama`,
+    '/api/v1/identidad/organigrama',
     { 'x-tenant-db-name': dbName },
   )
 

@@ -1,10 +1,6 @@
 import { and, count, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
 import {
-  obtenerUsuariosBatch,
-  type UsuarioResumen,
-} from '../libs/identidadClient.js'
-import {
   type Conversacion,
   type NewConversacion,
   conversaciones,
@@ -14,6 +10,10 @@ import {
   type NewParticipante,
   participantes,
 } from '../db/schemas/participantes.schema.js'
+import {
+  type UsuarioResumen,
+  obtenerUsuariosBatch,
+} from '../libs/identidadClient.js'
 
 function usuarioDesconocido(id: number): UsuarioResumen {
   return { id, nombreCompleto: 'Usuario', email: '' }
@@ -116,7 +116,8 @@ export const conversacionesService = {
     >()
     for (const m of ultimosMensajesRaw) {
       if (!ultimoMensajePorConv.has(m.conversacionId)) {
-        const remitente = usuarioMap.get(m.remitenteId) ?? usuarioDesconocido(m.remitenteId)
+        const remitente =
+          usuarioMap.get(m.remitenteId) ?? usuarioDesconocido(m.remitenteId)
         ultimoMensajePorConv.set(m.conversacionId, {
           id: m.id,
           contenido: m.contenido,
@@ -171,7 +172,8 @@ export const conversacionesService = {
 
     for (const p of participantesData) {
       const existing = participantesPorConversacion.get(p.conversacionId) ?? []
-      const usuario = usuarioMap.get(p.usuarioId) ?? usuarioDesconocido(p.usuarioId)
+      const usuario =
+        usuarioMap.get(p.usuarioId) ?? usuarioDesconocido(p.usuarioId)
       existing.push({
         usuarioId: p.usuarioId,
         rol: p.rol,
@@ -344,7 +346,8 @@ export const conversacionesService = {
     const usuarioMap = new Map(usuariosResueltos.map((u) => [u.id, u]))
 
     return rows.map((r) => {
-      const usuario = usuarioMap.get(r.usuarioId) ?? usuarioDesconocido(r.usuarioId)
+      const usuario =
+        usuarioMap.get(r.usuarioId) ?? usuarioDesconocido(r.usuarioId)
       return {
         ...r,
         usuario: {

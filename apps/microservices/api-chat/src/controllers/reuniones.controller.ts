@@ -8,7 +8,7 @@ export const reunionesController = {
   // GET /chat/conversaciones/:id/reuniones
   async listar(req: Request, res: Response) {
     const conversacionId = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
 
     const esParticipante = await conversacionesService.verificarParticipante(
       db,
@@ -31,7 +31,7 @@ export const reunionesController = {
   // POST /chat/conversaciones/:id/reuniones
   async crear(req: Request, res: Response) {
     const conversacionId = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
     const {
       titulo,
       descripcion,
@@ -123,7 +123,7 @@ export const reunionesController = {
 
   // GET /chat/reuniones/proximas
   async proximas(req: Request, res: Response) {
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
     const data = await reunionesService.listarProximasDelUsuario(db, userId)
     return res.json({ success: true, data })
   },
@@ -131,7 +131,7 @@ export const reunionesController = {
   // GET /chat/reuniones/:id
   async detalle(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
 
     const reunion = await reunionesService.obtenerConInvitaciones(db, id)
     if (!reunion) {
@@ -153,7 +153,7 @@ export const reunionesController = {
   // PATCH /chat/reuniones/:id
   async editar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
     const {
       titulo,
       descripcion,
@@ -198,7 +198,7 @@ export const reunionesController = {
   // DELETE /chat/reuniones/:id
   async cancelar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
 
     // Capturar llamadaId antes de cancelar (para finalizar si la reunión estaba activa)
     const reunionActual = await reunionesService.obtenerPorId(db, id)
@@ -243,7 +243,7 @@ export const reunionesController = {
   // PATCH /chat/reuniones/:id/rsvp
   async rsvp(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
     const { estado } = req.body
 
     if (!['pendiente', 'aceptada', 'rechazada', 'tentativa'].includes(estado)) {
@@ -280,7 +280,7 @@ export const reunionesController = {
   // POST /chat/reuniones/:id/iniciar
   async iniciar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario!.id
+    const userId = req.usuario?.id
 
     const reunion = await reunionesService.obtenerPorId(db, id)
     if (!reunion) {

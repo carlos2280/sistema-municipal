@@ -224,10 +224,7 @@ export async function runTransversalMigrations(
     `);
 
     for (const entry of journal.entries) {
-      const sqlPath = resolve(
-        TRANSVERSAL_MIGRATIONS_DIR,
-        `${entry.tag}.sql`,
-      );
+      const sqlPath = resolve(TRANSVERSAL_MIGRATIONS_DIR, `${entry.tag}.sql`);
       const migrationSql = await readFile(sqlPath, "utf-8");
 
       const statements = migrationSql
@@ -280,21 +277,81 @@ interface PrioridadData {
 }
 
 const CATEGORIAS_DEFAULT: CategoriaData[] = [
-  { codigo: "infraestructura", nombre: "Infraestructura y Obras",  icono: "hard-hat",      color: "warning",   orden: 1 },
-  { codigo: "tramites",        nombre: "Tramites y Documentos",    icono: "file-text",     color: "info",      orden: 2 },
-  { codigo: "reclamos",        nombre: "Reclamos Ciudadanos",      icono: "alert-triangle", color: "error",    orden: 3 },
-  { codigo: "consultas",       nombre: "Consultas Generales",      icono: "help-circle",   color: "primary",   orden: 4 },
-  { codigo: "servicios",       nombre: "Servicios Municipales",    icono: "building-2",    color: "secondary", orden: 5 },
-  { codigo: "medioambiente",   nombre: "Medio Ambiente y Aseo",   icono: "leaf",           color: "success",   orden: 6 },
-  { codigo: "seguridad",       nombre: "Seguridad Ciudadana",      icono: "shield",        color: "error",     orden: 7 },
-  { codigo: "social",          nombre: "Asistencia Social",        icono: "heart",         color: "secondary", orden: 8 },
+  {
+    codigo: "infraestructura",
+    nombre: "Infraestructura y Obras",
+    icono: "hard-hat",
+    color: "warning",
+    orden: 1,
+  },
+  {
+    codigo: "tramites",
+    nombre: "Tramites y Documentos",
+    icono: "file-text",
+    color: "info",
+    orden: 2,
+  },
+  {
+    codigo: "reclamos",
+    nombre: "Reclamos Ciudadanos",
+    icono: "alert-triangle",
+    color: "error",
+    orden: 3,
+  },
+  {
+    codigo: "consultas",
+    nombre: "Consultas Generales",
+    icono: "help-circle",
+    color: "primary",
+    orden: 4,
+  },
+  {
+    codigo: "servicios",
+    nombre: "Servicios Municipales",
+    icono: "building-2",
+    color: "secondary",
+    orden: 5,
+  },
+  {
+    codigo: "medioambiente",
+    nombre: "Medio Ambiente y Aseo",
+    icono: "leaf",
+    color: "success",
+    orden: 6,
+  },
+  {
+    codigo: "seguridad",
+    nombre: "Seguridad Ciudadana",
+    icono: "shield",
+    color: "error",
+    orden: 7,
+  },
+  {
+    codigo: "social",
+    nombre: "Asistencia Social",
+    icono: "heart",
+    color: "secondary",
+    orden: 8,
+  },
 ];
 
 const PRIORIDADES_DEFAULT: PrioridadData[] = [
-  { codigo: "baja",    nombre: "Baja",    color: "#34D399", nivel: 1, slaHoras: 72 },
-  { codigo: "media",   nombre: "Media",   color: "#60A5FA", nivel: 2, slaHoras: 48 },
-  { codigo: "alta",    nombre: "Alta",    color: "#FBBF24", nivel: 3, slaHoras: 24 },
-  { codigo: "critica", nombre: "Critica", color: "#F87171", nivel: 4, slaHoras: 8  },
+  { codigo: "baja", nombre: "Baja", color: "#34D399", nivel: 1, slaHoras: 72 },
+  {
+    codigo: "media",
+    nombre: "Media",
+    color: "#60A5FA",
+    nivel: 2,
+    slaHoras: 48,
+  },
+  { codigo: "alta", nombre: "Alta", color: "#FBBF24", nivel: 3, slaHoras: 24 },
+  {
+    codigo: "critica",
+    nombre: "Critica",
+    color: "#F87171",
+    nivel: 4,
+    slaHoras: 8,
+  },
 ];
 
 /**

@@ -89,8 +89,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isActive = (path: string, exact = false) =>
     exact
       ? location.pathname === path
-      : location.pathname === path ||
-        location.pathname.startsWith(`${path}/`)
+      : location.pathname === path || location.pathname.startsWith(`${path}/`)
 
   return (
     <Box

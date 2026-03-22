@@ -9,7 +9,11 @@ import type { RequestHandler } from "express";
  * Retorna el nombre de la DB transversal del tenant.
  * Usado internamente por api-gateway para inyectar x-transversal-db-name.
  */
-export const getTenantTransversalDb: RequestHandler = async (req, res, next) => {
+export const getTenantTransversalDb: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
   try {
     const tenantIdHeader = req.headers["x-tenant-id"] as string | undefined;
 

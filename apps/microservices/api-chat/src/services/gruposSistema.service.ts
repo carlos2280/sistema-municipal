@@ -1,8 +1,8 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
-import { obtenerDepartamentosConUsuarios } from '../libs/identidadClient.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
+import { obtenerDepartamentosConUsuarios } from '../libs/identidadClient.js'
 
 interface SyncResult {
   created: number[]

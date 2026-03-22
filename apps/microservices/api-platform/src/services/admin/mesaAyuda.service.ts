@@ -570,8 +570,7 @@ export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
       totalTickets: total,
       cumplidos: total - venc,
       vencidos: venc,
-      compliance:
-        total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
+      compliance: total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
     };
   });
 
@@ -748,10 +747,7 @@ export const getTickets = async (
       .limit(pageSize)
       .offset(offset),
 
-    transversalDb
-      .select({ total: count() })
-      .from(tickets)
-      .where(whereClause),
+    transversalDb.select({ total: count() }).from(tickets).where(whereClause),
   ]);
 
   // Paso 2: enriquecer con municipalidades desde platform DB
@@ -1175,9 +1171,7 @@ export const getTenantsSummary = async (): Promise<TenantResumen[]> => {
           .from(municipalidades)
           .where(inArray(municipalidades.id, tenantIds))
       : [];
-  const muniMap = new Map(
-    munis.map((m) => [m.id, m]),
-  );
+  const muniMap = new Map(munis.map((m) => [m.id, m]));
 
   // Paso 3: combinar
   return rows

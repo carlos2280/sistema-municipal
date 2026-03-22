@@ -1,16 +1,16 @@
 import { and, desc, eq, lt } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
-import {
-  obtenerUsuarioPorId,
-  obtenerUsuariosBatch,
-  type UsuarioResumen,
-} from '../libs/identidadClient.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
 import {
   type Mensaje,
   type NewMensaje,
   mensajes,
 } from '../db/schemas/mensajes.schema.js'
+import {
+  type UsuarioResumen,
+  obtenerUsuarioPorId,
+  obtenerUsuariosBatch,
+} from '../libs/identidadClient.js'
 
 const PAGE_SIZE = 50
 
@@ -55,7 +55,8 @@ export const mensajesService = {
 
     return results.map((r) => ({
       ...r,
-      remitente: remitenteMap.get(r.remitenteId) ?? remitenteDesconocido(r.remitenteId),
+      remitente:
+        remitenteMap.get(r.remitenteId) ?? remitenteDesconocido(r.remitenteId),
     }))
   },
 

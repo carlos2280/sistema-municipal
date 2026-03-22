@@ -8,7 +8,7 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL_TRANSVERSAL!,
+    url: process.env.DATABASE_URL_TRANSVERSAL ?? '',
   },
   schemaFilter: ['mesa_ayuda'],
   verbose: true,

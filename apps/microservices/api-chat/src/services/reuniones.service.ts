@@ -1,6 +1,5 @@
 import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
-import { obtenerUsuariosBatch } from '../libs/identidadClient.js'
 import {
   type InvitacionReunion,
   type NewInvitacionReunion,
@@ -13,6 +12,7 @@ import {
   reuniones,
 } from '../db/schemas/index.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
+import { obtenerUsuariosBatch } from '../libs/identidadClient.js'
 import { mensajesService } from './mensajes.service.js'
 
 export const reunionesService = {
