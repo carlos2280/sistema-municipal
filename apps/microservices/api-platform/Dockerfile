@@ -8,6 +8,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
 COPY packages/db-platform/package.json ./packages/db-platform/
+COPY packages/db-mesa-ayuda/package.json ./packages/db-mesa-ayuda/
 COPY apps/microservices/api-platform/package.json ./apps/microservices/api-platform/
 RUN pnpm install --frozen-lockfile
 
@@ -15,9 +16,11 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY packages/core/ ./packages/core/
 COPY packages/db-platform/ ./packages/db-platform/
+COPY packages/db-mesa-ayuda/ ./packages/db-mesa-ayuda/
 COPY apps/microservices/api-platform/ ./apps/microservices/api-platform/
 RUN pnpm --filter @municipal/core build && \
     pnpm --filter @municipal/db-platform build && \
+    pnpm --filter @municipal/db-mesa-ayuda build && \
     pnpm --filter api-platform build
 
 # --- Production ---
@@ -28,10 +31,12 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 RUN echo "shamefully-hoist=true" > .npmrc
 COPY packages/core/package.json ./packages/core/
 COPY packages/db-platform/package.json ./packages/db-platform/
+COPY packages/db-mesa-ayuda/package.json ./packages/db-mesa-ayuda/
 COPY apps/microservices/api-platform/package.json ./apps/microservices/api-platform/
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=build /app/packages/db-platform/dist ./packages/db-platform/dist
+COPY --from=build /app/packages/db-mesa-ayuda/dist ./packages/db-mesa-ayuda/dist
 COPY --from=build /app/apps/microservices/api-platform/dist ./apps/microservices/api-platform/dist
 WORKDIR /app/apps/microservices/api-platform
 EXPOSE 3006
