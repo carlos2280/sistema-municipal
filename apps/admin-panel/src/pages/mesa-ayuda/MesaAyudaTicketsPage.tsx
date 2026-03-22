@@ -1,16 +1,16 @@
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import {
-  type MRT_ColumnFiltersState,
-  type MRT_PaginationState,
-  type MRT_SortingState,
-} from 'material-react-table'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { TicketsTable } from '@/components/organisms'
 import { useMesaAyudaTickets } from '@/hooks/useMesaAyudaTickets'
 import type { AdminTicket, AdminTicketListResponse } from '@/types/mesa-ayuda'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import type {
+  MRT_ColumnFiltersState,
+  MRT_PaginationState,
+  MRT_SortingState,
+} from 'material-react-table'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function MesaAyudaTicketsPage() {
   const navigate = useNavigate()
@@ -32,7 +32,10 @@ export default function MesaAyudaTicketsPage() {
 
   if (error) {
     return (
-      <Alert severity="error">Error al cargar tickets: {error.message}</Alert>
+      <Alert severity="error">
+        Error al cargar tickets:{' '}
+        {error instanceof Error ? error.message : 'Error desconocido'}
+      </Alert>
     )
   }
 
