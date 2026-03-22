@@ -4,11 +4,15 @@ import type { CrearComentarioInput } from '@/libs/schemas/comentarios.schemas'
 import { comentarios, tickets } from '@municipal/db-mesa-ayuda'
 import { and, eq } from 'drizzle-orm'
 
-export async function listarComentarios(db: DbClient, ticketId: number) {
+export async function listarComentarios(
+  db: DbClient,
+  tenantId: number,
+  ticketId: number,
+) {
   const [ticket] = await db
     .select({ id: tickets.id })
     .from(tickets)
-    .where(eq(tickets.id, ticketId))
+    .where(and(eq(tickets.id, ticketId), eq(tickets.tenantId, tenantId)))
 
   if (!ticket) {
     throw new AppError('Ticket no encontrado', 404)
@@ -23,6 +27,7 @@ export async function listarComentarios(db: DbClient, ticketId: number) {
 
 export async function agregarComentario(
   db: DbClient,
+  tenantId: number,
   ticketId: number,
   input: CrearComentarioInput,
   autor: { id: number; nombre: string },
@@ -30,7 +35,7 @@ export async function agregarComentario(
   const [ticket] = await db
     .select({ id: tickets.id })
     .from(tickets)
-    .where(eq(tickets.id, ticketId))
+    .where(and(eq(tickets.id, ticketId), eq(tickets.tenantId, tenantId)))
 
   if (!ticket) {
     throw new AppError('Ticket no encontrado', 404)

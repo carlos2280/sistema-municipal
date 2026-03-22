@@ -1,9 +1,10 @@
 import { and, eq } from 'drizzle-orm'
 import type { Server, Socket } from 'socket.io'
-import { db } from '../../db/client.js'
-import { participantes } from '../../db/schemas/participantes.schema.js'
-import { conversacionesService } from '../../services/conversaciones.service.js'
-import { mensajesService } from '../../services/mensajes.service.js'
+import { db } from '@/db/client.js'
+import type { DbClient } from '@/db/client.js'
+import { participantes } from '@/db/schemas/participantes.schema.js'
+import { conversacionesService } from '@/services/conversaciones.service.js'
+import { mensajesService } from '@/services/mensajes.service.js'
 
 interface ChatJoinPayload {
   conversacionId: number
@@ -22,9 +23,9 @@ interface TypingPayload {
 
 export function setupChatHandlers(io: Server, socket: Socket) {
   const userId = socket.data.userId as number
-  // Para sockets se usa la DB por defecto como fallback.
-  // En el futuro se puede extraer el tenant del handshake/JWT.
-  const socketDb = db
+  // Usar la DB transversal del tenant resuelta en el middleware de Socket.IO.
+  // Fallback a la DB por defecto si no se inyectó (desarrollo sin gateway).
+  const socketDb: DbClient = socket.data.tenantDb ?? db
 
   // Unirse a una sala de conversación
   socket.on('chat:join', async ({ conversacionId }: ChatJoinPayload) => {

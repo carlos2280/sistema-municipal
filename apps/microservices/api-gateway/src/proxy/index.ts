@@ -11,6 +11,7 @@ import type { GatewayUserPayload } from "../middleware/auth";
 interface RequestWithBody extends IncomingMessage {
   body?: unknown;
   __gatewayUser?: GatewayUserPayload;
+  __transversalDbName?: string;
 }
 
 interface ServiceConfig {
@@ -138,6 +139,14 @@ export const configureProxies = (app: Express) => {
               proxyReq.setHeader(
                 X_USER_HEADERS.tenantDbName,
                 user.tenantDbName,
+              );
+            }
+
+            // Inyectar DB transversal del tenant (solo para servicios transversales)
+            if (reqWithUser.__transversalDbName) {
+              proxyReq.setHeader(
+                X_USER_HEADERS.transversalDbName,
+                reqWithUser.__transversalDbName,
               );
             }
 

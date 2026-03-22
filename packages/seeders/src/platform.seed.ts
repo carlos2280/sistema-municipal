@@ -42,6 +42,7 @@ async function seed() {
         slug: "default",
         dominioBase: "default.localhost",
         dbName: "muni_default",
+        transversalDbName: "transversal_muni_default",
         activo: true,
         maxUsuarios: 50,
       })

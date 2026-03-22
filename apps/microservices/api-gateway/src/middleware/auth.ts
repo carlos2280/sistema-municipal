@@ -20,6 +20,7 @@ export interface GatewayUserPayload {
 declare module "express-serve-static-core" {
   interface Request {
     __gatewayUser?: GatewayUserPayload;
+    __transversalDbName?: string;
   }
 }
 

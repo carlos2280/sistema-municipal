@@ -1,8 +1,9 @@
 import { and, eq, gt } from 'drizzle-orm'
 import type { Server, Socket } from 'socket.io'
-import { db } from '../../db/client.js'
-import { estadoUsuarios } from '../../db/schemas/estadoUsuarios.schema.js'
-import type { RedisClient as Redis } from '../../libs/redis.js'
+import { db } from '@/db/client.js'
+import type { DbClient } from '@/db/client.js'
+import { estadoUsuarios } from '@/db/schemas/estadoUsuarios.schema.js'
+import type { RedisClient as Redis } from '@/libs/redis.js'
 import { connectionTracker } from '../connectionTracker.js'
 
 export function setupPresenceHandlers(
@@ -11,7 +12,7 @@ export function setupPresenceHandlers(
   redis: Redis,
 ) {
   const userId = socket.data.userId as number
-  const socketDb = db
+  const socketDb: DbClient = socket.data.tenantDb ?? db
 
   // -----------------------------------------------------------------------
   // Registrar conexión

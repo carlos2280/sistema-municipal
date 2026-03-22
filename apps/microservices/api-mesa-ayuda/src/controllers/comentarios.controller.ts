@@ -1,18 +1,25 @@
 import { getDB } from '@/db/client'
+import { AppError } from '@/libs/middleware/AppError'
 import * as comentariosService from '@/services/comentarios.service'
 import type { NextFunction, Request, Response } from 'express'
 
-function getUserInfo(req: Request) {
-  return {
-    id: Number(req.headers['x-user-id']) || 1,
-    nombre: (req.headers['x-user-nombre'] as string) || 'Usuario Dev',
+function requireUser(req: Request) {
+  const user = req.gatewayUser
+  if (!user) {
+    throw new AppError('Usuario no autenticado', 401)
   }
+  return user
 }
 
 export async function listar(req: Request, res: Response, next: NextFunction) {
   try {
+    const user = requireUser(req)
     const ticketId = Number(req.params.id)
-    const result = await comentariosService.listarComentarios(getDB(), ticketId)
+    const result = await comentariosService.listarComentarios(
+      getDB(),
+      user.tenantId,
+      ticketId,
+    )
     res.json(result)
   } catch (err) {
     next(err)
@@ -21,13 +28,14 @@ export async function listar(req: Request, res: Response, next: NextFunction) {
 
 export async function crear(req: Request, res: Response, next: NextFunction) {
   try {
+    const user = requireUser(req)
     const ticketId = Number(req.params.id)
-    const user = getUserInfo(req)
     const comentario = await comentariosService.agregarComentario(
       getDB(),
+      user.tenantId,
       ticketId,
       req.body,
-      user,
+      { id: user.id, nombre: user.nombre },
     )
     res.status(201).json(comentario)
   } catch (err) {
@@ -41,9 +49,9 @@ export async function eliminar(
   next: NextFunction,
 ) {
   try {
+    const user = requireUser(req)
     const ticketId = Number(req.params.id)
     const comentarioId = Number(req.params.cid)
-    const user = getUserInfo(req)
     await comentariosService.eliminarComentario(
       getDB(),
       ticketId,
