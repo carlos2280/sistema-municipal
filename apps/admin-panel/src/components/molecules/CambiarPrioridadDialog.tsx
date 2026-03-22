@@ -1,3 +1,5 @@
+import type { AdminPrioridad, CambiarPrioridadInput } from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Dialog from '@mui/material/Dialog'
@@ -9,10 +11,8 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { AdminPrioridad, CambiarPrioridadInput } from '@/types/mesa-ayuda'
 
 const schema = z.object({
   prioridadId: z.number().min(1),
@@ -38,9 +38,17 @@ export function CambiarPrioridadDialog({
   prioridades,
   prioridadActualId,
 }: CambiarPrioridadDialogProps) {
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { prioridadId: prioridadActualId ?? prioridades[0]?.id ?? 0, recalcularSla: true },
+    defaultValues: {
+      prioridadId: prioridadActualId ?? prioridades[0]?.id ?? 0,
+      recalcularSla: true,
+    },
   })
 
   function handleClose() {
@@ -49,14 +57,25 @@ export function CambiarPrioridadDialog({
   }
 
   function handleValid(values: FormValues) {
-    onSubmit({ prioridadId: values.prioridadId, recalcularSla: values.recalcularSla })
+    onSubmit({
+      prioridadId: values.prioridadId,
+      recalcularSla: values.recalcularSla,
+    })
     reset()
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
+    >
       <DialogTitle>Cambiar Prioridad</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+      <DialogContent
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}
+      >
         <Controller
           name="prioridadId"
           control={control}
@@ -94,7 +113,11 @@ export function CambiarPrioridadDialog({
         <Button onClick={handleClose} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button variant="contained" onClick={handleSubmit(handleValid)} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit(handleValid)}
+          disabled={isLoading}
+        >
           Cambiar
         </Button>
       </DialogActions>

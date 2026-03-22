@@ -258,9 +258,7 @@ function Compass({ hidden = false, chatUnreadCount = 0 }: CompassProps) {
 							isActive={
 								sis.id === sistemaIdActual || (sis.isHome && !sistemaIdActual)
 							}
-							hasUnread={
-								sis.icono === "message-square" && chatUnreadCount > 0
-							}
+							hasUnread={sis.icono === "message-square" && chatUnreadCount > 0}
 							onClick={() => goSistema(sis.id)}
 						/>
 					))}

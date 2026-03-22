@@ -1,11 +1,11 @@
 import { SystemGroupBadge } from '@/components/atoms'
+import { getAvatarColor } from '@/utils'
 import Badge from '@mui/material/Badge'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
-import { Building2, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { getAvatarColor } from '@/utils'
+import { Building2, Users } from 'lucide-react'
 
 interface ConversationItemProps {
   id: number

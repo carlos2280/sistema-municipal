@@ -1,3 +1,5 @@
+import { fontFamily } from '@/theme/tokens'
+import type { TendenciaDia } from '@/types/mesa-ayuda'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
@@ -11,15 +13,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { TendenciaDia } from '@/types/mesa-ayuda'
-import { fontFamily } from '@/theme/tokens'
 
 interface TendenciaChartProps {
   data: TendenciaDia[]
   title?: string
 }
 
-export function TendenciaChart({ data, title = 'Tendencia 30 días' }: TendenciaChartProps) {
+export function TendenciaChart({
+  data,
+  title = 'Tendencia 30 días',
+}: TendenciaChartProps) {
   const theme = useTheme()
 
   const colorCreados = theme.palette.primary.main
@@ -33,7 +36,10 @@ export function TendenciaChart({ data, title = 'Tendencia 30 días' }: Tendencia
         </Typography>
       )}
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+        <AreaChart
+          data={data}
+          margin={{ top: 4, right: 4, left: -16, bottom: 0 }}
+        >
           <defs>
             <linearGradient id="gradCreados" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={colorCreados} stopOpacity={0.08} />

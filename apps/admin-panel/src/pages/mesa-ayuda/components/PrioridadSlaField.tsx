@@ -2,7 +2,10 @@ import TextField from '@mui/material/TextField'
 import type { ControllerRenderProps } from 'react-hook-form'
 
 interface PrioridadSlaFieldProps {
-  field: ControllerRenderProps<{ nombre: string; color: string; slaHoras: number }, 'slaHoras'>
+  field: ControllerRenderProps<
+    { nombre: string; color: string; slaHoras: number },
+    'slaHoras'
+  >
   error?: string
 }
 

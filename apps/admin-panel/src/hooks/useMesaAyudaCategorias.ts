@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { mesaAyuda } from '../lib/api'
-import type { CreateCategoriaInput, UpdateCategoriaInput } from '../types/mesa-ayuda'
+import type {
+  CreateCategoriaInput,
+  UpdateCategoriaInput,
+} from '../types/mesa-ayuda'
 import { mesaAyudaKeys } from './useMesaAyudaDashboard'
 
 export function useMesaAyudaCategorias() {
@@ -15,9 +18,12 @@ export function useCrearCategoria() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateCategoriaInput) => mesaAyuda.categorias.create(data),
+    mutationFn: (data: CreateCategoriaInput) =>
+      mesaAyuda.categorias.create(data),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: mesaAyudaKeys.categorias() })
+      void queryClient.invalidateQueries({
+        queryKey: mesaAyudaKeys.categorias(),
+      })
     },
   })
 }
@@ -29,7 +35,9 @@ export function useActualizarCategoria() {
     mutationFn: ({ id, data }: { id: number; data: UpdateCategoriaInput }) =>
       mesaAyuda.categorias.update(id, data),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: mesaAyudaKeys.categorias() })
+      void queryClient.invalidateQueries({
+        queryKey: mesaAyudaKeys.categorias(),
+      })
     },
   })
 }
@@ -40,7 +48,9 @@ export function useEliminarCategoria() {
   return useMutation({
     mutationFn: (id: number) => mesaAyuda.categorias.delete(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: mesaAyudaKeys.categorias() })
+      void queryClient.invalidateQueries({
+        queryKey: mesaAyudaKeys.categorias(),
+      })
     },
   })
 }

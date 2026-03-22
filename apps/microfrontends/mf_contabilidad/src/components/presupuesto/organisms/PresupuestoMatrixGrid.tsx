@@ -1,6 +1,6 @@
+import type { FilaMatrix, SubprogramaItem } from '@/types/presupuesto.types';
 import { Box, Typography } from '@mui/material';
 import { memo, useMemo } from 'react';
-import type { FilaMatrix, SubprogramaItem } from '@/types/presupuesto.types';
 import PresupuestoMatrixHeader from '../molecules/PresupuestoMatrixHeader';
 import PresupuestoMatrixRow from '../molecules/PresupuestoMatrixRow';
 
@@ -24,11 +24,19 @@ interface PresupuestoMatrixGridProps {
   deleteTargetIds: Set<string>;
   searchFilter: string;
   onMontoConfirm: (clientId: string, monto: number) => void;
-  onMontoAreaConfirm: (clientId: string, subprogramaId: number, montoPesos: number) => void;
+  onMontoAreaConfirm: (
+    clientId: string,
+    subprogramaId: number,
+    montoPesos: number,
+  ) => void;
   onRecalcular: (clientId: string) => void;
   onEliminar: (clientId: string) => void;
   onTab: (clientId: string, shiftKey: boolean) => void;
-  onTabArea: (clientId: string, currentAreaIndex: number, shiftKey: boolean) => void;
+  onTabArea: (
+    clientId: string,
+    currentAreaIndex: number,
+    shiftKey: boolean,
+  ) => void;
   onEnterArea: (clientId: string, areaIndex: number) => void;
   loading?: boolean;
   isSaving?: boolean;

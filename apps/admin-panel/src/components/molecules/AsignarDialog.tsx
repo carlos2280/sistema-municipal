@@ -1,13 +1,13 @@
+import type { AsignarTicketInput } from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { AsignarTicketInput } from '@/types/mesa-ayuda'
 
 const schema = z.object({
   asignadoNombre: z.string().min(1, 'Ingresa el nombre del encargado').max(200),
@@ -30,7 +30,12 @@ export function AsignarDialog({
   isLoading,
   asignadoActual,
 }: AsignarDialogProps) {
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { asignadoNombre: asignadoActual ?? '' },
   })
@@ -46,7 +51,13 @@ export function AsignarDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
+    >
       <DialogTitle>Asignar Ticket</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         <Controller
@@ -69,7 +80,11 @@ export function AsignarDialog({
         <Button onClick={handleClose} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button variant="contained" onClick={handleSubmit(handleValid)} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit(handleValid)}
+          disabled={isLoading}
+        >
           Asignar
         </Button>
       </DialogActions>

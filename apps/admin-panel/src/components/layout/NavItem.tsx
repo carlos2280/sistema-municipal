@@ -37,7 +37,9 @@ export default function NavItem({
         minHeight: 40,
         position: 'relative',
         transition: 'background-color 150ms ease-out',
-        bgcolor: active ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
+        bgcolor: active
+          ? alpha(theme.palette.primary.main, 0.12)
+          : 'transparent',
         '&::before': active
           ? {
               content: '""',

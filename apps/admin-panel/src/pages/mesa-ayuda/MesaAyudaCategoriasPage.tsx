@@ -1,15 +1,15 @@
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
+import { CategoriasTable } from '@/components/organisms'
 import {
   useActualizarCategoria,
   useCrearCategoria,
   useEliminarCategoria,
   useMesaAyudaCategorias,
 } from '@/hooks/useMesaAyudaCategorias'
-import { CategoriasTable } from '@/components/organisms'
 import type { CreateCategoriaInput } from '@/types/mesa-ayuda'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
 
 export default function MesaAyudaCategoriasPage() {
   const { data: categorias = [], isLoading, error } = useMesaAyudaCategorias()
@@ -32,7 +32,9 @@ export default function MesaAyudaCategoriasPage() {
 
   if (error) {
     return (
-      <Alert severity="error">Error al cargar categorías: {error.message}</Alert>
+      <Alert severity="error">
+        Error al cargar categorías: {error.message}
+      </Alert>
     )
   }
 

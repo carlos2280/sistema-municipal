@@ -156,9 +156,7 @@ const DigitInput = styled("input")<{ ownerState: { filled: boolean } }>(
 		height: 48,
 		borderRadius: 8,
 		border: `1.5px solid ${
-			ownerState.filled
-				? theme.palette.primary.main
-				: theme.palette.divider
+			ownerState.filled ? theme.palette.primary.main : theme.palette.divider
 		}`,
 		background: theme.meridian.surfaces.s3,
 		color: theme.palette.text.primary,
@@ -438,9 +436,7 @@ const ScanPhase = memo(function ScanPhase({
 							inputMode="numeric"
 							maxLength={1}
 							value={digits[i] || ""}
-							onChange={(e) =>
-								handleDigitChange(i, e.target.value)
-							}
+							onChange={(e) => handleDigitChange(i, e.target.value)}
 							onKeyDown={(e) => handleKeyDown(i, e)}
 							ownerState={{ filled: !!digits[i] }}
 							aria-label={`Dígito ${i + 1} de 6`}
@@ -460,9 +456,7 @@ const ScanPhase = memo(function ScanPhase({
 							inputMode="numeric"
 							maxLength={1}
 							value={digits[i] || ""}
-							onChange={(e) =>
-								handleDigitChange(i, e.target.value)
-							}
+							onChange={(e) => handleDigitChange(i, e.target.value)}
 							onKeyDown={(e) => handleKeyDown(i, e)}
 							ownerState={{ filled: !!digits[i] }}
 							aria-label={`Dígito ${i + 1} de 6`}
@@ -475,7 +469,9 @@ const ScanPhase = memo(function ScanPhase({
 
 			{/* Error message */}
 			{errorMsg && !reducedMotion && <ErrorBox>{errorMsg}</ErrorBox>}
-			{errorMsg && reducedMotion && <ErrorBox sx={{ animation: "none" }}>{errorMsg}</ErrorBox>}
+			{errorMsg && reducedMotion && (
+				<ErrorBox sx={{ animation: "none" }}>{errorMsg}</ErrorBox>
+			)}
 
 			{/* Security footer */}
 			<SecurityFooter>
@@ -513,9 +509,7 @@ const BackupPhase = memo(function BackupPhase({
 					<CheckCircle2 size={20} />
 				</Box>
 				<Box>
-					<Typography
-						sx={{ fontWeight: 600, fontSize: 14, mb: 0.5 }}
-					>
+					<Typography sx={{ fontWeight: 600, fontSize: 14, mb: 0.5 }}>
 						MFA activado correctamente
 					</Typography>
 					<Typography
@@ -547,9 +541,7 @@ const BackupPhase = memo(function BackupPhase({
 						<CodeCell
 							key={code}
 							custom={i}
-							variants={
-								reducedMotion ? undefined : codeRevealVariants
-							}
+							variants={reducedMotion ? undefined : codeRevealVariants}
 							initial={reducedMotion ? undefined : "hidden"}
 							animate={reducedMotion ? undefined : "visible"}
 						>
@@ -571,8 +563,7 @@ const BackupPhase = memo(function BackupPhase({
 					<AlertTriangle size={14} />
 				</Box>
 				<span>
-					Cada código solo puede usarse una vez. No podrás verlos de
-					nuevo.
+					Cada código solo puede usarse una vez. No podrás verlos de nuevo.
 				</span>
 			</WarningText>
 		</Box>
@@ -621,9 +612,7 @@ export const MfaSetupInline = memo(function MfaSetupInline({
 						onActivar={onActivar}
 					/>
 				)}
-				{phase === "backup" && (
-					<BackupPhase backupCodes={backupCodes} />
-				)}
+				{phase === "backup" && <BackupPhase backupCodes={backupCodes} />}
 			</motion.div>
 		</AnimatePresence>
 	);

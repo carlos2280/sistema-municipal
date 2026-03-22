@@ -1,10 +1,10 @@
+import type { UpdateTenantInput } from '@/types'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
-import type { UpdateTenantInput } from '@/types'
 
 interface EditTenantDialogProps {
   open: boolean
@@ -32,7 +32,14 @@ export function EditTenantDialog({
       slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
     >
       <DialogTitle>Editar Municipalidad</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
+      <DialogContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          pt: '8px !important',
+        }}
+      >
         <TextField
           label="Nombre"
           value={form.nombre ?? ''}
@@ -46,29 +53,40 @@ export function EditTenantDialog({
         <TextField
           label="RUT"
           value={form.rut ?? ''}
-          onChange={(e) => onChange({ ...form, rut: e.target.value || undefined })}
+          onChange={(e) =>
+            onChange({ ...form, rut: e.target.value || undefined })
+          }
         />
         <TextField
           label="Dirección"
           value={form.direccion ?? ''}
-          onChange={(e) => onChange({ ...form, direccion: e.target.value || undefined })}
+          onChange={(e) =>
+            onChange({ ...form, direccion: e.target.value || undefined })
+          }
         />
         <TextField
           label="Teléfono"
           value={form.telefono ?? ''}
-          onChange={(e) => onChange({ ...form, telefono: e.target.value || undefined })}
+          onChange={(e) =>
+            onChange({ ...form, telefono: e.target.value || undefined })
+          }
         />
         <TextField
           label="Email de Contacto"
           value={form.emailContacto ?? ''}
-          onChange={(e) => onChange({ ...form, emailContacto: e.target.value || undefined })}
+          onChange={(e) =>
+            onChange({ ...form, emailContacto: e.target.value || undefined })
+          }
         />
         <TextField
           label="Max Usuarios"
           type="number"
           value={form.maxUsuarios ?? ''}
           onChange={(e) =>
-            onChange({ ...form, maxUsuarios: e.target.value ? Number(e.target.value) : undefined })
+            onChange({
+              ...form,
+              maxUsuarios: e.target.value ? Number(e.target.value) : undefined,
+            })
           }
         />
       </DialogContent>

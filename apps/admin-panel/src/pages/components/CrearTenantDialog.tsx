@@ -1,3 +1,4 @@
+import type { CreateTenantInput } from '@/types'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -5,7 +6,6 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
-import type { CreateTenantInput } from '@/types'
 
 interface CrearTenantDialogProps {
   open: boolean
@@ -35,7 +35,14 @@ export function CrearTenantDialog({
       slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
     >
       <DialogTitle>Nueva Municipalidad</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
+      <DialogContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          pt: '8px !important',
+        }}
+      >
         {error && <Alert severity="error">{error}</Alert>}
         <TextField
           label="Nombre"
@@ -47,7 +54,12 @@ export function CrearTenantDialog({
           label="Slug"
           required
           value={form.slug}
-          onChange={(e) => onChange({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+          onChange={(e) =>
+            onChange({
+              ...form,
+              slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''),
+            })
+          }
           helperText="Solo letras minúsculas, números y guiones"
         />
         <TextField
@@ -60,14 +72,19 @@ export function CrearTenantDialog({
         <TextField
           label="RUT (opcional)"
           value={form.rut ?? ''}
-          onChange={(e) => onChange({ ...form, rut: e.target.value || undefined })}
+          onChange={(e) =>
+            onChange({ ...form, rut: e.target.value || undefined })
+          }
         />
         <TextField
           label="Max Usuarios"
           type="number"
           value={form.maxUsuarios ?? ''}
           onChange={(e) =>
-            onChange({ ...form, maxUsuarios: e.target.value ? Number(e.target.value) : undefined })
+            onChange({
+              ...form,
+              maxUsuarios: e.target.value ? Number(e.target.value) : undefined,
+            })
           }
           helperText="Por defecto: 50"
         />

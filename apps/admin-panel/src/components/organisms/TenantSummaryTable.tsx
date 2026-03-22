@@ -1,17 +1,24 @@
+import { SlaProgressBar } from '@/components/molecules/SlaProgressBar'
+import type { TenantResumen } from '@/types/mesa-ayuda'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
+import {
+  type MRT_ColumnDef,
+  MaterialReactTable,
+  useMaterialReactTable,
+} from 'material-react-table'
 import { useMemo } from 'react'
-import { SlaProgressBar } from '@/components/molecules/SlaProgressBar'
-import type { TenantResumen } from '@/types/mesa-ayuda'
 
 interface TenantSummaryTableProps {
   data: TenantResumen[]
   isLoading?: boolean
 }
 
-export function TenantSummaryTable({ data, isLoading = false }: TenantSummaryTableProps) {
+export function TenantSummaryTable({
+  data,
+  isLoading = false,
+}: TenantSummaryTableProps) {
   const theme = useTheme()
 
   const columns = useMemo<MRT_ColumnDef<TenantResumen>[]>(
@@ -48,7 +55,11 @@ export function TenantSummaryTable({ data, isLoading = false }: TenantSummaryTab
         Cell: ({ cell }) => {
           const val = cell.getValue<number>()
           return (
-            <Typography variant="body2" color={val > 0 ? 'error.main' : 'text.primary'} fontWeight={val > 0 ? 700 : 400}>
+            <Typography
+              variant="body2"
+              color={val > 0 ? 'error.main' : 'text.primary'}
+              fontWeight={val > 0 ? 700 : 400}
+            >
               {val}
             </Typography>
           )
@@ -58,7 +69,9 @@ export function TenantSummaryTable({ data, isLoading = false }: TenantSummaryTab
         accessorKey: 'slaCompliance',
         header: 'SLA Compliance',
         size: 180,
-        Cell: ({ cell }) => <SlaProgressBar compliance={cell.getValue<number>()} />,
+        Cell: ({ cell }) => (
+          <SlaProgressBar compliance={cell.getValue<number>()} />
+        ),
       },
     ],
     [],

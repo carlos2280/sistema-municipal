@@ -1,3 +1,9 @@
+import type {
+  EquilibrioState,
+  FilaDisplay,
+  FilaMatrix,
+  SubprogramaItem,
+} from '@/types/presupuesto.types';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import BalanceIcon from '@mui/icons-material/Balance';
@@ -7,12 +13,6 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { Box, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useMemo } from 'react';
-import type {
-  EquilibrioState,
-  FilaDisplay,
-  FilaMatrix,
-  SubprogramaItem,
-} from '@/types/presupuesto.types';
 import { formatCLP } from '../atoms/MontoInput';
 
 const numFontSx = {
@@ -349,7 +349,10 @@ const PresupuestoResumen = ({
       .map((s) => ({
         ...s,
         total: totales.get(s.id) ?? 0,
-        pct: totalGeneral > 0 ? ((totales.get(s.id) ?? 0) / totalGeneral) * 100 : 0,
+        pct:
+          totalGeneral > 0
+            ? ((totales.get(s.id) ?? 0) / totalGeneral) * 100
+            : 0,
       }))
       .sort((a, b) => b.pct - a.pct);
   }, [subprogramas, filasMatrixGastos]);
@@ -790,30 +793,71 @@ const PresupuestoResumen = ({
               </Typography>
             </Box>
 
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
+            <Box
+              component="table"
+              sx={{ width: '100%', borderCollapse: 'collapse' }}
+            >
               <Box component="thead">
                 <Box component="tr" sx={{ bgcolor: 'action.hover' }}>
                   <Box
                     component="th"
-                    sx={{ px: 2.5, py: 1, textAlign: 'left', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled' }}
+                    sx={{
+                      px: 2.5,
+                      py: 1,
+                      textAlign: 'left',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'text.disabled',
+                    }}
                   >
                     Subprograma
                   </Box>
                   <Box
                     component="th"
-                    sx={{ px: 2, py: 1, textAlign: 'right', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled' }}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      textAlign: 'right',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'text.disabled',
+                    }}
                   >
                     Monto (M$)
                   </Box>
                   <Box
                     component="th"
-                    sx={{ px: 2, py: 1, textAlign: 'right', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled', width: 80 }}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      textAlign: 'right',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'text.disabled',
+                      width: 80,
+                    }}
                   >
                     %
                   </Box>
                   <Box
                     component="th"
-                    sx={{ px: 2, py: 1, textAlign: 'left', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.disabled', width: 200 }}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      textAlign: 'left',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'text.disabled',
+                      width: 200,
+                    }}
                   >
                     Distribución
                   </Box>
@@ -824,14 +868,28 @@ const PresupuestoResumen = ({
                 {distribucionSubprogramas.map((sub) => {
                   const maxPct = distribucionSubprogramas[0]?.pct ?? 100;
                   const barWidth = maxPct > 0 ? (sub.pct / maxPct) * 100 : 0;
-                  const paletteColor = sub.color === 'default' ? 'grey' : sub.color;
+                  const paletteColor =
+                    sub.color === 'default' ? 'grey' : sub.color;
                   return (
                     <Box
                       key={sub.id}
                       component="tr"
-                      sx={{ '&:hover': { bgcolor: 'action.hover' }, borderBottom: 1, borderColor: 'divider' }}
+                      sx={{
+                        '&:hover': { bgcolor: 'action.hover' },
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                      }}
                     >
-                      <Box component="td" sx={{ px: 2.5, py: 1.25, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          px: 2.5,
+                          py: 1.25,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
                         <Box
                           sx={{
                             width: 8,
@@ -892,8 +950,11 @@ const PresupuestoResumen = ({
                             borderRadius: 3,
                             width: `${barWidth}%`,
                             bgcolor:
-                              (t.palette[paletteColor as keyof typeof t.palette] as { main: string })?.main ??
-                              t.palette.primary.main,
+                              (
+                                t.palette[
+                                  paletteColor as keyof typeof t.palette
+                                ] as { main: string }
+                              )?.main ?? t.palette.primary.main,
                             minWidth: barWidth > 0 ? 4 : 0,
                           })}
                         />

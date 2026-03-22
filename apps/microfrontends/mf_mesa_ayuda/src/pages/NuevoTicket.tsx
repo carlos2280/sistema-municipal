@@ -1,15 +1,15 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import TicketForm from '@/components/organisms/TicketForm';
+import TicketForm from '@/components/organisms/TicketForm'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 interface NuevoTicketProps {
-  onSuccess: () => void;
-  onCancel: () => void;
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 function NuevoTicket({ onSuccess, onCancel }: NuevoTicketProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -29,7 +29,7 @@ function NuevoTicket({ onSuccess, onCancel }: NuevoTicketProps) {
 
       <TicketForm onSuccess={onSuccess} onCancel={onCancel} />
     </Box>
-  );
+  )
 }
 
-export default NuevoTicket;
+export default NuevoTicket

@@ -1,12 +1,12 @@
-import { startTransition, useCallback, useRef } from 'react';
-import { toast } from 'sonner';
-import { v4 as uuid } from 'uuid';
-import { read, utils } from 'xlsx';
 import type {
   CuentaPresupuestaria,
   FilaDetalle,
   SubprogramaItem,
 } from '@/types/presupuesto.types';
+import { startTransition, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
+import { v4 as uuid } from 'uuid';
+import { read, utils } from 'xlsx';
 
 /** Yield al event loop para no bloquear la UI */
 const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -303,9 +303,10 @@ function excelRowsConAreasToFilas(
       }
     }
 
-    const totalFromAreas = distPesos.size > 0
-      ? [...distPesos.values()].reduce((a, b) => a + b, 0)
-      : Math.round(row.monto * 1000);
+    const totalFromAreas =
+      distPesos.size > 0
+        ? [...distPesos.values()].reduce((a, b) => a + b, 0)
+        : Math.round(row.monto * 1000);
 
     filas.push({
       _clientId: clientId,
@@ -334,7 +335,10 @@ export const useImportarExcel = (
   cuentasIngresos: CuentaPresupuestaria[],
   cuentasGastos: CuentaPresupuestaria[],
   importarFilasIngresos: (filas: FilaDetalle[]) => void,
-  importarFilasGastos: (filas: FilaDetalle[], distribuciones?: Map<string, Map<number, number>>) => void,
+  importarFilasGastos: (
+    filas: FilaDetalle[],
+    distribuciones?: Map<string, Map<number, number>>,
+  ) => void,
   subprogramas: SubprogramaItem[] = [],
 ) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -424,13 +428,17 @@ export const useImportarExcel = (
 
           if (subprogramas.length > 0) {
             // Parseo con áreas
-            const { excelRows, areaMontos } = parseSheetConAreas(data, subprogramas);
-            const { filas, distribuciones, noEncontradas } = excelRowsConAreasToFilas(
-              excelRows,
-              areaMontos,
-              cuentasGastos,
-              '215',
+            const { excelRows, areaMontos } = parseSheetConAreas(
+              data,
+              subprogramas,
             );
+            const { filas, distribuciones, noEncontradas } =
+              excelRowsConAreasToFilas(
+                excelRows,
+                areaMontos,
+                cuentasGastos,
+                '215',
+              );
 
             if (filas.length > 0) {
               startTransition(() => importarFilasGastos(filas, distribuciones));

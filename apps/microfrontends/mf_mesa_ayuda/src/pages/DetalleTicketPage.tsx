@@ -1,9 +1,9 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import TicketDetail from '@/components/organisms/TicketDetail';
-import { useTicketDetalle } from '@/hooks/useTicketDetalle';
-import { useState } from 'react';
+import TicketDetail from '@/components/organisms/TicketDetail'
+import { useTicketDetalle } from '@/hooks/useTicketDetalle'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
+import { useState } from 'react'
 
 /**
  * Pagina standalone de detalle de ticket.
@@ -11,20 +11,24 @@ import { useState } from 'react';
  * El ticketId se toma de un prompt simple (en MVP).
  */
 function DetalleTicketPage() {
-  const theme = useTheme();
-  const [ticketId, setTicketId] = useState<number>(0);
-  const [inputValue, setInputValue] = useState('');
+  const theme = useTheme()
+  const [ticketId, setTicketId] = useState<number>(0)
+  const [inputValue, setInputValue] = useState('')
 
-  const {
-    ticket,
-    isLoading,
-    agregarComentario,
-    isAddingComentario,
-  } = useTicketDetalle(ticketId);
+  const { ticket, isLoading, agregarComentario, isAddingComentario } =
+    useTicketDetalle(ticketId)
 
   if (!ticketId) {
     return (
-      <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+      <Box
+        sx={{
+          p: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
         <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600 }}>
           Buscar Ticket
         </Typography>
@@ -46,8 +50,8 @@ function DetalleTicketPage() {
           <button
             type="button"
             onClick={() => {
-              const id = Number(inputValue);
-              if (id > 0) setTicketId(id);
+              const id = Number(inputValue)
+              if (id > 0) setTicketId(id)
             }}
             style={{
               padding: '8px 16px',
@@ -63,7 +67,7 @@ function DetalleTicketPage() {
           </button>
         </Box>
       </Box>
-    );
+    )
   }
 
   return (
@@ -89,7 +93,7 @@ function DetalleTicketPage() {
         isAddingComentario={isAddingComentario}
       />
     </Box>
-  );
+  )
 }
 
-export default DetalleTicketPage;
+export default DetalleTicketPage

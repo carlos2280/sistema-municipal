@@ -11,7 +11,11 @@ interface LogoutDialogProps {
   onConfirm: () => void
 }
 
-export default function LogoutDialog({ open, onClose, onConfirm }: LogoutDialogProps) {
+export default function LogoutDialog({
+  open,
+  onClose,
+  onConfirm,
+}: LogoutDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>Cerrar sesión</DialogTitle>
@@ -22,7 +26,12 @@ export default function LogoutDialog({ open, onClose, onConfirm }: LogoutDialogP
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button onClick={onConfirm} color="error" variant="contained" disableElevation>
+        <Button
+          onClick={onConfirm}
+          color="error"
+          variant="contained"
+          disableElevation
+        >
           Cerrar sesión
         </Button>
       </DialogActions>

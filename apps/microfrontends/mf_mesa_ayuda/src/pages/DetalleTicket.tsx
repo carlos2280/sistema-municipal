@@ -1,22 +1,18 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import TicketDetail from '@/components/organisms/TicketDetail';
-import { useTicketDetalle } from '@/hooks/useTicketDetalle';
+import TicketDetail from '@/components/organisms/TicketDetail'
+import { useTicketDetalle } from '@/hooks/useTicketDetalle'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 interface DetalleTicketProps {
-  ticketId: number;
-  onBack: () => void;
+  ticketId: number
+  onBack: () => void
 }
 
 function DetalleTicket({ ticketId, onBack }: DetalleTicketProps) {
-  const theme = useTheme();
-  const {
-    ticket,
-    isLoading,
-    agregarComentario,
-    isAddingComentario,
-  } = useTicketDetalle(ticketId);
+  const theme = useTheme()
+  const { ticket, isLoading, agregarComentario, isAddingComentario } =
+    useTicketDetalle(ticketId)
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -41,7 +37,7 @@ function DetalleTicket({ ticketId, onBack }: DetalleTicketProps) {
         isAddingComentario={isAddingComentario}
       />
     </Box>
-  );
+  )
 }
 
-export default DetalleTicket;
+export default DetalleTicket

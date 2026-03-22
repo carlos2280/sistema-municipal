@@ -1,3 +1,6 @@
+import useHookFormSchema from "@/hooks/useHookFormSchema";
+import type { TSchemaCredenciales } from "@/types/login.zod";
+import { schemaCredenciales } from "@/types/login.zod";
 import {
 	selectResolvedTenantSlug,
 	useAppSelector,
@@ -8,9 +11,6 @@ import {
 } from "mf_store/store";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import useHookFormSchema from "@/hooks/useHookFormSchema";
-import type { TSchemaCredenciales } from "@/types/login.zod";
-import { schemaCredenciales } from "@/types/login.zod";
 import type { AreaOption, LoginStep, MfaSetupPhase } from "../types";
 import { useAreaSistemas } from "./useAreaSistemas";
 import { useLoginFinish } from "./useLoginFinish";
@@ -173,9 +173,7 @@ export const useLoginFlow = () => {
 		setIsSubmitting(true);
 		const { correo, contrasena, areaId, sistemaId } = methods.getValues();
 
-		const minDelay = new Promise<void>((r) =>
-			setTimeout(r, MFA_MIN_DELAY_MS),
-		);
+		const minDelay = new Promise<void>((r) => setTimeout(r, MFA_MIN_DELAY_MS));
 
 		try {
 			const [loginData] = await Promise.all([
@@ -300,9 +298,7 @@ export const useLoginFlow = () => {
 			case 1:
 				return handleLoginStep();
 			case 2:
-				return mfaSetupPending
-					? handleMfaSetupActivar()
-					: handleMfaStep();
+				return mfaSetupPending ? handleMfaSetupActivar() : handleMfaStep();
 			case 3:
 				return handlePostSetupLogin();
 		}

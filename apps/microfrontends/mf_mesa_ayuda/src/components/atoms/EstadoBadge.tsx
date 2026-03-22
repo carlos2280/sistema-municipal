@@ -1,10 +1,10 @@
-import Chip from '@mui/material/Chip';
-import type { EstadoTicket } from '@/types/mesa-ayuda.types';
-import { getEstadoColor, getEstadoLabel } from '@/utils/estadoTransiciones';
+import type { EstadoTicket } from '@/types/mesa-ayuda.types'
+import { getEstadoColor, getEstadoLabel } from '@/utils/estadoTransiciones'
+import Chip from '@mui/material/Chip'
 
 interface EstadoBadgeProps {
-  estado: EstadoTicket;
-  size?: 'small' | 'medium';
+  estado: EstadoTicket
+  size?: 'small' | 'medium'
 }
 
 function EstadoBadge({ estado, size = 'small' }: EstadoBadgeProps) {
@@ -16,7 +16,7 @@ function EstadoBadge({ estado, size = 'small' }: EstadoBadgeProps) {
       variant="filled"
       sx={{ fontWeight: 600, letterSpacing: '0.02em' }}
     />
-  );
+  )
 }
 
-export default EstadoBadge;
+export default EstadoBadge

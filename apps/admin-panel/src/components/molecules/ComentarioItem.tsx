@@ -1,3 +1,4 @@
+import type { TicketComentario } from '@/types/mesa-ayuda'
 import LockIcon from '@mui/icons-material/Lock'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
@@ -6,7 +7,6 @@ import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { TicketComentario } from '@/types/mesa-ayuda'
 
 interface ComentarioItemProps {
   comentario: TicketComentario
@@ -21,7 +21,14 @@ function getInitials(name: string): string {
 }
 
 function getAvatarColor(name: string): string {
-  const colors = ['#60A5FA', '#34D399', '#FBBF24', '#F87171', '#A78BFA', '#FB923C']
+  const colors = [
+    '#60A5FA',
+    '#34D399',
+    '#FBBF24',
+    '#F87171',
+    '#A78BFA',
+    '#FB923C',
+  ]
   let hash = 0
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash)
@@ -32,13 +39,18 @@ function getAvatarColor(name: string): string {
 export function ComentarioItem({ comentario }: ComentarioItemProps) {
   const theme = useTheme()
 
-  const autorNombre = comentario.autorNombre ?? comentario.autor ?? 'Desconocido'
+  const autorNombre =
+    comentario.autorNombre ?? comentario.autor ?? 'Desconocido'
   const contenido = comentario.contenido ?? comentario.texto ?? ''
   const esInterno = comentario.esInterno ?? false
 
-  const formattedDate = format(parseISO(comentario.createdAt), 'd MMM yyyy, HH:mm', {
-    locale: es,
-  })
+  const formattedDate = format(
+    parseISO(comentario.createdAt),
+    'd MMM yyyy, HH:mm',
+    {
+      locale: es,
+    },
+  )
 
   const avatarColor = getAvatarColor(autorNombre)
 
@@ -57,7 +69,14 @@ export function ComentarioItem({ comentario }: ComentarioItemProps) {
         mb: 1.5,
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 1,
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar
             sx={{
@@ -92,7 +111,11 @@ export function ComentarioItem({ comentario }: ComentarioItemProps) {
             />
           )}
         </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, ml: 1 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ flexShrink: 0, ml: 1 }}
+        >
           {formattedDate}
         </Typography>
       </Box>

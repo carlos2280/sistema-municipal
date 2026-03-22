@@ -3,8 +3,14 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion'
-import { useEffect, type ReactNode } from 'react'
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from 'framer-motion'
+import { type ReactNode, useEffect } from 'react'
 
 interface TrendInfo {
   value: number
@@ -40,7 +46,9 @@ function AnimatedNumber({ value, format, delay = 0 }: AnimatedNumberProps) {
     duration: shouldReduceMotion ? 0 : 1200,
     bounce: 0,
   })
-  const displayed = useTransform(spring, (v) => formatValue(Math.round(v), format))
+  const displayed = useTransform(spring, (v) =>
+    formatValue(Math.round(v), format),
+  )
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -52,7 +60,15 @@ function AnimatedNumber({ value, format, delay = 0 }: AnimatedNumberProps) {
   return <motion.span>{displayed}</motion.span>
 }
 
-export function KpiCard({ icon, value, label, color, format = 'number', trend, delay = 0 }: KpiCardProps) {
+export function KpiCard({
+  icon,
+  value,
+  label,
+  color,
+  format = 'number',
+  trend,
+  delay = 0,
+}: KpiCardProps) {
   const theme = useTheme()
   const resolvedColor = color ?? theme.palette.primary.main
   const isNumeric = typeof value === 'number'
@@ -112,7 +128,9 @@ export function KpiCard({ icon, value, label, color, format = 'number', trend, d
               value
             )}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}
+          >
             <Typography variant="label" component="div" color="text.secondary">
               {label}
             </Typography>
@@ -122,7 +140,10 @@ export function KpiCard({ icon, value, label, color, format = 'number', trend, d
                 sx={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: trend.direction === 'up' ? theme.palette.success.main : theme.palette.error.main,
+                  color:
+                    trend.direction === 'up'
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
                 }}
               >
                 {trend.direction === 'up' ? '↑' : '↓'} {trend.value}%

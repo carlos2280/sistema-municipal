@@ -159,7 +159,10 @@ export default function AppLayout() {
 			<Stage />
 
 			{/* ── Compass FAB ──────────────────────────────────────────── */}
-			<Compass hidden={compassHidden || focusMode} chatUnreadCount={isChatActive ? chatUnreadCount : 0} />
+			<Compass
+				hidden={compassHidden || focusMode}
+				chatUnreadCount={isChatActive ? chatUnreadCount : 0}
+			/>
 
 			{/* ── StatusLine (2px accent bottom) ───────────────────────── */}
 			<StatusLine />

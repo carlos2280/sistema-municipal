@@ -122,8 +122,14 @@ const MontoAreaInput = forwardRef<MontoAreaInputHandle, MontoAreaInputProps>(
             width: '100%',
             '& input': { textAlign: 'right', padding: '2px 4px' },
             '&::after': {
-              borderBottomColor: t.palette[paletteColor as keyof typeof t.palette]
-                ? (t.palette[paletteColor as keyof typeof t.palette] as { main: string }).main
+              borderBottomColor: t.palette[
+                paletteColor as keyof typeof t.palette
+              ]
+                ? (
+                    t.palette[paletteColor as keyof typeof t.palette] as {
+                      main: string;
+                    }
+                  ).main
                 : t.palette.primary.main,
               borderBottomWidth: 2,
             },

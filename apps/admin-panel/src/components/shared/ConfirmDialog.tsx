@@ -53,7 +53,9 @@ export default function ConfirmDialog({
               flexShrink: 0,
             }}
           >
-            <WarningAmberIcon sx={{ fontSize: 20, color: theme.palette.error.main }} />
+            <WarningAmberIcon
+              sx={{ fontSize: 20, color: theme.palette.error.main }}
+            />
           </Box>
           <Typography variant="h6">{title}</Typography>
         </Box>
@@ -64,7 +66,12 @@ export default function ConfirmDialog({
           {entityName && (
             <>
               {' '}
-              <Typography component="span" variant="body2" fontWeight={700} color="text.primary">
+              <Typography
+                component="span"
+                variant="body2"
+                fontWeight={700}
+                color="text.primary"
+              >
                 {entityName}
               </Typography>
             </>

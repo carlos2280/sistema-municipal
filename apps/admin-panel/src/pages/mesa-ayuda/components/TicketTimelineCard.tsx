@@ -1,9 +1,9 @@
+import { TicketTimelineItem } from '@/components/molecules'
+import type { TicketHistorial } from '@/types/mesa-ayuda'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { TicketTimelineItem } from '@/components/molecules'
-import type { TicketHistorial } from '@/types/mesa-ayuda'
 
 interface TicketTimelineCardProps {
   historial: TicketHistorial[]

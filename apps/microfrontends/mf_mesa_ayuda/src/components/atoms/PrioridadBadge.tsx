@@ -1,14 +1,18 @@
-import Chip from '@mui/material/Chip';
-import { useTheme } from '@mui/material/styles';
+import Chip from '@mui/material/Chip'
+import { useTheme } from '@mui/material/styles'
 
 interface PrioridadBadgeProps {
-  nombre: string;
-  color: string | null;
-  size?: 'small' | 'medium';
+  nombre: string
+  color: string | null
+  size?: 'small' | 'medium'
 }
 
-function PrioridadBadge({ nombre, color, size = 'small' }: PrioridadBadgeProps) {
-  const theme = useTheme();
+function PrioridadBadge({
+  nombre,
+  color,
+  size = 'small',
+}: PrioridadBadgeProps) {
+  const theme = useTheme()
 
   return (
     <Chip
@@ -21,7 +25,7 @@ function PrioridadBadge({ nombre, color, size = 'small' }: PrioridadBadgeProps) 
         color: color ?? theme.palette.text.secondary,
       }}
     />
-  );
+  )
 }
 
-export default PrioridadBadge;
+export default PrioridadBadge

@@ -1,6 +1,6 @@
+import type { EstadoTicket } from '@/types/mesa-ayuda'
 import Box from '@mui/material/Box'
 import { alpha, useTheme } from '@mui/material/styles'
-import type { EstadoTicket } from '@/types/mesa-ayuda'
 
 interface EstadoChipProps {
   estado: EstadoTicket

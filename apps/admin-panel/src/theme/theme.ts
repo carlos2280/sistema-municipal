@@ -1,11 +1,11 @@
 import { createTheme } from '@mui/material/styles'
 import { createComponentsConfig } from './components'
 import {
+  PRIMARY_COLOR,
   bordersDark,
   bordersLight,
   durations,
   easings,
-  PRIMARY_COLOR,
   radii,
   semanticColorsDark,
   semanticColorsLight,

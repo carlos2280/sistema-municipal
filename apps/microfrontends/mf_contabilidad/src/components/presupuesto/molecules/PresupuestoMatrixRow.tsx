@@ -1,3 +1,4 @@
+import type { FilaMatrix, SubprogramaItem } from '@/types/presupuesto.types';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -6,8 +7,9 @@ import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import { type Theme, alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
 import { memo, useCallback, useRef } from 'react';
-import type { FilaMatrix, SubprogramaItem } from '@/types/presupuesto.types';
-import MontoAreaInput, { type MontoAreaInputHandle } from '../atoms/MontoAreaInput';
+import MontoAreaInput, {
+  type MontoAreaInputHandle,
+} from '../atoms/MontoAreaInput';
 import MontoInput, { type MontoInputHandle } from '../atoms/MontoInput';
 
 interface PresupuestoMatrixRowProps {
@@ -18,11 +20,19 @@ interface PresupuestoMatrixRowProps {
   isWarnChild: boolean;
   isDeleteTarget: boolean;
   onMontoConfirm: (clientId: string, monto: number) => void;
-  onMontoAreaConfirm: (clientId: string, subprogramaId: number, montoPesos: number) => void;
+  onMontoAreaConfirm: (
+    clientId: string,
+    subprogramaId: number,
+    montoPesos: number,
+  ) => void;
   onRecalcular: (clientId: string) => void;
   onEliminar: (clientId: string) => void;
   onTab: (clientId: string, shiftKey: boolean) => void;
-  onTabArea: (clientId: string, currentAreaIndex: number, shiftKey: boolean) => void;
+  onTabArea: (
+    clientId: string,
+    currentAreaIndex: number,
+    shiftKey: boolean,
+  ) => void;
   onEnterArea: (clientId: string, areaIndex: number) => void;
   loading?: boolean;
 }
@@ -94,7 +104,10 @@ function getRowSx(
       ...(!hasDiscrepancia &&
         !isWarnChild &&
         depth > 0 && {
-          '&:hover': { bgcolor: t.meridian?.surfaces?.s3 ?? alpha(t.palette.action.hover, 1) },
+          '&:hover': {
+            bgcolor:
+              t.meridian?.surfaces?.s3 ?? alpha(t.palette.action.hover, 1),
+          },
         }),
     }),
     '& .row-actions': { opacity: 0, transition: 'opacity 120ms' },
@@ -174,7 +187,15 @@ function PresupuestoMatrixRow({
   );
 
   return (
-    <Box sx={getRowSx(depth, hasDiscrepancia, isWarnChild, isDeleteTarget, gridTemplate)}>
+    <Box
+      sx={getRowSx(
+        depth,
+        hasDiscrepancia,
+        isWarnChild,
+        isDeleteTarget,
+        gridTemplate,
+      )}
+    >
       {/* Col 1: Código */}
       <div
         style={{ ...cellBase, paddingLeft: `${14 + depth * NIVEL_INDENT}px` }}
@@ -243,8 +264,11 @@ function PresupuestoMatrixRow({
                   width: 3,
                   borderRadius: 1,
                   bgcolor: alpha(
-                    (t.palette[paletteColor as keyof typeof t.palette] as { main: string })?.main ??
-                      t.palette.primary.main,
+                    (
+                      t.palette[paletteColor as keyof typeof t.palette] as {
+                        main: string;
+                      }
+                    )?.main ?? t.palette.primary.main,
                     0.4,
                   ),
                   opacity: 0,

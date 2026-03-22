@@ -1,10 +1,10 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useCreateTicketMutation,
   useUpdateTicketMutation,
-} from 'mf_store/store';
+} from 'mf_store/store'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 const ticketFormSchema = z.object({
   titulo: z
@@ -15,21 +15,25 @@ const ticketFormSchema = z.object({
     .string()
     .min(10, 'La descripcion debe tener al menos 10 caracteres')
     .max(5000, 'La descripcion no puede superar 5000 caracteres'),
-  categoriaId: z.number({ required_error: 'Seleccione una categoria' }).positive(),
-  prioridadId: z.number({ required_error: 'Seleccione una prioridad' }).positive(),
+  categoriaId: z
+    .number({ required_error: 'Seleccione una categoria' })
+    .positive(),
+  prioridadId: z
+    .number({ required_error: 'Seleccione una prioridad' })
+    .positive(),
   departamento: z.string().optional(),
-});
+})
 
-export type TicketFormValues = z.infer<typeof ticketFormSchema>;
+export type TicketFormValues = z.infer<typeof ticketFormSchema>
 
 interface UseTicketFormOptions {
-  defaultValues?: Partial<TicketFormValues>;
-  ticketId?: number;
-  onSuccess?: () => void;
+  defaultValues?: Partial<TicketFormValues>
+  ticketId?: number
+  onSuccess?: () => void
 }
 
 export function useTicketForm(options: UseTicketFormOptions = {}) {
-  const { defaultValues, ticketId, onSuccess } = options;
+  const { defaultValues, ticketId, onSuccess } = options
 
   const form = useForm<TicketFormValues>({
     resolver: zodResolver(ticketFormSchema),
@@ -39,21 +43,21 @@ export function useTicketForm(options: UseTicketFormOptions = {}) {
       departamento: '',
       ...defaultValues,
     },
-  });
+  })
 
-  const [createTicket, createState] = useCreateTicketMutation();
-  const [updateTicket, updateState] = useUpdateTicketMutation();
+  const [createTicket, createState] = useCreateTicketMutation()
+  const [updateTicket, updateState] = useUpdateTicketMutation()
 
-  const isEditing = ticketId !== undefined;
+  const isEditing = ticketId !== undefined
 
   const onSubmit = form.handleSubmit(async (data) => {
     if (isEditing) {
-      await updateTicket({ id: ticketId, ...data });
+      await updateTicket({ id: ticketId, ...data })
     } else {
-      await createTicket(data);
+      await createTicket(data)
     }
-    onSuccess?.();
-  });
+    onSuccess?.()
+  })
 
   return {
     form,
@@ -61,5 +65,5 @@ export function useTicketForm(options: UseTicketFormOptions = {}) {
     isSubmitting: createState.isLoading || updateState.isLoading,
     isEditing,
     errors: form.formState.errors,
-  };
+  }
 }

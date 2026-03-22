@@ -1,13 +1,13 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
-import './index.css';
-import { ThemeProvider } from '@mui/material/styles';
-import { createStore } from 'mf_store/store';
-import { Toaster } from 'sonner';
-import App from './App.tsx';
-import theme from './theme/theme';
-const { store } = createStore();
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
+import './index.css'
+import { ThemeProvider } from '@mui/material/styles'
+import { createStore } from 'mf_store/store'
+import { Toaster } from 'sonner'
+import App from './App.tsx'
+import theme from './theme/theme'
+const { store } = createStore()
 
 // biome-ignore lint/style/noNonNullAssertion: root element always exists in index.html
 createRoot(document.getElementById('root')!).render(
@@ -31,4 +31,4 @@ createRoot(document.getElementById('root')!).render(
       </ThemeProvider>
     </Provider>
   </StrictMode>,
-);
+)

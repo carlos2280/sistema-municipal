@@ -1,16 +1,16 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Skeleton from '@mui/material/Skeleton';
-import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import type { TicketStats } from '@/types/mesa-ayuda.types';
+import type { TicketStats } from '@/types/mesa-ayuda.types'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Skeleton from '@mui/material/Skeleton'
+import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
 
 interface StatItemConfig {
-  label: string;
-  key: keyof TicketStats;
-  colorKey: 'info' | 'warning' | 'default' | 'success' | 'error';
+  label: string
+  key: keyof TicketStats
+  colorKey: 'info' | 'warning' | 'default' | 'success' | 'error'
 }
 
 const STAT_ITEMS: StatItemConfig[] = [
@@ -19,7 +19,7 @@ const STAT_ITEMS: StatItemConfig[] = [
   { label: 'En Espera', key: 'enEspera', colorKey: 'default' },
   { label: 'Resueltos', key: 'resueltos', colorKey: 'success' },
   { label: 'Vencidos SLA', key: 'vencidosSla', colorKey: 'error' },
-];
+]
 
 function getStatColor(
   colorKey: StatItemConfig['colorKey'],
@@ -27,25 +27,25 @@ function getStatColor(
 ): string {
   switch (colorKey) {
     case 'info':
-      return palette.info.main;
+      return palette.info.main
     case 'warning':
-      return palette.warning.main;
+      return palette.warning.main
     case 'success':
-      return palette.success.main;
+      return palette.success.main
     case 'error':
-      return palette.error.main;
+      return palette.error.main
     default:
-      return palette.text.secondary;
+      return palette.text.secondary
   }
 }
 
 interface TicketStatsBarProps {
-  stats: TicketStats | null;
-  isLoading: boolean;
+  stats: TicketStats | null
+  isLoading: boolean
 }
 
 function TicketStatsBar({ stats, isLoading }: TicketStatsBarProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   if (isLoading) {
     return (
@@ -54,14 +54,14 @@ function TicketStatsBar({ stats, isLoading }: TicketStatsBarProps) {
           <Skeleton key={item.key} variant="rounded" width={140} height={80} />
         ))}
       </Box>
-    );
+    )
   }
 
   return (
     <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
       {STAT_ITEMS.map((item, index) => {
-        const color = getStatColor(item.colorKey, theme.palette);
-        const value = stats?.[item.key] ?? 0;
+        const color = getStatColor(item.colorKey, theme.palette)
+        const value = stats?.[item.key] ?? 0
 
         return (
           <motion.div
@@ -92,10 +92,10 @@ function TicketStatsBar({ stats, isLoading }: TicketStatsBarProps) {
               </CardContent>
             </Card>
           </motion.div>
-        );
+        )
       })}
     </Box>
-  );
+  )
 }
 
-export default TicketStatsBar;
+export default TicketStatsBar

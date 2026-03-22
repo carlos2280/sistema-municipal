@@ -1,14 +1,14 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 interface CategoriaDotProps {
-  nombre: string;
-  color: string | null;
+  nombre: string
+  color: string | null
 }
 
 function CategoriaDot({ nombre, color }: CategoriaDotProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -25,7 +25,7 @@ function CategoriaDot({ nombre, color }: CategoriaDotProps) {
         {nombre}
       </Typography>
     </Box>
-  );
+  )
 }
 
-export default CategoriaDot;
+export default CategoriaDot

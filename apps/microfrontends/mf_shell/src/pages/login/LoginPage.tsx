@@ -168,10 +168,7 @@ function LoginFormContent({
 		if (activeStep === 1) return !!(areaId && sistemaId);
 		if (activeStep === 2) {
 			if (mfaSetupPending) {
-				return (
-					mfaSetupInline.code.length === 6 &&
-					!mfaSetupInline.isActivating
-				);
+				return mfaSetupInline.code.length === 6 && !mfaSetupInline.isActivating;
 			}
 			return mfaCode.trim().length >= 6;
 		}
@@ -204,11 +201,7 @@ function LoginFormContent({
 		<>
 			<AnimatePresence mode="wait" custom={direction}>
 				<motion.div
-					key={
-						mfaSetupPending
-							? `setup-${mfaSetupInline.phase}`
-							: activeStep
-					}
+					key={mfaSetupPending ? `setup-${mfaSetupInline.phase}` : activeStep}
 					custom={direction}
 					variants={reducedMotion ? undefined : stepVariants}
 					initial="enter"
@@ -334,9 +327,7 @@ export default function LoginPage() {
 						<Building2 />
 					</TenantIcon>
 					<TenantOrg>
-						<TenantName>
-							{tenantNombre || "Municipalidad"}
-						</TenantName>
+						<TenantName>{tenantNombre || "Municipalidad"}</TenantName>
 						Sistema Integrado de Gestión · MERIDIAN
 					</TenantOrg>
 				</TenantBadge>

@@ -1,3 +1,5 @@
+import type { AdminCategoria, CambiarCategoriaInput } from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -7,10 +9,8 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { AdminCategoria, CambiarCategoriaInput } from '@/types/mesa-ayuda'
 
 const schema = z.object({
   categoriaId: z.number().min(1),
@@ -35,7 +35,12 @@ export function CambiarCategoriaDialog({
   categorias,
   categoriaActualId,
 }: CambiarCategoriaDialogProps) {
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { categoriaId: categoriaActualId ?? categorias[0]?.id ?? 0 },
   })
@@ -51,7 +56,13 @@ export function CambiarCategoriaDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
+    >
       <DialogTitle>Cambiar Categoría</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         <Controller
@@ -75,7 +86,11 @@ export function CambiarCategoriaDialog({
         <Button onClick={handleClose} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button variant="contained" onClick={handleSubmit(handleValid)} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit(handleValid)}
+          disabled={isLoading}
+        >
           Cambiar
         </Button>
       </DialogActions>

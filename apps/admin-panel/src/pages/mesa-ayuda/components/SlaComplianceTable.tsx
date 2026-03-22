@@ -1,3 +1,4 @@
+import { SlaProgressBar } from '@/components/molecules'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Table from '@mui/material/Table'
@@ -6,7 +7,6 @@ import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
-import { SlaProgressBar } from '@/components/molecules'
 
 interface ComplianceRow {
   id: number
@@ -22,15 +22,23 @@ interface SlaComplianceTableProps {
   emptyMessage?: string
 }
 
-export function SlaComplianceTable({ title, rows, emptyMessage = 'Sin datos' }: SlaComplianceTableProps) {
+export function SlaComplianceTable({
+  title,
+  rows,
+  emptyMessage = 'Sin datos',
+}: SlaComplianceTableProps) {
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>{title}</Typography>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+          {title}
+        </Typography>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>{title.includes('Prioridad') ? 'Prioridad' : 'Municipalidad'}</TableCell>
+              <TableCell>
+                {title.includes('Prioridad') ? 'Prioridad' : 'Municipalidad'}
+              </TableCell>
               <TableCell align="right">Total</TableCell>
               <TableCell align="right">Vencidos</TableCell>
               <TableCell sx={{ minWidth: 160 }}>Compliance</TableCell>
@@ -68,7 +76,9 @@ export function SlaComplianceTable({ title, rows, emptyMessage = 'Sin datos' }: 
             {rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center">
-                  <Typography variant="body2" color="text.secondary">{emptyMessage}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {emptyMessage}
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}

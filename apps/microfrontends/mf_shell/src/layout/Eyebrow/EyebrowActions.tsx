@@ -145,8 +145,7 @@ function EyebrowActions({
 	const hasChatUnread = chatUnreadCount > 0;
 	const hasAnyUnread = hasNotifications || hasChatUnread;
 
-	const chatDisplay =
-		chatUnreadCount > 99 ? "99+" : String(chatUnreadCount);
+	const chatDisplay = chatUnreadCount > 99 ? "99+" : String(chatUnreadCount);
 
 	return (
 		<ActionsContainer>
@@ -173,9 +172,7 @@ function EyebrowActions({
 					type="button"
 				>
 					<MessageCircle size={14} />
-					{hasChatUnread && (
-						<ChatBadgeText>[{chatDisplay}]</ChatBadgeText>
-					)}
+					{hasChatUnread && <ChatBadgeText>[{chatDisplay}]</ChatBadgeText>}
 				</ChatButton>
 			)}
 

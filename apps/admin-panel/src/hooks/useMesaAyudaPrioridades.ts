@@ -18,7 +18,9 @@ export function useActualizarPrioridad() {
     mutationFn: ({ id, data }: { id: number; data: UpdatePrioridadInput }) =>
       mesaAyuda.prioridades.update(id, data),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: mesaAyudaKeys.prioridades() })
+      void queryClient.invalidateQueries({
+        queryKey: mesaAyudaKeys.prioridades(),
+      })
     },
   })
 }

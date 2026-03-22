@@ -1,14 +1,18 @@
+import { PrioridadChip } from '@/components/atoms/PrioridadChip'
+import { TenantBadge } from '@/components/atoms/TenantBadge'
+import type { SlaTicketEnRiesgo, SlaTicketVencido } from '@/types/mesa-ayuda'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
+import {
+  type MRT_ColumnDef,
+  MaterialReactTable,
+  useMaterialReactTable,
+} from 'material-react-table'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PrioridadChip } from '@/components/atoms/PrioridadChip'
-import { TenantBadge } from '@/components/atoms/TenantBadge'
-import type { SlaTicketEnRiesgo, SlaTicketVencido } from '@/types/mesa-ayuda'
 
 type SlaRiskType = 'vencidos' | 'enRiesgo'
 type SlaTicket = SlaTicketVencido | SlaTicketEnRiesgo
@@ -29,7 +33,11 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
         header: 'Número',
         size: 100,
         Cell: ({ cell }) => (
-          <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main }}>
+          <Typography
+            variant="body2"
+            fontWeight={600}
+            sx={{ color: theme.palette.primary.main }}
+          >
             {cell.getValue<string>()}
           </Typography>
         ),
@@ -121,7 +129,9 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
       sx: {
         cursor: 'pointer',
         backgroundColor:
-          type === 'vencidos' ? alpha(theme.palette.error.main, 0.06) : undefined,
+          type === 'vencidos'
+            ? alpha(theme.palette.error.main, 0.06)
+            : undefined,
         '&:hover': {
           backgroundColor: alpha(theme.palette.error.main, 0.1),
         },

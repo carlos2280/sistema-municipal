@@ -1,4 +1,13 @@
 import type {
+  CreateSubscriptionInput,
+  CreateTenantInput,
+  Module,
+  Subscription,
+  Tenant,
+  UpdateEstadoInput,
+  UpdateTenantInput,
+} from '../types'
+import type {
   AdminCategoria,
   AdminMesaAyudaDashboard,
   AdminPrioridad,
@@ -16,15 +25,6 @@ import type {
   UpdateCategoriaInput,
   UpdatePrioridadInput,
 } from '../types/mesa-ayuda'
-import type {
-  CreateSubscriptionInput,
-  CreateTenantInput,
-  Module,
-  Subscription,
-  Tenant,
-  UpdateEstadoInput,
-  UpdateTenantInput,
-} from '../types'
 import { clearApiKey, getApiKey } from './auth'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
@@ -124,8 +124,7 @@ function buildTicketParams(filters?: AdminTicketFilters): string {
 }
 
 export const mesaAyuda = {
-  dashboard: () =>
-    request<AdminMesaAyudaDashboard>('/mesa-ayuda/dashboard'),
+  dashboard: () => request<AdminMesaAyudaDashboard>('/mesa-ayuda/dashboard'),
 
   tickets: (filters?: AdminTicketFilters) => {
     const qs = buildTicketParams(filters)
@@ -135,9 +134,7 @@ export const mesaAyuda = {
   },
 
   ticketDetail: (tenantSlug: string, ticketId: number) =>
-    request<AdminTicketDetail>(
-      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}`,
-    ),
+    request<AdminTicketDetail>(`/mesa-ayuda/tickets/${tenantSlug}/${ticketId}`),
 
   cambiarEstado: (
     tenantSlug: string,

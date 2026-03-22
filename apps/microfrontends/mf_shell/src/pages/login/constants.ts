@@ -1,10 +1,4 @@
-import {
-	Building2,
-	LogIn,
-	MailCheck,
-	QrCode,
-	ShieldCheck,
-} from "lucide-react";
+import { Building2, LogIn, MailCheck, QrCode, ShieldCheck } from "lucide-react";
 import type { LoginStep, StepConfig } from "./types";
 
 /** Labels base del stepper (2 fijos + dinámicos según flujo) */
@@ -30,8 +24,7 @@ export const STEP_CONFIG: Record<LoginStep, StepConfig> = {
 	},
 	2: {
 		title: "Verificación en dos pasos",
-		subtitle:
-			"Ingresa el código de 6 dígitos de tu aplicación autenticadora",
+		subtitle: "Ingresa el código de 6 dígitos de tu aplicación autenticadora",
 		buttonLabel: "Verificar",
 		icon: ShieldCheck,
 	},

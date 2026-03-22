@@ -1,3 +1,4 @@
+import type { EstadoTicket } from '@/types/mesa-ayuda'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
@@ -6,9 +7,13 @@ import WarningIcon from '@mui/icons-material/Warning'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import { differenceInHours, formatDistanceToNow, isPast, parseISO } from 'date-fns'
+import {
+  differenceInHours,
+  formatDistanceToNow,
+  isPast,
+  parseISO,
+} from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { EstadoTicket } from '@/types/mesa-ayuda'
 
 interface SlaIndicatorProps {
   fechaLimite: string | null
@@ -18,7 +23,10 @@ interface SlaIndicatorProps {
 
 type SlaStatus = 'vencido' | 'riesgo' | 'ok' | 'neutral'
 
-function getSlaStatus(fechaLimite: string | null, estado: EstadoTicket): SlaStatus {
+function getSlaStatus(
+  fechaLimite: string | null,
+  estado: EstadoTicket,
+): SlaStatus {
   if (estado === 'resuelto' || estado === 'cerrado') return 'neutral'
   if (!fechaLimite) return 'neutral'
 
@@ -41,7 +49,11 @@ function getSlaLabel(fechaLimite: string | null, estado: EstadoTicket): string {
   return `${formatDistanceToNow(fecha, { locale: es, addSuffix: false })} restantes`
 }
 
-export function SlaIndicator({ fechaLimite, estado, compact = false }: SlaIndicatorProps) {
+export function SlaIndicator({
+  fechaLimite,
+  estado,
+  compact = false,
+}: SlaIndicatorProps) {
   const theme = useTheme()
   const status = getSlaStatus(fechaLimite, estado)
   const label = getSlaLabel(fechaLimite, estado)
@@ -76,9 +88,13 @@ export function SlaIndicator({ fechaLimite, estado, compact = false }: SlaIndica
       <Typography variant="caption" sx={{ color, fontWeight: 500 }}>
         {label}
       </Typography>
-      {status === 'neutral' && estado !== 'resuelto' && estado !== 'cerrado' && (
-        <AccessTimeIcon sx={{ fontSize: 14, color: theme.palette.text.disabled }} />
-      )}
+      {status === 'neutral' &&
+        estado !== 'resuelto' &&
+        estado !== 'cerrado' && (
+          <AccessTimeIcon
+            sx={{ fontSize: 14, color: theme.palette.text.disabled }}
+          />
+        )}
     </Box>
   )
 }

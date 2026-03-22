@@ -340,9 +340,7 @@ export function MembersPanel({
                 color: 'text.secondary',
               }}
             >
-              {searchTerm
-                ? 'No se encontraron miembros'
-                : 'No hay miembros'}
+              {searchTerm ? 'No se encontraron miembros' : 'No hay miembros'}
             </Typography>
           </Box>
         ) : (

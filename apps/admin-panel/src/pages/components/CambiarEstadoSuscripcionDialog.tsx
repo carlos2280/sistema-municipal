@@ -1,3 +1,4 @@
+import type { EstadoSuscripcion } from '@/types'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -8,7 +9,6 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-import type { EstadoSuscripcion } from '@/types'
 
 interface CambiarEstadoSuscripcionDialogProps {
   open: boolean
@@ -40,13 +40,22 @@ export function CambiarEstadoSuscripcionDialog({
       slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
     >
       <DialogTitle>Cambiar Estado</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
+      <DialogContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          pt: '8px !important',
+        }}
+      >
         <FormControl fullWidth>
           <InputLabel>Estado</InputLabel>
           <Select
             value={estado}
             label="Estado"
-            onChange={(e) => onEstadoChange(e.target.value as EstadoSuscripcion)}
+            onChange={(e) =>
+              onEstadoChange(e.target.value as EstadoSuscripcion)
+            }
           >
             <MenuItem value="activa">Activa</MenuItem>
             <MenuItem value="trial">Trial</MenuItem>

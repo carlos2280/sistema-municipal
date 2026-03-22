@@ -1,12 +1,15 @@
+import type { ThemeMode } from '@/App'
+import { pageTransition } from '@/theme/motion'
 import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import type { ThemeMode } from '@/App'
-import { pageTransition } from '@/theme/motion'
 import Header from './Header'
-import Sidebar, { SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_WIDTH_EXPANDED } from './Sidebar'
+import Sidebar, {
+  SIDEBAR_WIDTH_COLLAPSED,
+  SIDEBAR_WIDTH_EXPANDED,
+} from './Sidebar'
 
 interface AdminLayoutProps {
   mode: ThemeMode
@@ -24,7 +27,9 @@ export default function AdminLayout({ mode, toggleTheme }: AdminLayoutProps) {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
 
-  const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED
+  const sidebarWidth = collapsed
+    ? SIDEBAR_WIDTH_COLLAPSED
+    : SIDEBAR_WIDTH_EXPANDED
   const pagePadding = isDetailPage(location.pathname) ? 2.5 : 4
 
   return (
@@ -35,9 +40,16 @@ export default function AdminLayout({ mode, toggleTheme }: AdminLayoutProps) {
         bgcolor: theme.meridian.surfaces.ground,
       }}
     >
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((prev) => !prev)} />
+      <Sidebar
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((prev) => !prev)}
+      />
 
-      <Header mode={mode} toggleTheme={toggleTheme} sidebarWidth={sidebarWidth} />
+      <Header
+        mode={mode}
+        toggleTheme={toggleTheme}
+        sidebarWidth={sidebarWidth}
+      />
 
       <Box
         component="main"

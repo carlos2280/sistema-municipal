@@ -1,22 +1,22 @@
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import type { Comentario } from '@/types/mesa-ayuda.types';
+import type { Comentario } from '@/types/mesa-ayuda.types'
+import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
+import Chip from '@mui/material/Chip'
+import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
 
 interface ComentarioItemProps {
-  comentario: Comentario;
+  comentario: Comentario
 }
 
 function ComentarioItem({ comentario }: ComentarioItemProps) {
-  const theme = useTheme();
+  const theme = useTheme()
   const initials = comentario.autorNombre
     .split(' ')
     .map((n) => n[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase()
 
   const fecha = new Date(comentario.createdAt).toLocaleString('es-CL', {
     day: '2-digit',
@@ -24,7 +24,7 @@ function ComentarioItem({ comentario }: ComentarioItemProps) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  })
 
   return (
     <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
@@ -43,7 +43,10 @@ function ComentarioItem({ comentario }: ComentarioItemProps) {
       <Box sx={{ flex: 1 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: theme.palette.text.primary }}
+          >
             {comentario.autorNombre}
           </Typography>
           <Typography variant="caption" color="text.disabled">
@@ -79,13 +82,17 @@ function ComentarioItem({ comentario }: ComentarioItemProps) {
             }`,
           }}
         >
-          <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ whiteSpace: 'pre-wrap' }}
+          >
             {comentario.contenido}
           </Typography>
         </Box>
       </Box>
     </Box>
-  );
+  )
 }
 
-export default ComentarioItem;
+export default ComentarioItem

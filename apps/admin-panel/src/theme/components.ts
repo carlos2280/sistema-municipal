@@ -2,7 +2,9 @@ import { alpha } from '@mui/material/styles'
 import type { ThemeOptions } from '@mui/material/styles'
 import { durations, easings, radii, textDark, textLight } from './tokens'
 
-export function createComponentsConfig(mode: 'dark' | 'light'): ThemeOptions['components'] {
+export function createComponentsConfig(
+  mode: 'dark' | 'light',
+): ThemeOptions['components'] {
   const text = mode === 'dark' ? textDark : textLight
 
   // Scrollbar styles — uses tokens, zero hardcoded colors

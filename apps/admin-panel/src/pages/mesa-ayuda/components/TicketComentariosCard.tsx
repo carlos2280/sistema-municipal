@@ -1,9 +1,12 @@
+import { ComentarioForm, ComentarioItem } from '@/components/molecules'
+import type {
+  AgregarComentarioInput,
+  TicketComentario,
+} from '@/types/mesa-ayuda'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { ComentarioForm, ComentarioItem } from '@/components/molecules'
-import type { AgregarComentarioInput, TicketComentario } from '@/types/mesa-ayuda'
 
 interface TicketComentariosCardProps {
   comentarios: TicketComentario[]
@@ -11,7 +14,11 @@ interface TicketComentariosCardProps {
   onSubmit: (data: AgregarComentarioInput) => void
 }
 
-export function TicketComentariosCard({ comentarios, isLoading, onSubmit }: TicketComentariosCardProps) {
+export function TicketComentariosCard({
+  comentarios,
+  isLoading,
+  onSubmit,
+}: TicketComentariosCardProps) {
   return (
     <Card>
       <CardContent>
