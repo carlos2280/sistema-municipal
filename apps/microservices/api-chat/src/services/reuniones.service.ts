@@ -12,7 +12,7 @@ import {
   reuniones,
 } from '../db/schemas/index.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
+import { obtenerUsuariosBatch } from '../libs/identidadClient.js'
 import { mensajesService } from './mensajes.service.js'
 
 export const reunionesService = {
@@ -30,7 +30,7 @@ export const reunionesService = {
     const reunion = await this.obtenerPorId(db, id)
     if (!reunion) return undefined
 
-    const invitaciones = await db
+    const invitacionesRaw = await db
       .select({
         id: invitacionesReunion.id,
         reunionId: invitacionesReunion.reunionId,
@@ -39,11 +39,19 @@ export const reunionesService = {
         respondidoEn: invitacionesReunion.respondidoEn,
         createdAt: invitacionesReunion.createdAt,
         updatedAt: invitacionesReunion.updatedAt,
-        nombreUsuario: usuarios.nombreCompleto,
       })
       .from(invitacionesReunion)
-      .leftJoin(usuarios, eq(usuarios.id, invitacionesReunion.usuarioId))
       .where(eq(invitacionesReunion.reunionId, id))
+
+    // Enriquecer con nombres de usuario via api-identidad
+    const usuarioIds = invitacionesRaw.map((i) => i.usuarioId)
+    const usuariosResueltos = await obtenerUsuariosBatch(usuarioIds)
+    const usuarioMap = new Map(usuariosResueltos.map((u) => [u.id, u]))
+
+    const invitaciones = invitacionesRaw.map((i) => ({
+      ...i,
+      nombreUsuario: usuarioMap.get(i.usuarioId)?.nombreCompleto ?? null,
+    }))
 
     return { ...reunion, invitaciones }
   },

@@ -5,7 +5,12 @@ export const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  DATABASE_URL: z.string().url(),
+  // DATABASE_URL mantiene compatibilidad con multi-tenant (createTenantDbClient)
+  DATABASE_URL: z.string().url().optional(),
+  // Conexion principal: DB transversal (mensajeria)
+  DATABASE_URL_TRANSVERSAL: z.string().url(),
+  // URL del microservicio api-identidad para resolver datos de usuarios
+  IDENTIDAD_SERVICE_URL: z.string().url().default('http://localhost:3001'),
   JWT_SECRET: z.string().min(10),
   CORS_ORIGIN: z.string().default('http://localhost:5030'),
   MAX_FILE_SIZE: z.string().default('10485760'),

@@ -22,8 +22,14 @@ async function bootstrap() {
   httpServer.listen(Number(env.PORT), () => {
     logger.info(`[api-chat] Servidor iniciado en puerto ${env.PORT}`)
 
+    // dbName para identidad: nombre de la DB de identidad del tenant por defecto.
+    // Se extrae de DATABASE_URL si está definida, o se usa 'muni_default'.
+    const identidadDbName = env.DATABASE_URL
+      ? new URL(env.DATABASE_URL).pathname.replace(/^\//, '')
+      : 'muni_default'
+
     gruposSistemaService
-      .sincronizarGrupos(db)
+      .sincronizarGrupos(db, identidadDbName)
       .then((result) => {
         if (result.created.length > 0 || result.updated.length > 0) {
           logger.info(

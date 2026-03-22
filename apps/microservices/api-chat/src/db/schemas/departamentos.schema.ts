@@ -1,11 +1,7 @@
-import { integer, serial, text } from 'drizzle-orm/pg-core'
-import { identidadSchema } from '../../config/schemaPG.js'
-
-// Solo lectura - tabla pertenece al schema 'identidad'
-export const departamentos = identidadSchema.table('departamentos', {
-  id: serial('id').primaryKey(),
-  nombreDepartamento: text('nombre_departamento').notNull(),
-  idDireccion: integer('id_direccion').notNull(),
-})
-
-export type Departamento = typeof departamentos.$inferSelect
+// Tipo local que representa un departamento resuelto desde api-identidad via HTTP.
+// La tabla identidad.departamentos vive en muni_default, no en transversal.
+export interface DepartamentoLocal {
+  id: number
+  nombreDepartamento: string
+  idDireccion: number
+}

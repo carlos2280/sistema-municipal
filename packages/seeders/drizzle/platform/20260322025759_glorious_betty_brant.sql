@@ -10,8 +10,8 @@ CREATE TABLE "modulos" (
 	"requiere" text[] DEFAULT '{}',
 	"activo" boolean DEFAULT true,
 	"orden" integer DEFAULT 0,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "modulos_codigo_unique" UNIQUE("codigo")
 );
 --> statement-breakpoint
@@ -30,8 +30,9 @@ CREATE TABLE "municipalidades" (
 	"db_name" text NOT NULL,
 	"activo" boolean DEFAULT true,
 	"max_usuarios" integer DEFAULT 50,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"mfa_policy" text DEFAULT 'optional' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "municipalidades_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "municipalidades_rut_unique" UNIQUE("rut"),
 	CONSTRAINT "municipalidades_db_name_unique" UNIQUE("db_name")
@@ -42,13 +43,13 @@ CREATE TABLE "suscripciones" (
 	"municipalidad_id" integer NOT NULL,
 	"modulo_id" integer NOT NULL,
 	"estado" text DEFAULT 'activa' NOT NULL,
-	"fecha_inicio" timestamp DEFAULT now() NOT NULL,
-	"fecha_fin" timestamp,
+	"fecha_inicio" timestamp with time zone DEFAULT now() NOT NULL,
+	"fecha_fin" timestamp with time zone,
 	"precio_mensual" numeric(10, 2),
 	"notas" text,
 	"activado_por" text,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "uq_muni_modulo" UNIQUE("municipalidad_id","modulo_id")
 );
 --> statement-breakpoint
@@ -61,7 +62,7 @@ CREATE TABLE "suscripcion_historial" (
 	"motivo" text,
 	"ejecutado_por" text NOT NULL,
 	"metadata" jsonb DEFAULT '{}'::jsonb,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "suscripciones" ADD CONSTRAINT "suscripciones_municipalidad_id_municipalidades_id_fk" FOREIGN KEY ("municipalidad_id") REFERENCES "public"."municipalidades"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

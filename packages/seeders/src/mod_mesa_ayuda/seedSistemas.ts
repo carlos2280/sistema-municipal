@@ -16,6 +16,7 @@ export async function seedMesaAyudaSistemas(db: DbExecutor) {
   const [sistema] = await db
     .insert(sistemas)
     .values({
+      codigo: "mesa_ayuda",
       nombre: "Mesa de Ayuda",
       icono: "headphones",
     })

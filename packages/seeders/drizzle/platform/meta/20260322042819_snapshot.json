@@ -1,6 +1,6 @@
 {
-  "id": "f0d768d1-a273-4370-beaa-eb36e408262d",
-  "prevId": "be8191da-9a42-4264-8dd6-79cee24c33dd",
+  "id": "63e0d64b-b942-43ec-b597-dd41e6b4c4c2",
+  "prevId": "fd707441-fc45-4604-baa6-f4eb43a5f02a",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -185,6 +185,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "transversal_db_name": {
+          "name": "transversal_db_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'transversal'"
         },
         "activo": {
           "name": "activo",

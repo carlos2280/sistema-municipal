@@ -21,6 +21,7 @@ export const municipalidades = pgTable("municipalidades", {
   dominioBase: text("dominio_base").notNull(),
   dominiosCustom: text("dominios_custom").array().default([]),
   dbName: text("db_name").notNull().unique(),
+  transversalDbName: text("transversal_db_name").notNull().default("transversal"),
   activo: boolean("activo").default(true),
   maxUsuarios: integer("max_usuarios").default(50),
   mfaPolicy: text("mfa_policy")

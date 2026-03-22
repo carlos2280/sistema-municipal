@@ -6,17 +6,17 @@ import * as schema from './schemas/index.js'
 
 const { Pool } = pg
 
+// Conexion principal: DB transversal (schema mensajeria)
 const pool = new Pool({
-  connectionString: env.DATABASE_URL,
+  connectionString: env.DATABASE_URL_TRANSVERSAL,
 })
 
-// Instancia por defecto (backward compat)
 export const db = drizzle(pool, { schema })
 
 export type DbClient = typeof db
 
 /**
- * Parsea la DATABASE_URL para extraer host, port, user, password.
+ * Parsea una DATABASE_URL para extraer host, port, user, password.
  * Se usa para crear pools de tenant con las mismas credenciales de servidor.
  */
 function parseDatabaseUrl(url: string) {
@@ -30,10 +30,12 @@ function parseDatabaseUrl(url: string) {
   }
 }
 
-const dbConfig = parseDatabaseUrl(env.DATABASE_URL)
+const dbConfig = parseDatabaseUrl(env.DATABASE_URL_TRANSVERSAL)
 
 /**
- * Crea una instancia de drizzle conectada a la DB de un tenant específico.
+ * Crea una instancia de drizzle conectada a una DB de tenant específica.
+ * El schema mensajeria vive en la DB transversal, pero el tenant puede
+ * tener su propia instancia (mismas credenciales de servidor, distinta DB).
  * Reutiliza pools vía getTenantPool() del shared package.
  */
 export function createTenantDbClient(dbName: string): DbClient {

@@ -21,6 +21,7 @@ import {
   invalidateSubscriptionCache,
   subscriptionGuard,
 } from "./middleware/subscriptionGuard";
+import { transversalDbInjector } from "./middleware/transversalDbInjector";
 import { configureProxies } from "./proxy";
 
 const corsOptions = {
@@ -87,6 +88,9 @@ export const createApp = (): Express => {
 
   // SUBSCRIPTION: Bloquear acceso a módulos no contratados por el tenant
   app.use(subscriptionGuard);
+
+  // TRANSVERSAL DB: Resolver el nombre de la DB transversal del tenant para servicios transversales
+  app.use(transversalDbInjector);
 
   // INTERNAL: Endpoint para invalidar cache de suscripciones (llamado por api-platform)
   app.post("/internal/cache/invalidate", (req, res) => {

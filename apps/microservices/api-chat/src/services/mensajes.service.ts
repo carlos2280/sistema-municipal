@@ -6,7 +6,11 @@ import {
   type NewMensaje,
   mensajes,
 } from '../db/schemas/mensajes.schema.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
+import {
+  type UsuarioResumen,
+  obtenerUsuarioPorId,
+  obtenerUsuariosBatch,
+} from '../libs/identidadClient.js'
 
 const PAGE_SIZE = 50
 
@@ -16,6 +20,11 @@ interface MensajeConRemitente extends Mensaje {
     nombreCompleto: string
     email: string
   }
+}
+
+// Fallback cuando el usuario no se puede resolver desde api-identidad
+function remitenteDesconocido(id: number): UsuarioResumen {
+  return { id, nombreCompleto: 'Usuario', email: '' }
 }
 
 export const mensajesService = {
@@ -31,42 +40,23 @@ export const mensajesService = {
     }
 
     const results = await db
-      .select({
-        id: mensajes.id,
-        conversacionId: mensajes.conversacionId,
-        remitenteId: mensajes.remitenteId,
-        contenido: mensajes.contenido,
-        tipo: mensajes.tipo,
-        replyToId: mensajes.replyToId,
-        editado: mensajes.editado,
-        eliminado: mensajes.eliminado,
-        createdAt: mensajes.createdAt,
-        updatedAt: mensajes.updatedAt,
-        remitenteNombre: usuarios.nombreCompleto,
-        remitenteEmail: usuarios.email,
-      })
+      .select()
       .from(mensajes)
-      .innerJoin(usuarios, eq(usuarios.id, mensajes.remitenteId))
       .where(and(...conditions))
       .orderBy(desc(mensajes.createdAt))
       .limit(PAGE_SIZE)
 
+    if (results.length === 0) return []
+
+    // Enriquecer con datos de usuario via api-identidad (batch)
+    const remitenteIds = [...new Set(results.map((r) => r.remitenteId))]
+    const remitentes = await obtenerUsuariosBatch(remitenteIds)
+    const remitenteMap = new Map(remitentes.map((u) => [u.id, u]))
+
     return results.map((r) => ({
-      id: r.id,
-      conversacionId: r.conversacionId,
-      remitenteId: r.remitenteId,
-      contenido: r.contenido,
-      tipo: r.tipo,
-      replyToId: r.replyToId,
-      editado: r.editado,
-      eliminado: r.eliminado,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-      remitente: {
-        id: r.remitenteId,
-        nombreCompleto: r.remitenteNombre,
-        email: r.remitenteEmail,
-      },
+      ...r,
+      remitente:
+        remitenteMap.get(r.remitenteId) ?? remitenteDesconocido(r.remitenteId),
     }))
   },
 
@@ -76,29 +66,20 @@ export const mensajesService = {
   ): Promise<MensajeConRemitente> {
     const [nuevoMensaje] = await db.insert(mensajes).values(data).returning()
 
-    // Actualizar timestamp de la conversación
+    // Actualizar timestamp de la conversacion
     await db
       .update(conversaciones)
       .set({ updatedAt: new Date() })
       .where(eq(conversaciones.id, data.conversacionId))
 
-    // Obtener datos del remitente
-    const [remitente] = await db
-      .select({
-        id: usuarios.id,
-        nombreCompleto: usuarios.nombreCompleto,
-        email: usuarios.email,
-      })
-      .from(usuarios)
-      .where(eq(usuarios.id, data.remitenteId))
+    // Resolver datos del remitente via api-identidad
+    const remitente =
+      (await obtenerUsuarioPorId(data.remitenteId)) ??
+      remitenteDesconocido(data.remitenteId)
 
     return {
       ...nuevoMensaje,
-      remitente: {
-        id: remitente.id,
-        nombreCompleto: remitente.nombreCompleto,
-        email: remitente.email,
-      },
+      remitente,
     }
   },
 

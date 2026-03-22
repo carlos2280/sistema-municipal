@@ -1,45 +1,28 @@
-import { and, eq, ilike, ne } from 'drizzle-orm'
-import type { DbClient } from '../db/client.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
+import {
+  type UsuarioResumen,
+  buscarUsuarios as identidadBuscarUsuarios,
+  obtenerUsuarioPorId as identidadObtenerUsuarioPorId,
+} from '../libs/identidadClient.js'
 
 export const usuariosService = {
+  /**
+   * Busca usuarios delegando a api-identidad.
+   * El parametro `db` se mantiene por compatibilidad de firma con los controllers
+   * que pasan `tenantDb`, pero no se usa (identidad vive en muni_default).
+   */
   async buscarUsuarios(
-    db: DbClient,
+    _db: unknown,
     busqueda: string,
     usuarioActualId: number,
     limit = 20,
-  ) {
-    const resultado = await db
-      .select({
-        id: usuarios.id,
-        nombreCompleto: usuarios.nombreCompleto,
-        email: usuarios.email,
-      })
-      .from(usuarios)
-      .where(
-        and(
-          ne(usuarios.id, usuarioActualId),
-          eq(usuarios.activo, true),
-          busqueda
-            ? ilike(usuarios.nombreCompleto, `%${busqueda}%`)
-            : undefined,
-        ),
-      )
-      .limit(limit)
-
-    return resultado
+  ): Promise<UsuarioResumen[]> {
+    return identidadBuscarUsuarios(busqueda, usuarioActualId, limit)
   },
 
-  async obtenerUsuarioPorId(db: DbClient, id: number) {
-    const [usuario] = await db
-      .select({
-        id: usuarios.id,
-        nombreCompleto: usuarios.nombreCompleto,
-        email: usuarios.email,
-      })
-      .from(usuarios)
-      .where(eq(usuarios.id, id))
-
-    return usuario
+  async obtenerUsuarioPorId(
+    _db: unknown,
+    id: number,
+  ): Promise<UsuarioResumen | undefined> {
+    return identidadObtenerUsuarioPorId(id)
   },
 }

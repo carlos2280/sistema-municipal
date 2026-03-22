@@ -16,6 +16,7 @@
       "@services/*": ["./src/services/*"],
       "@routes/*": ["./src/routes/*"]
     },
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "types": ["node"],
     "noEmit": false,
     "allowImportingTsExtensions": false,

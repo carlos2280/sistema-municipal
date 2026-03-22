@@ -1,6 +1,6 @@
 {
-  "id": "7ec500a6-d9a6-45dd-b6e2-046f10c32229",
-  "prevId": "d1e29572-f532-4a7d-a97d-be24ea2228cc",
+  "id": "7d268fef-8d59-4977-b4ac-17f5bd6ec10d",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -20,16 +20,22 @@
           "primaryKey": false,
           "notNull": true
         },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -72,7 +78,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_deptos_direccion": {
+          "name": "idx_deptos_direccion",
+          "columns": [
+            {
+              "expression": "id_direccion",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "departamentos_id_direccion_direcciones_id_fk": {
           "name": "departamentos_id_direccion_direcciones_id_fk",
@@ -199,14 +221,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -309,7 +331,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_oficinas_depto": {
+          "name": "idx_oficinas_depto",
+          "columns": [
+            {
+              "expression": "id_departamento",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "oficinas_id_departamento_departamentos_id_fk": {
           "name": "oficinas_id_departamento_departamentos_id_fk",
@@ -362,14 +400,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -470,14 +508,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -515,14 +553,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -606,6 +644,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "codigo": {
+          "name": "codigo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "nombre": {
           "name": "nombre",
           "type": "text",
@@ -620,14 +664,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -636,7 +680,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "sistemas_codigo_unique": {
+          "name": "sistemas_codigo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "codigo"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -672,13 +724,13 @@
         },
         "expira_en": {
           "name": "expira_en",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "creado_en": {
           "name": "creado_en",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -765,14 +817,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -804,7 +856,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_usuarios_oficina": {
+          "name": "idx_usuarios_oficina",
+          "columns": [
+            {
+              "expression": "id_oficina",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "usuarios_id_oficina_oficinas_id_fk": {
           "name": "usuarios_id_oficina_oficinas_id_fk",
@@ -866,14 +934,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
@@ -931,14 +999,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -1041,14 +1109,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -1090,6 +1158,21 @@
           "columns": [
             {
               "expression": "tipo_cuenta_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_planes_parent": {
+          "name": "idx_planes_parent",
+          "columns": [
+            {
+              "expression": "parent_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1208,14 +1291,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
@@ -1265,6 +1348,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "subprograma_id": {
+          "name": "subprograma_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "monto_anual": {
           "name": "monto_anual",
           "type": "bigint",
@@ -1279,20 +1368,66 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_presup_det_cuenta": {
+          "name": "idx_presup_det_cuenta",
+          "columns": [
+            {
+              "expression": "cuenta_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_presup_det_centro": {
+          "name": "idx_presup_det_centro",
+          "columns": [
+            {
+              "expression": "centro_costo_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_presup_det_subprog": {
+          "name": "idx_presup_det_subprog",
+          "columns": [
+            {
+              "expression": "subprograma_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "presupuestos_detalle_presupuesto_id_presupuestos_id_fk": {
           "name": "presupuestos_detalle_presupuesto_id_presupuestos_id_fk",
@@ -1335,6 +1470,20 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "presupuestos_detalle_subprograma_id_subprogramas_presupuestarios_id_fk": {
+          "name": "presupuestos_detalle_subprograma_id_subprogramas_presupuestarios_id_fk",
+          "tableFrom": "presupuestos_detalle",
+          "tableTo": "subprogramas_presupuestarios",
+          "schemaTo": "contabilidad",
+          "columnsFrom": [
+            "subprograma_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1345,7 +1494,118 @@
           "columns": [
             "presupuesto_id",
             "cuenta_id",
-            "centro_costo_id"
+            "centro_costo_id",
+            "subprograma_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "contabilidad.subprogramas_presupuestarios": {
+      "name": "subprogramas_presupuestarios",
+      "schema": "contabilidad",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "codigo": {
+          "name": "codigo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "abreviatura": {
+          "name": "abreviatura",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orden": {
+          "name": "orden",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_subprog_codigo": {
+          "name": "idx_subprog_codigo",
+          "columns": [
+            {
+              "expression": "codigo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_subprog_activo": {
+          "name": "idx_subprog_activo",
+          "columns": [
+            {
+              "expression": "activo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subprogramas_presupuestarios_codigo_unique": {
+          "name": "subprogramas_presupuestarios_codigo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "codigo"
           ]
         }
       },
@@ -1377,14 +1637,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -1422,14 +1682,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
@@ -1437,768 +1697,6 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.archivos": {
-      "name": "archivos",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "mensaje_id": {
-          "name": "mensaje_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "nombre": {
-          "name": "nombre",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tipo": {
-          "name": "tipo",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tamanio": {
-          "name": "tamanio",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "thumbnail_url": {
-          "name": "thumbnail_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "archivos_mensaje_id_mensajes_id_fk": {
-          "name": "archivos_mensaje_id_mensajes_id_fk",
-          "tableFrom": "archivos",
-          "tableTo": "mensajes",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "mensaje_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.conversaciones": {
-      "name": "conversaciones",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "tipo": {
-          "name": "tipo",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "nombre": {
-          "name": "nombre",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "descripcion": {
-          "name": "descripcion",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "avatar_url": {
-          "name": "avatar_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "creador_id": {
-          "name": "creador_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "activo": {
-          "name": "activo",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "sistema": {
-          "name": "sistema",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "departamento_id": {
-          "name": "departamento_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.estado_usuarios": {
-      "name": "estado_usuarios",
-      "schema": "mensajeria",
-      "columns": {
-        "usuario_id": {
-          "name": "usuario_id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "estado": {
-          "name": "estado",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'offline'"
-        },
-        "ultima_conexion": {
-          "name": "ultima_conexion",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "socket_id": {
-          "name": "socket_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.invitaciones_reunion": {
-      "name": "invitaciones_reunion",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "reunion_id": {
-          "name": "reunion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "usuario_id": {
-          "name": "usuario_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "estado": {
-          "name": "estado",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pendiente'"
-        },
-        "respondido_en": {
-          "name": "respondido_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "invitaciones_reunion_reunion_id_reuniones_id_fk": {
-          "name": "invitaciones_reunion_reunion_id_reuniones_id_fk",
-          "tableFrom": "invitaciones_reunion",
-          "tableTo": "reuniones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "reunion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.llamadas": {
-      "name": "llamadas",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "conversacion_id": {
-          "name": "conversacion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "iniciado_por": {
-          "name": "iniciado_por",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tipo": {
-          "name": "tipo",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "estado": {
-          "name": "estado",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "livekit_room": {
-          "name": "livekit_room",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "duracion_segundos": {
-          "name": "duracion_segundos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "participantes_ids": {
-          "name": "participantes_ids",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "iniciada_en": {
-          "name": "iniciada_en",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "finalizada_en": {
-          "name": "finalizada_en",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "llamadas_conversacion_id_conversaciones_id_fk": {
-          "name": "llamadas_conversacion_id_conversaciones_id_fk",
-          "tableFrom": "llamadas",
-          "tableTo": "conversaciones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.mensajes": {
-      "name": "mensajes",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "conversacion_id": {
-          "name": "conversacion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "remitente_id": {
-          "name": "remitente_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "contenido": {
-          "name": "contenido",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tipo": {
-          "name": "tipo",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'texto'"
-        },
-        "reply_to_id": {
-          "name": "reply_to_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "editado": {
-          "name": "editado",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "eliminado": {
-          "name": "eliminado",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "mensajes_conversacion_id_conversaciones_id_fk": {
-          "name": "mensajes_conversacion_id_conversaciones_id_fk",
-          "tableFrom": "mensajes",
-          "tableTo": "conversaciones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.participantes": {
-      "name": "participantes",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "conversacion_id": {
-          "name": "conversacion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "usuario_id": {
-          "name": "usuario_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "rol": {
-          "name": "rol",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'miembro'"
-        },
-        "silenciado": {
-          "name": "silenciado",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "ultima_lectura": {
-          "name": "ultima_lectura",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "participantes_conversacion_id_conversaciones_id_fk": {
-          "name": "participantes_conversacion_id_conversaciones_id_fk",
-          "tableFrom": "participantes",
-          "tableTo": "conversaciones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.recordatorios_reunion": {
-      "name": "recordatorios_reunion",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "reunion_id": {
-          "name": "reunion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "usuario_id": {
-          "name": "usuario_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "minutos_antes": {
-          "name": "minutos_antes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 15
-        },
-        "estado": {
-          "name": "estado",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pendiente'"
-        },
-        "enviar_en": {
-          "name": "enviar_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "enviado_en": {
-          "name": "enviado_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "recordatorios_reunion_reunion_id_reuniones_id_fk": {
-          "name": "recordatorios_reunion_reunion_id_reuniones_id_fk",
-          "tableFrom": "recordatorios_reunion",
-          "tableTo": "reuniones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "reunion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "mensajeria.reuniones": {
-      "name": "reuniones",
-      "schema": "mensajeria",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "conversacion_id": {
-          "name": "conversacion_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "organizador_id": {
-          "name": "organizador_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "titulo": {
-          "name": "titulo",
-          "type": "varchar(200)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "descripcion": {
-          "name": "descripcion",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tipo": {
-          "name": "tipo",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'video'"
-        },
-        "estado": {
-          "name": "estado",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'programada'"
-        },
-        "fecha_inicio": {
-          "name": "fecha_inicio",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "fecha_fin": {
-          "name": "fecha_fin",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "llamada_id": {
-          "name": "llamada_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mensaje_id": {
-          "name": "mensaje_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ubicacion": {
-          "name": "ubicacion",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notas": {
-          "name": "notas",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "reuniones_conversacion_id_conversaciones_id_fk": {
-          "name": "reuniones_conversacion_id_conversaciones_id_fk",
-          "tableFrom": "reuniones",
-          "tableTo": "conversaciones",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reuniones_llamada_id_llamadas_id_fk": {
-          "name": "reuniones_llamada_id_llamadas_id_fk",
-          "tableFrom": "reuniones",
-          "tableTo": "llamadas",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "llamada_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reuniones_mensaje_id_mensajes_id_fk": {
-          "name": "reuniones_mensaje_id_mensajes_id_fk",
-          "tableFrom": "reuniones",
-          "tableTo": "mensajes",
-          "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "mensaje_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -2208,9 +1706,8 @@
   },
   "enums": {},
   "schemas": {
-    "contabilidad": "contabilidad",
     "identidad": "identidad",
-    "mensajeria": "mensajeria"
+    "contabilidad": "contabilidad"
   },
   "sequences": {},
   "roles": {},

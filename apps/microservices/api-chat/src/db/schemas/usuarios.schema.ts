@@ -1,16 +1,7 @@
-import { boolean, integer, serial, text, timestamp } from 'drizzle-orm/pg-core'
-import { identidadSchema } from '../../config/schemaPG.js'
-
-// Schema de usuarios (solo lectura desde api-chat)
-// La tabla pertenece al schema 'identidad' pero api-chat la consulta
-export const usuarios = identidadSchema.table('usuarios', {
-  id: serial('id').primaryKey(),
-  nombreCompleto: text('nombre_completo').notNull(),
-  email: text('email').notNull(),
-  idOficina: integer('id_oficina'),
-  activo: boolean('activo').default(true),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-})
-
-export type Usuario = typeof usuarios.$inferSelect
+// Tipo local que representa los datos de usuario que api-chat recibe
+// desde api-identidad via HTTP (no JOIN directo, las tablas viven en DBs distintas).
+export interface UsuarioLocal {
+  id: number
+  nombreCompleto: string
+  email: string
+}

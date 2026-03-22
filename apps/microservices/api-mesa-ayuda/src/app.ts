@@ -2,17 +2,18 @@ import { loadEnv } from '@/config/env'
 import { type DbClient, initializeDB } from '@/db/client'
 import { errorHandler } from '@/libs/middleware/error.middleware'
 import { requireGateway } from '@/libs/middleware/requireGateway'
+import { extractUser } from '@/middlewares/extractUser'
 import router from '@/routes'
 import { requestIdMiddleware } from '@municipal/core/logger'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { sql } from 'drizzle-orm'
-import express, { type Express } from 'express'
+import express from 'express'
 
 const env = loadEnv()
 const db: DbClient = initializeDB(env)
 
-const app: Express = express()
+const app = express()
 
 app.use(
   cors({
@@ -26,6 +27,11 @@ app.use(requestIdMiddleware)
 app.use(express.json())
 app.use(cookieParser())
 app.use(requireGateway)
+
+// Extrae y valida usuario + tenantId desde headers del gateway.
+// Mesa de ayuda es centralizada: siempre conecta a DB `transversal`.
+// El tenantId del header se usa como filtro obligatorio en todas las queries.
+app.use(extractUser)
 
 app.use('/api', router)
 

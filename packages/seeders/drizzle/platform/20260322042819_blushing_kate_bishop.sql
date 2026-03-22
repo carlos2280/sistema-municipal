@@ -1,0 +1,1 @@
+ALTER TABLE "municipalidades" ADD COLUMN "transversal_db_name" text DEFAULT 'transversal' NOT NULL;

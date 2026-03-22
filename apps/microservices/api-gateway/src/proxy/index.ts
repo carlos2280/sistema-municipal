@@ -11,6 +11,7 @@ import type { GatewayUserPayload } from "../middleware/auth";
 interface RequestWithBody extends IncomingMessage {
   body?: unknown;
   __gatewayUser?: GatewayUserPayload;
+  __transversalDbName?: string;
 }
 
 interface ServiceConfig {
@@ -141,6 +142,14 @@ export const configureProxies = (app: Express) => {
               );
             }
 
+            // Inyectar DB transversal del tenant (solo para servicios transversales)
+            if (reqWithUser.__transversalDbName) {
+              proxyReq.setHeader(
+                X_USER_HEADERS.transversalDbName,
+                reqWithUser.__transversalDbName,
+              );
+            }
+
             // Construir URL final para logging
             const targetUrl = `${config.baseUrl}${req.url}`;
 
@@ -168,10 +177,10 @@ export const configureProxies = (app: Express) => {
             // Eliminar headers CORS del upstream para evitar conflictos
             // (el upstream puede enviar Access-Control-Allow-Origin: * que es
             // incompatible con credentials: "include" del frontend)
-            delete proxyRes.headers["access-control-allow-origin"];
-            delete proxyRes.headers["access-control-allow-credentials"];
-            delete proxyRes.headers["access-control-allow-methods"];
-            delete proxyRes.headers["access-control-allow-headers"];
+            proxyRes.headers["access-control-allow-origin"] = undefined;
+            proxyRes.headers["access-control-allow-credentials"] = undefined;
+            proxyRes.headers["access-control-allow-methods"] = undefined;
+            proxyRes.headers["access-control-allow-headers"] = undefined;
 
             // Setear CORS correcto con el origen específico
             const origin = req.headers.origin;

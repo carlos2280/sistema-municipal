@@ -24,6 +24,9 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
+    "db:setup": "pnpm --filter @municipal/seeders db:setup",
+    "db:migrate:all": "pnpm --filter @municipal/seeders db:migrate:all",
+    "db:seed:all": "pnpm --filter @municipal/seeders seed:all",
     "test": "echo \"No tests configured yet\"",
     "prepare": "node -e \"if(process.env.CI!=='true'){require('child_process').execSync('husky install')}\""
   },

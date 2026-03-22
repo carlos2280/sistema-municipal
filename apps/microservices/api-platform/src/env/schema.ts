@@ -18,6 +18,17 @@ export const envSchema = z.object({
     .transform((val) => val === "true"),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
 
+  // Transversal DB (mesa_ayuda, mensajeria)
+  TRANSVERSAL_DB_USER: z.string().min(1).default("postgres"),
+  TRANSVERSAL_DB_PASSWORD: z.string().min(1).default("postgres"),
+  TRANSVERSAL_DB_HOST: z.string().min(1).default("localhost"),
+  TRANSVERSAL_DB_PORT: z.coerce.number().int().positive().default(5434),
+  TRANSVERSAL_DB_NAME: z.string().min(1).default("transversal"),
+  TRANSVERSAL_DB_SSL: z
+    .string()
+    .default("false")
+    .transform((val) => val === "true"),
+
   // Platform config
   PLATFORM_DOMAIN: z.string().min(1).default("localhost"),
 

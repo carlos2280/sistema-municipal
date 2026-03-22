@@ -5,6 +5,8 @@ import { desc, eq } from "drizzle-orm";
 import {
   createTenantDatabase,
   generateDbName,
+  generateTransversalDbName,
+  provisionTransversalDb,
   runTenantMigrations,
 } from "./provisioning.service";
 
@@ -52,8 +54,9 @@ export const getTenantById = async (id: number) => {
 
 export const createTenant = async (input: CreateTenantInput) => {
   const dbName = generateDbName(input.slug);
+  const transversalDbName = generateTransversalDbName(input.slug);
 
-  // 1. Insert into platform DB
+  // 1. Insert into platform DB (includes transversal_db_name)
   const [tenant] = await db
     .insert(municipalidades)
     .values({
@@ -61,6 +64,7 @@ export const createTenant = async (input: CreateTenantInput) => {
       slug: input.slug,
       dominioBase: input.dominioBase,
       dbName,
+      transversalDbName,
       rut: input.rut,
       direccion: input.direccion,
       telefono: input.telefono,
@@ -70,7 +74,7 @@ export const createTenant = async (input: CreateTenantInput) => {
     })
     .returning();
 
-  // 2. Create PostgreSQL database
+  // 2. Create core PostgreSQL database (identidad, contabilidad)
   try {
     await createTenantDatabase(dbName);
   } catch (err) {
@@ -81,7 +85,7 @@ export const createTenant = async (input: CreateTenantInput) => {
     );
   }
 
-  // 3. Run migrations on the new DB
+  // 3. Run core migrations on the new DB
   try {
     await runTenantMigrations(dbName);
   } catch (err) {
@@ -90,7 +94,21 @@ export const createTenant = async (input: CreateTenantInput) => {
       .set({ activo: false })
       .where(eq(municipalidades.id, tenant.id));
     throw new AppError(
-      `Error ejecutando migraciones: ${(err as Error).message}`,
+      `Error ejecutando migraciones de DB core: ${(err as Error).message}`,
+      500,
+    );
+  }
+
+  // 4. Provision transversal DB: create + migrate (mensajeria schema) + seed catalogs
+  try {
+    await provisionTransversalDb(transversalDbName);
+  } catch (err) {
+    await db
+      .update(municipalidades)
+      .set({ activo: false })
+      .where(eq(municipalidades.id, tenant.id));
+    throw new AppError(
+      `Error provisionando DB transversal: ${(err as Error).message}`,
       500,
     );
   }

@@ -2,13 +2,11 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as identidadSchema from "@municipal/db-identidad";
 import * as contabilidadSchema from "@municipal/db-contabilidad";
-import * as mensajeriaSchema from "@municipal/db-mensajeria";
 import { loadEnv } from "./env";
 
 const schema = {
   ...identidadSchema,
   ...contabilidadSchema,
-  ...mensajeriaSchema,
 };
 
 export type DbClient = ReturnType<typeof createDbClient>;
