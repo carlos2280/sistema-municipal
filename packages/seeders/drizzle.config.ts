@@ -10,7 +10,7 @@ const {
   DB_USER = "postgres",
   DB_PASSWORD = "postgres",
   DB_HOST = "localhost",
-  DB_PORT = "5432",
+  DB_PORT = "5434",
   DB_NAME = "muni_default",
   DB_SSL = "false",
 } = process.env;
@@ -21,8 +21,6 @@ export default defineConfig({
     "../db-identidad/src/schemas/*.schema.ts",
     "../db-contabilidad/src/schemas.ts",
     "../db-contabilidad/src/schemas/*.schema.ts",
-    "../db-mensajeria/src/schemas.ts",
-    "../db-mensajeria/src/schemas/*.schema.ts",
   ],
   out: "./drizzle",
   dialect: "postgresql",

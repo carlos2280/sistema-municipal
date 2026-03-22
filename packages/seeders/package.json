@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "seed": "tsx src/index.ts",
+    "seed": "tsx src/migrate.ts && tsx src/index.ts",
     "migrate": "tsx src/migrate.ts",
     "generate": "tsx node_modules/drizzle-kit/bin.cjs generate",
     "db:push": "tsx node_modules/drizzle-kit/bin.cjs push",
@@ -14,8 +14,17 @@
     "platform:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.platform.config.ts",
     "platform:push": "tsx node_modules/drizzle-kit/bin.cjs push --config drizzle.platform.config.ts",
     "platform:studio": "tsx node_modules/drizzle-kit/bin.cjs studio --config drizzle.platform.config.ts",
-    "platform:seed": "tsx src/platform.seed.ts",
-    "tenant:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.tenant.config.ts"
+    "platform:seed": "tsx src/platform.migrate.ts && tsx src/platform.seed.ts",
+    "platform:migrate:run": "tsx src/platform.migrate.ts",
+    "transversal:generate": "tsx node_modules/drizzle-kit/bin.cjs generate --config drizzle.transversal.config.ts",
+    "transversal:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config drizzle.transversal.config.ts",
+    "transversal:push": "tsx node_modules/drizzle-kit/bin.cjs push --config drizzle.transversal.config.ts",
+    "transversal:studio": "tsx node_modules/drizzle-kit/bin.cjs studio --config drizzle.transversal.config.ts",
+    "transversal:seed": "tsx src/transversal.migrate.ts && tsx src/transversal.seed.ts",
+    "transversal:migrate:run": "tsx src/transversal.migrate.ts",
+    "seed:all": "pnpm seed && pnpm platform:seed && pnpm transversal:seed",
+    "db:migrate:all": "pnpm migrate && pnpm platform:migrate:run && pnpm transversal:migrate:run",
+    "db:setup": "pnpm db:migrate:all && pnpm seed:all"
   },
   "dependencies": {
     "@municipal/core": "workspace:*",

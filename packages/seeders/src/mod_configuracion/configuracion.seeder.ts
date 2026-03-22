@@ -22,6 +22,7 @@ export async function seedConfiguracion(db: DbExecutor) {
 	const [sistema] = await db
 		.insert(sistemas)
 		.values({
+			codigo: "configuracion",
 			nombre: "Sistema Configuración",
 			icono: "settings-2",
 		})

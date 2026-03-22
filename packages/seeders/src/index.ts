@@ -40,7 +40,7 @@ export async function runAllSeeders() {
             await seedConfiguracion(tx);
 
             // API--->Mesa de Ayuda (sistemas y menus en tenant DB)
-            // Nota: categorias y prioridades son catálogo global → platform.seed.ts
+            // Nota: categorias y prioridades son catálogo global → transversal.seed.ts
             await seedMesaAyudaSistemas(tx);
 
             // API--->Contabilidad

@@ -10,7 +10,7 @@ const {
   DB_USER = "postgres",
   DB_PASSWORD = "postgres",
   DB_HOST = "localhost",
-  DB_PORT = "5432",
+  DB_PORT = "5434",
   DB_SSL = "false",
   PLATFORM_DB_NAME = "platform",
 } = process.env;
@@ -18,8 +18,6 @@ const {
 export default defineConfig({
   schema: [
     "../db-platform/src/schemas/*.schema.ts",
-    "../db-mesa-ayuda/src/schemas.ts",
-    "../db-mesa-ayuda/src/schemas/*.schema.ts",
   ],
   out: "./drizzle/platform",
   dialect: "postgresql",

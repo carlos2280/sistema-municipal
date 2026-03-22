@@ -1,10 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { planesCuentas } from "@municipal/db-contabilidad";
+import { cuentasSubgrupos, planesCuentas } from "@municipal/db-contabilidad";
 import type { DbExecutor } from "../types/db";
 
 const ANO = 2026;
-const SUB_DEUDORES = 240; // subgrupoId: Deudores Presupuestarios (115)
-const SUB_ACREEDORES = 262; // subgrupoId: Acreedores Presupuestarios (215)
 
 interface CuentaData {
   codigo: string;
@@ -395,6 +393,25 @@ const NIVEL_5: CuentaData[] = [
 
 export async function seedPresupuestoCuentas2026(db: DbExecutor) {
   console.log("🌱 Insertando plan de cuentas presupuestarias 2026...");
+
+  // Resolver IDs de subgrupos por codigo (no hardcodear IDs autoincrement)
+  const [deudores] = await db
+    .select({ id: cuentasSubgrupos.id })
+    .from(cuentasSubgrupos)
+    .where(eq(cuentasSubgrupos.codigo, "115"));
+  const [acreedores] = await db
+    .select({ id: cuentasSubgrupos.id })
+    .from(cuentasSubgrupos)
+    .where(eq(cuentasSubgrupos.codigo, "215"));
+
+  if (!deudores || !acreedores) {
+    throw new Error(
+      "No se encontraron subgrupos 115 (Deudores) o 215 (Acreedores). Ejecutar seedCuentasSubgrupos primero.",
+    );
+  }
+
+  const SUB_DEUDORES = deudores.id;
+  const SUB_ACREEDORES = acreedores.id;
 
   const codeToId = new Map<string, number>();
 
