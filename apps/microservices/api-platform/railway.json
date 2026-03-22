@@ -10,7 +10,8 @@
       "packages/db-identidad/**",
       "packages/db-platform/**",
       "packages/db-contabilidad/**",
-      "packages/db-mensajeria/**"
+      "packages/db-mensajeria/**",
+      "packages/db-mesa-ayuda/**"
     ]
   },
   "deploy": {
