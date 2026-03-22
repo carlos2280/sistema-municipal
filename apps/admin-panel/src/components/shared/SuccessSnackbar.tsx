@@ -11,7 +11,12 @@ interface SuccessSnackbarProps {
   duration?: number
 }
 
-export function SuccessSnackbar({ open, message, onClose, duration = 4000 }: SuccessSnackbarProps) {
+export function SuccessSnackbar({
+  open,
+  message,
+  onClose,
+  duration = 4000,
+}: SuccessSnackbarProps) {
   const theme = useTheme()
 
   return (
@@ -23,7 +28,7 @@ export function SuccessSnackbar({ open, message, onClose, duration = 4000 }: Suc
       aria-live="polite"
     >
       <Box
-        role="status"
+        component="output"
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -37,7 +42,13 @@ export function SuccessSnackbar({ open, message, onClose, duration = 4000 }: Suc
           minWidth: 280,
         }}
       >
-        <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: 20, flexShrink: 0 }} />
+        <CheckCircleIcon
+          sx={{
+            color: theme.palette.success.main,
+            fontSize: 20,
+            flexShrink: 0,
+          }}
+        />
         <Typography variant="body2" fontWeight={500} color="text.primary">
           {message}
         </Typography>
