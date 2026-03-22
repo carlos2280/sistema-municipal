@@ -6,7 +6,7 @@ import express from "express";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-const port = process.env.PORT || 5050;
+const port = process.env.PORT || 5055;
 const distPath = path.join(__dirname, "dist");
 
 app.get("/health", (_req, res) => {

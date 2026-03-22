@@ -9,7 +9,7 @@
  */
 
 import { alpha, styled } from "@mui/material/styles";
-import { useMenu } from "../../hooks/useMenu";
+import { useMenu } from "@/hooks/useMenu";
 import NavPanelFooter from "./NavPanelFooter";
 import NavPanelHeader from "./NavPanelHeader";
 import NavPanelMenu from "./NavPanelMenu";
@@ -110,8 +110,8 @@ function NavPanel({
 				isOpen={isOpen}
 				role="dialog"
 				aria-label="Panel de navegación"
-				aria-modal="true"
-				aria-hidden={!isOpen}
+				aria-modal={isOpen}
+				{...(isOpen ? {} : { inert: "" as unknown as string })}
 			>
 				<NavPanelHeader onClose={onClose} onChangeSistema={onChangeSistema} />
 

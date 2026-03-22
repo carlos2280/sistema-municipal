@@ -1,4 +1,22 @@
 import type {
+  AdminCategoria,
+  AdminMesaAyudaDashboard,
+  AdminPrioridad,
+  AdminSlaMonitoreo,
+  AdminTicketDetail,
+  AdminTicketFilters,
+  AdminTicketListResponse,
+  AgregarComentarioInput,
+  AsignarTicketInput,
+  CambiarCategoriaInput,
+  CambiarEstadoInput,
+  CambiarPrioridadInput,
+  CreateCategoriaInput,
+  TenantResumen,
+  UpdateCategoriaInput,
+  UpdatePrioridadInput,
+} from '../types/mesa-ayuda'
+import type {
   CreateSubscriptionInput,
   CreateTenantInput,
   Module,
@@ -10,7 +28,7 @@ import type {
 import { clearApiKey, getApiKey } from './auth'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-const API_PREFIX = '/api/v1/admin'
+const API_PREFIX = '/api/v1/platform/admin'
 
 export class ApiError extends Error {
   constructor(
@@ -89,4 +107,114 @@ export const subscriptions = {
 
 export const modules = {
   list: () => request<Module[]>('/modules'),
+}
+
+function buildTicketParams(filters?: AdminTicketFilters): string {
+  const params = new URLSearchParams()
+  if (filters?.tenantSlug) params.set('tenantSlug', filters.tenantSlug)
+  if (filters?.estado) params.set('estado', filters.estado)
+  if (filters?.prioridad) params.set('prioridad', filters.prioridad)
+  if (filters?.categoria) params.set('categoria', filters.categoria)
+  if (filters?.search) params.set('search', filters.search)
+  if (filters?.page) params.set('page', String(filters.page))
+  if (filters?.pageSize) params.set('pageSize', String(filters.pageSize))
+  if (filters?.sortBy) params.set('sortBy', filters.sortBy)
+  if (filters?.sortOrder) params.set('sortOrder', filters.sortOrder)
+  return params.toString()
+}
+
+export const mesaAyuda = {
+  dashboard: () =>
+    request<AdminMesaAyudaDashboard>('/mesa-ayuda/dashboard'),
+
+  tickets: (filters?: AdminTicketFilters) => {
+    const qs = buildTicketParams(filters)
+    return request<AdminTicketListResponse>(
+      `/mesa-ayuda/tickets${qs ? `?${qs}` : ''}`,
+    )
+  },
+
+  ticketDetail: (tenantSlug: string, ticketId: number) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}`,
+    ),
+
+  cambiarEstado: (
+    tenantSlug: string,
+    ticketId: number,
+    data: CambiarEstadoInput,
+  ) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}/estado`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
+
+  asignarTicket: (
+    tenantSlug: string,
+    ticketId: number,
+    data: AsignarTicketInput,
+  ) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}/asignar`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
+
+  cambiarPrioridad: (
+    tenantSlug: string,
+    ticketId: number,
+    data: CambiarPrioridadInput,
+  ) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}/prioridad`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
+
+  cambiarCategoria: (
+    tenantSlug: string,
+    ticketId: number,
+    data: CambiarCategoriaInput,
+  ) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}/categoria`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
+
+  agregarComentario: (
+    tenantSlug: string,
+    ticketId: number,
+    data: AgregarComentarioInput,
+  ) =>
+    request<AdminTicketDetail>(
+      `/mesa-ayuda/tickets/${tenantSlug}/${ticketId}/comentarios`,
+      { method: 'POST', body: JSON.stringify(data) },
+    ),
+
+  sla: () => request<AdminSlaMonitoreo>('/mesa-ayuda/sla'),
+
+  tenants: () => request<TenantResumen[]>('/mesa-ayuda/tenants'),
+
+  categorias: {
+    list: () => request<AdminCategoria[]>('/mesa-ayuda/categorias'),
+    create: (data: CreateCategoriaInput) =>
+      request<AdminCategoria>('/mesa-ayuda/categorias', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: UpdateCategoriaInput) =>
+      request<AdminCategoria>(`/mesa-ayuda/categorias/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      request<void>(`/mesa-ayuda/categorias/${id}`, { method: 'DELETE' }),
+  },
+
+  prioridades: {
+    list: () => request<AdminPrioridad[]>('/mesa-ayuda/prioridades'),
+    update: (id: number, data: UpdatePrioridadInput) =>
+      request<AdminPrioridad>(`/mesa-ayuda/prioridades/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+  },
 }

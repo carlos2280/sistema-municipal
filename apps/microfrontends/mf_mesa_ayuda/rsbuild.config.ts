@@ -1,0 +1,58 @@
+import { defineConfig, loadEnv } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+const env = (key: string, parsed: Record<string, string>, fallback: string) =>
+  process.env[key] || parsed[key] || fallback;
+
+export default defineConfig(() => {
+  const { parsed, publicVars } = loadEnv({ prefixes: ['VITE_'] });
+
+  const processEnvDefines: Record<string, string> = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith('VITE_')) {
+      processEnvDefines[`import.meta.env.${key}`] = JSON.stringify(process.env[key]);
+    }
+  }
+
+  return {
+    plugins: [
+      pluginReact(),
+      pluginModuleFederation({
+        name: 'mf_mesa_ayuda',
+        dts: false,
+        exposes: {
+          './routes': './src/routes/routes.tsx',
+          './components': './src/pages/index.ts',
+        },
+        remotes: {
+          mf_store: `mf_store@${env('VITE_MF_STORE_URL', parsed, 'http://localhost:5010/mf-manifest.json')}`,
+        },
+        shared: {
+          react: { singleton: true, requiredVersion: false },
+          'react-dom': { singleton: true, requiredVersion: false },
+          '@mui/material': { singleton: true, requiredVersion: false, version: '7.3.7' },
+          '@mui/icons-material': { singleton: true, requiredVersion: false, version: '7.3.7' },
+          '@emotion/react': { singleton: true, requiredVersion: false },
+          '@emotion/styled': { singleton: true, requiredVersion: false },
+          'react-redux': { singleton: true, requiredVersion: false },
+          '@reduxjs/toolkit': { singleton: true, requiredVersion: false },
+          'react-hook-form': { singleton: true, requiredVersion: false },
+          'framer-motion': { singleton: true, requiredVersion: false },
+          'lucide-react': { singleton: true, requiredVersion: false },
+          sonner: { singleton: true, requiredVersion: false },
+        },
+      }),
+    ],
+    source: { entry: { index: './src/main.tsx' }, define: { ...publicVars, ...processEnvDefines } },
+    resolve: { alias: { '@': './src' } },
+    server: {
+      port: 5050,
+      strictPort: true,
+      host: '0.0.0.0',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    },
+    output: { distPath: { root: 'dist' }, assetPrefix: 'auto' },
+    html: { title: '[M] Mesa de Ayuda' },
+  };
+});

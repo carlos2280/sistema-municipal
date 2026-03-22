@@ -11,6 +11,7 @@ import { seedCentrosCosto } from "./mod_contabilidad/seedCentrosCosto";
 import { seedSubprogramas } from "./mod_contabilidad/seedSubprogramas";
 import { seedPresupuestoCuentas2026 } from "./mod_contabilidad/seedPresupuestoCuentas2026";
 import { seedConfiguracion } from "./mod_configuracion/configuracion.seeder";
+import { seedMesaAyudaSistemas } from "./mod_mesa_ayuda/seedSistemas";
 import { seedOficinas } from "./oficinas.seeder";
 import { seedPerfilAreaUsuario } from "./perfilAreaUsuario.seeder";
 import { seedPerfiles } from "./perfiles.seeder";
@@ -37,6 +38,10 @@ export async function runAllSeeders() {
 
             // API--->Configuración
             await seedConfiguracion(tx);
+
+            // API--->Mesa de Ayuda (sistemas y menus en tenant DB)
+            // Nota: categorias y prioridades son catálogo global → platform.seed.ts
+            await seedMesaAyudaSistemas(tx);
 
             // API--->Contabilidad
             await seedTitulosCuentas(tx);

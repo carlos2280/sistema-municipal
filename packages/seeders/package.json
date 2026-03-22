@@ -22,6 +22,7 @@
     "@municipal/db-contabilidad": "workspace:*",
     "@municipal/db-identidad": "workspace:*",
     "@municipal/db-mensajeria": "workspace:*",
+    "@municipal/db-mesa-ayuda": "workspace:*",
     "@municipal/db-platform": "workspace:*",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",

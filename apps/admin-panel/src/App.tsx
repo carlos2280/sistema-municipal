@@ -13,6 +13,12 @@ import AdminLayout from './components/layout/AdminLayout'
 import { AuthContext, useAuth, useAuthProvider } from './hooks/useAuth'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
+import MesaAyudaCategoriasPage from './pages/mesa-ayuda/MesaAyudaCategoriasPage'
+import MesaAyudaDashboardPage from './pages/mesa-ayuda/MesaAyudaDashboardPage'
+import MesaAyudaSlaConfigPage from './pages/mesa-ayuda/MesaAyudaSlaConfigPage'
+import MesaAyudaSlaPage from './pages/mesa-ayuda/MesaAyudaSlaPage'
+import MesaAyudaTicketDetailPage from './pages/mesa-ayuda/MesaAyudaTicketDetailPage'
+import MesaAyudaTicketsPage from './pages/mesa-ayuda/MesaAyudaTicketsPage'
 import ModulesPage from './pages/ModulesPage'
 import TenantDetailPage from './pages/TenantDetailPage'
 import TenantsPage from './pages/TenantsPage'
@@ -33,7 +39,7 @@ function RequireAuth() {
 export type ThemeMode = 'light' | 'dark'
 
 export default function App() {
-  const [mode, setMode] = useState<ThemeMode>('light')
+  const [mode, setMode] = useState<ThemeMode>('dark')
   const theme = useMemo(
     () => (mode === 'dark' ? darkTheme : lightTheme),
     [mode],
@@ -61,6 +67,30 @@ export default function App() {
                   <Route path="/tenants" element={<TenantsPage />} />
                   <Route path="/tenants/:id" element={<TenantDetailPage />} />
                   <Route path="/modules" element={<ModulesPage />} />
+                  <Route
+                    path="/mesa-ayuda"
+                    element={<MesaAyudaDashboardPage />}
+                  />
+                  <Route
+                    path="/mesa-ayuda/tickets"
+                    element={<MesaAyudaTicketsPage />}
+                  />
+                  <Route
+                    path="/mesa-ayuda/tickets/:tenantSlug/:ticketId"
+                    element={<MesaAyudaTicketDetailPage />}
+                  />
+                  <Route
+                    path="/mesa-ayuda/sla"
+                    element={<MesaAyudaSlaPage />}
+                  />
+                  <Route
+                    path="/mesa-ayuda/categorias"
+                    element={<MesaAyudaCategoriasPage />}
+                  />
+                  <Route
+                    path="/mesa-ayuda/sla-config"
+                    element={<MesaAyudaSlaConfigPage />}
+                  />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />

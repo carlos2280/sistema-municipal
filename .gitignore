@@ -63,6 +63,7 @@ mcp-servers/
 # Claude — compartir settings, skills, hooks, agents, rules con el equipo
 # Solo excluir settings locales (tokens personales, permisos extra)
 .claude/settings.local.json
+.claude/agent-memory/
 
 # NPM registry tokens
 .npmrc.local

@@ -12,15 +12,26 @@
     "check": "biome check --write ./src"
   },
   "dependencies": {
-    "express": "^5.1.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@fontsource/dm-mono": "^5.2.7",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "@hookform/resolvers": "^5.2.2",
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
     "@tanstack/react-query": "^5.75.5",
+    "date-fns": "^3.6.0",
+    "express": "^5.1.0",
+    "framer-motion": "^12.34.5",
+    "material-react-table": "^3.2.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.1"
+    "react-hook-form": "^7.71.0",
+    "react-router-dom": "^7.6.1",
+    "recharts": "^2.15.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

@@ -12,6 +12,7 @@ import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { municipalidades, modulos, suscripciones, suscripcionHistorial } from "@municipal/db-platform";
+import { categorias, prioridades } from "@municipal/db-mesa-ayuda";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: resolve(__dirname, "../.env") });
@@ -92,9 +93,24 @@ async function seed() {
       })
       .returning();
 
+    const [modMesaAyuda] = await tx
+      .insert(modulos)
+      .values({
+        codigo: "mesa_ayuda",
+        nombre: "Mesa de Ayuda",
+        descripcion: "Sistema de tickets y soporte para atencion ciudadana",
+        icono: "headphones",
+        apiPrefix: "/api/v1/mesa-ayuda",
+        mfName: "mf_mesa_ayuda",
+        mfManifestUrlTpl: "${BASE_URL}:5050/mf-manifest.json",
+        orden: 4,
+      })
+      .returning();
+
     console.log(`  Modulo creado: ${modContabilidad.nombre} (${modContabilidad.codigo})`);
     console.log(`  Modulo creado: ${modChat.nombre} (${modChat.codigo})`);
     console.log(`  Modulo creado: ${modConfiguracion.nombre} (${modConfiguracion.codigo})`);
+    console.log(`  Modulo creado: ${modMesaAyuda.nombre} (${modMesaAyuda.codigo})`);
 
     // 3. Suscripciones: default tiene todos los módulos activos
     const suscs = await tx
@@ -118,6 +134,12 @@ async function seed() {
           estado: "activa",
           activadoPor: "system",
         },
+        {
+          municipalidadId: tenant.id,
+          moduloId: modMesaAyuda.id,
+          estado: "activa",
+          activadoPor: "system",
+        },
       ])
       .returning();
 
@@ -136,6 +158,51 @@ async function seed() {
     }
 
     console.log("  Historial de suscripciones registrado");
+
+    // 5. Catálogo global de categorías de mesa de ayuda
+    const CATEGORIAS = [
+      { codigo: "infraestructura", nombre: "Infraestructura y Obras", icono: "hard-hat", color: "warning", orden: 1 },
+      { codigo: "tramites", nombre: "Tramites y Documentos", icono: "file-text", color: "info", orden: 2 },
+      { codigo: "reclamos", nombre: "Reclamos Ciudadanos", icono: "alert-triangle", color: "error", orden: 3 },
+      { codigo: "consultas", nombre: "Consultas Generales", icono: "help-circle", color: "primary", orden: 4 },
+      { codigo: "servicios", nombre: "Servicios Municipales", icono: "building-2", color: "secondary", orden: 5 },
+      { codigo: "medioambiente", nombre: "Medio Ambiente y Aseo", icono: "leaf", color: "success", orden: 6 },
+      { codigo: "seguridad", nombre: "Seguridad Ciudadana", icono: "shield", color: "error", orden: 7 },
+      { codigo: "social", nombre: "Asistencia Social", icono: "heart", color: "secondary", orden: 8 },
+    ] as const;
+
+    await tx.insert(categorias).values(
+      CATEGORIAS.map((c) => ({
+        codigo: c.codigo,
+        nombre: c.nombre,
+        icono: c.icono,
+        color: c.color,
+        orden: c.orden,
+        activo: true,
+      })),
+    );
+
+    console.log(`  Categorias mesa_ayuda creadas: ${CATEGORIAS.length}`);
+
+    // 6. Catálogo global de prioridades de mesa de ayuda
+    const PRIORIDADES = [
+      { codigo: "baja", nombre: "Baja", color: "success", nivel: 1, slaHoras: 72 },
+      { codigo: "media", nombre: "Media", color: "info", nivel: 2, slaHoras: 48 },
+      { codigo: "alta", nombre: "Alta", color: "warning", nivel: 3, slaHoras: 24 },
+      { codigo: "critica", nombre: "Critica", color: "error", nivel: 4, slaHoras: 8 },
+    ] as const;
+
+    await tx.insert(prioridades).values(
+      PRIORIDADES.map((p) => ({
+        codigo: p.codigo,
+        nombre: p.nombre,
+        color: p.color,
+        nivel: p.nivel,
+        slaHoras: p.slaHoras,
+      })),
+    );
+
+    console.log(`  Prioridades mesa_ayuda creadas: ${PRIORIDADES.length}`);
   });
 
   console.log("\nSeed completado exitosamente.");
