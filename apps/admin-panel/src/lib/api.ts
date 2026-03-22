@@ -1,22 +1,4 @@
 import type {
-  AdminCategoria,
-  AdminMesaAyudaDashboard,
-  AdminPrioridad,
-  AdminSlaMonitoreo,
-  AdminTicketDetail,
-  AdminTicketFilters,
-  AdminTicketListResponse,
-  AgregarComentarioInput,
-  AsignarTicketInput,
-  CambiarCategoriaInput,
-  CambiarEstadoInput,
-  CambiarPrioridadInput,
-  CreateCategoriaInput,
-  TenantResumen,
-  UpdateCategoriaInput,
-  UpdatePrioridadInput,
-} from '../types/mesa-ayuda'
-import type {
   CreateSubscriptionInput,
   CreateTenantInput,
   Module,

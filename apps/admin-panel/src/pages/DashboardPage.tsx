@@ -41,7 +41,9 @@ export default function DashboardPage() {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>Dashboard</Typography>
+      <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
+        Dashboard
+      </Typography>
 
       <Box
         component={motion.div}
@@ -83,7 +85,9 @@ export default function DashboardPage() {
         </Grid>
       </Box>
 
-      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>Municipalidades recientes</Typography>
+      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+        Municipalidades recientes
+      </Typography>
       <Card>
         <Table>
           <TableHead>
@@ -96,18 +100,29 @@ export default function DashboardPage() {
           </TableHead>
           <TableBody>
             {recientes.map((t) => (
-              <TableRow key={t.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/tenants/${t.id}`)}>
+              <TableRow
+                key={t.id}
+                hover
+                sx={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/tenants/${t.id}`)}
+              >
                 <TableCell>{t.nombre}</TableCell>
                 <TableCell>{t.slug}</TableCell>
                 <TableCell>{t.dominioBase}</TableCell>
                 <TableCell>
-                  <Chip label={t.activo !== false ? 'Activa' : 'Inactiva'} color={t.activo !== false ? 'success' : 'default'} size="small" />
+                  <Chip
+                    label={t.activo !== false ? 'Activa' : 'Inactiva'}
+                    color={t.activo !== false ? 'success' : 'default'}
+                    size="small"
+                  />
                 </TableCell>
               </TableRow>
             ))}
             {recientes.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">No hay municipalidades registradas</TableCell>
+                <TableCell colSpan={4} align="center">
+                  No hay municipalidades registradas
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
