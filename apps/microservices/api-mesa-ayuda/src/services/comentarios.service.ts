@@ -1,24 +1,24 @@
-import type { DbClient } from "@/db/client";
-import { AppError } from "@/libs/middleware/AppError";
-import type { CrearComentarioInput } from "@/libs/schemas/comentarios.schemas";
-import { comentarios, tickets } from "@municipal/db-mesa-ayuda";
-import { and, eq } from "drizzle-orm";
+import type { DbClient } from '@/db/client'
+import { AppError } from '@/libs/middleware/AppError'
+import type { CrearComentarioInput } from '@/libs/schemas/comentarios.schemas'
+import { comentarios, tickets } from '@municipal/db-mesa-ayuda'
+import { and, eq } from 'drizzle-orm'
 
 export async function listarComentarios(db: DbClient, ticketId: number) {
   const [ticket] = await db
     .select({ id: tickets.id })
     .from(tickets)
-    .where(eq(tickets.id, ticketId));
+    .where(eq(tickets.id, ticketId))
 
   if (!ticket) {
-    throw new AppError("Ticket no encontrado", 404);
+    throw new AppError('Ticket no encontrado', 404)
   }
 
   return db
     .select()
     .from(comentarios)
     .where(eq(comentarios.ticketId, ticketId))
-    .orderBy(comentarios.createdAt);
+    .orderBy(comentarios.createdAt)
 }
 
 export async function agregarComentario(
@@ -30,10 +30,10 @@ export async function agregarComentario(
   const [ticket] = await db
     .select({ id: tickets.id })
     .from(tickets)
-    .where(eq(tickets.id, ticketId));
+    .where(eq(tickets.id, ticketId))
 
   if (!ticket) {
-    throw new AppError("Ticket no encontrado", 404);
+    throw new AppError('Ticket no encontrado', 404)
   }
 
   const [comentario] = await db
@@ -45,9 +45,9 @@ export async function agregarComentario(
       contenido: input.contenido,
       esInterno: input.esInterno,
     })
-    .returning();
+    .returning()
 
-  return comentario;
+  return comentario
 }
 
 export async function eliminarComentario(
@@ -60,19 +60,16 @@ export async function eliminarComentario(
     .select({ id: comentarios.id, autorId: comentarios.autorId })
     .from(comentarios)
     .where(
-      and(
-        eq(comentarios.id, comentarioId),
-        eq(comentarios.ticketId, ticketId),
-      ),
-    );
+      and(eq(comentarios.id, comentarioId), eq(comentarios.ticketId, ticketId)),
+    )
 
   if (!comentario) {
-    throw new AppError("Comentario no encontrado", 404);
+    throw new AppError('Comentario no encontrado', 404)
   }
 
   if (comentario.autorId !== autorId) {
-    throw new AppError("Solo el autor puede eliminar su comentario", 403);
+    throw new AppError('Solo el autor puede eliminar su comentario', 403)
   }
 
-  await db.delete(comentarios).where(eq(comentarios.id, comentarioId));
+  await db.delete(comentarios).where(eq(comentarios.id, comentarioId))
 }

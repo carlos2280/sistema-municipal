@@ -1,8 +1,8 @@
-import * as controller from "@/controllers/prioridades.controller";
-import { Router } from "express";
+import * as controller from '@/controllers/prioridades.controller'
+import { Router } from 'express'
 
-const router: Router = Router();
+const router: Router = Router()
 
-router.get("/", controller.listar);
+router.get('/', controller.listar)
 
-export default router;
+export default router

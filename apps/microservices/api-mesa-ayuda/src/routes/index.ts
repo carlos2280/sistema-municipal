@@ -1,8 +1,8 @@
-import v1Router from "@/routes/v1";
-import { Router } from "express";
+import v1Router from '@/routes/v1'
+import { Router } from 'express'
 
-const router: Router = Router();
+const router: Router = Router()
 
-router.use("/v1", v1Router);
+router.use('/v1', v1Router)
 
-export default router;
+export default router
