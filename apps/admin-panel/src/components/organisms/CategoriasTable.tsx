@@ -6,6 +6,7 @@ import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { useMemo, useState } from 'react'
 import { CategoriaFormDialog } from '@/components/molecules/CategoriaFormDialog'
@@ -28,6 +29,7 @@ export function CategoriasTable({
   onDelete,
   isMutating = false,
 }: CategoriasTableProps) {
+  const theme = useTheme()
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<AdminCategoria | null>(null)
 
@@ -43,7 +45,7 @@ export function CategoriasTable({
         header: 'Código',
         size: 130,
         Cell: ({ cell }) => (
-          <Typography variant="body2" fontFamily="monospace">
+          <Typography variant="mono">
             {cell.getValue<string>()}
           </Typography>
         ),
@@ -63,7 +65,7 @@ export function CategoriasTable({
         header: 'Color',
         size: 110,
         Cell: ({ cell }) => (
-          <Chip label={cell.getValue<string>()} color={cell.getValue<'primary'>('color')} size="small" />
+          <Chip label={cell.getValue<string>()} color={cell.getValue<string>() as 'primary'} size="small" />
         ),
       },
       {
@@ -110,9 +112,16 @@ export function CategoriasTable({
     enableColumnFilters: false,
     enableGlobalFilter: true,
     enableDensityToggle: false,
-    enableColumnVisibility: false,
+    enableHiding: false,
     enableFullScreenToggle: false,
-    muiTablePaperProps: { variant: 'outlined', elevation: 0 },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        border: '1px solid',
+        borderColor: theme.meridian.borders.default,
+        borderRadius: 2,
+      },
+    },
     initialState: { density: 'compact', sorting: [{ id: 'orden', desc: false }] },
     renderTopToolbarCustomActions: () => (
       <Button

@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -46,6 +47,8 @@ export function TicketsTable({
   onGlobalFilterChange,
   onRowClick,
 }: TicketsTableProps) {
+  const theme = useTheme()
+
   const columns = useMemo<MRT_ColumnDef<AdminTicket>[]>(
     () => [
       {
@@ -63,7 +66,7 @@ export function TicketsTable({
         header: 'Municipalidad',
         size: 160,
         Cell: ({ row }) => (
-          <TenantBadge nombre={row.original.tenantNombre} slug={row.original.tenantSlug} />
+          <TenantBadge nombre={row.original.tenantNombre} />
         ),
       },
       {
@@ -88,7 +91,6 @@ export function TicketsTable({
         size: 120,
         Cell: ({ row }) => (
           <PrioridadChip
-            codigo={row.original.prioridadCodigo}
             nombre={row.original.prioridadNombre}
             color={row.original.prioridadColor}
           />
@@ -166,9 +168,20 @@ export function TicketsTable({
     enableFullScreenToggle: false,
     muiTableBodyRowProps: ({ row }) => ({
       onClick: () => onRowClick?.(row.original),
-      sx: { cursor: onRowClick ? 'pointer' : 'default' },
+      sx: {
+        cursor: onRowClick ? 'pointer' : 'default',
+        '&:hover': { backgroundColor: theme.meridian.surfaces.s3 },
+        height: 44,
+      },
     }),
-    muiTablePaperProps: { variant: 'outlined', elevation: 0 },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        border: '1px solid',
+        borderColor: theme.meridian.borders.default,
+        borderRadius: 2,
+      },
+    },
     initialState: { density: 'compact' },
     localization: {
       actions: 'Acciones',

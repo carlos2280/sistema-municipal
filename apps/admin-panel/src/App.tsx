@@ -39,7 +39,7 @@ function RequireAuth() {
 export type ThemeMode = 'light' | 'dark'
 
 export default function App() {
-  const [mode, setMode] = useState<ThemeMode>('light')
+  const [mode, setMode] = useState<ThemeMode>('dark')
   const theme = useMemo(
     () => (mode === 'dark' ? darkTheme : lightTheme),
     [mode],

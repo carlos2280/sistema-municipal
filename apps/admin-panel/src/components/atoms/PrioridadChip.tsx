@@ -1,11 +1,12 @@
 import Chip from '@mui/material/Chip'
-import { useTheme } from '@mui/material/styles'
-import { alpha } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
+
 interface PrioridadChipProps {
-  codigo: string
   nombre: string
   color: string
   size?: 'small' | 'medium'
+  /** @deprecated ignorado — se mantiene por compatibilidad */
+  codigo?: string
 }
 
 const PALETTE_KEYS = new Set(['primary', 'secondary', 'error', 'warning', 'info', 'success'])
@@ -29,6 +30,10 @@ export function PrioridadChip({ nombre, color, size = 'small' }: PrioridadChipPr
         color: resolved,
         backgroundColor: alpha(resolved, theme.palette.mode === 'dark' ? 0.15 : 0.08),
         fontWeight: 600,
+        '&:focus-visible': {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: 2,
+        },
       }}
     />
   )

@@ -1,11 +1,13 @@
-import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PrioridadChip } from '@/components/atoms/PrioridadChip'
+import { TenantBadge } from '@/components/atoms/TenantBadge'
 import type { SlaTicketEnRiesgo, SlaTicketVencido } from '@/types/mesa-ayuda'
 
 type SlaRiskType = 'vencidos' | 'enRiesgo'
@@ -18,6 +20,7 @@ interface SlaRiskTableProps {
 
 export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
   const theme = useTheme()
+  const navigate = useNavigate()
 
   const columns = useMemo<MRT_ColumnDef<SlaTicket>[]>(
     () => [
@@ -26,15 +29,19 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
         header: 'Número',
         size: 100,
         Cell: ({ cell }) => (
-          <Typography variant="body2" fontWeight={600}>
+          <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main }}>
             {cell.getValue<string>()}
           </Typography>
         ),
       },
       {
-        accessorKey: 'tenantSlug',
+        id: 'municipalidad',
         header: 'Municipalidad',
-        size: 140,
+        size: 160,
+        Cell: ({ row }) => {
+          const nombre = row.original.tenantNombre ?? row.original.tenantSlug
+          return <TenantBadge nombre={nombre} />
+        },
       },
       {
         accessorKey: 'titulo',
@@ -47,9 +54,15 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
         ),
       },
       {
-        accessorKey: 'prioridadNombre',
+        id: 'prioridad',
         header: 'Prioridad',
-        size: 110,
+        size: 120,
+        Cell: ({ row }) => (
+          <PrioridadChip
+            nombre={row.original.prioridadNombre}
+            color={row.original.prioridadColor ?? 'warning'}
+          />
+        ),
       },
       {
         accessorKey: 'fechaLimite',
@@ -69,9 +82,10 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
         size: 140,
         Cell: ({ row }) => {
           const ticket = row.original
-          const horas = type === 'vencidos'
-            ? (ticket as SlaTicketVencido).horasVencido
-            : (ticket as SlaTicketEnRiesgo).horasRestantes
+          const horas =
+            type === 'vencidos'
+              ? (ticket as SlaTicketVencido).horasVencido
+              : (ticket as SlaTicketEnRiesgo).horasRestantes
           return (
             <Chip
               label={`${horas}h`}
@@ -92,9 +106,31 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
     enableColumnFilters: false,
     enableGlobalFilter: true,
     enableDensityToggle: false,
-    enableColumnVisibility: false,
+    enableHiding: false,
     enableFullScreenToggle: false,
-    muiTablePaperProps: { variant: 'outlined', elevation: 0 },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        border: '1px solid',
+        borderColor: theme.meridian.borders.default,
+        borderRadius: 2,
+      },
+    },
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: () => navigate(`/mesa-ayuda/tickets/${row.original.ticketId}`),
+      sx: {
+        cursor: 'pointer',
+        backgroundColor:
+          type === 'vencidos' ? alpha(theme.palette.error.main, 0.06) : undefined,
+        '&:hover': {
+          backgroundColor: alpha(theme.palette.error.main, 0.1),
+        },
+        '&:focus-visible': {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: -2,
+        },
+      },
+    }),
     initialState: { density: 'compact' },
     localization: {
       noRecordsToDisplay: 'Sin tickets',
@@ -102,9 +138,5 @@ export function SlaRiskTable({ tickets, type }: SlaRiskTableProps) {
     },
   })
 
-  return (
-    <Box>
-      <MaterialReactTable table={table} />
-    </Box>
-  )
+  return <MaterialReactTable table={table} />
 }

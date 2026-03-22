@@ -218,9 +218,11 @@ export interface SlaTenantResumen {
 export interface SlaTicketVencido {
   ticketId: number
   tenantSlug: string
+  tenantNombre?: string
   numero: string
   titulo: string
   prioridadNombre: string
+  prioridadColor?: string
   fechaLimite: string
   horasVencido: number
 }
@@ -228,9 +230,11 @@ export interface SlaTicketVencido {
 export interface SlaTicketEnRiesgo {
   ticketId: number
   tenantSlug: string
+  tenantNombre?: string
   numero: string
   titulo: string
   prioridadNombre: string
+  prioridadColor?: string
   fechaLimite: string
   horasRestantes: number
 }

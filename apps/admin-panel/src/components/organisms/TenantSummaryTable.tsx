@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { useMemo } from 'react'
 import { SlaProgressBar } from '@/components/molecules/SlaProgressBar'
@@ -11,6 +12,8 @@ interface TenantSummaryTableProps {
 }
 
 export function TenantSummaryTable({ data, isLoading = false }: TenantSummaryTableProps) {
+  const theme = useTheme()
+
   const columns = useMemo<MRT_ColumnDef<TenantResumen>[]>(
     () => [
       {
@@ -68,9 +71,16 @@ export function TenantSummaryTable({ data, isLoading = false }: TenantSummaryTab
     enableColumnFilters: false,
     enableGlobalFilter: true,
     enableDensityToggle: false,
-    enableColumnVisibility: false,
+    enableHiding: false,
     enableFullScreenToggle: false,
-    muiTablePaperProps: { variant: 'outlined', elevation: 0 },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        border: '1px solid',
+        borderColor: theme.meridian.borders.default,
+        borderRadius: 2,
+      },
+    },
     initialState: { density: 'compact' },
     localization: {
       noRecordsToDisplay: 'Sin datos',

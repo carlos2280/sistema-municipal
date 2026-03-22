@@ -1,11 +1,11 @@
-import CircleIcon from '@mui/icons-material/Circle'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { TicketHistorial } from '@/types/mesa-ayuda'
+import type { EstadoTicket, TicketHistorial } from '@/types/mesa-ayuda'
 import { EstadoChip } from '@/components/atoms/EstadoChip'
 
 interface TicketTimelineItemProps {
@@ -13,12 +13,28 @@ interface TicketTimelineItemProps {
   isLast?: boolean
 }
 
+function getDotColor(theme: Theme, estadoNuevo: EstadoTicket): string {
+  switch (estadoNuevo) {
+    case 'resuelto':
+    case 'cerrado':
+      return theme.palette.success.main
+    case 'en_progreso':
+      return theme.palette.warning.main
+    case 'abierto':
+      return theme.palette.info.main
+    default:
+      return theme.palette.primary.main
+  }
+}
+
 export function TicketTimelineItem({ historial, isLast = false }: TicketTimelineItemProps) {
   const theme = useTheme()
 
-  const formattedDate = format(parseISO(historial.createdAt), "d MMM yyyy, HH:mm", {
+  const formattedDate = format(parseISO(historial.createdAt), 'd MMM yyyy, HH:mm', {
     locale: es,
   })
+
+  const dotColor = getDotColor(theme, historial.estadoNuevo)
 
   return (
     <Box
@@ -26,16 +42,33 @@ export function TicketTimelineItem({ historial, isLast = false }: TicketTimeline
         display: 'flex',
         gap: 1.5,
         pb: isLast ? 0 : 2,
-        borderLeft: isLast ? '2px solid transparent' : '2px solid',
-        borderColor: isLast ? 'transparent' : theme.palette.divider,
-        ml: '5px',
-        pl: 2,
         position: 'relative',
+        pl: 3,
+        '&::before': isLast
+          ? undefined
+          : {
+              content: '""',
+              position: 'absolute',
+              left: '7px',
+              top: '20px',
+              bottom: 0,
+              width: '1px',
+              background: `linear-gradient(to bottom, ${alpha(theme.palette.divider, 0.8)}, ${alpha(theme.palette.divider, 0.1)})`,
+            },
       }}
     >
-      <CircleIcon
-        color="primary"
-        sx={{ fontSize: 12, position: 'absolute', left: -7, top: 4 }}
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 2,
+          top: 5,
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          backgroundColor: dotColor,
+          border: `2px solid ${alpha(dotColor, 0.3)}`,
+          flexShrink: 0,
+        }}
       />
       <Box sx={{ flex: 1 }}>
         {historial.estadoAnterior && historial.estadoNuevo ? (

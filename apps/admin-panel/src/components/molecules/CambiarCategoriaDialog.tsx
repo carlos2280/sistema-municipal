@@ -51,7 +51,7 @@ export function CambiarCategoriaDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
       <DialogTitle>Cambiar Categoría</DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
         <Controller

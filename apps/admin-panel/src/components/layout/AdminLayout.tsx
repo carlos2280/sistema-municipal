@@ -1,62 +1,69 @@
-import DarkModeIcon from '@mui/icons-material/DarkMode'
-import LightModeIcon from '@mui/icons-material/LightMode'
-import LogoutIcon from '@mui/icons-material/Logout'
-import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import Toolbar from '@mui/material/Toolbar'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
-import { Outlet } from 'react-router-dom'
-import type { ThemeMode } from '../../App'
-import { useAuth } from '../../hooks/useAuth'
-import Sidebar, { DRAWER_WIDTH } from './Sidebar'
+import { useTheme } from '@mui/material/styles'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import type { ThemeMode } from '@/App'
+import { pageTransition } from '@/theme/motion'
+import Header from './Header'
+import Sidebar, { SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_WIDTH_EXPANDED } from './Sidebar'
 
-interface Props {
+interface AdminLayoutProps {
   mode: ThemeMode
   toggleTheme: () => void
 }
 
-export default function AdminLayout({ mode, toggleTheme }: Props) {
-  const { logout } = useAuth()
+const DETAIL_PATTERNS = [/^\/tenants\/\d+/, /^\/mesa-ayuda\/tickets\/.+/]
+
+function isDetailPage(pathname: string): boolean {
+  return DETAIL_PATTERNS.some((pattern) => pattern.test(pathname))
+}
+
+export default function AdminLayout({ mode, toggleTheme }: AdminLayoutProps) {
+  const theme = useTheme()
+  const location = useLocation()
+  const [collapsed, setCollapsed] = useState(false)
+
+  const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED
+  const pagePadding = isDetailPage(location.pathname) ? 2.5 : 4
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar
-        position="fixed"
-        sx={{
-          width: `calc(100% - ${DRAWER_WIDTH}px)`,
-          ml: `${DRAWER_WIDTH}px`,
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-            Sistema Municipal
-          </Typography>
-          <Tooltip title={mode === 'light' ? 'Modo oscuro' : 'Modo claro'}>
-            <IconButton color="inherit" onClick={toggleTheme}>
-              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Cerrar sesión">
-            <IconButton color="inherit" onClick={logout}>
-              <LogoutIcon />
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
-      <Sidebar />
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        bgcolor: theme.meridian.surfaces.ground,
+      }}
+    >
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((prev) => !prev)} />
+
+      <Header mode={mode} toggleTheme={toggleTheme} sidebarWidth={sidebarWidth} />
+
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          mt: 8,
-          minHeight: '100vh',
-          bgcolor: 'background.default',
+          ml: `${sidebarWidth}px`,
+          mt: '48px',
+          p: pagePadding,
+          minHeight: 'calc(100vh - 48px)',
+          bgcolor: theme.meridian.surfaces.ground,
+          transition: `margin-left 150ms ${theme.meridian.easings.out}, padding 250ms ${theme.meridian.easings.out}`,
+          overflow: 'auto',
         }}
       >
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={location.pathname}
+            variants={pageTransition}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            style={{ height: '100%' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </Box>
     </Box>
   )
