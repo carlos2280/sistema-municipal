@@ -9,6 +9,9 @@ const { Pool } = pg
 // Conexion principal: DB transversal (schema mensajeria)
 const pool = new Pool({
   connectionString: env.DATABASE_URL_TRANSVERSAL,
+  ssl: env.DATABASE_URL_TRANSVERSAL.includes('sslmode=require')
+    ? { rejectUnauthorized: false }
+    : false,
 })
 
 export const db = drizzle(pool, { schema })
