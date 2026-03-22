@@ -177,10 +177,10 @@ export const configureProxies = (app: Express) => {
             // Eliminar headers CORS del upstream para evitar conflictos
             // (el upstream puede enviar Access-Control-Allow-Origin: * que es
             // incompatible con credentials: "include" del frontend)
-            delete proxyRes.headers["access-control-allow-origin"];
-            delete proxyRes.headers["access-control-allow-credentials"];
-            delete proxyRes.headers["access-control-allow-methods"];
-            delete proxyRes.headers["access-control-allow-headers"];
+            proxyRes.headers["access-control-allow-origin"] = undefined;
+            proxyRes.headers["access-control-allow-credentials"] = undefined;
+            proxyRes.headers["access-control-allow-methods"] = undefined;
+            proxyRes.headers["access-control-allow-headers"] = undefined;
 
             // Setear CORS correcto con el origen específico
             const origin = req.headers.origin;

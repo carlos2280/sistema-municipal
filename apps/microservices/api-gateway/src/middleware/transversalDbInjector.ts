@@ -94,9 +94,7 @@ async function getTransversalDbName(tenantId: number): Promise<string> {
 // ---------------------------------------------------------------------------
 
 function isTransversalService(path: string): boolean {
-  return TRANSVERSAL_SERVICE_PREFIXES.some((prefix) =>
-    path.startsWith(prefix),
-  );
+  return TRANSVERSAL_SERVICE_PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
 // ---------------------------------------------------------------------------
