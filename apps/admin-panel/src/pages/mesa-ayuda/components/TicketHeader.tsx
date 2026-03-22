@@ -1,5 +1,13 @@
+import {
+  EstadoChip,
+  PrioridadChip,
+  SlaIndicator,
+  TenantBadge,
+} from '@/components/atoms'
+import type { AdminTicketDetail } from '@/types/mesa-ayuda'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Divider from '@mui/material/Divider'
@@ -8,10 +16,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import { useState } from 'react'
-import { EstadoChip, PrioridadChip, SlaIndicator, TenantBadge } from '@/components/atoms'
-import type { AdminTicketDetail } from '@/types/mesa-ayuda'
 
 interface TicketHeaderProps {
   ticket: AdminTicketDetail
@@ -35,7 +40,14 @@ export function TicketHeader({
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 2,
+          }}
+        >
           <Box>
             <Typography variant="h5" fontWeight={700} sx={{ mb: 1 }}>
               {ticket.numero} — {ticket.titulo}
@@ -47,8 +59,14 @@ export function TicketHeader({
                 nombre={ticket.prioridadNombre}
                 color={ticket.prioridadColor}
               />
-              <SlaIndicator fechaLimite={ticket.fechaLimite ?? null} estado={ticket.estado} />
-              <TenantBadge nombre={ticket.tenantNombre} slug={ticket.tenantSlug} />
+              <SlaIndicator
+                fechaLimite={ticket.fechaLimite ?? null}
+                estado={ticket.estado}
+              />
+              <TenantBadge
+                nombre={ticket.tenantNombre}
+                slug={ticket.tenantSlug}
+              />
             </Stack>
           </Box>
         </Box>
@@ -64,17 +82,40 @@ export function TicketHeader({
           >
             Cambiar Estado
           </Button>
-          <Button variant="outlined" size="small" onClick={onAsignar} disabled={isMutating}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={onAsignar}
+            disabled={isMutating}
+          >
             Asignar
           </Button>
-          <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)} disabled={isMutating}>
+          <IconButton
+            size="small"
+            onClick={(e) => setMenuAnchor(e.currentTarget)}
+            disabled={isMutating}
+          >
             <MoreVertIcon fontSize="small" />
           </IconButton>
-          <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
-            <MenuItem onClick={() => { setMenuAnchor(null); onCambiarPrioridad() }}>
+          <Menu
+            anchorEl={menuAnchor}
+            open={!!menuAnchor}
+            onClose={() => setMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null)
+                onCambiarPrioridad()
+              }}
+            >
               Cambiar Prioridad
             </MenuItem>
-            <MenuItem onClick={() => { setMenuAnchor(null); onCambiarCategoria() }}>
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null)
+                onCambiarCategoria()
+              }}
+            >
               Cambiar Categoría
             </MenuItem>
           </Menu>

@@ -1,3 +1,5 @@
+import StatusChip from '@/components/shared/StatusChip'
+import type { EstadoSuscripcion } from '@/types'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -8,8 +10,6 @@ import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
-import StatusChip from '@/components/shared/StatusChip'
-import type { EstadoSuscripcion } from '@/types'
 
 interface Suscripcion {
   id: number
@@ -36,7 +36,14 @@ export function TenantSuscripcionesCard({
 }: TenantSuscripcionesCardProps) {
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
         <Typography variant="h5" fontWeight={600}>
           Suscripciones
         </Typography>
@@ -69,7 +76,9 @@ export function TenantSuscripcionesCard({
                     <StatusChip estado={s.estado} />
                   </TableCell>
                   <TableCell>
-                    {new Intl.DateTimeFormat('es-CL').format(new Date(s.fechaInicio))}
+                    {new Intl.DateTimeFormat('es-CL').format(
+                      new Date(s.fechaInicio),
+                    )}
                   </TableCell>
                   <TableCell>
                     {s.precioMensual
@@ -77,7 +86,10 @@ export function TenantSuscripcionesCard({
                       : '—'}
                   </TableCell>
                   <TableCell>
-                    <Button size="small" onClick={() => onChangeEstado(s.id, s.estado)}>
+                    <Button
+                      size="small"
+                      onClick={() => onChangeEstado(s.id, s.estado)}
+                    >
                       Cambiar Estado
                     </Button>
                   </TableCell>

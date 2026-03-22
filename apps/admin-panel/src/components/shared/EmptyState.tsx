@@ -11,7 +11,12 @@ interface EmptyStateProps {
   onCta?: () => void
 }
 
-export function EmptyState({ icon: Icon, message, ctaLabel, onCta }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  message,
+  ctaLabel,
+  onCta,
+}: EmptyStateProps) {
   const theme = useTheme()
 
   return (

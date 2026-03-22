@@ -12,13 +12,13 @@ export const surfacesDark = {
 } as const
 
 export const surfacesLight = {
-  void: '#EAEAED',   // Fondo absoluto
+  void: '#EAEAED', // Fondo absoluto
   ground: '#F5F5F7', // Canvas base
-  s1: '#F0F0F3',     // Contenedor principal (sidebar, header)
-  s2: '#FFFFFF',     // Cards, paneles elevados
-  s3: '#F7F7FA',     // Inputs, hover states
-  s4: '#EAEAED',     // Modales, dropdowns
-  s5: '#E2E2E6',     // Tooltips, flotantes máximos
+  s1: '#F0F0F3', // Contenedor principal (sidebar, header)
+  s2: '#FFFFFF', // Cards, paneles elevados
+  s3: '#F7F7FA', // Inputs, hover states
+  s4: '#EAEAED', // Modales, dropdowns
+  s5: '#E2E2E6', // Tooltips, flotantes máximos
 } as const
 
 export const bordersDark = {

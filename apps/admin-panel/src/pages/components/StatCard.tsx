@@ -15,7 +15,12 @@ export function StatCard({ title, value, icon, color }: StatCardProps) {
   const theme = useTheme()
 
   return (
-    <Card sx={{ backgroundColor: theme.meridian.surfaces.s2, borderColor: theme.meridian.borders.default }}>
+    <Card
+      sx={{
+        backgroundColor: theme.meridian.surfaces.s2,
+        borderColor: theme.meridian.borders.default,
+      }}
+    >
       <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ color, fontSize: 40, display: 'flex' }}>{icon}</Box>
         <Box>
@@ -31,7 +36,9 @@ export function StatCard({ title, value, icon, color }: StatCardProps) {
           >
             {value}
           </Typography>
-          <Typography variant="body2" color="text.secondary">{title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {title}
+          </Typography>
         </Box>
       </CardContent>
     </Card>

@@ -1,44 +1,49 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import { Controller } from 'react-hook-form';
-import { Save, X } from 'lucide-react';
-import {
-  useGetCategoriasQuery,
-  useGetPrioridadesQuery,
-} from 'mf_store/store';
-import { useTicketForm } from '@/hooks/useTicketForm';
-import type { TicketFormValues } from '@/hooks/useTicketForm';
+import { useTicketForm } from '@/hooks/useTicketForm'
+import type { TicketFormValues } from '@/hooks/useTicketForm'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import FormControl from '@mui/material/FormControl'
+import FormHelperText from '@mui/material/FormHelperText'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
+import { Save, X } from 'lucide-react'
+import { useGetCategoriasQuery, useGetPrioridadesQuery } from 'mf_store/store'
+import { Controller } from 'react-hook-form'
 
 interface TicketFormProps {
-  defaultValues?: Partial<TicketFormValues>;
-  ticketId?: number;
-  onSuccess: () => void;
-  onCancel: () => void;
+  defaultValues?: Partial<TicketFormValues>
+  ticketId?: number
+  onSuccess: () => void
+  onCancel: () => void
 }
 
-function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketFormProps) {
-  const theme = useTheme();
-  const { data: categorias } = useGetCategoriasQuery();
-  const { data: prioridades } = useGetPrioridadesQuery();
+function TicketForm({
+  defaultValues,
+  ticketId,
+  onSuccess,
+  onCancel,
+}: TicketFormProps) {
+  const theme = useTheme()
+  const { data: categorias } = useGetCategoriasQuery()
+  const { data: prioridades } = useGetPrioridadesQuery()
 
   const { form, onSubmit, isSubmitting, isEditing } = useTicketForm({
     defaultValues,
     ticketId,
     onSuccess,
-  });
+  })
 
-  const { control, formState: { errors } } = form;
+  const {
+    control,
+    formState: { errors },
+  } = form
 
   return (
     <motion.div
@@ -56,7 +61,10 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: theme.palette.text.primary }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, mb: 3, color: theme.palette.text.primary }}
+          >
             {isEditing ? 'Editar Ticket' : 'Nuevo Ticket'}
           </Typography>
 
@@ -99,7 +107,9 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
             />
 
             {/* Categoria + Prioridad */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <Box
+              sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}
+            >
               <Controller
                 name="categoriaId"
                 control={control}
@@ -119,7 +129,9 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
                       ))}
                     </Select>
                     {errors.categoriaId && (
-                      <FormHelperText>{errors.categoriaId.message}</FormHelperText>
+                      <FormHelperText>
+                        {errors.categoriaId.message}
+                      </FormHelperText>
                     )}
                   </FormControl>
                 )}
@@ -144,7 +156,9 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
                       ))}
                     </Select>
                     {errors.prioridadId && (
-                      <FormHelperText>{errors.prioridadId.message}</FormHelperText>
+                      <FormHelperText>
+                        {errors.prioridadId.message}
+                      </FormHelperText>
                     )}
                   </FormControl>
                 )}
@@ -165,7 +179,14 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
             />
 
             {/* Acciones */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                justifyContent: 'flex-end',
+                mt: 1,
+              }}
+            >
               <Button
                 variant="outlined"
                 startIcon={<X size={16} />}
@@ -187,7 +208,7 @@ function TicketForm({ defaultValues, ticketId, onSuccess, onCancel }: TicketForm
         </CardContent>
       </Card>
     </motion.div>
-  );
+  )
 }
 
-export default TicketForm;
+export default TicketForm

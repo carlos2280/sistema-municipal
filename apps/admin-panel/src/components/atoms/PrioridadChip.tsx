@@ -9,15 +9,34 @@ interface PrioridadChipProps {
   codigo?: string
 }
 
-const PALETTE_KEYS = new Set(['primary', 'secondary', 'error', 'warning', 'info', 'success'])
+const PALETTE_KEYS = new Set([
+  'primary',
+  'secondary',
+  'error',
+  'warning',
+  'info',
+  'success',
+])
 
-export function PrioridadChip({ nombre, color, size = 'small' }: PrioridadChipProps) {
+export function PrioridadChip({
+  nombre,
+  color,
+  size = 'small',
+}: PrioridadChipProps) {
   const theme = useTheme()
 
   const resolved = !color
     ? theme.palette.text.primary
     : PALETTE_KEYS.has(color)
-      ? theme.palette[color as 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'].main
+      ? theme.palette[
+          color as
+            | 'primary'
+            | 'secondary'
+            | 'error'
+            | 'warning'
+            | 'info'
+            | 'success'
+        ].main
       : color
 
   return (
@@ -28,7 +47,10 @@ export function PrioridadChip({ nombre, color, size = 'small' }: PrioridadChipPr
       sx={{
         borderColor: resolved,
         color: resolved,
-        backgroundColor: alpha(resolved, theme.palette.mode === 'dark' ? 0.15 : 0.08),
+        backgroundColor: alpha(
+          resolved,
+          theme.palette.mode === 'dark' ? 0.15 : 0.08,
+        ),
         fontWeight: 600,
         '&:focus-visible': {
           outline: `2px solid ${theme.palette.primary.main}`,

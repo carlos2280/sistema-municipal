@@ -1,3 +1,9 @@
+import type {
+  AdminCategoria,
+  CategoriaColor,
+  CreateCategoriaInput,
+} from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -9,19 +15,35 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { AdminCategoria, CategoriaColor, CreateCategoriaInput } from '@/types/mesa-ayuda'
 
-const COLORES: CategoriaColor[] = ['primary', 'secondary', 'error', 'warning', 'info', 'success']
+const COLORES: CategoriaColor[] = [
+  'primary',
+  'secondary',
+  'error',
+  'warning',
+  'info',
+  'success',
+]
 
 const schema = z.object({
-  codigo: z.string().min(1).max(50).regex(/^[a-z_]+$/, 'Solo letras minúsculas y guiones bajos'),
+  codigo: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z_]+$/, 'Solo letras minúsculas y guiones bajos'),
   nombre: z.string().min(1, 'El nombre es requerido').max(100),
   descripcion: z.string().max(500).optional(),
   icono: z.string().max(50).optional(),
-  color: z.enum(['primary', 'secondary', 'error', 'warning', 'info', 'success']),
+  color: z.enum([
+    'primary',
+    'secondary',
+    'error',
+    'warning',
+    'info',
+    'success',
+  ]),
   orden: z.number().int().min(0).optional(),
 })
 
@@ -44,7 +66,12 @@ export function CategoriaFormDialog({
 }: CategoriaFormDialogProps) {
   const isEditing = !!categoria
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       codigo: categoria?.codigo ?? '',
@@ -74,9 +101,19 @@ export function CategoriaFormDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
-      <DialogTitle>{isEditing ? 'Editar Categoría' : 'Nueva Categoría'}</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
+    >
+      <DialogTitle>
+        {isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
+      </DialogTitle>
+      <DialogContent
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}
+      >
         <Controller
           name="codigo"
           control={control}
@@ -150,7 +187,9 @@ export function CategoriaFormDialog({
                   </MenuItem>
                 ))}
               </Select>
-              {errors.color && <FormHelperText>{errors.color.message}</FormHelperText>}
+              {errors.color && (
+                <FormHelperText>{errors.color.message}</FormHelperText>
+              )}
             </FormControl>
           )}
         />
@@ -175,7 +214,11 @@ export function CategoriaFormDialog({
         <Button onClick={handleClose} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button variant="contained" onClick={handleSubmit(handleValid)} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit(handleValid)}
+          disabled={isLoading}
+        >
           {isEditing ? 'Guardar cambios' : 'Crear'}
         </Button>
       </DialogActions>

@@ -1,10 +1,10 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import CategoriaManager from '@/components/organisms/CategoriaManager';
+import CategoriaManager from '@/components/organisms/CategoriaManager'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 function GestionCategorias() {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -17,7 +17,7 @@ function GestionCategorias() {
 
       <CategoriaManager />
     </Box>
-  );
+  )
 }
 
-export default GestionCategorias;
+export default GestionCategorias

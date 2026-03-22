@@ -1,38 +1,38 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import TextField from '@mui/material/TextField';
-import { alpha, useTheme } from '@mui/material/styles';
-import { Send } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
+import TextField from '@mui/material/TextField'
+import { alpha, useTheme } from '@mui/material/styles'
+import { Send } from 'lucide-react'
+import { useCallback, useState } from 'react'
 
 interface ComentarioFormProps {
-  onSubmit: (contenido: string, esInterno: boolean) => void;
-  isSubmitting: boolean;
+  onSubmit: (contenido: string, esInterno: boolean) => void
+  isSubmitting: boolean
 }
 
 function ComentarioForm({ onSubmit, isSubmitting }: ComentarioFormProps) {
-  const theme = useTheme();
-  const [contenido, setContenido] = useState('');
-  const [esInterno, setEsInterno] = useState(false);
+  const theme = useTheme()
+  const [contenido, setContenido] = useState('')
+  const [esInterno, setEsInterno] = useState(false)
 
   const handleSubmit = useCallback(() => {
-    const trimmed = contenido.trim();
-    if (!trimmed) return;
-    onSubmit(trimmed, esInterno);
-    setContenido('');
-    setEsInterno(false);
-  }, [contenido, esInterno, onSubmit]);
+    const trimmed = contenido.trim()
+    if (!trimmed) return
+    onSubmit(trimmed, esInterno)
+    setContenido('')
+    setEsInterno(false)
+  }, [contenido, esInterno, onSubmit])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        handleSubmit();
+        handleSubmit()
       }
     },
     [handleSubmit],
-  );
+  )
 
   return (
     <Box
@@ -57,7 +57,13 @@ function ComentarioForm({ onSubmit, isSubmitting }: ComentarioFormProps) {
         sx={{ mb: 1.5 }}
       />
 
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <FormControlLabel
           control={
             <Switch
@@ -86,7 +92,7 @@ function ComentarioForm({ onSubmit, isSubmitting }: ComentarioFormProps) {
         </Button>
       </Box>
     </Box>
-  );
+  )
 }
 
-export default ComentarioForm;
+export default ComentarioForm

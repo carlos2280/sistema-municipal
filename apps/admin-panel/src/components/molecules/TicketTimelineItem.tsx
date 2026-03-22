@@ -1,3 +1,5 @@
+import { EstadoChip } from '@/components/atoms/EstadoChip'
+import type { EstadoTicket, TicketHistorial } from '@/types/mesa-ayuda'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -5,8 +7,6 @@ import { alpha, useTheme } from '@mui/material/styles'
 import type { Theme } from '@mui/material/styles'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { EstadoTicket, TicketHistorial } from '@/types/mesa-ayuda'
-import { EstadoChip } from '@/components/atoms/EstadoChip'
 
 interface TicketTimelineItemProps {
   historial: TicketHistorial
@@ -27,12 +27,19 @@ function getDotColor(theme: Theme, estadoNuevo: EstadoTicket): string {
   }
 }
 
-export function TicketTimelineItem({ historial, isLast = false }: TicketTimelineItemProps) {
+export function TicketTimelineItem({
+  historial,
+  isLast = false,
+}: TicketTimelineItemProps) {
   const theme = useTheme()
 
-  const formattedDate = format(parseISO(historial.createdAt), 'd MMM yyyy, HH:mm', {
-    locale: es,
-  })
+  const formattedDate = format(
+    parseISO(historial.createdAt),
+    'd MMM yyyy, HH:mm',
+    {
+      locale: es,
+    },
+  )
 
   const dotColor = getDotColor(theme, historial.estadoNuevo)
 
@@ -72,7 +79,9 @@ export function TicketTimelineItem({ historial, isLast = false }: TicketTimeline
       />
       <Box sx={{ flex: 1 }}>
         {historial.estadoAnterior && historial.estadoNuevo ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}
+          >
             <EstadoChip estado={historial.estadoAnterior} size="small" />
             <SwapHorizIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
             <EstadoChip estado={historial.estadoNuevo} size="small" />

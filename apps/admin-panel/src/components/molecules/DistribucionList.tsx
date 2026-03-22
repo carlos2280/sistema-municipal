@@ -13,11 +13,26 @@ interface DistribucionListProps {
   items: DistribucionItem[]
 }
 
-type PaletteKey = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
-const PALETTE_KEYS = new Set<string>(['primary', 'secondary', 'error', 'warning', 'info', 'success'])
+type PaletteKey =
+  | 'primary'
+  | 'secondary'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'success'
+const PALETTE_KEYS = new Set<string>([
+  'primary',
+  'secondary',
+  'error',
+  'warning',
+  'info',
+  'success',
+])
 
 function resolveColor(color: string, theme: Theme): string {
-  return PALETTE_KEYS.has(color) ? theme.palette[color as PaletteKey].main : color
+  return PALETTE_KEYS.has(color)
+    ? theme.palette[color as PaletteKey].main
+    : color
 }
 
 export function DistribucionList({ items }: DistribucionListProps) {
@@ -34,7 +49,12 @@ export function DistribucionList({ items }: DistribucionListProps) {
         return (
           <Box key={item.label}>
             <Box
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 0.5,
+              }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box
@@ -49,7 +69,11 @@ export function DistribucionList({ items }: DistribucionListProps) {
                 <Typography variant="body2">{item.label}</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="caption" fontWeight={700} sx={{ color: resolved }}>
+                <Typography
+                  variant="caption"
+                  fontWeight={700}
+                  sx={{ color: resolved }}
+                >
                   {item.count}
                 </Typography>
                 <Typography variant="caption" color="text.disabled">

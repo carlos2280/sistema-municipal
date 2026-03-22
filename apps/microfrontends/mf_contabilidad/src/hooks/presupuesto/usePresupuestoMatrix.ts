@@ -1,14 +1,23 @@
-import type { CentrosCostoItem, CuentaPresupuestaria, DetalleItem, SubprogramaItem } from 'mf_store/store';
-import { useCallback, useMemo, useState } from 'react';
-import { v4 as uuid } from 'uuid';
-import type { FilaDetalle, FilaDisplay, FilaMatrix } from '@/types/presupuesto.types';
+import type {
+  FilaDetalle,
+  FilaDisplay,
+  FilaMatrix,
+} from '@/types/presupuesto.types';
 import {
+  type DeleteInfo,
   buildTreeMaps,
+  getDeleteInfo,
   recalcAncestors,
   removeWithDescendants,
-  getDeleteInfo,
-  type DeleteInfo,
 } from '@/utils/presupuestoTree';
+import type {
+  CentrosCostoItem,
+  CuentaPresupuestaria,
+  DetalleItem,
+  SubprogramaItem,
+} from 'mf_store/store';
+import { useCallback, useMemo, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Hook que gestiona el estado de la Adaptive Financial Matrix.
@@ -24,9 +33,9 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
     agruparDetallesInicial(initialDetalle),
   );
   // Distribución: Map<clientId, Map<subprogramaId, monto>>
-  const [distribuciones, setDistribuciones] = useState<Map<string, Map<number, number>>>(() =>
-    buildDistribucionesDesdeDetalle(initialDetalle),
-  );
+  const [distribuciones, setDistribuciones] = useState<
+    Map<string, Map<number, number>>
+  >(() => buildDistribucionesDesdeDetalle(initialDetalle));
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const resetFromServer = useCallback((detalle: DetalleItem[]) => {
@@ -62,7 +71,10 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
           } else {
             updatedDist.delete(subprogramaId);
           }
-          const totalDist = [...updatedDist.values()].reduce((a, b) => a + b, 0);
+          const totalDist = [...updatedDist.values()].reduce(
+            (a, b) => a + b,
+            0,
+          );
           return { ...f, montoAnual: totalDist, isDirty: true };
         });
 
@@ -150,7 +162,12 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
       setFilas((prev) =>
         prev.map((f) =>
           f._clientId === clientId
-            ? { ...f, cuentaId: cuenta?.id, cuenta: cuenta ?? undefined, isDirty: true }
+            ? {
+                ...f,
+                cuentaId: cuenta?.id,
+                cuenta: cuenta ?? undefined,
+                isDirty: true,
+              }
             : f,
         ),
       );
@@ -163,7 +180,12 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
       setFilas((prev) =>
         prev.map((f) =>
           f._clientId === clientId
-            ? { ...f, centroCostoId: cc?.id ?? null, centroCosto: cc, isDirty: true }
+            ? {
+                ...f,
+                centroCostoId: cc?.id ?? null,
+                centroCosto: cc,
+                isDirty: true,
+              }
             : f,
         ),
       );
@@ -174,7 +196,9 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
   const setMonto = useCallback((clientId: string, monto: number) => {
     setFilas((prev) => {
       const updated = prev.map((f) =>
-        f._clientId === clientId ? { ...f, montoAnual: monto, isDirty: true } : f,
+        f._clientId === clientId
+          ? { ...f, montoAnual: monto, isDirty: true }
+          : f,
       );
       const maps = buildTreeMaps(updated);
       return recalcAncestors(updated, clientId, maps);
@@ -184,7 +208,9 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
   const setObservacion = useCallback((clientId: string, obs: string) => {
     setFilas((prev) =>
       prev.map((f) =>
-        f._clientId === clientId ? { ...f, observacion: obs, isDirty: true } : f,
+        f._clientId === clientId
+          ? { ...f, observacion: obs, isDirty: true }
+          : f,
       ),
     );
   }, []);
@@ -249,7 +275,10 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
   );
 
   const importarFilas = useCallback(
-    (nuevas: FilaDetalle[], nuevasDistribuciones?: Map<string, Map<number, number>>) => {
+    (
+      nuevas: FilaDetalle[],
+      nuevasDistribuciones?: Map<string, Map<number, number>>,
+    ) => {
       setFilas(nuevas);
       if (nuevasDistribuciones) {
         setDistribuciones(nuevasDistribuciones);
@@ -327,7 +356,10 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
   }, [filas, distribuciones]);
 
   const cuentasEnUso = useMemo(
-    () => filas.map((f) => f.cuentaId).filter((id): id is number => id !== undefined),
+    () =>
+      filas
+        .map((f) => f.cuentaId)
+        .filter((id): id is number => id !== undefined),
     [filas],
   );
 
@@ -444,7 +476,9 @@ function agruparDetallesInicial(detalles: DetalleItem[]): FilaDetalle[] {
       montoAnual: totalMonto,
       observacion: base.observacion ?? undefined,
       cuenta: base.cuenta,
-      centroCosto: base.centroCosto ? { ...base.centroCosto, activo: true } : null,
+      centroCosto: base.centroCosto
+        ? { ...base.centroCosto, activo: true }
+        : null,
       isNew: false,
       isDirty: false,
     };
@@ -480,7 +514,9 @@ function buildDistribucionesDesdeDetalle(
 }
 
 /** Build display order with hierarchy (same as usePresupuestoDetalle) */
-function buildDisplayOrder(filas: FilaDetalle[]): Array<FilaDetalle & { nivel: number; hijosIds: string[] }> {
+function buildDisplayOrder(
+  filas: FilaDetalle[],
+): Array<FilaDetalle & { nivel: number; hijosIds: string[] }> {
   const cuentaIdToClientId = new Map<number, string>();
   for (const f of filas) {
     if (f.cuentaId) cuentaIdToClientId.set(f.cuentaId, f._clientId);

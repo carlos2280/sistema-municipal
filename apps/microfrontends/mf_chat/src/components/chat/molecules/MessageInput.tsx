@@ -84,8 +84,12 @@ export function MessageInput({
           component="input"
           ref={inputRef}
           value={mensaje}
-          onChange={handleChange as unknown as React.ChangeEventHandler<HTMLInputElement>}
-          onKeyDown={handleKeyDown as unknown as React.KeyboardEventHandler<HTMLInputElement>}
+          onChange={
+            handleChange as unknown as React.ChangeEventHandler<HTMLInputElement>
+          }
+          onKeyDown={
+            handleKeyDown as unknown as React.KeyboardEventHandler<HTMLInputElement>
+          }
           disabled={disabled}
           placeholder="Escribe un mensaje..."
           sx={{
@@ -225,11 +229,7 @@ export function MessageInput({
               theme={emojiTheme}
               onEmojiClick={handleEmojiClick}
               searchPlaceHolder="Buscar emoji..."
-              width={
-                isMobile
-                  ? Math.min(window.innerWidth - 48, 320)
-                  : 350
-              }
+              width={isMobile ? Math.min(window.innerWidth - 48, 320) : 350}
               height={isMobile ? 320 : 400}
               previewConfig={{ showPreview: false }}
               lazyLoadEmojis

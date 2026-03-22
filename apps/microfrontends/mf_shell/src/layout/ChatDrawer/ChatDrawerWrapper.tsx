@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Drawer from "@mui/material/Drawer";
 import Typography from "@mui/material/Typography";
-import { alpha, type Theme } from "@mui/material/styles";
+import { type Theme, alpha } from "@mui/material/styles";
 import { MessageSquare } from "lucide-react";
 import { useTheme as useAppTheme } from "mf_ui/theme";
 import { type FC, useEffect, useRef, useState } from "react";
@@ -110,10 +110,7 @@ export function ChatDrawerWrapper({ open, onClose }: ChatDrawerProps) {
 					sx: {
 						width: { xs: "100vw", sm: DRAWER_WIDTH },
 						boxSizing: "border-box",
-						background: alpha(
-							theme.meridian.surfaces.ground,
-							0.92,
-						),
+						background: alpha(theme.meridian.surfaces.ground, 0.92),
 						backdropFilter: "blur(24px) saturate(1.4)",
 						borderLeft: `1px solid ${theme.meridian.borders.default}`,
 						color: theme.palette.text.primary,
@@ -148,10 +145,7 @@ export function ChatDrawerWrapper({ open, onClose }: ChatDrawerProps) {
 					</>
 				) : (
 					<>
-						<MessageSquare
-							size={48}
-							color={theme.palette.text.secondary}
-						/>
+						<MessageSquare size={48} color={theme.palette.text.secondary} />
 						<Typography
 							sx={{
 								fontWeight: 600,
@@ -171,8 +165,7 @@ export function ChatDrawerWrapper({ open, onClose }: ChatDrawerProps) {
 								textAlign: "center",
 							}}
 						>
-							El módulo de chat no está cargado. Intenta recargar
-							la página.
+							El módulo de chat no está cargado. Intenta recargar la página.
 						</Typography>
 					</>
 				)}

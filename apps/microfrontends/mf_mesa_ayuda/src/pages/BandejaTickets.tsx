@@ -1,16 +1,16 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import { useCallback, useState } from 'react';
-import TicketFilters from '@/components/molecules/TicketFilters';
-import TicketStatsBar from '@/components/molecules/TicketStatsBar';
-import TicketList from '@/components/organisms/TicketList';
-import { useTickets } from '@/hooks/useTickets';
-import DetalleTicket from './DetalleTicket';
+import TicketFilters from '@/components/molecules/TicketFilters'
+import TicketStatsBar from '@/components/molecules/TicketStatsBar'
+import TicketList from '@/components/organisms/TicketList'
+import { useTickets } from '@/hooks/useTickets'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
+import { useCallback, useState } from 'react'
+import DetalleTicket from './DetalleTicket'
 
 function BandejaTickets() {
-  const theme = useTheme();
+  const theme = useTheme()
   const {
     tickets,
     totalPages,
@@ -22,23 +22,23 @@ function BandejaTickets() {
     updateFilters,
     clearFilters,
     goToPage,
-  } = useTickets();
+  } = useTickets()
 
-  const [view, setView] = useState<'bandeja' | 'detalle'>('bandeja');
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [view, setView] = useState<'bandeja' | 'detalle'>('bandeja')
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null)
 
   const handleTicketClick = useCallback((ticketId: number) => {
-    setSelectedTicketId(ticketId);
-    setView('detalle');
-  }, []);
+    setSelectedTicketId(ticketId)
+    setView('detalle')
+  }, [])
 
   const handleBack = useCallback(() => {
-    setView('bandeja');
-    setSelectedTicketId(null);
-  }, []);
+    setView('bandeja')
+    setSelectedTicketId(null)
+  }, [])
 
   if (view === 'detalle' && selectedTicketId) {
-    return <DetalleTicket ticketId={selectedTicketId} onBack={handleBack} />;
+    return <DetalleTicket ticketId={selectedTicketId} onBack={handleBack} />
   }
 
   return (
@@ -74,10 +74,9 @@ function BandejaTickets() {
           onPageChange={goToPage}
           onTicketClick={handleTicketClick}
         />
-
       </Box>
     </motion.div>
-  );
+  )
 }
 
-export default BandejaTickets;
+export default BandejaTickets

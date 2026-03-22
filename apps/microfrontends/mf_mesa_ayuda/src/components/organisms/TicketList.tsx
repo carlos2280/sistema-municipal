@@ -1,19 +1,19 @@
-import Box from '@mui/material/Box';
-import Pagination from '@mui/material/Pagination';
-import Skeleton from '@mui/material/Skeleton';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import { AnimatePresence } from 'framer-motion';
-import TicketCard from '@/components/molecules/TicketCard';
-import type { Ticket } from '@/types/mesa-ayuda.types';
+import TicketCard from '@/components/molecules/TicketCard'
+import type { Ticket } from '@/types/mesa-ayuda.types'
+import Box from '@mui/material/Box'
+import Pagination from '@mui/material/Pagination'
+import Skeleton from '@mui/material/Skeleton'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
+import { AnimatePresence } from 'framer-motion'
 
 interface TicketListProps {
-  tickets: Ticket[];
-  isLoading: boolean;
-  totalPages: number;
-  currentPage: number;
-  onPageChange: (page: number) => void;
-  onTicketClick: (ticketId: number) => void;
+  tickets: Ticket[]
+  isLoading: boolean
+  totalPages: number
+  currentPage: number
+  onPageChange: (page: number) => void
+  onTicketClick: (ticketId: number) => void
 }
 
 function TicketList({
@@ -24,7 +24,7 @@ function TicketList({
   onPageChange,
   onTicketClick,
 }: TicketListProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   if (isLoading) {
     return (
@@ -37,7 +37,7 @@ function TicketList({
           />
         ))}
       </Box>
-    );
+    )
   }
 
   if (tickets.length === 0) {
@@ -54,7 +54,7 @@ function TicketList({
           No se encontraron tickets
         </Typography>
       </Box>
-    );
+    )
   }
 
   return (
@@ -86,7 +86,7 @@ function TicketList({
         </Box>
       )}
     </Box>
-  );
+  )
 }
 
-export default TicketList;
+export default TicketList

@@ -8,7 +8,11 @@ interface SidebarNavGroupLabelProps {
   collapsed: boolean
 }
 
-export default function SidebarNavGroupLabel({ icon, label, collapsed }: SidebarNavGroupLabelProps) {
+export default function SidebarNavGroupLabel({
+  icon,
+  label,
+  collapsed,
+}: SidebarNavGroupLabelProps) {
   const theme = useTheme()
   return (
     <Box
@@ -28,7 +32,12 @@ export default function SidebarNavGroupLabel({ icon, label, collapsed }: Sidebar
       <Typography
         variant="caption"
         color="text.disabled"
-        sx={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 10, fontWeight: 600 }}
+        sx={{
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+          fontSize: 10,
+          fontWeight: 600,
+        }}
       >
         {label}
       </Typography>

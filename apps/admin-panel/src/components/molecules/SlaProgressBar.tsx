@@ -54,11 +54,17 @@ export function SlaProgressBar({ compliance }: SlaProgressBarProps) {
           '& .MuiLinearProgress-bar': {
             backgroundColor: barColor,
             borderRadius: 4,
-            transition: reducedMotion ? 'none' : 'transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0)',
+            transition: reducedMotion
+              ? 'none'
+              : 'transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0)',
           },
         }}
       />
-      <Typography variant="caption" fontWeight={600} sx={{ color: barColor, minWidth: 38 }}>
+      <Typography
+        variant="caption"
+        fontWeight={600}
+        sx={{ color: barColor, minWidth: 38 }}
+      >
         {compliance}%
       </Typography>
     </Box>

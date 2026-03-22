@@ -1,3 +1,4 @@
+import type { AdminTicketDetail } from '@/types/mesa-ayuda'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -5,7 +6,6 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { AdminTicketDetail } from '@/types/mesa-ayuda'
 
 interface InfoRowProps {
   label: string
@@ -15,7 +15,11 @@ interface InfoRowProps {
 function InfoRow({ label, value }: InfoRowProps) {
   return (
     <Box sx={{ display: 'flex', py: 0.75 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ width: 140, flexShrink: 0 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ width: 140, flexShrink: 0 }}
+      >
         {label}
       </Typography>
       <Typography variant="body2">{value ?? '—'}</Typography>

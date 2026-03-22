@@ -1,7 +1,7 @@
-import BandejaTickets from '../pages/BandejaTickets';
-import DetalleTicketPage from '../pages/DetalleTicketPage';
-import NuevoTicketPage from '../pages/NuevoTicketPage';
-import GestionCategorias from '../pages/GestionCategorias';
+import BandejaTickets from '../pages/BandejaTickets'
+import DetalleTicketPage from '../pages/DetalleTicketPage'
+import GestionCategorias from '../pages/GestionCategorias'
+import NuevoTicketPage from '../pages/NuevoTicketPage'
 
 const mesaAyudaRoutes = {
   sistemaId: 5,
@@ -11,6 +11,6 @@ const mesaAyudaRoutes = {
     nuevo_ticket: <NuevoTicketPage />,
     categorias: <GestionCategorias />,
   },
-};
+}
 
-export default mesaAyudaRoutes;
+export default mesaAyudaRoutes

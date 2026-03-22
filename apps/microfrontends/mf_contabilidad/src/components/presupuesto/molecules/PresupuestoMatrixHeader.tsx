@@ -1,6 +1,6 @@
+import type { SubprogramaItem } from '@/types/presupuesto.types';
 import { Box } from '@mui/material';
 import { memo } from 'react';
-import type { SubprogramaItem } from '@/types/presupuesto.types';
 import AreaDot from '../atoms/AreaDot';
 
 interface PresupuestoMatrixHeaderProps {
@@ -48,7 +48,10 @@ function PresupuestoMatrixHeader({
       {/* Area columns */}
       {areasVisibles.map((area) => {
         const totalArea = totalesPorArea.get(area.id) ?? 0;
-        const pct = totalGeneral > 0 ? ((totalArea / totalGeneral) * 100).toFixed(1) : '0.0';
+        const pct =
+          totalGeneral > 0
+            ? ((totalArea / totalGeneral) * 100).toFixed(1)
+            : '0.0';
         return (
           <Box
             key={area.id}

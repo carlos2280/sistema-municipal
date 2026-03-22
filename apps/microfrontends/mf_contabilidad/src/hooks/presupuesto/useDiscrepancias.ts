@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
 import type {
   EquilibrioState,
   FilaDetalle,
   FilaDisplay,
   FilaMatrix,
 } from '@/types/presupuesto.types';
+import { useMemo } from 'react';
 
 /**
  * Hook de responsabilidad única: detección de discrepancias padre/hijo

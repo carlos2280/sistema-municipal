@@ -1,6 +1,6 @@
+import type { SubprogramaItem } from '@/types/presupuesto.types';
 import { Box, Tooltip, Typography, alpha } from '@mui/material';
 import { memo } from 'react';
-import type { SubprogramaItem } from '@/types/presupuesto.types';
 
 interface PresupuestoMatrixFooterProps {
   areasVisibles: SubprogramaItem[];
@@ -49,13 +49,20 @@ function PresupuestoMatrixFooter({
         }}
       >
         {/* Frozen left: empty (page footer shows "Total Gastos") */}
-        <Box sx={{ position: 'sticky', left: 0, zIndex: 4, bgcolor: 'inherit' }} />
-        <Box sx={{ position: 'sticky', left: 160, zIndex: 4, bgcolor: 'inherit' }} />
+        <Box
+          sx={{ position: 'sticky', left: 0, zIndex: 4, bgcolor: 'inherit' }}
+        />
+        <Box
+          sx={{ position: 'sticky', left: 160, zIndex: 4, bgcolor: 'inherit' }}
+        />
 
         {/* Area totals + percentages */}
         {areasVisibles.map((area) => {
           const total = totalesPorArea.get(area.id) ?? 0;
-          const pct = totalGeneral > 0 ? ((total / totalGeneral) * 100).toFixed(1) : '0.0';
+          const pct =
+            totalGeneral > 0
+              ? ((total / totalGeneral) * 100).toFixed(1)
+              : '0.0';
           return (
             <Box
               key={area.id}
@@ -124,8 +131,12 @@ function PresupuestoMatrixFooter({
         </Box>
 
         {/* Status + Actions empty */}
-        <Box sx={{ position: 'sticky', right: 56, zIndex: 4, bgcolor: 'inherit' }} />
-        <Box sx={{ position: 'sticky', right: 0, zIndex: 4, bgcolor: 'inherit' }} />
+        <Box
+          sx={{ position: 'sticky', right: 56, zIndex: 4, bgcolor: 'inherit' }}
+        />
+        <Box
+          sx={{ position: 'sticky', right: 0, zIndex: 4, bgcolor: 'inherit' }}
+        />
       </Box>
 
       {/* Stacked bar */}
@@ -138,8 +149,17 @@ function PresupuestoMatrixFooter({
           }}
         >
           {/* Skip frozen left cols */}
-          <Box sx={{ position: 'sticky', left: 0, zIndex: 4, bgcolor: 'inherit' }} />
-          <Box sx={{ position: 'sticky', left: 160, zIndex: 4, bgcolor: 'inherit' }} />
+          <Box
+            sx={{ position: 'sticky', left: 0, zIndex: 4, bgcolor: 'inherit' }}
+          />
+          <Box
+            sx={{
+              position: 'sticky',
+              left: 160,
+              zIndex: 4,
+              bgcolor: 'inherit',
+            }}
+          />
 
           {/* Bar spanning area columns */}
           <Box
@@ -157,7 +177,8 @@ function PresupuestoMatrixFooter({
               const total = totalesPorArea.get(area.id) ?? 0;
               const pct = totalGeneral > 0 ? (total / totalGeneral) * 100 : 0;
               if (pct === 0) return null;
-              const paletteColor = area.color === 'default' ? 'grey' : area.color;
+              const paletteColor =
+                area.color === 'default' ? 'grey' : area.color;
               return (
                 <Tooltip
                   key={area.id}
@@ -168,8 +189,11 @@ function PresupuestoMatrixFooter({
                     sx={(t) => ({
                       width: `${pct}%`,
                       bgcolor:
-                        (t.palette[paletteColor as keyof typeof t.palette] as { main: string })
-                          ?.main ?? t.palette.primary.main,
+                        (
+                          t.palette[paletteColor as keyof typeof t.palette] as {
+                            main: string;
+                          }
+                        )?.main ?? t.palette.primary.main,
                       minWidth: 2,
                       '&:hover': {
                         opacity: 0.8,
@@ -182,9 +206,25 @@ function PresupuestoMatrixFooter({
           </Box>
 
           {/* Skip frozen right cols */}
-          <Box sx={{ position: 'sticky', right: 84, zIndex: 4, bgcolor: 'inherit' }} />
-          <Box sx={{ position: 'sticky', right: 56, zIndex: 4, bgcolor: 'inherit' }} />
-          <Box sx={{ position: 'sticky', right: 0, zIndex: 4, bgcolor: 'inherit' }} />
+          <Box
+            sx={{
+              position: 'sticky',
+              right: 84,
+              zIndex: 4,
+              bgcolor: 'inherit',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'sticky',
+              right: 56,
+              zIndex: 4,
+              bgcolor: 'inherit',
+            }}
+          />
+          <Box
+            sx={{ position: 'sticky', right: 0, zIndex: 4, bgcolor: 'inherit' }}
+          />
         </Box>
       )}
     </Box>

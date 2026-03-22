@@ -1,3 +1,7 @@
+import { DistribucionList } from '@/components/molecules'
+import { TenantSummaryTable, TendenciaChart } from '@/components/organisms'
+import { useMesaAyudaDashboard } from '@/hooks/useMesaAyudaDashboard'
+import type { CategoriaResumen, PrioridadResumen } from '@/types/mesa-ayuda'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -6,18 +10,22 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import { DistribucionList } from '@/components/molecules'
-import { TendenciaChart, TenantSummaryTable } from '@/components/organisms'
-import { useMesaAyudaDashboard } from '@/hooks/useMesaAyudaDashboard'
-import type { CategoriaResumen, PrioridadResumen } from '@/types/mesa-ayuda'
 import { DashboardKpis } from './components/DashboardKpis'
 
 export default function MesaAyudaDashboardPage() {
   const theme = useTheme()
   const { data, isLoading, error } = useMesaAyudaDashboard()
 
-  if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><CircularProgress /></Box>
-  if (error) return <Alert severity="error">Error al cargar dashboard: {error.message}</Alert>
+  if (isLoading)
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    )
+  if (error)
+    return (
+      <Alert severity="error">Error al cargar dashboard: {error.message}</Alert>
+    )
   if (!data) return null
 
   const global = data.global ?? {
@@ -56,11 +64,15 @@ export default function MesaAyudaDashboardPage() {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
           <Card sx={{ mb: 3 }}>
-            <CardContent><TendenciaChart data={tendenciaData} /></CardContent>
+            <CardContent>
+              <TendenciaChart data={tendenciaData} />
+            </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>Por Municipalidad</Typography>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Por Municipalidad
+              </Typography>
               <TenantSummaryTable data={porTenant} />
             </CardContent>
           </Card>
@@ -68,13 +80,17 @@ export default function MesaAyudaDashboardPage() {
         <Grid size={{ xs: 12, md: 4 }}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>Por Categoría</Typography>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Por Categoría
+              </Typography>
               <DistribucionList items={categoriaItems} />
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>Por Prioridad</Typography>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Por Prioridad
+              </Typography>
               <DistribucionList items={prioridadItems} />
             </CardContent>
           </Card>

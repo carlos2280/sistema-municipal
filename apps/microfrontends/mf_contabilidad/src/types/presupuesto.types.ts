@@ -6,7 +6,12 @@ import type {
 } from 'mf_store/store';
 
 // Re-exportar tipos del store para uso en componentes
-export type { CentrosCostoItem, CuentaPresupuestaria, DiscrepanciaItem, SubprogramaItem };
+export type {
+  CentrosCostoItem,
+  CuentaPresupuestaria,
+  DiscrepanciaItem,
+  SubprogramaItem,
+};
 
 // ─── Tab activo ───────────────────────────────────────────────────────────────
 

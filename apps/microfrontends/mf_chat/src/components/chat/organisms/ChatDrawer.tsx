@@ -8,7 +8,12 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { type Theme, ThemeProvider, alpha, useTheme } from '@mui/material/styles'
+import {
+  type Theme,
+  ThemeProvider,
+  alpha,
+  useTheme,
+} from '@mui/material/styles'
 import { MessageSquarePlus, Users } from 'lucide-react'
 import {
   selectUsuarioId,

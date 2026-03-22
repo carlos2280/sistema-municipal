@@ -8,8 +8,8 @@
  * Animación: translateX(100%) → 0 en 250ms ease-out.
  */
 
-import { alpha, styled } from "@mui/material/styles";
 import { useMenu } from "@/hooks/useMenu";
+import { alpha, styled } from "@mui/material/styles";
 import NavPanelFooter from "./NavPanelFooter";
 import NavPanelHeader from "./NavPanelHeader";
 import NavPanelMenu from "./NavPanelMenu";

@@ -1,25 +1,28 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
-import Skeleton from '@mui/material/Skeleton';
-import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import EstadoBadge from '@/components/atoms/EstadoBadge';
-import PrioridadBadge from '@/components/atoms/PrioridadBadge';
-import SlaIndicator from '@/components/atoms/SlaIndicator';
-import CategoriaDot from '@/components/atoms/CategoriaDot';
-import ComentarioItem from '@/components/molecules/ComentarioItem';
-import ComentarioForm from '@/components/molecules/ComentarioForm';
-import HistorialTimeline from '@/components/molecules/HistorialTimeline';
-import type { EstadoTicket, TicketDetalle as TicketDetalleType } from '@/types/mesa-ayuda.types';
+import CategoriaDot from '@/components/atoms/CategoriaDot'
+import EstadoBadge from '@/components/atoms/EstadoBadge'
+import PrioridadBadge from '@/components/atoms/PrioridadBadge'
+import SlaIndicator from '@/components/atoms/SlaIndicator'
+import ComentarioForm from '@/components/molecules/ComentarioForm'
+import ComentarioItem from '@/components/molecules/ComentarioItem'
+import HistorialTimeline from '@/components/molecules/HistorialTimeline'
+import type {
+  EstadoTicket,
+  TicketDetalle as TicketDetalleType,
+} from '@/types/mesa-ayuda.types'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Divider from '@mui/material/Divider'
+import Skeleton from '@mui/material/Skeleton'
+import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
 
 interface TicketDetailProps {
-  ticket: TicketDetalleType | null;
-  isLoading: boolean;
-  onAgregarComentario: (contenido: string, esInterno: boolean) => void;
-  isAddingComentario: boolean;
+  ticket: TicketDetalleType | null
+  isLoading: boolean
+  onAgregarComentario: (contenido: string, esInterno: boolean) => void
+  isAddingComentario: boolean
 }
 
 function TicketDetail({
@@ -28,7 +31,7 @@ function TicketDetail({
   onAgregarComentario,
   isAddingComentario,
 }: TicketDetailProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   if (isLoading || !ticket) {
     return (
@@ -36,7 +39,7 @@ function TicketDetail({
         <Skeleton variant="rounded" height={200} />
         <Skeleton variant="rounded" height={300} />
       </Box>
-    );
+    )
   }
 
   const fecha = new Date(ticket.createdAt).toLocaleString('es-CL', {
@@ -45,7 +48,7 @@ function TicketDetail({
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  })
 
   return (
     <motion.div
@@ -53,7 +56,9 @@ function TicketDetail({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Box sx={{ display: 'grid', gridTemplateColumns: { md: '2fr 1fr' }, gap: 3 }}>
+      <Box
+        sx={{ display: 'grid', gridTemplateColumns: { md: '2fr 1fr' }, gap: 3 }}
+      >
         {/* Columna principal */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Header */}
@@ -66,8 +71,14 @@ function TicketDetail({
             }}
           >
             <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 700 }}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}
+              >
+                <Typography
+                  variant="caption"
+                  color="text.disabled"
+                  sx={{ fontWeight: 700 }}
+                >
                   #{ticket.numero}
                 </Typography>
                 <EstadoBadge estado={ticket.estado as EstadoTicket} />
@@ -83,11 +94,22 @@ function TicketDetail({
                 />
               </Box>
 
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: theme.palette.text.primary }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  color: theme.palette.text.primary,
+                }}
+              >
                 {ticket.titulo}
               </Typography>
 
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ whiteSpace: 'pre-wrap' }}
+              >
                 {ticket.descripcion}
               </Typography>
 
@@ -95,29 +117,48 @@ function TicketDetail({
 
               <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                 <Box>
-                  <Typography variant="caption" color="text.disabled">Solicitante</Typography>
-                  <Typography variant="body2">{ticket.solicitanteNombre}</Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    Solicitante
+                  </Typography>
+                  <Typography variant="body2">
+                    {ticket.solicitanteNombre}
+                  </Typography>
                 </Box>
                 {ticket.asignadoNombre && (
                   <Box>
-                    <Typography variant="caption" color="text.disabled">Asignado a</Typography>
-                    <Typography variant="body2">{ticket.asignadoNombre}</Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      Asignado a
+                    </Typography>
+                    <Typography variant="body2">
+                      {ticket.asignadoNombre}
+                    </Typography>
                   </Box>
                 )}
                 {ticket.categoriaNombre && (
                   <Box>
-                    <Typography variant="caption" color="text.disabled">Categoria</Typography>
-                    <CategoriaDot nombre={ticket.categoriaNombre} color={ticket.categoriaColor} />
+                    <Typography variant="caption" color="text.disabled">
+                      Categoria
+                    </Typography>
+                    <CategoriaDot
+                      nombre={ticket.categoriaNombre}
+                      color={ticket.categoriaColor}
+                    />
                   </Box>
                 )}
                 {ticket.departamento && (
                   <Box>
-                    <Typography variant="caption" color="text.disabled">Departamento</Typography>
-                    <Typography variant="body2">{ticket.departamento}</Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      Departamento
+                    </Typography>
+                    <Typography variant="body2">
+                      {ticket.departamento}
+                    </Typography>
                   </Box>
                 )}
                 <Box>
-                  <Typography variant="caption" color="text.disabled">Creado</Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    Creado
+                  </Typography>
                   <Typography variant="body2">{fecha}</Typography>
                 </Box>
               </Box>
@@ -170,7 +211,7 @@ function TicketDetail({
         </Box>
       </Box>
     </motion.div>
-  );
+  )
 }
 
-export default TicketDetail;
+export default TicketDetail

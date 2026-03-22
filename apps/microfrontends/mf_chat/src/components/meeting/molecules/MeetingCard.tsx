@@ -256,7 +256,9 @@ export const MeetingCard = memo(function MeetingCard({
                 color:
                   reunion.estado === 'activa' ? 'success.main' : 'primary.main',
                 bgcolor:
-                  reunion.estado === 'activa' ? 'success.light' : 'primary.light',
+                  reunion.estado === 'activa'
+                    ? 'success.light'
+                    : 'primary.light',
                 px: 0.75,
                 py: 0.25,
                 borderRadius: 1,

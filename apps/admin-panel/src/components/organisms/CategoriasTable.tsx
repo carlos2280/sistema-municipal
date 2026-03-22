@@ -1,3 +1,5 @@
+import { CategoriaFormDialog } from '@/components/molecules/CategoriaFormDialog'
+import type { AdminCategoria, CreateCategoriaInput } from '@/types/mesa-ayuda'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -7,10 +9,12 @@ import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
-import { type MRT_ColumnDef, MaterialReactTable, useMaterialReactTable } from 'material-react-table'
+import {
+  type MRT_ColumnDef,
+  MaterialReactTable,
+  useMaterialReactTable,
+} from 'material-react-table'
 import { useMemo, useState } from 'react'
-import { CategoriaFormDialog } from '@/components/molecules/CategoriaFormDialog'
-import type { AdminCategoria, CreateCategoriaInput } from '@/types/mesa-ayuda'
 
 interface CategoriasTableProps {
   data: AdminCategoria[]
@@ -45,9 +49,7 @@ export function CategoriasTable({
         header: 'Código',
         size: 130,
         Cell: ({ cell }) => (
-          <Typography variant="mono">
-            {cell.getValue<string>()}
-          </Typography>
+          <Typography variant="mono">{cell.getValue<string>()}</Typography>
         ),
       },
       {
@@ -65,7 +67,11 @@ export function CategoriasTable({
         header: 'Color',
         size: 110,
         Cell: ({ cell }) => (
-          <Chip label={cell.getValue<string>()} color={cell.getValue<string>() as 'primary'} size="small" />
+          <Chip
+            label={cell.getValue<string>()}
+            color={cell.getValue<string>() as 'primary'}
+            size="small"
+          />
         ),
       },
       {
@@ -88,7 +94,10 @@ export function CategoriasTable({
         enableColumnFilter: false,
         Cell: ({ row }) => (
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton size="small" onClick={() => setEditTarget(row.original)}>
+            <IconButton
+              size="small"
+              onClick={() => setEditTarget(row.original)}
+            >
               <EditIcon fontSize="small" />
             </IconButton>
             <IconButton
@@ -122,7 +131,10 @@ export function CategoriasTable({
         borderRadius: 2,
       },
     },
-    initialState: { density: 'compact', sorting: [{ id: 'orden', desc: false }] },
+    initialState: {
+      density: 'compact',
+      sorting: [{ id: 'orden', desc: false }],
+    },
     renderTopToolbarCustomActions: () => (
       <Button
         size="small"

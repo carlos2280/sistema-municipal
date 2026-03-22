@@ -1,23 +1,23 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import EstadoBadge from '@/components/atoms/EstadoBadge';
-import PrioridadBadge from '@/components/atoms/PrioridadBadge';
-import SlaIndicator from '@/components/atoms/SlaIndicator';
-import CategoriaDot from '@/components/atoms/CategoriaDot';
-import type { EstadoTicket, Ticket } from '@/types/mesa-ayuda.types';
+import CategoriaDot from '@/components/atoms/CategoriaDot'
+import EstadoBadge from '@/components/atoms/EstadoBadge'
+import PrioridadBadge from '@/components/atoms/PrioridadBadge'
+import SlaIndicator from '@/components/atoms/SlaIndicator'
+import type { EstadoTicket, Ticket } from '@/types/mesa-ayuda.types'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardActionArea from '@mui/material/CardActionArea'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
 
 interface TicketCardProps {
-  ticket: Ticket;
-  onClick: (ticketId: number) => void;
+  ticket: Ticket
+  onClick: (ticketId: number) => void
 }
 
 function TicketCard({ ticket, onClick }: TicketCardProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <motion.div
@@ -111,7 +111,7 @@ function TicketCard({ ticket, onClick }: TicketCardProps) {
         </CardActionArea>
       </Card>
     </motion.div>
-  );
+  )
 }
 
-export default TicketCard;
+export default TicketCard

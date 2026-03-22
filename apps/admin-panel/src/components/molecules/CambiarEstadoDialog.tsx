@@ -1,3 +1,6 @@
+import type { CambiarEstadoInput, EstadoTicket } from '@/types/mesa-ayuda'
+import { TRANSICIONES_ESTADO } from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -8,11 +11,8 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { CambiarEstadoInput, EstadoTicket } from '@/types/mesa-ayuda'
-import { TRANSICIONES_ESTADO } from '@/types/mesa-ayuda'
 
 const ESTADO_LABEL: Record<EstadoTicket, string> = {
   abierto: 'Abierto',
@@ -23,7 +23,13 @@ const ESTADO_LABEL: Record<EstadoTicket, string> = {
 }
 
 const schema = z.object({
-  estado: z.enum(['abierto', 'en_progreso', 'en_espera', 'resuelto', 'cerrado']),
+  estado: z.enum([
+    'abierto',
+    'en_progreso',
+    'en_espera',
+    'resuelto',
+    'cerrado',
+  ]),
   motivo: z.string().max(500).optional(),
 })
 
@@ -46,7 +52,12 @@ export function CambiarEstadoDialog({
 }: CambiarEstadoDialogProps) {
   const transiciones = TRANSICIONES_ESTADO[estadoActual]
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { estado: transiciones[0] ?? 'cerrado', motivo: '' },
   })
@@ -62,9 +73,17 @@ export function CambiarEstadoDialog({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}
+    >
       <DialogTitle>Cambiar Estado del Ticket</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+      <DialogContent
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}
+      >
         <Controller
           name="estado"
           control={control}

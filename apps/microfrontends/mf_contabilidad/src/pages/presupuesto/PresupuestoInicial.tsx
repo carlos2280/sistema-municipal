@@ -1,3 +1,11 @@
+import DeleteConfirmToast from '@/components/presupuesto/molecules/DeleteConfirmToast';
+import DeleteLineaDialog from '@/components/presupuesto/molecules/DeleteLineaDialog';
+import PresupuestoHeader from '@/components/presupuesto/molecules/PresupuestoHeader';
+import AgregarCuentaDrawer from '@/components/presupuesto/organisms/AgregarCuentaDrawer';
+import PresupuestoGrid from '@/components/presupuesto/organisms/PresupuestoGrid';
+import PresupuestoMatrixGrid from '@/components/presupuesto/organisms/PresupuestoMatrixGrid';
+import PresupuestoResumen from '@/components/presupuesto/organisms/PresupuestoResumen';
+import { usePresupuestoInicial } from '@/hooks/presupuesto/usePresupuestoInicial';
 import AddIcon from '@mui/icons-material/Add';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -30,14 +38,6 @@ import {
 import { type Theme, alpha } from '@mui/material/styles';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { FormProvider } from 'react-hook-form';
-import DeleteConfirmToast from '@/components/presupuesto/molecules/DeleteConfirmToast';
-import DeleteLineaDialog from '@/components/presupuesto/molecules/DeleteLineaDialog';
-import PresupuestoHeader from '@/components/presupuesto/molecules/PresupuestoHeader';
-import AgregarCuentaDrawer from '@/components/presupuesto/organisms/AgregarCuentaDrawer';
-import PresupuestoGrid from '@/components/presupuesto/organisms/PresupuestoGrid';
-import PresupuestoMatrixGrid from '@/components/presupuesto/organisms/PresupuestoMatrixGrid';
-import PresupuestoResumen from '@/components/presupuesto/organisms/PresupuestoResumen';
-import { usePresupuestoInicial } from '@/hooks/presupuesto/usePresupuestoInicial';
 
 // ─── Tipos ────────────────────────────────────────────────────────
 type TabValue = 'ingresos' | 'gastos' | 'resumen';
@@ -760,7 +760,9 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
               onTab={handleTabNavigation}
               onTabArea={(clientId, areaIdx, shiftKey) => {
                 const nextIdx = shiftKey ? areaIdx - 1 : areaIdx + 1;
-                const visibleAreas = subprogramas.filter((s) => s.codigo !== 'SIN_ASIG');
+                const visibleAreas = subprogramas.filter(
+                  (s) => s.codigo !== 'SIN_ASIG',
+                );
                 if (nextIdx >= 0 && nextIdx < visibleAreas.length) {
                   return;
                 }

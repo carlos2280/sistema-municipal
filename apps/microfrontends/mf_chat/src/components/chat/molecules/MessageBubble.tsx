@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { alpha, useTheme } from '@mui/material/styles'
+import { motion } from 'framer-motion'
 import { FileText } from 'lucide-react'
 import { memo } from 'react'
-import { motion } from 'framer-motion'
 
 /** Elimina caracteres de control invisibles (excepto newline/tab) y null bytes */
 function sanitizeContent(text: string): string {

@@ -1,3 +1,8 @@
+import { EstadoChip } from '@/components/atoms/EstadoChip'
+import { PrioridadChip } from '@/components/atoms/PrioridadChip'
+import { SlaIndicator } from '@/components/atoms/SlaIndicator'
+import { TenantBadge } from '@/components/atoms/TenantBadge'
+import type { AdminTicket } from '@/types/mesa-ayuda'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
@@ -12,11 +17,6 @@ import {
   useMaterialReactTable,
 } from 'material-react-table'
 import { useMemo } from 'react'
-import { EstadoChip } from '@/components/atoms/EstadoChip'
-import { PrioridadChip } from '@/components/atoms/PrioridadChip'
-import { SlaIndicator } from '@/components/atoms/SlaIndicator'
-import { TenantBadge } from '@/components/atoms/TenantBadge'
-import type { AdminTicket } from '@/types/mesa-ayuda'
 
 interface TicketsTableProps {
   data: AdminTicket[]
@@ -26,9 +26,19 @@ interface TicketsTableProps {
   sorting: MRT_SortingState
   columnFilters: MRT_ColumnFiltersState
   globalFilter: string
-  onPaginationChange: (updater: MRT_PaginationState | ((prev: MRT_PaginationState) => MRT_PaginationState)) => void
-  onSortingChange: (updater: MRT_SortingState | ((prev: MRT_SortingState) => MRT_SortingState)) => void
-  onColumnFiltersChange: (updater: MRT_ColumnFiltersState | ((prev: MRT_ColumnFiltersState) => MRT_ColumnFiltersState)) => void
+  onPaginationChange: (
+    updater:
+      | MRT_PaginationState
+      | ((prev: MRT_PaginationState) => MRT_PaginationState),
+  ) => void
+  onSortingChange: (
+    updater: MRT_SortingState | ((prev: MRT_SortingState) => MRT_SortingState),
+  ) => void
+  onColumnFiltersChange: (
+    updater:
+      | MRT_ColumnFiltersState
+      | ((prev: MRT_ColumnFiltersState) => MRT_ColumnFiltersState),
+  ) => void
   onGlobalFilterChange: (value: string) => void
   onRowClick?: (ticket: AdminTicket) => void
 }
@@ -65,9 +75,7 @@ export function TicketsTable({
         accessorKey: 'tenantNombre',
         header: 'Municipalidad',
         size: 160,
-        Cell: ({ row }) => (
-          <TenantBadge nombre={row.original.tenantNombre} />
-        ),
+        Cell: ({ row }) => <TenantBadge nombre={row.original.tenantNombre} />,
       },
       {
         accessorKey: 'titulo',
@@ -110,7 +118,12 @@ export function TicketsTable({
         accessorKey: 'asignado',
         header: 'Asignado',
         size: 140,
-        Cell: ({ cell }) => cell.getValue<string | null>() ?? <Typography variant="body2" color="text.disabled">—</Typography>,
+        Cell: ({ cell }) =>
+          cell.getValue<string | null>() ?? (
+            <Typography variant="body2" color="text.disabled">
+              —
+            </Typography>
+          ),
       },
       {
         accessorKey: 'fechaLimite',

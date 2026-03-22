@@ -1,23 +1,23 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import type { HistorialEstado } from '@/types/mesa-ayuda.types';
-import type { EstadoTicket } from '@/types/mesa-ayuda.types';
-import { getEstadoLabel } from '@/utils/estadoTransiciones';
+import type { HistorialEstado } from '@/types/mesa-ayuda.types'
+import type { EstadoTicket } from '@/types/mesa-ayuda.types'
+import { getEstadoLabel } from '@/utils/estadoTransiciones'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 interface HistorialTimelineProps {
-  historial: HistorialEstado[];
+  historial: HistorialEstado[]
 }
 
 function HistorialTimeline({ historial }: HistorialTimelineProps) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   if (historial.length === 0) {
     return (
       <Typography variant="body2" color="text.disabled" sx={{ py: 2 }}>
         Sin historial de cambios
       </Typography>
-    );
+    )
   }
 
   return (
@@ -40,7 +40,7 @@ function HistorialTimeline({ historial }: HistorialTimelineProps) {
           month: 'short',
           hour: '2-digit',
           minute: '2-digit',
-        });
+        })
 
         return (
           <Box key={item.id} sx={{ position: 'relative', mb: 2 }}>
@@ -69,15 +69,19 @@ function HistorialTimeline({ historial }: HistorialTimelineProps) {
                   {item.motivo}
                 </Typography>
               )}
-              <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.disabled"
+                sx={{ display: 'block' }}
+              >
                 {fecha}
               </Typography>
             </Box>
           </Box>
-        );
+        )
       })}
     </Box>
-  );
+  )
 }
 
-export default HistorialTimeline;
+export default HistorialTimeline

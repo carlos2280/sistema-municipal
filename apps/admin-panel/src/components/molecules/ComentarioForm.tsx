@@ -1,13 +1,13 @@
+import type { AgregarComentarioInput } from '@/types/mesa-ayuda'
+import { zodResolver } from '@hookform/resolvers/zod'
 import SendIcon from '@mui/icons-material/Send'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import TextField from '@mui/material/TextField'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import type { AgregarComentarioInput } from '@/types/mesa-ayuda'
 
 const schema = z.object({
   contenido: z.string().min(1, 'El comentario no puede estar vacío').max(2000),
@@ -22,7 +22,12 @@ interface ComentarioFormProps {
 }
 
 export function ComentarioForm({ onSubmit, isLoading }: ComentarioFormProps) {
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { contenido: '', esInterno: false },
   })
@@ -51,7 +56,13 @@ export function ComentarioForm({ onSubmit, isLoading }: ComentarioFormProps) {
           />
         )}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Controller
           name="esInterno"
           control={control}
