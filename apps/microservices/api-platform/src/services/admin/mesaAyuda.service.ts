@@ -304,9 +304,9 @@ export const getDashboard = async (): Promise<DashboardData> => {
     statsByEstado.map((r) => [r.estado, r.cantidad]),
   );
 
-  const abiertos = byEstado["abierto"] ?? 0;
-  const enProgreso = byEstado["en_progreso"] ?? 0;
-  const enEspera = byEstado["en_espera"] ?? 0;
+  const abiertos = byEstado.abierto ?? 0;
+  const enProgreso = byEstado.en_progreso ?? 0;
+  const enEspera = byEstado.en_espera ?? 0;
 
   const totalActivos = estadosAbiertos.reduce(
     (sum, e) => sum + (byEstado[e] ?? 0),
@@ -374,62 +374,66 @@ export const getDashboard = async (): Promise<DashboardData> => {
 // ─── SLA Monitoreo ────────────────────────────────────────────────────────────
 
 export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
-  const [vencidosResult, enRiesgoResult, compliancePrioridadResult, complianceTenantResult] =
-    await Promise.all([
-      db
-        .select({ cantidad: count() })
-        .from(tickets)
-        .where(
-          and(
-            lt(tickets.fechaLimite, sql`now()`),
-            notInArray(tickets.estado, ["resuelto", "cerrado"]),
-          ),
+  const [
+    vencidosResult,
+    enRiesgoResult,
+    compliancePrioridadResult,
+    complianceTenantResult,
+  ] = await Promise.all([
+    db
+      .select({ cantidad: count() })
+      .from(tickets)
+      .where(
+        and(
+          lt(tickets.fechaLimite, sql`now()`),
+          notInArray(tickets.estado, ["resuelto", "cerrado"]),
         ),
+      ),
 
-      db
-        .select({ cantidad: count() })
-        .from(tickets)
-        .where(
-          and(
-            sql`${tickets.fechaLimite} BETWEEN now() AND now() + interval '4 hours'`,
-            notInArray(tickets.estado, ["resuelto", "cerrado"]),
-          ),
+    db
+      .select({ cantidad: count() })
+      .from(tickets)
+      .where(
+        and(
+          sql`${tickets.fechaLimite} BETWEEN now() AND now() + interval '4 hours'`,
+          notInArray(tickets.estado, ["resuelto", "cerrado"]),
         ),
+      ),
 
-      db
-        .select({
-          prioridadId: tickets.prioridadId,
-          nombre: prioridades.nombre,
-          total: count(),
-          vencidos: sql<number>`
+    db
+      .select({
+        prioridadId: tickets.prioridadId,
+        nombre: prioridades.nombre,
+        total: count(),
+        vencidos: sql<number>`
             COUNT(*) FILTER (
               WHERE ${tickets.fechaLimite} < now()
               AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
             )::int
           `.as("vencidos"),
-        })
-        .from(tickets)
-        .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
-        .groupBy(tickets.prioridadId, prioridades.nombre, prioridades.nivel)
-        .orderBy(prioridades.nivel),
+      })
+      .from(tickets)
+      .innerJoin(prioridades, eq(tickets.prioridadId, prioridades.id))
+      .groupBy(tickets.prioridadId, prioridades.nombre, prioridades.nivel)
+      .orderBy(prioridades.nivel),
 
-      db
-        .select({
-          tenantId: tickets.tenantId,
-          tenantSlug: municipalidades.slug,
-          nombre: municipalidades.nombre,
-          total: count(),
-          vencidos: sql<number>`
+    db
+      .select({
+        tenantId: tickets.tenantId,
+        tenantSlug: municipalidades.slug,
+        nombre: municipalidades.nombre,
+        total: count(),
+        vencidos: sql<number>`
             COUNT(*) FILTER (
               WHERE ${tickets.fechaLimite} < now()
               AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
             )::int
           `.as("vencidos"),
-        })
-        .from(tickets)
-        .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
-        .groupBy(tickets.tenantId, municipalidades.slug, municipalidades.nombre),
-    ]);
+      })
+      .from(tickets)
+      .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
+      .groupBy(tickets.tenantId, municipalidades.slug, municipalidades.nombre),
+  ]);
 
   const compliancePorPrioridad: CompliancePrioridad[] =
     compliancePrioridadResult.map((r) => {
@@ -440,7 +444,8 @@ export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
         prioridadNombre: r.nombre,
         total,
         vencidos: venc,
-        compliance: total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
+        compliance:
+          total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
       };
     });
 
@@ -454,7 +459,8 @@ export const getSlaMonitoreo = async (): Promise<SlaMonitoreo> => {
         nombre: r.nombre,
         total,
         vencidos: venc,
-        compliance: total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
+        compliance:
+          total > 0 ? Math.round(((total - venc) / total) * 100) : 100,
       };
     },
   );
@@ -614,7 +620,11 @@ export const getTicketDetail = async (
   ticketId: number,
 ): Promise<TicketDetail> => {
   const [muni] = await db
-    .select({ id: municipalidades.id, slug: municipalidades.slug, nombre: municipalidades.nombre })
+    .select({
+      id: municipalidades.id,
+      slug: municipalidades.slug,
+      nombre: municipalidades.nombre,
+    })
     .from(municipalidades)
     .where(eq(municipalidades.slug, tenantSlug));
 
@@ -748,7 +758,10 @@ export const cambiarEstado = async (
   const estadoNuevo = input.estado;
 
   if (estadoActual === "cerrado") {
-    throw new AppError("El ticket está cerrado y no puede cambiar de estado", 400);
+    throw new AppError(
+      "El ticket está cerrado y no puede cambiar de estado",
+      400,
+    );
   }
 
   const transicionesPermitidas = TRANSICIONES_VALIDAS[estadoActual];
@@ -775,10 +788,7 @@ export const cambiarEstado = async (
   }
 
   await db.transaction(async (tx) => {
-    await tx
-      .update(tickets)
-      .set(updates)
-      .where(eq(tickets.id, ticketId));
+    await tx.update(tickets).set(updates).where(eq(tickets.id, ticketId));
 
     await tx.insert(historialEstados).values({
       ticketId,
@@ -819,7 +829,10 @@ export const cambiarPrioridad = async (
   const { ticket } = await resolveTicketConTenant(tenantSlug, ticketId);
 
   if (ticket.estado === "cerrado") {
-    throw new AppError("No se puede cambiar la prioridad de un ticket cerrado", 400);
+    throw new AppError(
+      "No se puede cambiar la prioridad de un ticket cerrado",
+      400,
+    );
   }
 
   const [prio] = await db
@@ -851,13 +864,18 @@ export const cambiarCategoria = async (
   const { ticket } = await resolveTicketConTenant(tenantSlug, ticketId);
 
   if (ticket.estado === "cerrado") {
-    throw new AppError("No se puede cambiar la categoría de un ticket cerrado", 400);
+    throw new AppError(
+      "No se puede cambiar la categoría de un ticket cerrado",
+      400,
+    );
   }
 
   const [cat] = await db
     .select({ id: categorias.id })
     .from(categorias)
-    .where(and(eq(categorias.id, input.categoriaId), eq(categorias.activo, true)));
+    .where(
+      and(eq(categorias.id, input.categoriaId), eq(categorias.activo, true)),
+    );
 
   if (!cat) throw new AppError("Categoría no encontrada o inactiva", 404);
 
@@ -915,26 +933,45 @@ export const getTenantsSummary = async (): Promise<TenantResumen[]> => {
       nombre: municipalidades.nombre,
       activo: municipalidades.activo,
       total: count(),
-      abiertos: sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} = 'abierto')::int`.as("abiertos"),
-      enProgreso: sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} = 'en_progreso')::int`.as("enProgreso"),
-      resueltos: sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} IN ('resuelto', 'cerrado'))::int`.as("resueltos"),
+      abiertos:
+        sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} = 'abierto')::int`.as(
+          "abiertos",
+        ),
+      enProgreso:
+        sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} = 'en_progreso')::int`.as(
+          "enProgreso",
+        ),
+      resueltos:
+        sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} IN ('resuelto', 'cerrado'))::int`.as(
+          "resueltos",
+        ),
       vencidos: sql<number>`
         COUNT(*) FILTER (
           WHERE ${tickets.fechaLimite} < now()
           AND ${tickets.estado} NOT IN ('resuelto', 'cerrado')
         )::int
       `.as("vencidos"),
-      activos: sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} NOT IN ('resuelto', 'cerrado'))::int`.as("activos"),
+      activos:
+        sql<number>`COUNT(*) FILTER (WHERE ${tickets.estado} NOT IN ('resuelto', 'cerrado'))::int`.as(
+          "activos",
+        ),
     })
     .from(tickets)
     .innerJoin(municipalidades, eq(tickets.tenantId, municipalidades.id))
-    .groupBy(tickets.tenantId, municipalidades.slug, municipalidades.nombre, municipalidades.activo);
+    .groupBy(
+      tickets.tenantId,
+      municipalidades.slug,
+      municipalidades.nombre,
+      municipalidades.activo,
+    );
 
   return rows.map((r) => {
     const totalActiv = r.activos;
     const venc = r.vencidos;
     const slaCompliance =
-      totalActiv > 0 ? Math.round(((totalActiv - venc) / totalActiv) * 100) : 100;
+      totalActiv > 0
+        ? Math.round(((totalActiv - venc) / totalActiv) * 100)
+        : 100;
     return {
       tenantId: r.tenantId,
       tenantSlug: r.tenantSlug,
@@ -965,7 +1002,10 @@ export const createCategoria = async (input: CreateCategoriaInput) => {
     .where(eq(categorias.codigo, input.codigo));
 
   if (existing) {
-    throw new AppError(`Ya existe una categoría con el código '${input.codigo}'`, 400);
+    throw new AppError(
+      `Ya existe una categoría con el código '${input.codigo}'`,
+      400,
+    );
   }
 
   const [nueva] = await db.insert(categorias).values(input).returning();
@@ -1057,4 +1097,3 @@ export const updatePrioridad = async (
 
   return updated;
 };
-

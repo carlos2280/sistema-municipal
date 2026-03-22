@@ -13,10 +13,22 @@ router.get("/tickets/:tenantSlug/:ticketId", controller.getTicketDetail);
 
 // Tickets — gestión operativa
 router.patch("/tickets/:tenantSlug/:ticketId/estado", controller.cambiarEstado);
-router.patch("/tickets/:tenantSlug/:ticketId/asignar", controller.asignarTicket);
-router.patch("/tickets/:tenantSlug/:ticketId/prioridad", controller.cambiarPrioridad);
-router.patch("/tickets/:tenantSlug/:ticketId/categoria", controller.cambiarCategoria);
-router.post("/tickets/:tenantSlug/:ticketId/comentarios", controller.agregarComentario);
+router.patch(
+  "/tickets/:tenantSlug/:ticketId/asignar",
+  controller.asignarTicket,
+);
+router.patch(
+  "/tickets/:tenantSlug/:ticketId/prioridad",
+  controller.cambiarPrioridad,
+);
+router.patch(
+  "/tickets/:tenantSlug/:ticketId/categoria",
+  controller.cambiarCategoria,
+);
+router.post(
+  "/tickets/:tenantSlug/:ticketId/comentarios",
+  controller.agregarComentario,
+);
 
 // Tenants
 router.get("/tenants", controller.getTenantsSummary);

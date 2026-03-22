@@ -11,7 +11,8 @@ export const requireAdminKey = (
   const provided = req.headers["x-admin-key"] as string | undefined;
 
   if (!provided || provided !== ADMIN_API_KEY) {
-    return next(new AppError("Acceso no autorizado", 401));
+    next(new AppError("Acceso no autorizado", 401));
+    return;
   }
 
   next();
