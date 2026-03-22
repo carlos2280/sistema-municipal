@@ -1,10 +1,8 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
+import { obtenerDepartamentosConUsuarios } from '../libs/identidadClient.js'
 import { conversaciones } from '../db/schemas/conversaciones.schema.js'
-import { departamentos } from '../db/schemas/departamentos.schema.js'
-import { oficinas } from '../db/schemas/oficinas.schema.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
 
 interface SyncResult {
   created: number[]
@@ -12,8 +10,19 @@ interface SyncResult {
 }
 
 export const gruposSistemaService = {
-  async sincronizarGrupos(db: DbClient): Promise<SyncResult> {
-    const allDepartamentos = await db.select().from(departamentos)
+  /**
+   * Sincroniza los grupos del sistema con la estructura de departamentos
+   * de api-identidad. Un grupo del sistema = un departamento.
+   * Los usuarios del grupo son todos los activos del departamento
+   * (via sus oficinas), resueltos por HTTP a api-identidad.
+   *
+   * @param db      cliente de DB del tenant (mensajeria en transversal)
+   * @param dbName  nombre de la DB del tenant (para el header x-tenant-db-name
+   *                que api-identidad necesita para resolver el organigrama)
+   */
+  async sincronizarGrupos(db: DbClient, dbName: string): Promise<SyncResult> {
+    // Obtener departamentos con sus usuarios desde api-identidad
+    const allDepartamentos = await obtenerDepartamentosConUsuarios(dbName)
 
     const gruposSistema = await db
       .select()
@@ -27,16 +36,7 @@ export const gruposSistemaService = {
     const result: SyncResult = { created: [], updated: [] }
 
     for (const depto of allDepartamentos) {
-      // Obtener usuarios activos del departamento (usuarios -> oficinas -> departamento)
-      const usuariosDepto = await db
-        .select({ id: usuarios.id })
-        .from(usuarios)
-        .innerJoin(oficinas, eq(usuarios.idOficina, oficinas.id))
-        .where(
-          and(eq(oficinas.idDepartamento, depto.id), eq(usuarios.activo, true)),
-        )
-
-      const userIds = usuariosDepto.map((u) => u.id)
+      const userIds = depto.usuarioIds
       const existingGroup = gruposPorDepto.get(depto.id)
 
       if (!existingGroup) {
@@ -47,8 +47,8 @@ export const gruposSistemaService = {
           .insert(conversaciones)
           .values({
             tipo: 'grupo',
-            nombre: depto.nombreDepartamento,
-            descripcion: `Grupo del departamento ${depto.nombreDepartamento}`,
+            nombre: depto.nombre,
+            descripcion: `Grupo del departamento ${depto.nombre}`,
             creadorId: userIds[0],
             sistema: true,
             departamentoId: depto.id,
@@ -100,12 +100,12 @@ export const gruposSistemaService = {
             )
         }
 
-        // Actualizar nombre si cambió el departamento
-        if (existingGroup.nombre !== depto.nombreDepartamento) {
+        // Actualizar nombre si cambio el departamento
+        if (existingGroup.nombre !== depto.nombre) {
           await db
             .update(conversaciones)
             .set({
-              nombre: depto.nombreDepartamento,
+              nombre: depto.nombre,
               updatedAt: new Date(),
             })
             .where(eq(conversaciones.id, existingGroup.id))

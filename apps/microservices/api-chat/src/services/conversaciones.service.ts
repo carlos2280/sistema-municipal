@@ -1,5 +1,9 @@
-import { and, count, desc, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, count, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm'
 import type { DbClient } from '../db/client.js'
+import {
+  obtenerUsuariosBatch,
+  type UsuarioResumen,
+} from '../libs/identidadClient.js'
 import {
   type Conversacion,
   type NewConversacion,
@@ -10,11 +14,14 @@ import {
   type NewParticipante,
   participantes,
 } from '../db/schemas/participantes.schema.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
+
+function usuarioDesconocido(id: number): UsuarioResumen {
+  return { id, nombreCompleto: 'Usuario', email: '' }
+}
 
 export const conversacionesService = {
   async obtenerConversacionesPorUsuario(db: DbClient, usuarioId: number) {
-    // Obtener IDs de conversaciones del usuario con su última lectura
+    // 1. IDs de conversaciones del usuario con su ultima lectura
     const conversacionesDelUsuario = await db
       .select({
         id: conversaciones.id,
@@ -34,35 +41,38 @@ export const conversacionesService = {
       return []
     }
 
-    // Mapa de última lectura por conversación
+    // Mapa de ultima lectura por conversacion
     const ultimaLecturaPorConv = new Map<number, Date | null>()
     for (const c of conversacionesDelUsuario) {
       ultimaLecturaPorConv.set(c.id, c.ultimaLectura)
     }
 
-    // Obtener datos completos de las conversaciones
+    // 2. Datos completos de las conversaciones
     const conversacionesData = await db
       .select()
       .from(conversaciones)
       .where(inArray(conversaciones.id, conversacionIds))
       .orderBy(desc(conversaciones.updatedAt))
 
-    // Obtener participantes con datos de usuario para cada conversación
+    // 3. Participantes (solo IDs y rol — sin JOIN a identidad)
     const participantesData = await db
       .select({
         conversacionId: participantes.conversacionId,
         usuarioId: participantes.usuarioId,
         rol: participantes.rol,
-        nombreCompleto: usuarios.nombreCompleto,
-        email: usuarios.email,
       })
       .from(participantes)
-      .innerJoin(usuarios, eq(usuarios.id, participantes.usuarioId))
       .where(inArray(participantes.conversacionId, conversacionIds))
 
-    // Obtener último mensaje de cada conversación (con nombre del remitente)
-    // Usamos una subquery con DISTINCT ON para eficiencia
-    const ultimosMensajes = await db
+    // 4. Enriquecer participantes con datos de api-identidad (batch unico)
+    const todosLosUsuarioIds = [
+      ...new Set(participantesData.map((p) => p.usuarioId)),
+    ]
+    const usuariosResueltos = await obtenerUsuariosBatch(todosLosUsuarioIds)
+    const usuarioMap = new Map(usuariosResueltos.map((u) => [u.id, u]))
+
+    // 5. Ultimo mensaje de cada conversacion (sin JOIN a identidad)
+    const ultimosMensajesRaw = await db
       .select({
         id: mensajes.id,
         conversacionId: mensajes.conversacionId,
@@ -70,10 +80,8 @@ export const conversacionesService = {
         tipo: mensajes.tipo,
         createdAt: mensajes.createdAt,
         remitenteId: mensajes.remitenteId,
-        remitente: usuarios.nombreCompleto,
       })
       .from(mensajes)
-      .innerJoin(usuarios, eq(usuarios.id, mensajes.remitenteId))
       .where(
         and(
           inArray(mensajes.conversacionId, conversacionIds),
@@ -82,7 +90,19 @@ export const conversacionesService = {
       )
       .orderBy(mensajes.conversacionId, desc(mensajes.createdAt))
 
-    // Agrupar: solo el primer mensaje por conversación (el más reciente)
+    // IDs de remitentes del ultimo mensaje (para enriquecer)
+    const remitenteIds = [
+      ...new Set(ultimosMensajesRaw.map((m) => m.remitenteId)),
+    ].filter((id) => !usuarioMap.has(id))
+
+    if (remitenteIds.length > 0) {
+      const remitentesExtra = await obtenerUsuariosBatch(remitenteIds)
+      for (const u of remitentesExtra) {
+        usuarioMap.set(u.id, u)
+      }
+    }
+
+    // Agrupar: solo el primer mensaje por conversacion (el mas reciente)
     const ultimoMensajePorConv = new Map<
       number,
       {
@@ -94,20 +114,21 @@ export const conversacionesService = {
         remitente: string
       }
     >()
-    for (const m of ultimosMensajes) {
+    for (const m of ultimosMensajesRaw) {
       if (!ultimoMensajePorConv.has(m.conversacionId)) {
+        const remitente = usuarioMap.get(m.remitenteId) ?? usuarioDesconocido(m.remitenteId)
         ultimoMensajePorConv.set(m.conversacionId, {
           id: m.id,
           contenido: m.contenido,
           tipo: m.tipo,
           createdAt: m.createdAt,
           remitenteId: m.remitenteId,
-          remitente: m.remitente,
+          remitente: remitente.nombreCompleto,
         })
       }
     }
 
-    // Contar mensajes no leídos por conversación
+    // 6. Contar mensajes no leidos por conversacion
     const noLeidosCounts = await db
       .select({
         conversacionId: mensajes.conversacionId,
@@ -125,7 +146,6 @@ export const conversacionesService = {
         and(
           inArray(mensajes.conversacionId, conversacionIds),
           eq(mensajes.eliminado, false),
-          // Mensajes posteriores a la última lectura del usuario
           or(
             isNull(participantes.ultimaLectura),
             gt(mensajes.createdAt, participantes.ultimaLectura),
@@ -139,7 +159,7 @@ export const conversacionesService = {
       noLeidosPorConv.set(n.conversacionId, n.count)
     }
 
-    // Agrupar participantes por conversación
+    // 7. Agrupar participantes enriquecidos por conversacion
     const participantesPorConversacion = new Map<
       number,
       Array<{
@@ -150,19 +170,20 @@ export const conversacionesService = {
     >()
 
     for (const p of participantesData) {
-      const existing = participantesPorConversacion.get(p.conversacionId) || []
+      const existing = participantesPorConversacion.get(p.conversacionId) ?? []
+      const usuario = usuarioMap.get(p.usuarioId) ?? usuarioDesconocido(p.usuarioId)
       existing.push({
         usuarioId: p.usuarioId,
         rol: p.rol,
         usuario: {
-          nombreCompleto: p.nombreCompleto,
-          email: p.email,
+          nombreCompleto: usuario.nombreCompleto,
+          email: usuario.email,
         },
       })
       participantesPorConversacion.set(p.conversacionId, existing)
     }
 
-    // Transformar resultado para el frontend
+    // 8. Transformar resultado para el frontend
     return conversacionesData.map((conv) => {
       const ultimo = ultimoMensajePorConv.get(conv.id)
       return {
@@ -177,7 +198,7 @@ export const conversacionesService = {
         departamentoId: conv.departamentoId,
         createdAt: conv.createdAt,
         updatedAt: conv.updatedAt,
-        participantes: participantesPorConversacion.get(conv.id) || [],
+        participantes: participantesPorConversacion.get(conv.id) ?? [],
         ultimoMensaje: ultimo
           ? {
               id: ultimo.id,
@@ -217,7 +238,6 @@ export const conversacionesService = {
       .values(data)
       .returning()
 
-    // Agregar participantes
     const participantesData: NewParticipante[] = participantesIds.map(
       (usuarioId) => ({
         conversacionId: nuevaConversacion.id,
@@ -236,7 +256,7 @@ export const conversacionesService = {
     usuarioId1: number,
     usuarioId2: number,
   ): Promise<Conversacion> {
-    // Verificar si ya existe una conversación directa entre estos usuarios
+    // Verificar si ya existe una conversacion directa entre estos usuarios
     const existente = await db
       .select({ conversacionId: participantes.conversacionId })
       .from(participantes)
@@ -272,7 +292,7 @@ export const conversacionesService = {
       }
     }
 
-    // Crear nueva conversación directa
+    // Crear nueva conversacion directa
     return this.crearConversacion(
       db,
       { tipo: 'directa', creadorId: usuarioId1 },
@@ -306,22 +326,34 @@ export const conversacionesService = {
   },
 
   async obtenerParticipantesConUsuario(db: DbClient, conversacionId: number) {
-    return db
+    const rows = await db
       .select({
         id: participantes.id,
         usuarioId: participantes.usuarioId,
         conversacionId: participantes.conversacionId,
         rol: participantes.rol,
         createdAt: participantes.createdAt,
-        usuario: {
-          id: usuarios.id,
-          nombreCompleto: usuarios.nombreCompleto,
-          email: usuarios.email,
-        },
       })
       .from(participantes)
-      .innerJoin(usuarios, eq(usuarios.id, participantes.usuarioId))
       .where(eq(participantes.conversacionId, conversacionId))
+
+    if (rows.length === 0) return []
+
+    const ids = rows.map((r) => r.usuarioId)
+    const usuariosResueltos = await obtenerUsuariosBatch(ids)
+    const usuarioMap = new Map(usuariosResueltos.map((u) => [u.id, u]))
+
+    return rows.map((r) => {
+      const usuario = usuarioMap.get(r.usuarioId) ?? usuarioDesconocido(r.usuarioId)
+      return {
+        ...r,
+        usuario: {
+          id: usuario.id,
+          nombreCompleto: usuario.nombreCompleto,
+          email: usuario.email,
+        },
+      }
+    })
   },
 
   async eliminarParticipante(
@@ -335,7 +367,7 @@ export const conversacionesService = {
       .from(conversaciones)
       .where(eq(conversaciones.id, conversacionId))
 
-    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (!conv) return { success: false, error: 'Conversacion no encontrada' }
     if (conv.tipo !== 'grupo')
       return {
         success: false,
@@ -394,7 +426,7 @@ export const conversacionesService = {
       .from(conversaciones)
       .where(eq(conversaciones.id, conversacionId))
 
-    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (!conv) return { success: false, error: 'Conversacion no encontrada' }
     if (conv.tipo !== 'grupo')
       return {
         success: false,
@@ -446,7 +478,7 @@ export const conversacionesService = {
       .from(conversaciones)
       .where(eq(conversaciones.id, conversacionId))
 
-    if (!conv) return { success: false, error: 'Conversación no encontrada' }
+    if (!conv) return { success: false, error: 'Conversacion no encontrada' }
     if (conv.tipo !== 'grupo')
       return { success: false, error: 'Solo se pueden renombrar grupos' }
     if (conv.sistema)

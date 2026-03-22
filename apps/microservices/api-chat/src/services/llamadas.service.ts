@@ -2,6 +2,7 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { AccessToken } from 'livekit-server-sdk'
 import { env } from '../config/env.js'
 import type { DbClient } from '../db/client.js'
+import { obtenerUsuarioPorId } from '../libs/identidadClient.js'
 import { reuniones } from '../db/schemas/index.js'
 import {
   type Llamada,
@@ -9,7 +10,6 @@ import {
   llamadas,
 } from '../db/schemas/llamadas.schema.js'
 import { participantes } from '../db/schemas/participantes.schema.js'
-import { usuarios } from '../db/schemas/usuarios.schema.js'
 import { mensajesService } from './mensajes.service.js'
 
 export const llamadasService = {
@@ -160,15 +160,8 @@ export const llamadasService = {
       .limit(limit)
   },
 
-  async obtenerUsuario(db: DbClient, userId: number) {
-    const [user] = await db
-      .select({
-        id: usuarios.id,
-        nombreCompleto: usuarios.nombreCompleto,
-      })
-      .from(usuarios)
-      .where(eq(usuarios.id, userId))
-    return user
+  async obtenerUsuario(_db: DbClient, userId: number) {
+    return obtenerUsuarioPorId(userId)
   },
 
   async obtenerParticipanteIds(
