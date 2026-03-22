@@ -87,7 +87,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const hasMesaAyuda = modules?.some((m) => m.codigo === 'mesa_ayuda')
   const width = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED
   const isActive = (path: string, exact = false) =>
-    exact ? location.pathname === path : location.pathname.startsWith(path)
+    exact
+      ? location.pathname === path
+      : location.pathname === path ||
+        location.pathname.startsWith(`${path}/`)
 
   return (
     <Box
