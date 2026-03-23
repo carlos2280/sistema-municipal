@@ -21,6 +21,8 @@ export interface CreateTenantInput {
   nombre: string
   slug: string
   dominioBase: string
+  adminEmail: string
+  adminNombre: string
   rut?: string
   direccion?: string
   telefono?: string

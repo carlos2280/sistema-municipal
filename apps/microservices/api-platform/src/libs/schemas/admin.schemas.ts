@@ -15,6 +15,11 @@ export const createTenantSchema = z.object({
   telefono: z.string().optional(),
   emailContacto: z.string().email("Email de contacto inválido").optional(),
   maxUsuarios: z.number().int().positive().optional(),
+  // Administrador inicial del tenant
+  adminEmail: z.string().email("Email del administrador inválido"),
+  adminNombre: z
+    .string()
+    .min(2, "Nombre del administrador debe tener al menos 2 caracteres"),
 });
 
 export const updateTenantSchema = createTenantSchema.partial();

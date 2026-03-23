@@ -4,10 +4,13 @@ import * as identidadSchema from "@municipal/db-identidad";
 import * as contabilidadSchema from "@municipal/db-contabilidad";
 import { loadEnv } from "./env";
 
-const schema = {
+export const tenantSchema = {
   ...identidadSchema,
   ...contabilidadSchema,
 };
+
+// Alias interno para retrocompatibilidad
+const schema = tenantSchema;
 
 export type DbClient = ReturnType<typeof createDbClient>;
 
