@@ -48,7 +48,7 @@ async function fetchActiveModules(tenantSlug: string): Promise<string[]> {
     );
   }
 
-  const modules: { codigo: string }[] = await res.json();
+  const modules = (await res.json()) as { codigo: string }[];
   return modules.map((m) => m.codigo);
 }
 
