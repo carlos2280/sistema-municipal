@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { resolve } from "node:path";
 import { getEnv } from "@/config/env";
 import { createLogger } from "@municipal/core/logger";
@@ -14,7 +15,6 @@ import {
   seedPrioridades,
 } from "@municipal/seeders";
 import bcrypt from "bcrypt";
-import crypto from "node:crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -265,9 +265,7 @@ export async function seedTransversalCatalogs(
  * Sin esto, el tenant tendría tablas vacías y la aplicación no funcionaría.
  * Usa seedBase de @municipal/seeders — fuente única de verdad.
  */
-export async function seedTenantBaseCatalogs(
-  dbName: string,
-): Promise<void> {
+export async function seedTenantBaseCatalogs(dbName: string): Promise<void> {
   assertValidDbName(dbName);
 
   const env = getEnv();
