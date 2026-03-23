@@ -43,7 +43,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/express-serve-static-core": "^5.1.1",

@@ -4,8 +4,7 @@ RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 # --- Install dependencies ---
 FROM base AS deps
 WORKDIR /app
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-RUN echo "shamefully-hoist=true" > .npmrc
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc tsconfig.base.json ./
 COPY packages/core/package.json ./packages/core/
 COPY packages/db-mensajeria/package.json ./packages/db-mensajeria/
 COPY apps/microservices/api-chat/package.json ./apps/microservices/api-chat/
@@ -24,8 +23,7 @@ RUN pnpm --filter @municipal/core build && \
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production CI=true
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-RUN echo "shamefully-hoist=true" > .npmrc
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
 COPY packages/core/package.json ./packages/core/
 COPY packages/db-mensajeria/package.json ./packages/db-mensajeria/
 COPY apps/microservices/api-chat/package.json ./apps/microservices/api-chat/
