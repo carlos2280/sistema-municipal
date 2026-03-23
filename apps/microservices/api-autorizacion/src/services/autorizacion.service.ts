@@ -667,7 +667,9 @@ export const activarMfa = async (setupToken: string, code: string) => {
 export const refrescarToken = async (refreshTokenJwt: string) => {
   try {
     // Verificar el refresh token
-    const payload = verificarToken(refreshTokenJwt) as (TokenPayload & { jti?: string }) | null;
+    const payload = verificarToken(refreshTokenJwt) as
+      | (TokenPayload & { jti?: string })
+      | null;
 
     if (!payload) {
       throw new Error("Refresh token inválido o expirado");
@@ -756,7 +758,9 @@ export const refrescarToken = async (refreshTokenJwt: string) => {
  * @param refreshTokenJwt Refresh token JWT desde la cookie del cliente
  */
 export const cerrarSesion = async (refreshTokenJwt: string): Promise<void> => {
-  const payload = verificarToken(refreshTokenJwt) as (TokenPayload & { jti?: string }) | null;
+  const payload = verificarToken(refreshTokenJwt) as
+    | (TokenPayload & { jti?: string })
+    | null;
 
   if (!payload?.jti) {
     // Token inválido o sin jti — se considera ya expirado/revocado, no error

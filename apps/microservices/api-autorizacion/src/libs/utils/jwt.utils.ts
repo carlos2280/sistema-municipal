@@ -1,6 +1,6 @@
+import { randomUUID } from "node:crypto";
 import { loadEnv } from "@/config/env";
 import type { Usuario } from "@municipal/db-identidad";
-import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 
