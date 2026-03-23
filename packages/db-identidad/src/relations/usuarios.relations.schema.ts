@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { oficinas } from "../schemas/oficinas.schema";
 import { perfilAreaUsuario } from "../schemas/perfilAreaUsuario.schema";
+import { refreshTokens } from "../schemas/refresh-tokens.schema";
 import { usuarios } from "../schemas/usuarios.schema";
 
 export const usuariosRelations = relations(usuarios, ({ one, many }) => ({
@@ -9,4 +10,5 @@ export const usuariosRelations = relations(usuarios, ({ one, many }) => ({
     references: [oficinas.id],
   }),
   areas: many(perfilAreaUsuario),
+  refreshTokens: many(refreshTokens),
 }));

@@ -1,11 +1,15 @@
 import type { CreateTenantInput } from '@/types'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface CrearTenantDialogProps {
   open: boolean
@@ -26,6 +30,17 @@ export function CrearTenantDialog({
   onChange,
   onSubmit,
 }: CrearTenantDialogProps) {
+  const emailInvalido =
+    form.adminEmail.length > 0 && !EMAIL_REGEX.test(form.adminEmail)
+
+  const submitDisabled =
+    isPending ||
+    !form.nombre ||
+    !form.slug ||
+    !form.dominioBase ||
+    !form.adminNombre ||
+    !EMAIL_REGEX.test(form.adminEmail)
+
   return (
     <Dialog
       open={open}
@@ -44,6 +59,11 @@ export function CrearTenantDialog({
         }}
       >
         {error && <Alert severity="error">{error}</Alert>}
+
+        <Typography variant="overline" color="text.secondary">
+          Datos del municipio
+        </Typography>
+
         <TextField
           label="Nombre"
           required
@@ -88,10 +108,42 @@ export function CrearTenantDialog({
           }
           helperText="Por defecto: 50"
         />
+
+        <Box sx={{ pt: 1 }}>
+          <Typography variant="overline" color="text.secondary">
+            Administrador inicial
+          </Typography>
+        </Box>
+
+        <TextField
+          label="Email del admin"
+          type="email"
+          required
+          value={form.adminEmail}
+          placeholder="admin@pelarco.cl"
+          onChange={(e) => onChange({ ...form, adminEmail: e.target.value })}
+          error={emailInvalido}
+          helperText={emailInvalido ? 'Ingresa un email válido' : undefined}
+        />
+        <TextField
+          label="Nombre del admin"
+          required
+          value={form.adminNombre}
+          placeholder="Juan Pérez"
+          onChange={(e) => onChange({ ...form, adminNombre: e.target.value })}
+        />
+
+        <Typography variant="caption" color="text.secondary">
+          Se enviará un email con credenciales temporales a esta dirección.
+        </Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" onClick={onSubmit} disabled={isPending}>
+        <Button
+          variant="contained"
+          onClick={onSubmit}
+          disabled={submitDisabled}
+        >
           {isPending ? 'Creando...' : 'Crear'}
         </Button>
       </DialogActions>

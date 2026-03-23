@@ -1,7 +1,7 @@
-import { randomBytes } from "node:crypto";
 import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
 import { decryptSecret, encryptSecret } from "@/libs/utils/crypto.utils";
+import { BCRYPT_ROUNDS, generateBackupCodes } from "@municipal/core";
 import { usuarios } from "@municipal/db-identidad";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -12,8 +12,6 @@ import QRCode from "qrcode";
 
 const ISSUER = "Sistema Municipal";
 const TOTP_SECRET_BYTES = 20; // 160 bits — recomendado RFC 6238
-const BACKUP_CODE_COUNT = 8;
-const BCRYPT_ROUNDS = 12;
 
 // Rate limiting en memoria: máx 5 intentos fallidos por usuario en ventana de 15 min
 const _attemptStore = new Map<number, { count: number; resetAt: number }>();
@@ -54,14 +52,6 @@ function checkRateLimit(userId: number): void {
 
 function clearRateLimit(userId: number): void {
   _attemptStore.delete(userId);
-}
-
-/** Genera 8 códigos de respaldo de 10 caracteres (formato XXXXX-XXXXX). */
-function generateBackupCodes(): string[] {
-  return Array.from({ length: BACKUP_CODE_COUNT }, () => {
-    const raw = randomBytes(8).toString("hex").toUpperCase().slice(0, 10);
-    return `${raw.slice(0, 5)}-${raw.slice(5)}`;
-  });
 }
 
 /** Normaliza un backup code para comparación: elimina guión y lleva a mayúsculas. */

@@ -11,6 +11,8 @@ import { logger } from "../logger";
 const ROUTE_MODULE_MAP: Record<string, string> = {
   "/api/v1/contabilidad": "contabilidad",
   "/api/v1/chat": "chat",
+  "/api/v1/configuracion": "configuracion",
+  "/api/v1/mesa-ayuda": "mesa_ayuda",
 };
 
 // ---------------------------------------------------------------------------

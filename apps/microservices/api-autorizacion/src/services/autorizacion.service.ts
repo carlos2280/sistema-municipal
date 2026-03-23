@@ -12,12 +12,15 @@ import {
   verificarToken,
 } from "@/libs/utils/jwt.utils";
 import type { TokenPayload } from "@/libs/utils/jwt.utils";
+import { BCRYPT_ROUNDS, generateBackupCodes } from "@municipal/core";
 import {
   type Menu,
+  type NewRefreshToken,
   type Usuario,
   areas,
   menus,
   perfilAreaUsuario,
+  refreshTokens,
   sistemaPerfil,
   sistemas,
   tokensContrasenaTemporal,
@@ -223,6 +226,15 @@ export const login = async ({
       tenantSlug: tenant.slug,
       tenantDbName: tenant.dbName,
     });
+
+    // 7. Persistir el jti del refresh token en la blacklist (marcado como no revocado)
+    const nuevaEntrada: NewRefreshToken = {
+      jti: tokens.refreshTokenJti,
+      usuarioId: usuario.id,
+      revocado: false,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+    };
+    await tenantDb.insert(refreshTokens).values(nuevaEntrada);
 
     return {
       usuario: {
@@ -501,7 +513,6 @@ export const cambiarContrasenaTemporal = async (
   email: string,
   token: string,
 ) => {
-  console.log("cambiarContrasenaTemporal", { token });
   if (!email || !contrasenaTemporal || !nuevaContrasena) {
     throw new Error("Credenciales inválidas");
   }
@@ -519,7 +530,7 @@ export const cambiarContrasenaTemporal = async (
     if (!coincide) {
       throw new Error("Contraseña temporal incorrecta");
     }
-    const nuevaHash = await bcrypt.hash(nuevaContrasena, 10);
+    const nuevaHash = await bcrypt.hash(nuevaContrasena, BCRYPT_ROUNDS);
 
     await db.transaction(async (tx) => {
       await tx
@@ -630,15 +641,10 @@ export const activarMfa = async (setupToken: string, code: string) => {
   const valid = authenticator.verify({ token: code, secret });
   if (!valid) throw new Error("Código MFA incorrecto");
 
-  // Generar backup codes (mostrar al usuario una sola vez)
-  const backupCodes = Array.from(
-    { length: 8 },
-    () =>
-      Math.random().toString(36).substring(2, 7).toUpperCase() +
-      Math.random().toString(36).substring(2, 7).toUpperCase(),
-  );
+  // Generar backup codes criptográficos (mostrar al usuario una sola vez)
+  const backupCodes = generateBackupCodes();
   const backupHashes = await Promise.all(
-    backupCodes.map((c) => bcrypt.hash(c, 10)),
+    backupCodes.map((c) => bcrypt.hash(c, BCRYPT_ROUNDS)),
   );
 
   // Activar MFA
@@ -658,10 +664,12 @@ export const activarMfa = async (setupToken: string, code: string) => {
   return { backupCodes };
 };
 
-export const refrescarToken = async (refreshToken: string) => {
+export const refrescarToken = async (refreshTokenJwt: string) => {
   try {
     // Verificar el refresh token
-    const payload = verificarToken(refreshToken) as TokenPayload | null;
+    const payload = verificarToken(refreshTokenJwt) as
+      | (TokenPayload & { jti?: string })
+      | null;
 
     if (!payload) {
       throw new Error("Refresh token inválido o expirado");
@@ -677,6 +685,21 @@ export const refrescarToken = async (refreshToken: string) => {
       payload.tenantDbName || "muni_default",
       env,
     );
+
+    // Verificar que el jti no esté revocado (blacklist)
+    if (payload.jti) {
+      const [entrada] = await tenantDb
+        .select({ revocado: refreshTokens.revocado })
+        .from(refreshTokens)
+        .where(eq(refreshTokens.jti, payload.jti));
+
+      if (!entrada) {
+        throw new Error("Refresh token no reconocido");
+      }
+      if (entrada.revocado) {
+        throw new Error("Refresh token revocado");
+      }
+    }
 
     // Buscar usuario en la base de datos del tenant
     const [usuario] = await tenantDb
@@ -705,12 +728,54 @@ export const refrescarToken = async (refreshToken: string) => {
       tenantDbName: payload.tenantDbName || "muni_default",
     });
 
+    // Rotación: revocar el jti anterior e insertar el nuevo
+    await tenantDb.transaction(async (tx) => {
+      if (payload.jti) {
+        await tx
+          .update(refreshTokens)
+          .set({ revocado: true })
+          .where(eq(refreshTokens.jti, payload.jti));
+      }
+      const nuevaEntrada: NewRefreshToken = {
+        jti: tokens.refreshTokenJti,
+        usuarioId: usuario.id,
+        revocado: false,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      };
+      await tx.insert(refreshTokens).values(nuevaEntrada);
+    });
+
     return tokens;
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al refrescar token",
     );
   }
+};
+
+/**
+ * Revocar el refresh token en la blacklist (logout)
+ * @param refreshTokenJwt Refresh token JWT desde la cookie del cliente
+ */
+export const cerrarSesion = async (refreshTokenJwt: string): Promise<void> => {
+  const payload = verificarToken(refreshTokenJwt) as
+    | (TokenPayload & { jti?: string })
+    | null;
+
+  if (!payload?.jti) {
+    // Token inválido o sin jti — se considera ya expirado/revocado, no error
+    return;
+  }
+
+  const tenantDb = createTenantDbClient(
+    payload.tenantDbName || "muni_default",
+    env,
+  );
+
+  await tenantDb
+    .update(refreshTokens)
+    .set({ revocado: true })
+    .where(eq(refreshTokens.jti, payload.jti));
 };
 
 /**

@@ -38,6 +38,17 @@ export const envSchema = z.object({
     .min(16)
     .default("dev-admin-key-sistema-municipal-2024"),
   GATEWAY_INTERNAL_URL: z.string().url().default("http://localhost:3000"),
+
+  // CORS
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+
+  // SSL — en producción rechazar certificados no confiables; en dev, permitir self-signed
+  DB_SSL_REJECT_UNAUTHORIZED: z.coerce
+    .boolean()
+    .default(process.env.NODE_ENV === "production"),
+  TRANSVERSAL_DB_SSL_REJECT_UNAUTHORIZED: z.coerce
+    .boolean()
+    .default(process.env.NODE_ENV === "production"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

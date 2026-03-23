@@ -202,12 +202,24 @@ export const obtenerMenuporSistema: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const logout: RequestHandler = async (_req, res, _next) => {
+export const logout: RequestHandler = async (req, res, next) => {
   const cookieOpts = {
     httpOnly: true,
     secure: NODE_ENV === "production",
     sameSite: (NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
   };
+
+  try {
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
+    if (refreshToken) {
+      await autorizacionService.cerrarSesion(refreshToken);
+    }
+  } catch (error) {
+    // No bloquear el logout si la revocación falla — las cookies se limpian igual
+    next(error);
+    return;
+  }
+
   res.clearCookie("token", cookieOpts);
   res.clearCookie("refreshToken", cookieOpts);
   res.status(200).json({ mensaje: "Sesión cerrada" });

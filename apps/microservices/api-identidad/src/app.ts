@@ -21,13 +21,15 @@ const db: DbClient = initializeDB(env);
 const app: Express = express();
 // Configuración de Swagger
 const specs = swaggerJSDoc(swaggerOptions);
-app.use(cors());
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(requestIdMiddleware);
 app.use(express.json());
 app.use(requireGateway);
 app.use(tenantDbMiddleware);
-// Ruta para la documentación Swagger
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+// Ruta para la documentación Swagger — solo disponible fuera de producción
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+}
 app.use("/api", router);
 // Ruta de prueba
 app.get("/api/health", async (_req, res) => {

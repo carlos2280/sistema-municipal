@@ -1,13 +1,38 @@
-import { readFile } from "node:fs/promises";
+import crypto from "node:crypto";
 import { resolve } from "node:path";
 import { getEnv } from "@/config/env";
-import { categorias, prioridades } from "@municipal/db-mesa-ayuda";
+import { createLogger } from "@municipal/core/logger";
+import {
+  departamentos,
+  direcciones,
+  oficinas,
+  usuarios,
+} from "@municipal/db-identidad";
+import {
+  runMigrations,
+  seedBase,
+  seedCategorias,
+  seedPrioridades,
+} from "@municipal/seeders";
+import bcrypt from "bcrypt";
 import { drizzle } from "drizzle-orm/node-postgres";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+
+const logger = createLogger("provisioning.service");
+
+/**
+ * Base path to the core drizzle migration folder.
+ * packages/seeders/drizzle/ (identidad, contabilidad schemas)
+ */
+const CORE_MIGRATIONS_DIR = resolve(
+  import.meta.dirname ?? __dirname,
+  "../../../../../../packages/seeders/drizzle",
+);
 
 /**
  * Base path to the transversal drizzle migration folder.
- * In monorepo: packages/seeders/drizzle/transversal/
+ * packages/seeders/drizzle/transversal/
  */
 const TRANSVERSAL_MIGRATIONS_DIR = resolve(
   import.meta.dirname ?? __dirname,
@@ -72,86 +97,74 @@ export async function createTenantDatabase(dbName: string): Promise<void> {
     }
 
     await pool.query(`CREATE DATABASE "${dbName}"`);
+    logger.info({ dbName }, "Base de datos core creada");
   } finally {
     await pool.end();
   }
 }
 
 /**
- * Runs all tenant migration SQL files against the newly created core database.
- * Reads each .sql file, splits by statement-breakpoint, executes in order,
- * and records in the drizzle migrations journal table.
+ * Drops a PostgreSQL database if it exists.
+ * Used exclusively for rollback on provisioning failure.
  */
-export async function runTenantMigrations(dbName: string): Promise<void> {
-  const migrationsDir = resolve(
-    import.meta.dirname ?? __dirname,
-    "../../../../../../packages/seeders/drizzle",
-  );
-
-  const env = getEnv();
+async function dropDatabaseIfExists(
+  dbName: string,
+  host: string,
+  port: number,
+  user: string,
+  password: string,
+): Promise<void> {
   const pool = new Pool({
-    host: env.DB_HOST,
-    port: env.DB_PORT,
-    user: env.DB_USER,
-    password: env.DB_PASSWORD,
-    database: dbName,
+    host,
+    port,
+    user,
+    password,
+    database: "postgres",
     max: 1,
   });
 
   try {
-    const journalPath = resolve(migrationsDir, "meta", "_journal.json");
-    const journal = JSON.parse(await readFile(journalPath, "utf-8")) as {
-      entries: Array<{ idx: number; tag: string; when: number }>;
-    };
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "__drizzle_migrations__" (
-        id SERIAL PRIMARY KEY,
-        hash TEXT NOT NULL,
-        created_at BIGINT
-      )
-    `);
-
-    for (const entry of journal.entries) {
-      const sqlPath = resolve(migrationsDir, `${entry.tag}.sql`);
-      const migrationSql = await readFile(sqlPath, "utf-8");
-
-      const statements = migrationSql
-        .split("--> statement-breakpoint")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-
-      const client = await pool.connect();
-      try {
-        await client.query("BEGIN");
-
-        for (const statement of statements) {
-          await client.query(statement);
-        }
-
-        await client.query(
-          `INSERT INTO "__drizzle_migrations__" (hash, created_at) VALUES ($1, $2)`,
-          [entry.tag, entry.when],
-        );
-
-        await client.query("COMMIT");
-      } catch (err) {
-        await client.query("ROLLBACK");
-        throw err;
-      } finally {
-        client.release();
-      }
-    }
+    await pool.query(
+      "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1",
+      [dbName],
+    );
+    await pool.query(`DROP DATABASE IF EXISTS "${dbName}"`);
+    logger.info({ dbName }, "Base de datos eliminada en rollback");
+  } catch (err) {
+    logger.error(
+      { err, dbName },
+      "Error al eliminar DB en rollback (no crítico)",
+    );
   } finally {
     await pool.end();
   }
+}
+
+/**
+ * Runs all tenant core migrations using the shared runMigrations utility
+ * from @municipal/seeders.
+ */
+export async function runTenantMigrations(dbName: string): Promise<void> {
+  assertValidDbName(dbName);
+
+  const env = getEnv();
+  const sslSuffix = env.DB_SSL ? "?sslmode=require" : "";
+  const connectionString = `postgresql://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_HOST}:${env.DB_PORT}/${dbName}${sslSuffix}`;
+
+  await runMigrations({
+    connectionString,
+    migrationsFolder: CORE_MIGRATIONS_DIR,
+    schemas: ["identidad", "contabilidad"],
+    label: dbName,
+  });
+
+  logger.info({ dbName }, "Migraciones core aplicadas");
 }
 
 // ─── Transversal tenant DB ────────────────────────────────────────────────────
 
 /**
  * Creates the transversal PostgreSQL database for a tenant's mensajeria schema.
- * Connects to the "postgres" maintenance DB to issue CREATE DATABASE.
  */
 export async function createTransversalDatabase(
   transversalDbName: string,
@@ -181,14 +194,15 @@ export async function createTransversalDatabase(
     }
 
     await pool.query(`CREATE DATABASE "${transversalDbName}"`);
+    logger.info({ transversalDbName }, "Base de datos transversal creada");
   } finally {
     await pool.end();
   }
 }
 
 /**
- * Runs transversal migrations (mensajeria + mesa_ayuda schemas) against the new transversal DB.
- * Uses the journal at packages/seeders/drizzle/transversal/meta/_journal.json
+ * Runs transversal migrations using the shared runMigrations utility
+ * from @municipal/seeders.
  */
 export async function runTransversalMigrations(
   transversalDbName: string,
@@ -196,167 +210,25 @@ export async function runTransversalMigrations(
   assertValidDbName(transversalDbName);
 
   const env = getEnv();
-  const pool = new Pool({
-    host: env.TRANSVERSAL_DB_HOST,
-    port: env.TRANSVERSAL_DB_PORT,
-    user: env.TRANSVERSAL_DB_USER,
-    password: env.TRANSVERSAL_DB_PASSWORD,
-    database: transversalDbName,
-    max: 1,
+  const sslSuffix = env.TRANSVERSAL_DB_SSL ? "?sslmode=require" : "";
+  const connectionString = `postgresql://${env.TRANSVERSAL_DB_USER}:${env.TRANSVERSAL_DB_PASSWORD}@${env.TRANSVERSAL_DB_HOST}:${env.TRANSVERSAL_DB_PORT}/${transversalDbName}${sslSuffix}`;
+
+  await runMigrations({
+    connectionString,
+    migrationsFolder: TRANSVERSAL_MIGRATIONS_DIR,
+    schemas: ["mensajeria", "mesa_ayuda"],
+    label: transversalDbName,
   });
 
-  try {
-    const journalPath = resolve(
-      TRANSVERSAL_MIGRATIONS_DIR,
-      "meta",
-      "_journal.json",
-    );
-    const journal = JSON.parse(await readFile(journalPath, "utf-8")) as {
-      entries: Array<{ idx: number; tag: string; when: number }>;
-    };
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "__drizzle_migrations__" (
-        id SERIAL PRIMARY KEY,
-        hash TEXT NOT NULL,
-        created_at BIGINT
-      )
-    `);
-
-    for (const entry of journal.entries) {
-      const sqlPath = resolve(TRANSVERSAL_MIGRATIONS_DIR, `${entry.tag}.sql`);
-      const migrationSql = await readFile(sqlPath, "utf-8");
-
-      const statements = migrationSql
-        .split("--> statement-breakpoint")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-
-      const client = await pool.connect();
-      try {
-        await client.query("BEGIN");
-
-        for (const statement of statements) {
-          await client.query(statement);
-        }
-
-        await client.query(
-          `INSERT INTO "__drizzle_migrations__" (hash, created_at) VALUES ($1, $2)`,
-          [entry.tag, entry.when],
-        );
-
-        await client.query("COMMIT");
-      } catch (err) {
-        await client.query("ROLLBACK");
-        throw err;
-      } finally {
-        client.release();
-      }
-    }
-  } finally {
-    await pool.end();
-  }
+  logger.info({ transversalDbName }, "Migraciones transversal aplicadas");
 }
 
-// ─── Catalogo seeders ─────────────────────────────────────────────────────────
-
-interface CategoriaData {
-  codigo: string;
-  nombre: string;
-  icono: string;
-  color: string;
-  orden: number;
-}
-
-interface PrioridadData {
-  codigo: string;
-  nombre: string;
-  color: string;
-  nivel: number;
-  slaHoras: number;
-}
-
-const CATEGORIAS_DEFAULT: CategoriaData[] = [
-  {
-    codigo: "infraestructura",
-    nombre: "Infraestructura y Obras",
-    icono: "hard-hat",
-    color: "warning",
-    orden: 1,
-  },
-  {
-    codigo: "tramites",
-    nombre: "Tramites y Documentos",
-    icono: "file-text",
-    color: "info",
-    orden: 2,
-  },
-  {
-    codigo: "reclamos",
-    nombre: "Reclamos Ciudadanos",
-    icono: "alert-triangle",
-    color: "error",
-    orden: 3,
-  },
-  {
-    codigo: "consultas",
-    nombre: "Consultas Generales",
-    icono: "help-circle",
-    color: "primary",
-    orden: 4,
-  },
-  {
-    codigo: "servicios",
-    nombre: "Servicios Municipales",
-    icono: "building-2",
-    color: "secondary",
-    orden: 5,
-  },
-  {
-    codigo: "medioambiente",
-    nombre: "Medio Ambiente y Aseo",
-    icono: "leaf",
-    color: "success",
-    orden: 6,
-  },
-  {
-    codigo: "seguridad",
-    nombre: "Seguridad Ciudadana",
-    icono: "shield",
-    color: "error",
-    orden: 7,
-  },
-  {
-    codigo: "social",
-    nombre: "Asistencia Social",
-    icono: "heart",
-    color: "secondary",
-    orden: 8,
-  },
-];
-
-const PRIORIDADES_DEFAULT: PrioridadData[] = [
-  { codigo: "baja", nombre: "Baja", color: "#34D399", nivel: 1, slaHoras: 72 },
-  {
-    codigo: "media",
-    nombre: "Media",
-    color: "#60A5FA",
-    nivel: 2,
-    slaHoras: 48,
-  },
-  { codigo: "alta", nombre: "Alta", color: "#FBBF24", nivel: 3, slaHoras: 24 },
-  {
-    codigo: "critica",
-    nombre: "Critica",
-    color: "#F87171",
-    nivel: 4,
-    slaHoras: 8,
-  },
-];
+// ─── Catalogo seeders (usa seeders canónicos de @municipal/seeders) ──────────
 
 /**
- * Seeds the default catalogs (categorias, prioridades) into the transversal DB.
- * Idempotent: uses onConflictDoNothing on unique fields.
+ * Seeds default transversal catalogs (categorias, prioridades) into the transversal DB.
+ * Usa los seeders canónicos de @municipal/seeders — fuente única de verdad.
+ * Idempotente: onConflictDoNothing en los seeders base.
  */
 export async function seedTransversalCatalogs(
   transversalDbName: string,
@@ -373,37 +245,211 @@ export async function seedTransversalCatalogs(
     max: 1,
   });
 
+  const db: NodePgDatabase<Record<string, never>> = drizzle(pool);
+
+  try {
+    await seedCategorias(db);
+    await seedPrioridades(db);
+    logger.info({ transversalDbName }, "Catálogos transversal sembrados");
+  } finally {
+    await pool.end();
+  }
+}
+
+// ─── Seed base catalogs del tenant (sistemas, menus, contabilidad) ───────────
+
+/**
+ * Siembra los catálogos base del sistema en la DB core del tenant:
+ * sistemas, menus de navegación, tipos de cuentas, subgrupos, planes de cuentas, etc.
+ *
+ * Sin esto, el tenant tendría tablas vacías y la aplicación no funcionaría.
+ * Usa seedBase de @municipal/seeders — fuente única de verdad.
+ */
+export async function seedTenantBaseCatalogs(dbName: string): Promise<void> {
+  assertValidDbName(dbName);
+
+  const env = getEnv();
+  const pool = new Pool({
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: dbName,
+    max: 1,
+  });
+
   const db = drizzle(pool);
 
   try {
-    await db.transaction(async (tx) => {
-      await tx
-        .insert(categorias)
-        .values(
-          CATEGORIAS_DEFAULT.map((c) => ({
-            codigo: c.codigo,
-            nombre: c.nombre,
-            icono: c.icono,
-            color: c.color,
-            orden: c.orden,
-            activo: true,
-          })),
-        )
-        .onConflictDoNothing({ target: categorias.codigo });
+    await seedBase(db);
+    logger.info({ dbName }, "Catálogos base del tenant sembrados");
+  } finally {
+    await pool.end();
+  }
+}
 
-      await tx
-        .insert(prioridades)
-        .values(
-          PRIORIDADES_DEFAULT.map((p) => ({
-            codigo: p.codigo,
-            nombre: p.nombre,
-            color: p.color,
-            nivel: p.nivel,
-            slaHoras: p.slaHoras,
-          })),
-        )
-        .onConflictDoNothing({ target: prioridades.codigo });
-    });
+// ─── Seed base del tenant (estructura organizacional) ────────────────────────
+
+/**
+ * Resultado del seed base: IDs de los registros creados para uso posterior.
+ */
+export interface TenantBaseSeeds {
+  idDireccion: number;
+  idDepartamento: number;
+  idOficina: number;
+}
+
+/**
+ * Siembra la estructura organizacional mínima en la DB core del tenant.
+ * Crea la cadena jerárquica: dirección → departamento → oficina.
+ * Prerequisito para poder insertar usuarios (idOficina NOT NULL).
+ */
+export async function seedTenantBase(
+  dbName: string,
+  nombreMunicipalidad: string,
+): Promise<TenantBaseSeeds> {
+  assertValidDbName(dbName);
+
+  const env = getEnv();
+  const pool = new Pool({
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: dbName,
+    max: 1,
+  });
+
+  const db = drizzle(pool, {
+    schema: { direcciones, departamentos, oficinas, usuarios },
+  });
+
+  try {
+    const [direccion] = await db
+      .insert(direcciones)
+      .values({
+        nombre: `Dirección General — ${nombreMunicipalidad}`,
+        responsable: "Administrador del Sistema",
+      })
+      .returning({ id: direcciones.id });
+
+    const [departamento] = await db
+      .insert(departamentos)
+      .values({
+        nombreDepartamento: `Departamento General — ${nombreMunicipalidad}`,
+        responsable: "Administrador del Sistema",
+        idDireccion: direccion.id,
+      })
+      .returning({ id: departamentos.id });
+
+    const [oficina] = await db
+      .insert(oficinas)
+      .values({
+        nombreOficina: "Oficina de Administración",
+        responsable: "Administrador del Sistema",
+        idDepartamento: departamento.id,
+      })
+      .returning({ id: oficinas.id });
+
+    logger.info(
+      {
+        dbName,
+        idDireccion: direccion.id,
+        idDepartamento: departamento.id,
+        idOficina: oficina.id,
+      },
+      "Estructura organizacional base sembrada",
+    );
+
+    return {
+      idDireccion: direccion.id,
+      idDepartamento: departamento.id,
+      idOficina: oficina.id,
+    };
+  } finally {
+    await pool.end();
+  }
+}
+
+// ─── Crear usuario administrador ─────────────────────────────────────────────
+
+export interface CreateAdminUserParams {
+  dbName: string;
+  adminEmail: string;
+  adminNombre: string;
+  idOficina: number;
+}
+
+export interface AdminUserResult {
+  id: number;
+  email: string;
+  nombreCompleto: string;
+  /** Contraseña temporal en texto plano — usar solo para enviar por email, nunca loguear */
+  passwordTemporal: string;
+}
+
+/**
+ * Crea el usuario administrador inicial en la DB core del tenant.
+ *
+ * - Genera contraseña temporal con crypto.randomBytes (no Math.random)
+ * - bcrypt con 12 rounds
+ * - passwordTemp: true para forzar cambio en primer login
+ * - NUNCA loguea la contraseña temporal
+ */
+export async function createAdminUser(
+  params: CreateAdminUserParams,
+): Promise<AdminUserResult> {
+  const { dbName, adminEmail, adminNombre, idOficina } = params;
+  assertValidDbName(dbName);
+
+  const env = getEnv();
+  const pool = new Pool({
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: dbName,
+    max: 1,
+  });
+
+  const db = drizzle(pool, {
+    schema: { usuarios },
+  });
+
+  // crypto.randomBytes — nunca Math.random
+  const passwordTemporal = crypto.randomBytes(16).toString("hex");
+  const hashedPassword = await bcrypt.hash(passwordTemporal, 12);
+
+  try {
+    const [admin] = await db
+      .insert(usuarios)
+      .values({
+        nombreCompleto: adminNombre,
+        email: adminEmail,
+        password: hashedPassword,
+        idOficina,
+        activo: true,
+        passwordTemp: true,
+        mfaEnabled: false,
+        mfaVerified: false,
+      })
+      .returning({
+        id: usuarios.id,
+        email: usuarios.email,
+        nombreCompleto: usuarios.nombreCompleto,
+      });
+
+    logger.info(
+      { dbName, adminEmail, adminId: admin.id },
+      "Usuario administrador creado",
+    );
+
+    return {
+      id: admin.id,
+      email: admin.email,
+      nombreCompleto: admin.nombreCompleto,
+      passwordTemporal,
+    };
   } finally {
     await pool.end();
   }
@@ -423,4 +469,46 @@ export async function provisionTransversalDb(
   await createTransversalDatabase(transversalDbName);
   await runTransversalMigrations(transversalDbName);
   await seedTransversalCatalogs(transversalDbName);
+}
+
+// ─── Rollback de provisioning ─────────────────────────────────────────────────
+
+export interface RollbackParams {
+  dbName: string;
+  transversalDbName?: string;
+}
+
+/**
+ * Elimina las DBs creadas durante un provisioning fallido.
+ * Se ejecuta únicamente en el catch del flujo de createTenant.
+ * Los errores de rollback se loguean pero no se propagan (best-effort).
+ */
+export async function rollbackTenantDatabases(
+  params: RollbackParams,
+): Promise<void> {
+  const { dbName, transversalDbName } = params;
+  const env = getEnv();
+
+  logger.warn(
+    { dbName, transversalDbName },
+    "Iniciando rollback de DBs del tenant",
+  );
+
+  await dropDatabaseIfExists(
+    dbName,
+    env.DB_HOST,
+    env.DB_PORT,
+    env.DB_USER,
+    env.DB_PASSWORD,
+  );
+
+  if (transversalDbName) {
+    await dropDatabaseIfExists(
+      transversalDbName,
+      env.TRANSVERSAL_DB_HOST,
+      env.TRANSVERSAL_DB_PORT,
+      env.TRANSVERSAL_DB_USER,
+      env.TRANSVERSAL_DB_PASSWORD,
+    );
+  }
 }

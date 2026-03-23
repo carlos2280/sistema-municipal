@@ -15,14 +15,7 @@ const db: DbClient = initializeDB(env)
 
 const app = express()
 
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  }),
-)
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
 app.use(requestIdMiddleware)
 app.use(express.json())
 app.use(cookieParser())

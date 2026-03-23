@@ -2,6 +2,10 @@
 """
 Hook PostToolUse: detecta imports con 2+ niveles de ../ en archivos .ts/.tsx.
 Inyecta un warning al modelo para que convierta a @/ alias segun typescript.md.
+
+EXCEPCION: packages/ — los packages compartidos DEBEN usar relative imports
+porque son consumidos por multiples apps, cada una con su propio @/ alias.
+Usar @/ en packages rompe tsc cross-package.
 """
 import sys
 import json
@@ -11,6 +15,10 @@ data = json.load(sys.stdin)
 f = data.get("tool_input", {}).get("file_path", "")
 
 if not f.endswith((".ts", ".tsx")):
+    sys.exit(0)
+
+# Packages compartidos SIEMPRE usan relative imports (estandar monorepo)
+if "/packages/" in f:
     sys.exit(0)
 
 try:

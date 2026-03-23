@@ -9,3 +9,4 @@ export * from "./direcciones.schema";
 export * from "./departamentos.schema";
 export * from "./oficinas.schema";
 export * from "./sistemaPerfil.schema";
+export * from "./refresh-tokens.schema";

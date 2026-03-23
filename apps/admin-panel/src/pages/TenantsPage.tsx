@@ -25,7 +25,15 @@ import { CrearTenantDialog } from './components/CrearTenantDialog'
 
 type FilterMode = 'todos' | 'activos' | 'inactivos'
 
-const EMPTY_FORM: CreateTenantInput = { nombre: '', slug: '', dominioBase: '' }
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const EMPTY_FORM: CreateTenantInput = {
+  nombre: '',
+  slug: '',
+  dominioBase: '',
+  adminEmail: '',
+  adminNombre: '',
+}
 
 export default function TenantsPage() {
   const { data: tenants, isLoading, error } = useTenants()
@@ -53,6 +61,14 @@ export default function TenantsPage() {
   const handleCreate = async () => {
     if (!form.nombre || !form.slug || !form.dominioBase) {
       setCreateError('Nombre, slug y dominio son requeridos')
+      return
+    }
+    if (!form.adminNombre) {
+      setCreateError('El nombre del administrador es requerido')
+      return
+    }
+    if (!EMAIL_REGEX.test(form.adminEmail)) {
+      setCreateError('El email del administrador no es válido')
       return
     }
     setCreateError('')
