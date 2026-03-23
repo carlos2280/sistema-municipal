@@ -181,7 +181,8 @@ export async function obtenerDepartamentosConUsuarios(
           usuarioIds: [],
         })
       }
-      const entry = departamentosMap.get(depto.id)!
+      const entry = departamentosMap.get(depto.id)
+      if (!entry) continue
       for (const oficina of depto.oficinas) {
         for (const usuario of oficina.usuarios) {
           if (!entry.usuarioIds.includes(usuario.id)) {

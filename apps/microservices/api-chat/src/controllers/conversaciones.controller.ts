@@ -199,7 +199,8 @@ export const agregarParticipante: RequestHandler = async (req, res, next) => {
       solicitanteId,
     )
 
-    if (!result.success) throw new AppError(result.error!, 400)
+    if (!result.success)
+      throw new AppError(result.error ?? 'Error desconocido', 400)
 
     res.json({ success: true, message: 'Participante agregado' })
   } catch (error) {
@@ -222,7 +223,8 @@ export const eliminarParticipante: RequestHandler = async (req, res, next) => {
       solicitanteId,
     )
 
-    if (!result.success) throw new AppError(result.error!, 400)
+    if (!result.success)
+      throw new AppError(result.error ?? 'Error desconocido', 400)
 
     res.json({ success: true, message: 'Participante eliminado' })
   } catch (error) {
@@ -247,7 +249,8 @@ export const renombrarGrupo: RequestHandler = async (req, res, next) => {
       solicitanteId,
     )
 
-    if (!result.success) throw new AppError(result.error!, 400)
+    if (!result.success)
+      throw new AppError(result.error ?? 'Error desconocido', 400)
 
     res.json({ success: true, message: 'Grupo renombrado' })
   } catch (error) {
