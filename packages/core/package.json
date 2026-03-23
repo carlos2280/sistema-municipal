@@ -30,7 +30,8 @@
   },
   "scripts": {
     "build": "tsup src/index.ts src/auth/index.ts src/logger/index.ts src/errors/index.ts src/database/index.ts --format esm --dts --clean",
-    "dev": "tsup src/index.ts src/auth/index.ts src/logger/index.ts src/errors/index.ts src/database/index.ts --format esm --dts --watch"
+    "dev": "tsup src/index.ts src/auth/index.ts src/logger/index.ts src/errors/index.ts src/database/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "pg": "^8.16.0",

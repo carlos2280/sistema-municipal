@@ -118,7 +118,7 @@ export const getOrganigrama = async (db: DbClient): Promise<OrgDireccion[]> => {
         of_.usuarios.push({
           id: row.usrId,
           nombre: row.usrNombre ?? "",
-          email: row.usrEmail,
+          email: row.usrEmail ?? "",
         });
       }
     }

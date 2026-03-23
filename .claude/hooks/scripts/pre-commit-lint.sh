@@ -24,6 +24,8 @@ if [ -z "$PACKAGES" ]; then
 fi
 
 FAILED=0
+
+# Paso 1: Biome check (lint + format)
 for pkg in $PACKAGES; do
   if pnpm --filter "$pkg" check >/dev/null 2>&1; then
     echo "  biome check $pkg OK"
@@ -34,9 +36,21 @@ for pkg in $PACKAGES; do
   fi
 done
 
+# Paso 2: TypeScript (tsc --noEmit)
+for pkg in $PACKAGES; do
+  if pnpm --filter "$pkg" typecheck >/dev/null 2>&1; then
+    echo "  tsc $pkg OK"
+  else
+    echo "  tsc $pkg FAILED"
+    pnpm --filter "$pkg" typecheck 2>&1 | grep "error TS" | head -10
+    FAILED=1
+  fi
+done
+
 if [ "$FAILED" -eq 1 ]; then
   echo ""
-  echo "Lint failed. Fix errors before committing."
-  echo "Auto-fix: pnpm --filter <pkg> exec biome check --fix --unsafe ."
+  echo "Pre-commit failed. Fix errors before committing."
+  echo "Biome auto-fix: pnpm --filter <pkg> exec biome check --fix --unsafe ."
+  echo "TypeScript: pnpm --filter <pkg> typecheck"
   exit 1
 fi

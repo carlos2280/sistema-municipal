@@ -4,11 +4,21 @@ import { conversacionesService } from '../services/conversaciones.service.js'
 import { llamadasService } from '../services/llamadas.service.js'
 import { reunionesService } from '../services/reuniones.service.js'
 
+function requireUserId(req: Request, res: Response): number | null {
+  const userId = req.usuario?.id
+  if (userId === undefined) {
+    res.status(401).json({ success: false, message: 'No autenticado' })
+    return null
+  }
+  return userId
+}
+
 export const reunionesController = {
   // GET /chat/conversaciones/:id/reuniones
   async listar(req: Request, res: Response) {
     const conversacionId = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
 
     const esParticipante = await conversacionesService.verificarParticipante(
       db,
@@ -31,7 +41,9 @@ export const reunionesController = {
   // POST /chat/conversaciones/:id/reuniones
   async crear(req: Request, res: Response) {
     const conversacionId = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
+
     const {
       titulo,
       descripcion,
@@ -80,7 +92,7 @@ export const reunionesController = {
     if (Array.isArray(participantesIds) && participantesIds.length > 0) {
       const ids = [
         ...new Set([...participantesIds.map(Number), userId]),
-      ].filter((id) => Number.isInteger(id) && id > 0)
+      ].filter((id): id is number => Number.isInteger(id) && id > 0)
       if (ids.length > 50) {
         return res.status(400).json({
           success: false,
@@ -123,7 +135,9 @@ export const reunionesController = {
 
   // GET /chat/reuniones/proximas
   async proximas(req: Request, res: Response) {
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
+
     const data = await reunionesService.listarProximasDelUsuario(db, userId)
     return res.json({ success: true, data })
   },
@@ -131,7 +145,8 @@ export const reunionesController = {
   // GET /chat/reuniones/:id
   async detalle(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
 
     const reunion = await reunionesService.obtenerConInvitaciones(db, id)
     if (!reunion) {
@@ -153,7 +168,9 @@ export const reunionesController = {
   // PATCH /chat/reuniones/:id
   async editar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
+
     const {
       titulo,
       descripcion,
@@ -198,7 +215,8 @@ export const reunionesController = {
   // DELETE /chat/reuniones/:id
   async cancelar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
 
     // Capturar llamadaId antes de cancelar (para finalizar si la reunión estaba activa)
     const reunionActual = await reunionesService.obtenerPorId(db, id)
@@ -243,7 +261,9 @@ export const reunionesController = {
   // PATCH /chat/reuniones/:id/rsvp
   async rsvp(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
+
     const { estado } = req.body
 
     if (!['pendiente', 'aceptada', 'rechazada', 'tentativa'].includes(estado)) {
@@ -280,7 +300,8 @@ export const reunionesController = {
   // POST /chat/reuniones/:id/iniciar
   async iniciar(req: Request, res: Response) {
     const id = Number(req.params.id)
-    const userId = req.usuario?.id
+    const userId = requireUserId(req, res)
+    if (userId === null) return
 
     const reunion = await reunionesService.obtenerPorId(db, id)
     if (!reunion) {

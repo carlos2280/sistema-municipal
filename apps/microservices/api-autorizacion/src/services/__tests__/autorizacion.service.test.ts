@@ -98,15 +98,17 @@ vi.mock("@/libs/email/emailService", () => ({
 }));
 
 // Mock jwt utils
-const mockGenerarTokens = vi.fn(() => ({
+const mockGenerarTokens = vi.fn((..._args: unknown[]) => ({
   accessToken: "mock-access-token",
   refreshToken: "mock-refresh-token",
   refreshTokenJti: "mock-jti-uuid",
   expiresIn: 900,
 }));
 
-const mockVerificarToken = vi.fn();
-const mockGenerarTokenSetup = vi.fn(() => "mock-setup-token");
+const mockVerificarToken = vi.fn((..._args: unknown[]) => undefined as unknown);
+const mockGenerarTokenSetup = vi.fn(
+  (..._args: unknown[]) => "mock-setup-token",
+);
 
 vi.mock("@/libs/utils/jwt.utils", () => ({
   generarTokens: (...args: unknown[]) => mockGenerarTokens(...args),
@@ -203,7 +205,18 @@ import {
 
 // ─── Test data ───────────────────────────────────────────────────────────────
 
-const mockUsuario = {
+const mockUsuario: {
+  id: number;
+  email: string;
+  password: string;
+  nombreCompleto: string;
+  activo: boolean;
+  mfaEnabled: boolean;
+  mfaVerified: boolean;
+  mfaSecret: string | null;
+  mfaBackupCodes: string[] | null;
+  passwordTemp: boolean;
+} = {
   id: 1,
   email: "admin@muni.cl",
   password: "$2a$12$hashedPassword",
@@ -581,15 +594,17 @@ describe("autorizacion.service", () => {
 
     it("debería actualizar contraseña con credenciales temporales válidas", async () => {
       const usuario = { ...mockUsuario, passwordTemp: true };
-      (mockDb as Record<string, unknown>).select = vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([usuario]),
-        }),
-      });
+      (mockDb as unknown as Record<string, unknown>).select = vi
+        .fn()
+        .mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([usuario]),
+          }),
+        });
 
       vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
       vi.mocked(bcrypt.hash).mockResolvedValue("$2a$12$newHash" as never);
-      (mockDb as Record<string, unknown>).transaction = vi.fn(
+      (mockDb as unknown as Record<string, unknown>).transaction = vi.fn(
         async (cb: (tx: unknown) => Promise<void>) => {
           const tx = {
             update: vi.fn().mockReturnValue({
@@ -618,11 +633,13 @@ describe("autorizacion.service", () => {
 
     it("debería lanzar error con contraseña temporal incorrecta", async () => {
       const usuario = { ...mockUsuario, passwordTemp: true };
-      (mockDb as Record<string, unknown>).select = vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([usuario]),
-        }),
-      });
+      (mockDb as unknown as Record<string, unknown>).select = vi
+        .fn()
+        .mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([usuario]),
+          }),
+        });
 
       vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
