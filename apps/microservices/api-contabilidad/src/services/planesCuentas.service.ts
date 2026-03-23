@@ -3,7 +3,7 @@ import {
   type NewPlanesCuentas,
   planesCuentas,
 } from "@municipal/db-contabilidad";
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, isNull, like } from "drizzle-orm";
 import * as csService from "./cuentasSubgrupos.service";
 
 export const crearPlanesCuenta = async (
@@ -15,14 +15,18 @@ export const crearPlanesCuenta = async (
 };
 
 export const obtenerPlanesCuentas = async (db: DbClient) => {
-  return await db.select().from(planesCuentas).orderBy(planesCuentas.codigo);
+  return await db
+    .select()
+    .from(planesCuentas)
+    .where(isNull(planesCuentas.deletedAt))
+    .orderBy(planesCuentas.codigo);
 };
 
 export const obtenerPlanesCuentaPorId = async (db: DbClient, id: number) => {
   const [row] = await db
     .select()
     .from(planesCuentas)
-    .where(eq(planesCuentas.id, id));
+    .where(and(eq(planesCuentas.id, id), isNull(planesCuentas.deletedAt)));
   return row ?? null;
 };
 
@@ -48,18 +52,28 @@ export const actualizarPlanesCuenta = async (
 };
 
 /**
- * Elimina una cuenta y todos sus descendientes (cascade manual).
+ * Soft-delete de una cuenta y todos sus descendientes (cascade manual).
  * Orden: hijos primero (bottom-up) para respetar FK parentId.
+ * TODO: pasar deletedBy desde el controller cuando se implemente el contexto de usuario
  */
-export const eliminarPlanesCuenta = async (db: DbClient, id: number) => {
-  // Recopilar todos los IDs a eliminar (el nodo + descendientes)
+export const eliminarPlanesCuenta = async (
+  db: DbClient,
+  id: number,
+  deletedBy?: number,
+) => {
+  // Recopilar todos los IDs a marcar como eliminados (el nodo + descendientes)
   const idsToDelete: number[] = [];
 
   async function collectDescendants(parentId: number) {
     const children = await db
       .select({ id: planesCuentas.id })
       .from(planesCuentas)
-      .where(eq(planesCuentas.parentId, parentId));
+      .where(
+        and(
+          eq(planesCuentas.parentId, parentId),
+          isNull(planesCuentas.deletedAt),
+        ),
+      );
 
     for (const child of children) {
       await collectDescendants(child.id);
@@ -69,9 +83,15 @@ export const eliminarPlanesCuenta = async (db: DbClient, id: number) => {
 
   await collectDescendants(id);
 
-  // Eliminar en orden bottom-up (hijos antes que padres)
+  // Soft delete en orden bottom-up (hijos antes que padres)
+  const now = new Date();
   for (const deleteId of idsToDelete) {
-    await db.delete(planesCuentas).where(eq(planesCuentas.id, deleteId));
+    await db
+      .update(planesCuentas)
+      .set({ deletedAt: now, deletedBy: deletedBy ?? null })
+      .where(
+        and(eq(planesCuentas.id, deleteId), isNull(planesCuentas.deletedAt)),
+      );
   }
 };
 

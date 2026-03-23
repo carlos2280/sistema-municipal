@@ -11,6 +11,8 @@ vi.mock("bcryptjs", () => ({
 
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_col: unknown, val: unknown) => ({ _eq: val })),
+  and: vi.fn((...args: unknown[]) => ({ _and: args })),
+  isNull: vi.fn((_col: unknown) => ({ _isNull: true })),
 }));
 
 vi.mock("@municipal/db-identidad", () => ({
@@ -38,6 +40,9 @@ interface MockDbClient {
   insert: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
   delete: ReturnType<typeof vi.fn>;
+  query: {
+    usuarios: { findMany: ReturnType<typeof vi.fn> };
+  };
 }
 
 function createMockDb(): MockDbClient {
@@ -46,6 +51,9 @@ function createMockDb(): MockDbClient {
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    query: {
+      usuarios: { findMany: vi.fn() },
+    },
   };
 }
 
@@ -212,20 +220,22 @@ describe("usuarios.service", () => {
   // ─── getAllUsuarios() ──────────────────────────────────────────────────
 
   describe("getAllUsuarios()", () => {
-    it("debería retornar todos los usuarios", async () => {
-      db.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue([mockUsuario]),
-      });
+    it("debería retornar todos los usuarios sin campos sensibles", async () => {
+      db.query.usuarios.findMany.mockResolvedValue([mockUsuario]);
 
       const result = await getAllUsuarios(db as never);
       expect(result).toEqual([mockUsuario]);
+      // Verifica que se usan columnas excluidas (soft delete + campos sensibles)
+      expect(db.query.usuarios.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ columns: expect.any(Object) }),
+      );
     });
   });
 
   // ─── getUsuarioById() ─────────────────────────────────────────────────
 
   describe("getUsuarioById()", () => {
-    it("debería retornar un usuario por ID", async () => {
+    it("debería retornar un usuario por ID (solo activos)", async () => {
       db.select.mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([mockUsuario]),
@@ -240,15 +250,21 @@ describe("usuarios.service", () => {
   // ─── deleteUsuario() ──────────────────────────────────────────────────
 
   describe("deleteUsuario()", () => {
-    it("debería eliminar un usuario y retornar el registro", async () => {
-      db.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([mockUsuario]),
+    it("debería hacer soft delete de un usuario y retornar el registro", async () => {
+      // Soft delete usa db.update() en vez de db.delete()
+      db.update.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([mockUsuario]),
+          }),
         }),
       });
 
       const result = await deleteUsuario(db as never, 1);
       expect(result).toEqual(mockUsuario);
+      // Verifica que se usó update (soft delete) no delete (hard delete)
+      expect(db.update).toHaveBeenCalled();
+      expect(db.delete).not.toHaveBeenCalled();
     });
   });
 });

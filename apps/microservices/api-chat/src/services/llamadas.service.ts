@@ -2,7 +2,7 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { AccessToken } from 'livekit-server-sdk'
 import { env } from '../config/env.js'
 import type { DbClient } from '../db/client.js'
-import { reuniones } from '../db/schemas/index.js'
+import { llamadaParticipantes, reuniones } from '../db/schemas/index.js'
 import {
   type Llamada,
   type NewLlamada,
@@ -78,10 +78,23 @@ export const llamadasService = {
         estado: 'finalizada',
         finalizadaEn: ahora,
         duracionSegundos,
-        participantesIds: JSON.stringify(participantesQueUnieron),
       })
       .where(eq(llamadas.id, llamadaId))
       .returning()
+
+    // Registrar participantes en la tabla relacional
+    if (participantesQueUnieron.length > 0) {
+      await db
+        .insert(llamadaParticipantes)
+        .values(
+          participantesQueUnieron.map((usuarioId) => ({
+            llamadaId,
+            usuarioId,
+            leftAt: ahora,
+          })),
+        )
+        .onConflictDoNothing()
+    }
 
     // Insertar mensaje sistema en la conversación
     const duracionStr = this.formatDuration(duracionSegundos)

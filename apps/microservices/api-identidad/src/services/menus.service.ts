@@ -5,7 +5,7 @@ import {
   type NewMenu,
   menus,
 } from "@municipal/db-identidad";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export const createMenu = async (
   db: DbClient,
@@ -23,7 +23,7 @@ export const createMenu = async (
 
 export const getAllMenus = async (db: DbClient): Promise<Menu[]> => {
   try {
-    return await db.select().from(menus);
+    return await db.select().from(menus).where(isNull(menus.deletedAt));
   } catch (error) {
     throw new Error(
       `Error al obtener los menús: ${error instanceof Error ? error.message : String(error)}`,
@@ -36,7 +36,10 @@ export const getMenuById = async (
   id: number,
 ): Promise<Menu | undefined> => {
   try {
-    const [menu] = await db.select().from(menus).where(eq(menus.id, id));
+    const [menu] = await db
+      .select()
+      .from(menus)
+      .where(and(eq(menus.id, id), isNull(menus.deletedAt)));
     return menu;
   } catch (error) {
     throw new Error(
@@ -67,13 +70,17 @@ export const updateMenu = async (
 export const deleteMenu = async (
   db: DbClient,
   id: number,
+  deletedBy?: number,
 ): Promise<Menu | null> => {
   try {
-    const [deletedMenu] = await db
-      .delete(menus)
-      .where(eq(menus.id, id))
+    // Soft delete: marcar como eliminado en vez de borrar físicamente
+    // TODO: pasar deletedBy desde el controller cuando se implemente el contexto de usuario
+    const [softDeletedMenu] = await db
+      .update(menus)
+      .set({ deletedAt: new Date(), deletedBy: deletedBy ?? null })
+      .where(and(eq(menus.id, id), isNull(menus.deletedAt)))
       .returning();
-    return deletedMenu ?? null;
+    return softDeletedMenu ?? null;
   } catch (error) {
     throw new Error(
       `Error al eliminar el menú: ${error instanceof Error ? error.message : String(error)}`,
@@ -87,7 +94,10 @@ export const getMenusBySistema = async (
   sistemaId: number,
 ): Promise<Menu[]> => {
   try {
-    return await db.select().from(menus).where(eq(menus.idSistema, sistemaId));
+    return await db
+      .select()
+      .from(menus)
+      .where(and(eq(menus.idSistema, sistemaId), isNull(menus.deletedAt)));
   } catch (error) {
     throw new Error(
       `Error al obtener los menús del sistema: ${error instanceof Error ? error.message : String(error)}`,
@@ -101,7 +111,10 @@ export const getSubmenus = async (
   idPadre: number,
 ): Promise<Menu[]> => {
   try {
-    return await db.select().from(menus).where(eq(menus.idPadre, idPadre));
+    return await db
+      .select()
+      .from(menus)
+      .where(and(eq(menus.idPadre, idPadre), isNull(menus.deletedAt)));
   } catch (error) {
     throw new Error(
       `Error al obtener los submenús: ${error instanceof Error ? error.message : String(error)}`,

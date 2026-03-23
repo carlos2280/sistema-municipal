@@ -26,6 +26,9 @@ export const menus = identidadSchema.table(
 		orden: integer("orden").notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 		updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+		// Soft delete
+		deletedAt: timestamp("deleted_at"),
+		deletedBy: integer("deleted_by"),
 	},
 	(table) => ({
 		// Índice para consultas por sistema

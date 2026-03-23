@@ -16,7 +16,6 @@ import { BCRYPT_ROUNDS, generateBackupCodes } from "@municipal/core";
 import {
   type Menu,
   type NewRefreshToken,
-  type Usuario,
   areas,
   menus,
   perfilAreaUsuario,
@@ -94,11 +93,23 @@ export const login = async ({
     // 2. Crear conexión dinámica al tenant DB
     const tenantDb = createTenantDbClient(tenant.dbName, env);
 
-    // 3. Buscar usuario por correo (en tenant DB)
-    const [usuario]: Usuario[] = await tenantDb
-      .select()
+    // 3. Buscar usuario por correo (en tenant DB) — solo campos necesarios para login
+    const [usuario] = await tenantDb
+      .select({
+        id: usuarios.id,
+        email: usuarios.email,
+        nombreCompleto: usuarios.nombreCompleto,
+        password: usuarios.password,
+        activo: usuarios.activo,
+        passwordTemp: usuarios.passwordTemp,
+        mfaEnabled: usuarios.mfaEnabled,
+        mfaVerified: usuarios.mfaVerified,
+        mfaSecret: usuarios.mfaSecret,
+        mfaBackupCodes: usuarios.mfaBackupCodes,
+      })
       .from(usuarios)
-      .where(eq(usuarios.email, correo));
+      .where(eq(usuarios.email, correo))
+      .limit(1);
 
     if (!usuario) {
       throw new Error("Credenciales inválidas");
@@ -466,6 +477,7 @@ export const obtenerMenuPorSistema = async (
       .where(
         and(
           eq(menus.idSistema, idSistema),
+          isNull(menus.deletedAt),
           // eq(menus.visible, true)
         ),
       )

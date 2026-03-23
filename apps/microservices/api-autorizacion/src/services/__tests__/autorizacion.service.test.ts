@@ -144,11 +144,20 @@ const mockTenantDb = {
   transaction: vi.fn(),
 };
 
-// Chainable select
+// Chainable select — soporta tanto .where() (resuelve) como .where().limit() (resuelve)
 function chainableSelect(rows: unknown[]) {
+  // Crea un objeto que es Promise-like Y tiene métodos de chaining
+  function makeWhereResult() {
+    const result = Promise.resolve(rows) as Promise<unknown[]> & {
+      limit: ReturnType<typeof vi.fn>;
+    };
+    result.limit = vi.fn().mockResolvedValue(rows);
+    return result;
+  }
+
   const chain = {
     from: vi.fn().mockReturnValue({
-      where: vi.fn().mockResolvedValue(rows),
+      where: vi.fn().mockReturnValue(makeWhereResult()),
       innerJoin: vi.fn().mockReturnValue({
         innerJoin: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(rows),

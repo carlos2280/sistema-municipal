@@ -4,7 +4,7 @@ import { defineConfig } from 'drizzle-kit'
 dotenv.config()
 
 export default defineConfig({
-  schema: '../../../packages/db-mesa-ayuda/src/schemas.ts',
+  schema: '../../../packages/db-mesa-ayuda/src/schemas/index.ts',
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {

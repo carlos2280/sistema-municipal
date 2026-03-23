@@ -7,12 +7,19 @@ import {
   usuarios,
 } from "@municipal/db-identidad";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { sendWelcomeEmail } from "./email.service";
 
 export const getAllUsuarios = async (db: DbClient) => {
   try {
-    return await db.select().from(usuarios);
+    return await db.query.usuarios.findMany({
+      columns: {
+        password: false,
+        mfaSecret: false,
+        mfaBackupCodes: false,
+      },
+      where: isNull(usuarios.deletedAt),
+    });
   } catch (error) {
     throw new Error(
       `Error al obtener los usuarios: ${error instanceof Error ? error.message : String(error)}`,
@@ -25,7 +32,7 @@ export const getUsuarioById = async (db: DbClient, id: number) => {
     const [usuario] = await db
       .select()
       .from(usuarios)
-      .where(eq(usuarios.id, id));
+      .where(and(eq(usuarios.id, id), isNull(usuarios.deletedAt)));
     return usuario;
   } catch (error) {
     throw new Error(
@@ -100,13 +107,20 @@ export const updateUsuario = async (
   }
 };
 
-export const deleteUsuario = async (db: DbClient, id: number) => {
+export const deleteUsuario = async (
+  db: DbClient,
+  id: number,
+  deletedBy?: number,
+) => {
   try {
-    const [deletedUsuario] = await db
-      .delete(usuarios)
-      .where(eq(usuarios.id, id))
+    // Soft delete: marcar como eliminado en vez de borrar físicamente
+    // TODO: pasar deletedBy desde el controller cuando se implemente el contexto de usuario
+    const [softDeletedUsuario] = await db
+      .update(usuarios)
+      .set({ deletedAt: new Date(), deletedBy: deletedBy ?? null })
+      .where(and(eq(usuarios.id, id), isNull(usuarios.deletedAt)))
       .returning();
-    return deletedUsuario;
+    return softDeletedUsuario;
   } catch (error) {
     throw new Error(
       `Error al eliminar el usuario: ${error instanceof Error ? error.message : String(error)}`,
