@@ -1,104 +1,102 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mockOn = vi.fn();
-const mockEnd = vi.fn().mockResolvedValue(undefined);
+const mockOn = vi.fn()
+const mockEnd = vi.fn().mockResolvedValue(undefined)
 
-vi.mock("pg", () => {
-	const MockPool = vi.fn(function (this: Record<string, unknown>) {
-		this.on = mockOn;
-		this.end = mockEnd;
-	});
-	return { Pool: MockPool };
-});
+vi.mock('pg', () => {
+  const MockPool = vi.fn(function (this: Record<string, unknown>) {
+    this.on = mockOn
+    this.end = mockEnd
+  })
+  return { Pool: MockPool }
+})
 
 const baseConfig = {
-	host: "localhost",
-	port: 5432,
-	user: "postgres",
-	password: "secret",
-};
-
-async function freshModule() {
-	vi.resetModules();
-	mockOn.mockClear();
-	mockEnd.mockClear();
-	const mod = await import("../tenant-connection");
-	const pg = await import("pg");
-	vi.mocked(pg.Pool).mockClear();
-	return { ...mod, Pool: pg.Pool };
+  host: 'localhost',
+  port: 5432,
+  user: 'postgres',
+  password: 'secret',
 }
 
-describe("getTenantPool", () => {
-	it("crea un nuevo pool para un tenant desconocido", async () => {
-		const { getTenantPool, Pool } = await freshModule();
+async function freshModule() {
+  vi.resetModules()
+  mockOn.mockClear()
+  mockEnd.mockClear()
+  const mod = await import('../tenant-connection')
+  const pg = await import('pg')
+  vi.mocked(pg.Pool).mockClear()
+  return { ...mod, Pool: pg.Pool }
+}
 
-		const pool = getTenantPool("muni_alpha", baseConfig);
+describe('getTenantPool', () => {
+  it('crea un nuevo pool para un tenant desconocido', async () => {
+    const { getTenantPool, Pool } = await freshModule()
 
-		expect(Pool).toHaveBeenCalledWith(
-			expect.objectContaining({
-				host: "localhost",
-				database: "muni_alpha",
-				max: 5,
-			}),
-		);
-		expect(pool).toBeDefined();
-		expect(mockOn).toHaveBeenCalledWith("error", expect.any(Function));
-	});
+    const pool = getTenantPool('muni_alpha', baseConfig)
 
-	it("reutiliza el pool para el mismo tenant", async () => {
-		const { getTenantPool, Pool } = await freshModule();
+    expect(Pool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        host: 'localhost',
+        database: 'muni_alpha',
+        max: 5,
+      }),
+    )
+    expect(pool).toBeDefined()
+    expect(mockOn).toHaveBeenCalledWith('error', expect.any(Function))
+  })
 
-		const pool1 = getTenantPool("muni_beta", baseConfig);
-		const pool2 = getTenantPool("muni_beta", baseConfig);
+  it('reutiliza el pool para el mismo tenant', async () => {
+    const { getTenantPool, Pool } = await freshModule()
 
-		expect(pool1).toBe(pool2);
-		expect(Pool).toHaveBeenCalledTimes(1);
-	});
+    const pool1 = getTenantPool('muni_beta', baseConfig)
+    const pool2 = getTenantPool('muni_beta', baseConfig)
 
-	it("crea pools distintos para tenants diferentes", async () => {
-		const { getTenantPool, Pool } = await freshModule();
+    expect(pool1).toBe(pool2)
+    expect(Pool).toHaveBeenCalledTimes(1)
+  })
 
-		const poolA = getTenantPool("muni_a", baseConfig);
-		const poolB = getTenantPool("muni_b", baseConfig);
+  it('crea pools distintos para tenants diferentes', async () => {
+    const { getTenantPool, Pool } = await freshModule()
 
-		expect(poolA).not.toBe(poolB);
-		expect(Pool).toHaveBeenCalledTimes(2);
-	});
+    const poolA = getTenantPool('muni_a', baseConfig)
+    const poolB = getTenantPool('muni_b', baseConfig)
 
-	it("respeta maxConnections custom", async () => {
-		const { getTenantPool, Pool } = await freshModule();
+    expect(poolA).not.toBe(poolB)
+    expect(Pool).toHaveBeenCalledTimes(2)
+  })
 
-		getTenantPool("muni_custom", { ...baseConfig, maxConnections: 20 });
+  it('respeta maxConnections custom', async () => {
+    const { getTenantPool, Pool } = await freshModule()
 
-		expect(Pool).toHaveBeenCalledWith(
-			expect.objectContaining({ max: 20 }),
-		);
-	});
-});
+    getTenantPool('muni_custom', { ...baseConfig, maxConnections: 20 })
 
-describe("closeTenantPools", () => {
-	it("cierra todos los pools y limpia el Map", async () => {
-		const { getTenantPool, closeTenantPools } = await freshModule();
+    expect(Pool).toHaveBeenCalledWith(expect.objectContaining({ max: 20 }))
+  })
+})
 
-		getTenantPool("db1", baseConfig);
-		getTenantPool("db2", baseConfig);
+describe('closeTenantPools', () => {
+  it('cierra todos los pools y limpia el Map', async () => {
+    const { getTenantPool, closeTenantPools } = await freshModule()
 
-		await closeTenantPools();
+    getTenantPool('db1', baseConfig)
+    getTenantPool('db2', baseConfig)
 
-		expect(mockEnd).toHaveBeenCalledTimes(2);
-	});
-});
+    await closeTenantPools()
 
-describe("closeTenantPool", () => {
-	it("cierra solo el pool especificado", async () => {
-		const { getTenantPool, closeTenantPool } = await freshModule();
+    expect(mockEnd).toHaveBeenCalledTimes(2)
+  })
+})
 
-		getTenantPool("db_keep", baseConfig);
-		getTenantPool("db_close", baseConfig);
+describe('closeTenantPool', () => {
+  it('cierra solo el pool especificado', async () => {
+    const { getTenantPool, closeTenantPool } = await freshModule()
 
-		mockEnd.mockClear();
-		await closeTenantPool("db_close");
+    getTenantPool('db_keep', baseConfig)
+    getTenantPool('db_close', baseConfig)
 
-		expect(mockEnd).toHaveBeenCalledTimes(1);
-	});
-});
+    mockEnd.mockClear()
+    await closeTenantPool('db_close')
+
+    expect(mockEnd).toHaveBeenCalledTimes(1)
+  })
+})

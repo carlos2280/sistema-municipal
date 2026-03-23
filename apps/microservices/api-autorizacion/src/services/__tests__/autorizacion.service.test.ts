@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ─── Mocks de dependencias externas ─────────────────────────────────────────
 
@@ -38,8 +38,17 @@ vi.mock("drizzle-orm", () => ({
 vi.mock("@municipal/db-identidad", () => ({
   usuarios: { id: "id", email: "email", password: "password" },
   areas: { id: "id", nombre: "nombre", descripcion: "descripcion" },
-  menus: { id: "id", idSistema: "idSistema", orden: "orden", idPadre: "idPadre" },
-  perfilAreaUsuario: { usuarioId: "usuarioId", areaId: "areaId", perfilId: "perfilId" },
+  menus: {
+    id: "id",
+    idSistema: "idSistema",
+    orden: "orden",
+    idPadre: "idPadre",
+  },
+  perfilAreaUsuario: {
+    usuarioId: "usuarioId",
+    areaId: "areaId",
+    perfilId: "perfilId",
+  },
   refreshTokens: { jti: "jti", revocado: "revocado" },
   sistemaPerfil: { sistemaId: "sistemaId", perfilId: "perfilId" },
   sistemas: { id: "id", nombre: "nombre", codigo: "codigo" },
@@ -47,9 +56,19 @@ vi.mock("@municipal/db-identidad", () => ({
 }));
 
 vi.mock("@municipal/db-platform", () => ({
-  municipalidades: { id: "id", slug: "slug", activo: "activo", dbName: "dbName" },
+  municipalidades: {
+    id: "id",
+    slug: "slug",
+    activo: "activo",
+    dbName: "dbName",
+  },
   modulos: { id: "id", codigo: "codigo" },
-  suscripciones: { moduloId: "moduloId", municipalidadId: "municipalidadId", estado: "estado", fechaFin: "fechaFin" },
+  suscripciones: {
+    moduloId: "moduloId",
+    municipalidadId: "municipalidadId",
+    estado: "estado",
+    fechaFin: "fechaFin",
+  },
 }));
 
 vi.mock("@municipal/core", () => ({
@@ -167,10 +186,10 @@ vi.mock("@/app", () => ({
 import bcrypt from "bcryptjs";
 import { authenticator } from "otplib";
 import {
+  cambiarContrasenaTemporal,
+  cerrarSesion,
   login,
   refrescarToken,
-  cerrarSesion,
-  cambiarContrasenaTemporal,
 } from "../autorizacion.service";
 
 // ─── Test data ───────────────────────────────────────────────────────────────
@@ -418,12 +437,8 @@ describe("autorizacion.service", () => {
     });
 
     it("debería lanzar error si el usuario no tiene áreas asignadas", async () => {
-      mockPlatformDb.select.mockReturnValue(
-        chainableSelect([mockTenant]),
-      );
-      mockTenantDb.select.mockReturnValue(
-        chainableSelect([mockUsuario]),
-      );
+      mockPlatformDb.select.mockReturnValue(chainableSelect([mockTenant]));
+      mockTenantDb.select.mockReturnValue(chainableSelect([mockUsuario]));
       vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
       mockTenantDb.query.perfilAreaUsuario.findFirst.mockResolvedValue(null);
 
@@ -469,19 +484,21 @@ describe("autorizacion.service", () => {
         .mockReturnValueOnce(chainableSelect([{ revocado: false }]))
         .mockReturnValueOnce(selectForUser);
 
-      mockTenantDb.transaction.mockImplementation(async (cb: (tx: unknown) => Promise<void>) => {
-        const tx = {
-          update: vi.fn().mockReturnValue({
-            set: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue(undefined),
+      mockTenantDb.transaction.mockImplementation(
+        async (cb: (tx: unknown) => Promise<void>) => {
+          const tx = {
+            update: vi.fn().mockReturnValue({
+              set: vi.fn().mockReturnValue({
+                where: vi.fn().mockResolvedValue(undefined),
+              }),
             }),
-          }),
-          insert: vi.fn().mockReturnValue({
-            values: vi.fn().mockResolvedValue(undefined),
-          }),
-        };
-        await cb(tx);
-      });
+            insert: vi.fn().mockReturnValue({
+              values: vi.fn().mockResolvedValue(undefined),
+            }),
+          };
+          await cb(tx);
+        },
+      );
 
       const result = await refrescarToken("valid-refresh-jwt");
 
@@ -563,7 +580,6 @@ describe("autorizacion.service", () => {
 
       vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
       vi.mocked(bcrypt.hash).mockResolvedValue("$2a$12$newHash" as never);
-
       (mockDb as Record<string, unknown>).transaction = vi.fn(
         async (cb: (tx: unknown) => Promise<void>) => {
           const tx = {

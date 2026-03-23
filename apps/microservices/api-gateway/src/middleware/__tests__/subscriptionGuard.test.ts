@@ -1,50 +1,50 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Request, Response } from "express";
+import type { Request, Response } from 'express'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-vi.mock("dotenv", async () => {
-  const dotenv = await vi.importActual<typeof import("dotenv")>("dotenv");
-  const path = await import("node:path");
+vi.mock('dotenv', async () => {
+  const dotenv = await vi.importActual<typeof import('dotenv')>('dotenv')
+  const path = await import('node:path')
   return {
     default: {
       config: (opts?: Record<string, unknown>) => {
-        const envPath = path.resolve(__dirname, "../../../.env");
-        return dotenv.config({ ...opts, path: envPath });
+        const envPath = path.resolve(__dirname, '../../../.env')
+        return dotenv.config({ ...opts, path: envPath })
       },
     },
     config: (opts?: Record<string, unknown>) => {
-      const envPath = path.resolve(__dirname, "../../../.env");
-      return dotenv.config({ ...opts, path: envPath });
+      const envPath = path.resolve(__dirname, '../../../.env')
+      return dotenv.config({ ...opts, path: envPath })
     },
-  };
-});
+  }
+})
 
-vi.mock("@/config/env", () => ({
+vi.mock('@/config/env', () => ({
   env: {
-    PLATFORM_URL: "http://localhost:4060",
-    NODE_ENV: "test",
-    JWT_SECRET: "test-jwt-secret",
-    CORS_ORIGINS: "http://localhost:5030",
-    ADMIN_API_KEY: "dev-admin-key-sistema-municipal-2024",
+    PLATFORM_URL: 'http://localhost:4060',
+    NODE_ENV: 'test',
+    JWT_SECRET: 'test-jwt-secret',
+    CORS_ORIGINS: 'http://localhost:5030',
+    ADMIN_API_KEY: 'dev-admin-key-sistema-municipal-2024',
   },
-}));
+}))
 
-vi.mock("@/logger", () => ({
+vi.mock('@/logger', () => ({
   logger: {
     warn: vi.fn(),
     info: vi.fn(),
     error: vi.fn(),
   },
-}));
+}))
 
 // ─── Imports ─────────────────────────────────────────────────────────────────
 
 import {
-  subscriptionGuard,
   clearSubscriptionCache,
   invalidateSubscriptionCache,
-} from "../subscriptionGuard";
+  subscriptionGuard,
+} from '../subscriptionGuard'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -53,10 +53,10 @@ function createMockReq(
   gatewayUser?: { tenantSlug: string; userId: number },
 ): Request {
   return {
-    method: "GET",
+    method: 'GET',
     path,
     __gatewayUser: gatewayUser,
-  } as unknown as Request;
+  } as unknown as Request
 }
 
 function createMockRes(): Response & { _status: number; _json: unknown } {
@@ -65,116 +65,117 @@ function createMockRes(): Response & { _status: number; _json: unknown } {
     _json: null as unknown,
     status: vi.fn(),
     json: vi.fn(),
-  };
+  }
   res.status = vi.fn().mockImplementation((code: number) => {
-    res._status = code;
-    return res;
-  });
+    res._status = code
+    return res
+  })
   res.json = vi.fn().mockImplementation((data: unknown) => {
-    res._json = data;
-    return res;
-  });
-  return res as unknown as Response & { _status: number; _json: unknown };
+    res._json = data
+    return res
+  })
+  return res as unknown as Response & { _status: number; _json: unknown }
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
-describe("subscriptionGuard middleware", () => {
+describe('subscriptionGuard middleware', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    clearSubscriptionCache();
-    vi.restoreAllMocks();
-  });
+    vi.clearAllMocks()
+    clearSubscriptionCache()
+    vi.restoreAllMocks()
+  })
 
-  it("debería pasar sin restricción si no hay usuario autenticado (ruta pública)", async () => {
-    const req = createMockReq("/api/v1/autorizacion/login");
-    const res = createMockRes();
-    const next = vi.fn();
+  it('debería pasar sin restricción si no hay usuario autenticado (ruta pública)', async () => {
+    const req = createMockReq('/api/v1/autorizacion/login')
+    const res = createMockRes()
+    const next = vi.fn()
 
-    await subscriptionGuard(req, res, next);
+    await subscriptionGuard(req, res, next)
 
-    expect(next).toHaveBeenCalled();
-    expect(res.status).not.toHaveBeenCalled();
-  });
+    expect(next).toHaveBeenCalled()
+    expect(res.status).not.toHaveBeenCalled()
+  })
 
-  it("debería pasar si la ruta es core (no mapeada a módulo)", async () => {
-    const req = createMockReq("/api/v1/identidad/usuarios", {
-      tenantSlug: "default",
+  it('debería pasar si la ruta es core (no mapeada a módulo)', async () => {
+    const req = createMockReq('/api/v1/identidad/usuarios', {
+      tenantSlug: 'default',
       userId: 1,
-    });
-    const res = createMockRes();
-    const next = vi.fn();
+    })
+    const res = createMockRes()
+    const next = vi.fn()
 
-    await subscriptionGuard(req, res, next);
+    await subscriptionGuard(req, res, next)
 
-    expect(next).toHaveBeenCalled();
-  });
+    expect(next).toHaveBeenCalled()
+  })
 
-  it("debería permitir acceso a módulo suscrito", async () => {
+  it('debería permitir acceso a módulo suscrito', async () => {
     // Mock fetch to return active modules including contabilidad
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([{ codigo: "contabilidad" }, { codigo: "chat" }]),
-    });
-    vi.stubGlobal("fetch", mockFetch);
+      json: () =>
+        Promise.resolve([{ codigo: 'contabilidad' }, { codigo: 'chat' }]),
+    })
+    vi.stubGlobal('fetch', mockFetch)
 
-    const req = createMockReq("/api/v1/contabilidad/cuentas", {
-      tenantSlug: "default",
+    const req = createMockReq('/api/v1/contabilidad/cuentas', {
+      tenantSlug: 'default',
       userId: 1,
-    });
-    const res = createMockRes();
-    const next = vi.fn();
+    })
+    const res = createMockRes()
+    const next = vi.fn()
 
-    await subscriptionGuard(req, res, next);
+    await subscriptionGuard(req, res, next)
 
-    expect(next).toHaveBeenCalled();
-    expect(res.status).not.toHaveBeenCalled();
-  });
+    expect(next).toHaveBeenCalled()
+    expect(res.status).not.toHaveBeenCalled()
+  })
 
-  it("debería bloquear acceso a módulo no suscrito con 403", async () => {
+  it('debería bloquear acceso a módulo no suscrito con 403', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([{ codigo: "chat" }]), // no contabilidad
-    });
-    vi.stubGlobal("fetch", mockFetch);
+      json: () => Promise.resolve([{ codigo: 'chat' }]), // no contabilidad
+    })
+    vi.stubGlobal('fetch', mockFetch)
 
-    const req = createMockReq("/api/v1/contabilidad/cuentas", {
-      tenantSlug: "default",
+    const req = createMockReq('/api/v1/contabilidad/cuentas', {
+      tenantSlug: 'default',
       userId: 1,
-    });
-    const res = createMockRes();
-    const next = vi.fn();
+    })
+    const res = createMockRes()
+    const next = vi.fn()
 
-    await subscriptionGuard(req, res, next);
+    await subscriptionGuard(req, res, next)
 
-    expect(res._status).toBe(403);
-    expect(res._json).toHaveProperty("code", "MODULE_NOT_SUBSCRIBED");
-    expect(next).not.toHaveBeenCalled();
-  });
+    expect(res._status).toBe(403)
+    expect(res._json).toHaveProperty('code', 'MODULE_NOT_SUBSCRIBED')
+    expect(next).not.toHaveBeenCalled()
+  })
 
-  it("debería hacer fail-open si la verificación de suscripción falla", async () => {
-    const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
-    vi.stubGlobal("fetch", mockFetch);
+  it('debería hacer fail-open si la verificación de suscripción falla', async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'))
+    vi.stubGlobal('fetch', mockFetch)
 
-    const req = createMockReq("/api/v1/contabilidad/cuentas", {
-      tenantSlug: "default",
+    const req = createMockReq('/api/v1/contabilidad/cuentas', {
+      tenantSlug: 'default',
       userId: 1,
-    });
-    const res = createMockRes();
-    const next = vi.fn();
+    })
+    const res = createMockRes()
+    const next = vi.fn()
 
-    await subscriptionGuard(req, res, next);
+    await subscriptionGuard(req, res, next)
 
     // Fail-open: should call next despite error
-    expect(next).toHaveBeenCalled();
-  });
+    expect(next).toHaveBeenCalled()
+  })
 
-  it("invalidateSubscriptionCache debería limpiar cache de un tenant", () => {
+  it('invalidateSubscriptionCache debería limpiar cache de un tenant', () => {
     // Just verify it doesn't throw
-    expect(() => invalidateSubscriptionCache("default")).not.toThrow();
-  });
+    expect(() => invalidateSubscriptionCache('default')).not.toThrow()
+  })
 
-  it("clearSubscriptionCache debería limpiar todo el cache", () => {
-    expect(() => clearSubscriptionCache()).not.toThrow();
-  });
-});
+  it('clearSubscriptionCache debería limpiar todo el cache', () => {
+    expect(() => clearSubscriptionCache()).not.toThrow()
+  })
+})
