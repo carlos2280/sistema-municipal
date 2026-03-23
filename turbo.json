@@ -32,6 +32,10 @@
       "dependsOn": ["^check"],
       "outputs": []
     },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "clean": {
       "cache": false
     },

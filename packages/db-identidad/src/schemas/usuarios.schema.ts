@@ -25,6 +25,9 @@ export const usuarios = identidadSchema.table("usuarios", {
   mfaSecret: text("mfa_secret"),
   mfaVerified: boolean("mfa_verified").default(false).notNull(),
   mfaBackupCodes: jsonb("mfa_backup_codes").$type<string[]>(),
+  // Soft delete
+  deletedAt: timestamp("deleted_at"),
+  deletedBy: integer("deleted_by"),
 }, (table) => ({
   oficinaIdx: index("idx_usuarios_oficina").on(table.idOficina),
 }));

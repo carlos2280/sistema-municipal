@@ -12,12 +12,14 @@ export const requireGateway = (
   next: NextFunction,
 ): void => {
   if (process.env.NODE_ENV === 'development') {
-    return next()
+    next()
+    return
   }
 
   // Health checks son accesibles directamente (Railway, monitoring)
   if (req.path.endsWith('/health')) {
-    return next()
+    next()
+    return
   }
 
   const secured = req.headers[X_USER_HEADERS.secured]

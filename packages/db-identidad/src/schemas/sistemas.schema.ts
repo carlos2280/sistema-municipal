@@ -1,5 +1,5 @@
 import { identidadSchema } from "../schemas";
-import { serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const sistemas = identidadSchema.table("sistemas", {
   id: serial("id").primaryKey(),
@@ -8,6 +8,9 @@ export const sistemas = identidadSchema.table("sistemas", {
   icono: text("icono"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  // Soft delete
+  deletedAt: timestamp("deleted_at"),
+  deletedBy: integer("deleted_by"),
 });
 
 // Tipos

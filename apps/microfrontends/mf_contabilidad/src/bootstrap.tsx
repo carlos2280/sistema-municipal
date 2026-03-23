@@ -9,7 +9,7 @@ import App from './App.tsx';
 import theme from './theme/theme';
 const { store } = createStore();
 
-// biome-ignore lint/style/noNonNullAssertion: <explanation>
+// biome-ignore lint/style/noNonNullAssertion: el elemento root siempre existe en el HTML del microfrontend
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>

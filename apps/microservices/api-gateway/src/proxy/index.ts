@@ -278,7 +278,13 @@ export const attachWebSocketUpgrade = (server: http.Server) => {
 
   server.on("upgrade", (req, socket, head) => {
     if (req.url?.startsWith("/socket.io")) {
-      socketUpgradeProxy.upgrade?.(req, socket, head);
+      // socket es Duplex (stream) pero http-proxy-middleware espera Socket (net).
+      // Son compatibles en runtime — el cast es seguro en este contexto de proxy WS.
+      socketUpgradeProxy.upgrade?.(
+        req,
+        socket as import("node:net").Socket,
+        head,
+      );
     }
   });
 

@@ -5,6 +5,9 @@ export * from './archivos.schema.js'
 export * from './estadoUsuarios.schema.js'
 export * from './llamadas.schema.js'
 export {
+  llamadaParticipantes,
+  type LlamadaParticipante,
+  type NewLlamadaParticipante,
   reuniones,
   invitacionesReunion,
   recordatoriosReunion,

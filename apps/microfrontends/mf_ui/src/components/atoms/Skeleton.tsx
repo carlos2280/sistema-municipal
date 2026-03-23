@@ -98,6 +98,7 @@ export function SkeletonText({
 		<Stack spacing={spacing} sx={{ width }}>
 			{Array.from({ length: lines }).map((_, index) => (
 				<StyledSkeleton
+					// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders sin ID estable
 					key={index}
 					variant="text"
 					width={index === lines - 1 ? lastLineWidth : "100%"}
@@ -202,6 +203,7 @@ export function SkeletonTableRow({
 		>
 			{Array.from({ length: columns }).map((_, index) => (
 				<StyledSkeleton
+					// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders sin ID estable
 					key={index}
 					variant="text"
 					width={`${100 / columns}%`}

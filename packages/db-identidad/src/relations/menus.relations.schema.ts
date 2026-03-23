@@ -1,15 +1,18 @@
-import { relations } from "drizzle-orm";
-import { menus } from "../schemas/menus.schema";
-import { sistemas } from "../schemas/sistemas.schema";
+import { relations } from 'drizzle-orm'
+import { menus } from '../schemas/menus.schema'
+import { sistemas } from '../schemas/sistemas.schema'
 
-export const menusRelations = relations(menus, ({ one }) => ({
+export const menusRelations = relations(menus, ({ one, many }) => ({
   sistema: one(sistemas, {
     fields: [menus.idSistema],
     references: [sistemas.id],
   }),
-  padre: one(menus, {
+  menuPadre: one(menus, {
     fields: [menus.idPadre],
     references: [menus.id],
-    relationName: "menu_padre",
+    relationName: 'menu_padre',
   }),
-}));
+  menuHijos: many(menus, {
+    relationName: 'menu_padre',
+  }),
+}))

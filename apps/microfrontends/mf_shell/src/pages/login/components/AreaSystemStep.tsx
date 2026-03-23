@@ -306,6 +306,7 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 										key={area.id}
 										ownerState={{ selected: isSelected }}
 										onClick={() => field.onChange(area.id)}
+										// biome-ignore lint/a11y/useSemanticElements: AreaCard MUI styled como radio
 										role="radio"
 										aria-checked={isSelected}
 										tabIndex={0}
@@ -381,6 +382,7 @@ export const AreaSystemStep = memo(function AreaSystemStep({
 												onClick={() => {
 													field.onChange(sistema.id);
 												}}
+												// biome-ignore lint/a11y/useSemanticElements: SysCard MUI styled como radio
 												role="radio"
 												aria-checked={isSelected}
 												tabIndex={0}

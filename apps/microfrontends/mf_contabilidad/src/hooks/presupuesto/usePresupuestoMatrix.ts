@@ -118,7 +118,12 @@ export const usePresupuestoMatrix = (initialDetalle: DetalleItem[]) => {
 
       setFilas((prev) => {
         const existingCuentaIds = new Set(
-          prev.filter((f) => f.cuentaId !== undefined).map((f) => f.cuentaId!),
+          prev
+            .filter(
+              (f): f is typeof f & { cuentaId: number } =>
+                f.cuentaId !== undefined,
+            )
+            .map((f) => f.cuentaId),
         );
 
         const newFilas: FilaDetalle[] = [];
@@ -462,7 +467,8 @@ function agruparDetallesInicial(detalles: DetalleItem[]): FilaDetalle[] {
   for (const d of detalles) {
     const key = d.cuentaId;
     if (!porCuenta.has(key)) porCuenta.set(key, []);
-    porCuenta.get(key)!.push(d);
+    const bucket = porCuenta.get(key) as DetalleItem[];
+    bucket.push(d);
   }
 
   return [...porCuenta.entries()].map(([, items]) => {
@@ -494,7 +500,8 @@ function buildDistribucionesDesdeDetalle(
   const porCuenta = new Map<number, DetalleItem[]>();
   for (const d of detalles) {
     if (!porCuenta.has(d.cuentaId)) porCuenta.set(d.cuentaId, []);
-    porCuenta.get(d.cuentaId)!.push(d);
+    const bucket = porCuenta.get(d.cuentaId) as DetalleItem[];
+    bucket.push(d);
   }
 
   for (const [, items] of porCuenta) {

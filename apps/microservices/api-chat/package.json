@@ -14,7 +14,8 @@
     "start": "node dist/index.js",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check ."
+    "check": "biome check .",
+    "typecheck": "tsc --noEmit"
   },
   "author": "Carlos Roberto Fuentes Fuentes",
   "license": "ISC",

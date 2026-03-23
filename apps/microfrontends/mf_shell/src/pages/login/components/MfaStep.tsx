@@ -435,7 +435,11 @@ export const MfaStep = memo(function MfaStep({
 
 					<OtpRow>
 						{digits.map((digit, idx) => (
-							<Box key={idx} sx={{ display: "contents" }}>
+							<Box
+								// biome-ignore lint/suspicious/noArrayIndexKey: dígitos OTP posiciones fijas
+								key={idx}
+								sx={{ display: "contents" }}
+							>
 								{idx === 3 && <OtpSep>·</OtpSep>}
 								<OtpBox
 									ref={(el: HTMLInputElement | null) => {
@@ -522,7 +526,12 @@ export const MfaStep = memo(function MfaStep({
 			{/* Back link */}
 			{onBack && (
 				<Box sx={{ textAlign: "center", mt: "10px" }}>
-					<BackLink onClick={onBack} tabIndex={0} role="button">
+					<BackLink
+						onClick={onBack}
+						tabIndex={0}
+						// biome-ignore lint/a11y/useSemanticElements: BackLink MUI styled como button
+						role="button"
+					>
 						<ArrowLeft
 							size={12}
 							style={{ verticalAlign: "middle", marginRight: 4 }}

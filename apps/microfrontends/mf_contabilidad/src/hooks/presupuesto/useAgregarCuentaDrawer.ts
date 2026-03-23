@@ -50,7 +50,8 @@ function buildCuentaTree(cuentas: CuentaPresupuestaria[]) {
   }
 
   for (const c of cuentas) {
-    const node = nodeMap.get(c.id)!;
+    const node = nodeMap.get(c.id);
+    if (!node) continue;
     if (c.parentId !== null) {
       const parent = nodeMap.get(c.parentId);
       if (parent) {

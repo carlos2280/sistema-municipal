@@ -450,6 +450,7 @@ export function DataTable<T extends Record<string, unknown>>({
 										<SortButton
 											active={sortKey === col.key && sortDir !== null}
 											onClick={() => handleSort(col.key)}
+											// biome-ignore lint/a11y/useSemanticElements: SortButton es MUI styled component con role
 											role="button"
 											aria-label={`Ordenar por ${col.label}`}
 										>
@@ -477,6 +478,7 @@ export function DataTable<T extends Record<string, unknown>>({
 						{loading ? (
 							Array.from({ length: skeletonRows }).map((_, i) => (
 								<SkeletonRow
+									// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders sin ID estable
 									key={i}
 									columns={visibleColumns}
 									density={density}

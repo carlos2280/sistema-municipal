@@ -26,8 +26,12 @@ export const reuniones = mensajeriaSchema.table('reuniones', {
   mensajeId: integer('mensaje_id').references(() => mensajes.id),
   ubicacion: varchar('ubicacion', { length: 500 }),
   notas: text('notas'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 })
 
 export type Reunion = typeof reuniones.$inferSelect

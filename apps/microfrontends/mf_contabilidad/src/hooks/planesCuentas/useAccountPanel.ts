@@ -8,11 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import type { PanelMode } from '../../components/planCuentas/organisms/AccountPanel';
-import {
-  type TreeItemData,
-  formatCodigo,
-} from '../../utils/planDeCuentasUtils';
+import type { PanelMode } from '@/components/planCuentas/organisms/AccountPanel';
+import { type TreeItemData, formatCodigo } from '@/utils/planDeCuentasUtils';
 import useHookFormSchema from '../useHookFormSchema';
 import { type CodigoStatus, useVerificarCodigo } from './useVerificarCodigo';
 
@@ -271,6 +268,7 @@ export function useAccountPanel(
   // -------------------------------------------------------------------------
   // Submit del formulario
   // -------------------------------------------------------------------------
+  // biome-ignore lint/correctness/useExhaustiveDependencies: dispatch y setIsLoading son refs/setters estables que no necesitan estar en deps
   const handleSubmit = useCallback(
     async (data: AccountFormData) => {
       // Verificar si el código ya existe antes de crear

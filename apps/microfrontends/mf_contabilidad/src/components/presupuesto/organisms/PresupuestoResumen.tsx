@@ -106,7 +106,7 @@ const agruparPorCC = (
       const nombre = f.centroCosto?.nombre ?? 'Sin Centro de Costo';
       if (!map.has(key))
         map.set(key, { codigo: key, nombre, ingresos: 0, gastos: 0, saldo: 0 });
-      const e = map.get(key)!;
+      const e = map.get(key) as ResumenCC;
       if (tipo === 'ingresos') e.ingresos += f.montoAnual;
       else e.gastos += f.montoAnual;
     }

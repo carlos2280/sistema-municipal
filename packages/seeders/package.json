@@ -25,7 +25,8 @@
     "transversal:migrate:run": "tsx src/transversal.migrate.ts",
     "seed:all": "pnpm seed && pnpm platform:seed && pnpm transversal:seed",
     "db:migrate:all": "pnpm migrate && pnpm platform:migrate:run && pnpm transversal:migrate:run",
-    "db:setup": "pnpm db:migrate:all && pnpm seed:all"
+    "db:setup": "pnpm db:migrate:all && pnpm seed:all",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@municipal/core": "workspace:*",

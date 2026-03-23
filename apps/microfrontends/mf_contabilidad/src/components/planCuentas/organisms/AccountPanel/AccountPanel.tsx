@@ -93,6 +93,7 @@ export const AccountPanel = memo(function AccountPanel({
   const formBodyRef = useRef<HTMLDivElement>(null);
   const [showScrollFade, setShowScrollFade] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: open y mode disparan re-setup del listener; formBodyRef y setShowScrollFade son refs/setters estables
   useEffect(() => {
     const el = formBodyRef.current;
     if (!el) return;

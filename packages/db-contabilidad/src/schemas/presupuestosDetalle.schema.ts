@@ -1,4 +1,3 @@
-import { contabilidadSchema } from "../schemas";
 import {
   type AnyPgColumn,
   bigint,
@@ -8,47 +7,52 @@ import {
   text,
   timestamp,
   unique,
-} from "drizzle-orm/pg-core";
-import { centrosCosto } from "./centrosCosto.schema";
-import { planesCuentas } from "./planesCuentas.schema";
-import { presupuestos } from "./presupuestos.schema";
-import { subprogramasPresupuestarios } from "./subprogramasPresupuestarios.schema";
+} from 'drizzle-orm/pg-core'
+import { contabilidadSchema } from '../schemas'
+import { centrosCosto } from './centrosCosto.schema'
+import { planesCuentas } from './planesCuentas.schema'
+import { presupuestos } from './presupuestos.schema'
+import { subprogramasPresupuestarios } from './subprogramasPresupuestarios.schema'
 
 export const presupuestosDetalle = contabilidadSchema.table(
-  "presupuestos_detalle",
+  'presupuestos_detalle',
   {
-    id: serial("id").primaryKey(),
-    presupuestoId: integer("presupuesto_id")
+    id: serial('id').primaryKey(),
+    presupuestoId: integer('presupuesto_id')
       .notNull()
-      .references((): AnyPgColumn => presupuestos.id, { onDelete: "cascade" }),
-    cuentaId: integer("cuenta_id")
+      .references((): AnyPgColumn => presupuestos.id, { onDelete: 'cascade' }),
+    cuentaId: integer('cuenta_id')
       .notNull()
       .references((): AnyPgColumn => planesCuentas.id),
-    centroCostoId: integer("centro_costo_id").references(
+    centroCostoId: integer('centro_costo_id').references(
       (): AnyPgColumn => centrosCosto.id,
     ),
-    subprogramaId: integer("subprograma_id").references(
+    subprogramaId: integer('subprograma_id').references(
       (): AnyPgColumn => subprogramasPresupuestarios.id,
     ),
     // Pesos chilenos enteros (sin decimales). bigint mode:"number" cabe en JS Number hasta 2^53
-    montoAnual: bigint("monto_anual", { mode: "number" }).notNull(),
-    observacion: text("observacion"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    montoAnual: bigint('monto_anual', { mode: 'number' }).notNull(),
+    observacion: text('observacion'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => ({
-    uqLinea: unique("uq_presupuesto_detalle").on(
+    uqLinea: unique('uq_presupuesto_detalle').on(
       table.presupuestoId,
       table.cuentaId,
       table.centroCostoId,
       table.subprogramaId,
     ),
-    cuentaIdx: index("idx_presup_det_cuenta").on(table.cuentaId),
-    centroCostoIdx: index("idx_presup_det_centro").on(table.centroCostoId),
-    subprogramaIdx: index("idx_presup_det_subprog").on(table.subprogramaId),
+    cuentaIdx: index('idx_presup_det_cuenta').on(table.cuentaId),
+    centroCostoIdx: index('idx_presup_det_centro').on(table.centroCostoId),
+    subprogramaIdx: index('idx_presup_det_subprog').on(table.subprogramaId),
   }),
-);
+)
 
-export type PresupuestoDetalle = typeof presupuestosDetalle.$inferSelect;
-export type NewPresupuestoDetalle = typeof presupuestosDetalle.$inferInsert;
-export type PresupuestoDetalleUpdate = Partial<NewPresupuestoDetalle>;
+export type PresupuestoDetalle = typeof presupuestosDetalle.$inferSelect
+export type NewPresupuestoDetalle = typeof presupuestosDetalle.$inferInsert
+export type PresupuestoDetalleUpdate = Partial<NewPresupuestoDetalle>

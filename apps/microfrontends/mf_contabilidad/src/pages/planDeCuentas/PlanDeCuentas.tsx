@@ -24,12 +24,12 @@ import { useEliminarPlanesCuentaMutation } from 'mf_store/store';
 import { type JSX, memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { AccountPanel } from '../../components/planCuentas/organisms/AccountPanel';
-import { DeleteConfirmDialog } from '../../components/planCuentas/organisms/DeleteConfirmDialog';
-import { PlanDeCuentasTree } from '../../components/planCuentas/organisms/PlanDeCuentasTree';
-import { useAccountPanel } from '../../hooks/planesCuentas/useAccountPanel';
-import { usePlanDeCuentasTree } from '../../hooks/planesCuentas/usePlanDeCuentasTree';
-import type { TreeItemData } from '../../utils/planDeCuentasUtils';
+import { AccountPanel } from '@/components/planCuentas/organisms/AccountPanel';
+import { DeleteConfirmDialog } from '@/components/planCuentas/organisms/DeleteConfirmDialog';
+import { PlanDeCuentasTree } from '@/components/planCuentas/organisms/PlanDeCuentasTree';
+import { useAccountPanel } from '@/hooks/planesCuentas/useAccountPanel';
+import { usePlanDeCuentasTree } from '@/hooks/planesCuentas/usePlanDeCuentasTree';
+import type { TreeItemData } from '@/utils/planDeCuentasUtils';
 
 // ─── Styled Components ──────────────────────────────────────────────
 
@@ -357,6 +357,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
         <span>
           {parts.map((part, i) =>
             part.toLowerCase() === term.toLowerCase() ? (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fragmentos de texto sin ID estable; el índice es la posición correcta
               <Box
                 key={i}
                 component="span"
@@ -372,6 +373,7 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
                 {part}
               </Box>
             ) : (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fragmentos de texto sin ID estable; el índice es la posición correcta
               <span key={i}>{part}</span>
             ),
           )}
@@ -406,11 +408,11 @@ export const PlanDeCuentas = memo(function PlanDeCuentas() {
       <PageHeaderRoot>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Breadcrumb>
-            <a>Inicio</a>
+            <span>Inicio</span>
             <span className="separator">
               <ChevronRight size={12} />
             </span>
-            <a>Contabilidad</a>
+            <span>Contabilidad</span>
             <span className="separator">
               <ChevronRight size={12} />
             </span>

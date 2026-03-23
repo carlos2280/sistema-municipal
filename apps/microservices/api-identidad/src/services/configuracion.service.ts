@@ -1,7 +1,7 @@
 import type { DbClient } from "@/db/client";
 import { AppError } from "@/libs/middleware/AppError";
 import { usuarios } from "@municipal/db-identidad";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 
 export interface UsuarioMfaStatus {
   id: number;
@@ -22,7 +22,8 @@ export const getUsuariosMfaStatus = async (
       mfaEnabled: usuarios.mfaEnabled,
       mfaVerified: usuarios.mfaVerified,
     })
-    .from(usuarios);
+    .from(usuarios)
+    .where(isNull(usuarios.deletedAt));
 };
 
 export const resetMfaUsuario = async (
