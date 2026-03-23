@@ -31,15 +31,7 @@ app.use(cookieParser());
 app.use(requireGateway);
 app.use(tenantDbMiddleware);
 
-// Configuración CORS para el gateway
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  }),
-);
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 
 // Configuración mejorada de body parser
 app.use(

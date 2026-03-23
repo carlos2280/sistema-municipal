@@ -111,14 +111,14 @@ export const createTenant = async (input: CreateTenantInput) => {
       idOficina: seeds.idOficina,
     });
 
-    // 7. Enviar email de bienvenida con contraseña temporal
+    // 7. Enviar email de bienvenida
+    //    La contraseña temporal NO se incluye en el email.
+    //    El usuario la establece al iniciar sesión por primera vez.
     //    Fallo de email no aborta el provisioning (manejado internamente)
-    //    NUNCA loguear admin.passwordTemporal
     await sendTenantWelcomeEmail({
       adminEmail: admin.email,
       adminNombre: admin.nombreCompleto,
       nombreMunicipalidad: input.nombre,
-      passwordTemporal: admin.passwordTemporal,
     });
 
     logger.info(

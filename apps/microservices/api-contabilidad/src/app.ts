@@ -10,8 +10,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { sql } from "drizzle-orm";
 import express, { type Express } from "express";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 // Cargar y validar variables de entorno
 const env = loadEnv();
 
@@ -19,17 +17,8 @@ const env = loadEnv();
 const db: DbClient = initializeDB(env);
 
 const app: Express = express();
-// Configuración de Swagger
 
-// Configuración CORS para el gateway
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  }),
-);
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(requestIdMiddleware);
 app.use(express.json());
 app.use(cookieParser());

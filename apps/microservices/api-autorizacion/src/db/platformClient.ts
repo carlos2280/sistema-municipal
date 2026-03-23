@@ -10,7 +10,10 @@ export function createPlatformClient(config: EnvConfig) {
 
   const pool = new Pool({
     connectionString,
-    ssl: config.DB_SSL === true ? { rejectUnauthorized: false } : false,
+    // Railway y otros PaaS usan certificados que requieren rejectUnauthorized: false
+    ssl: config.DB_SSL
+      ? { rejectUnauthorized: config.DB_SSL_REJECT_UNAUTHORIZED }
+      : false,
     max: 3, // Pool pequeño — solo se usa para resolver tenant en login
   });
 

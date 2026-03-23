@@ -42,6 +42,14 @@ export const envSchema = z.object({
   DB_POOL_MIN: z.coerce.number().int().positive().default(1),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
 
+  // CORS
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+
+  // SSL — en producción rechazar certificados no confiables; en dev, permitir self-signed
+  DB_SSL_REJECT_UNAUTHORIZED: z.coerce
+    .boolean()
+    .default(process.env.NODE_ENV === "production"),
+
   // Email (SMTP — Mailhog en dev, SMTP real en prod)
   SMTP_HOST: z.string().default("localhost"),
   SMTP_PORT: z.coerce.number().int().positive().default(1025),

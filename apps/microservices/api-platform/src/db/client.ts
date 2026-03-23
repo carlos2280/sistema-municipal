@@ -13,7 +13,10 @@ function createPlatformClient(config: EnvConfig) {
 
   const pool = new Pool({
     connectionString,
-    ssl: config.DB_SSL ? { rejectUnauthorized: false } : false,
+    // Railway y otros PaaS usan certificados que requieren rejectUnauthorized: false
+    ssl: config.DB_SSL
+      ? { rejectUnauthorized: config.DB_SSL_REJECT_UNAUTHORIZED }
+      : false,
     max: config.DB_POOL_MAX,
   });
 
@@ -54,7 +57,10 @@ function createTransversalClient(config: EnvConfig) {
 
   const pool = new Pool({
     connectionString,
-    ssl: config.TRANSVERSAL_DB_SSL ? { rejectUnauthorized: false } : false,
+    // Railway y otros PaaS usan certificados que requieren rejectUnauthorized: false
+    ssl: config.TRANSVERSAL_DB_SSL
+      ? { rejectUnauthorized: config.TRANSVERSAL_DB_SSL_REJECT_UNAUTHORIZED }
+      : false,
     max: 5,
   });
 

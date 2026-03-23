@@ -1,5 +1,6 @@
 import type { DbClient } from "@/db/client";
 import { generateRandomPassword } from "@/libs/utils/contrasenaAleatoria.utils";
+import { BCRYPT_ROUNDS } from "@municipal/core";
 import {
   type NewUsuario,
   type UsuarioUpdate,
@@ -36,7 +37,7 @@ export const getUsuarioById = async (db: DbClient, id: number) => {
 export const createUsuario = async (db: DbClient, usuario: NewUsuario) => {
   try {
     const randomPassword = generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    const hashedPassword = await bcrypt.hash(randomPassword, BCRYPT_ROUNDS);
     // Insertar el nuevo usuario y devolver el registro creado
     const [createdUsuario] = await db
       .insert(usuarios)
@@ -83,7 +84,7 @@ export const updateUsuario = async (
 
     // Si incluye password, encriptarla
     if (data.password) {
-      updatedData.password = await bcrypt.hash(data.password, 10);
+      updatedData.password = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
     }
 
     const [updatedUsuario] = await db

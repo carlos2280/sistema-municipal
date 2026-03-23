@@ -1,3 +1,6 @@
+export * from "./backup-codes";
+export * from "./constants";
+
 /**
  * Módulo de autenticación compartido entre gateway y microservicios.
  *

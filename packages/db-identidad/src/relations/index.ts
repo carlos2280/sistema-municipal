@@ -5,3 +5,4 @@ export * from "./perfilAreaUsuario.relations.schema";
 export * from "./sistemas.relations.schema";
 export * from "./menus.relations.schema";
 export * from "./sistemaPerfil.relations.schema";
+export * from "./refresh-tokens.relations.schema";

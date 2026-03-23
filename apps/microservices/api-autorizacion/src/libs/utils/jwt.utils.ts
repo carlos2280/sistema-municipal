@@ -1,5 +1,6 @@
 import { loadEnv } from "@/config/env";
 import type { Usuario } from "@municipal/db-identidad";
+import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 
@@ -28,6 +29,7 @@ export interface TokenPayload {
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
+  refreshTokenJti: string; // JTI del refresh token — usado para blacklist
   expiresIn: number; // Segundos hasta que expire el access token
 }
 
@@ -70,7 +72,8 @@ export const generarTokens = (
     } as jwt.SignOptions,
   );
 
-  // Refresh Token (larga duración, incluye tenant + contexto de sesión para renovar access token)
+  // Refresh Token (larga duración, incluye jti para blacklist + contexto de sesión)
+  const refreshTokenJti = randomUUID();
   const refreshToken = jwt.sign(
     {
       sub: usuario.id.toString(),
@@ -81,6 +84,7 @@ export const generarTokens = (
       tenantSlug: usuario.tenantSlug,
       tenantDbName: usuario.tenantDbName,
       tipo: "refresh",
+      jti: refreshTokenJti,
     },
     JWT_CONFIG.secret,
     {
@@ -92,6 +96,7 @@ export const generarTokens = (
   return {
     accessToken,
     refreshToken,
+    refreshTokenJti,
     expiresIn: 15 * 60, // 15 minutos en segundos
   };
 };

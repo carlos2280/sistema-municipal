@@ -24,7 +24,7 @@ export const transversalDb: TransversalDbClient = initializeTransversalDB(env);
 const app = express();
 
 // 4. Middleware
-app.use(cors());
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(requestIdMiddleware);
 app.use(express.json());
 app.use(requireGateway);

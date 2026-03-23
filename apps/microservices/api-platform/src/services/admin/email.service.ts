@@ -57,19 +57,17 @@ export interface WelcomeAdminEmailParams {
   adminNombre: string;
   /** Nombre de la municipalidad */
   nombreMunicipalidad: string;
-  /** Contraseña temporal ya generada — NUNCA se loguea */
-  passwordTemporal: string;
 }
 
 /**
  * Envía el email de bienvenida al administrador inicial de un tenant recién creado.
- * El password temporal se incluye en el cuerpo del email pero NUNCA se loguea.
+ * La contraseña temporal NO se incluye en el email: el usuario la establece
+ * al iniciar sesión por primera vez mediante el flujo de contraseña temporal.
  */
 export async function sendTenantWelcomeEmail(
   params: WelcomeAdminEmailParams,
 ): Promise<void> {
-  const { adminEmail, adminNombre, nombreMunicipalidad, passwordTemporal } =
-    params;
+  const { adminEmail, adminNombre, nombreMunicipalidad } = params;
 
   const appUrl = process.env.APP_URL ?? "http://localhost:5030";
 
@@ -81,10 +79,7 @@ export async function sendTenantWelcomeEmail(
         <strong>${nombreMunicipalidad}</strong> ha sido creada exitosamente.
       </p>
       <p style="font-size: 16px;">
-        Tu contraseña temporal es: <strong>${passwordTemporal}</strong>
-      </p>
-      <p style="font-size: 16px;">
-        <b>Se te pedirá que la cambies al iniciar sesión por primera vez.</b>
+        Tu cuenta ha sido creada. Se te pedirá establecer tu contraseña al iniciar sesión por primera vez.
       </p>
       <p style="font-size: 16px;">
         Puedes acceder al sistema en:
@@ -100,8 +95,7 @@ export async function sendTenantWelcomeEmail(
   const text = [
     `Bienvenido al Sistema Municipal, ${adminNombre}.`,
     `Tu cuenta de administrador para la municipalidad "${nombreMunicipalidad}" ha sido creada.`,
-    `Tu contraseña temporal es: ${passwordTemporal}`,
-    "Se te pedirá que la cambies al iniciar sesión.",
+    "Tu cuenta ha sido creada. Se te pedirá establecer tu contraseña al iniciar sesión por primera vez.",
     `Accede en: ${appUrl}`,
   ].join("\n");
 

@@ -85,8 +85,14 @@ export const cambiarEstado: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // TODO: cuando haya autenticación, obtener userId del token
-    const ejecutadoPor = 1;
+    // El panel admin no tiene JWT propio aún. Se espera que el proxy/gateway
+    // inyecte x-admin-user-id con el id numérico del operador autenticado.
+    // Fallback a 0 (id reservado para "sistema/plataforma").
+    const adminUserIdHeader = req.headers["x-admin-user-id"];
+    const ejecutadoPor =
+      typeof adminUserIdHeader === "string" && adminUserIdHeader.trim() !== ""
+        ? Number(adminUserIdHeader)
+        : 0;
 
     await mesaAyudaService.cambiarEstado(
       tenantSlug,
@@ -189,9 +195,19 @@ export const agregarComentario: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // TODO: cuando haya autenticación, obtener autorId y autorNombre del token
-    const autorId = 1;
-    const autorNombre = "Admin Platform";
+    // El panel admin no tiene JWT propio aún. Se espera que el proxy/gateway
+    // inyecte x-admin-user-id y x-admin-user-name del operador autenticado.
+    // Fallback a 0 y "admin-panel" respectivamente.
+    const adminUserIdHeader = req.headers["x-admin-user-id"];
+    const autorId =
+      typeof adminUserIdHeader === "string" && adminUserIdHeader.trim() !== ""
+        ? Number(adminUserIdHeader)
+        : 0;
+    const autorNombreHeader = req.headers["x-admin-user-name"];
+    const autorNombre =
+      typeof autorNombreHeader === "string" && autorNombreHeader.trim() !== ""
+        ? autorNombreHeader
+        : "admin-panel";
 
     const comentario = await mesaAyudaService.agregarComentario(
       tenantSlug,
