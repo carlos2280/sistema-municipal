@@ -48,11 +48,18 @@ export async function listarTickets(
   const conditions = [eq(tickets.tenantId, tenantId)]
 
   if (filters.estado) {
-    const estados = filters.estado.split(',') as (typeof tickets.estado.enumValues)[number][]
+    const estados = filters.estado.split(
+      ',',
+    ) as (typeof tickets.estado.enumValues)[number][]
     conditions.push(
-      or(...estados.map((e) => eq(tickets.estado, e.trim() as (typeof tickets.estado.enumValues)[number]))) as ReturnType<
-        typeof eq
-      >,
+      or(
+        ...estados.map((e) =>
+          eq(
+            tickets.estado,
+            e.trim() as (typeof tickets.estado.enumValues)[number],
+          ),
+        ),
+      ) as ReturnType<typeof eq>,
     )
   }
   if (filters.categoriaId) {
