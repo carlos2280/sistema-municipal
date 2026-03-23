@@ -3,22 +3,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-vi.mock("dotenv", async () => {
-  const dotenv = await vi.importActual<typeof import("dotenv")>("dotenv");
-  const path = await import("node:path");
-  return {
-    default: {
-      config: (opts?: Record<string, unknown>) => {
-        const envPath = path.resolve(__dirname, "../../../.env");
-        return dotenv.config({ ...opts, path: envPath });
-      },
-    },
-    config: (opts?: Record<string, unknown>) => {
-      const envPath = path.resolve(__dirname, "../../../.env");
-      return dotenv.config({ ...opts, path: envPath });
-    },
-  };
-});
+// dotenv no-op: env vars are injected by setupFiles, not by .env file
+vi.mock("dotenv", () => ({
+  default: { config: () => ({ parsed: {} }) },
+  config: () => ({ parsed: {} }),
+}));
+
+// Also mock the resolved path to prevent module-level process.exit
+vi.mock("../../config/env", () => ({
+  env: {
+    PLATFORM_URL: "http://localhost:4060",
+    NODE_ENV: "test",
+    JWT_SECRET: "test-jwt-secret",
+    CORS_ORIGINS: "http://localhost:5030",
+    ADMIN_API_KEY: "dev-admin-key-sistema-municipal-2024",
+    AUTH_URL: "http://localhost:4001",
+    IDENTITY_URL: "http://localhost:4002",
+    CONTABILIDAD_URL: "http://localhost:4003",
+    CHAT_URL: "http://localhost:4004",
+    MESA_AYUDA_URL: "http://localhost:4050",
+  },
+}));
 
 vi.mock("@/config/env", () => ({
   env: {
