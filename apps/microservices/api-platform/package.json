@@ -17,6 +17,9 @@
     "check": "biome check .",
     "typecheck": "tsc --noEmit"
   },
+  "//dependencies-notes": {
+    "db-mesa-ayuda": "Requerido para el admin panel cross-tenant de mesa de ayuda: dashboard SLA, gestion de tickets/categorias/prioridades — ver src/controllers/admin/mesaAyuda.controller.ts"
+  },
   "dependencies": {
     "@municipal/core": "workspace:*",
     "@municipal/db-identidad": "workspace:*",

@@ -4,7 +4,7 @@ RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 # --- Install dependencies ---
 FROM base AS deps
 WORKDIR /app
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
 COPY apps/microfrontends/mf_store/package.json ./apps/microfrontends/mf_store/
 RUN pnpm install --frozen-lockfile
 
@@ -17,7 +17,7 @@ RUN pnpm --filter mf-store build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production CI=true
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
 COPY apps/microfrontends/mf_store/package.json ./apps/microfrontends/mf_store/
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/apps/microfrontends/mf_store/dist ./apps/microfrontends/mf_store/dist

@@ -1,16 +1,10 @@
 {
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "ignoreDeprecations": "5.0",
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "rootDir": "./src",
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -28,10 +22,8 @@
     "types": ["node"],
     "noEmit": false,
     "allowImportingTsExtensions": false,
-    "declaration": true,
     "emitDeclarationOnly": false
   },
-
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }

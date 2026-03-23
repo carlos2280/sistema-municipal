@@ -1,14 +1,9 @@
 {
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "rootDir": "./src",
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -16,11 +11,9 @@
       "@services/*": ["./src/services/*"],
       "@routes/*": ["./src/routes/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
     "types": ["node"],
     "noEmit": false,
     "allowImportingTsExtensions": false,
-    "declaration": true,
     "emitDeclarationOnly": false
   },
   "include": ["src/**/*"],
