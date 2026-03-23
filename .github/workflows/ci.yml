@@ -131,12 +131,28 @@ jobs:
           name: build-artifacts
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test -- --reporter=verbose
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/municipal_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-secret
           NODE_ENV: test
+
+      - name: Run coverage
+        run: pnpm test:coverage
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/municipal_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          NODE_ENV: test
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
 
   # ============================================
   # Build Docker Images (solo en main)
@@ -154,21 +170,38 @@ jobs:
       matrix:
         service:
           - name: api-gateway
-            context: ./apps/microservices/api-gateway
+            context: .
+            dockerfile: apps/microservices/api-gateway/Dockerfile
           - name: api-identidad
-            context: ./apps/microservices/api-identidad
+            context: .
+            dockerfile: apps/microservices/api-identidad/Dockerfile
           - name: api-autorizacion
-            context: ./apps/microservices/api-autorizacion
+            context: .
+            dockerfile: apps/microservices/api-autorizacion/Dockerfile
           - name: api-contabilidad
-            context: ./apps/microservices/api-contabilidad
+            context: .
+            dockerfile: apps/microservices/api-contabilidad/Dockerfile
           - name: mf-shell
-            context: ./apps/microfrontends/mf_shell
+            context: .
+            dockerfile: apps/microfrontends/mf_shell/Dockerfile
           - name: mf-store
-            context: ./apps/microfrontends/mf_store
+            context: .
+            dockerfile: apps/microfrontends/mf_store/Dockerfile
           - name: mf-ui
-            context: ./apps/microfrontends/mf_ui
+            context: .
+            dockerfile: apps/microfrontends/mf_ui/Dockerfile
           - name: mf-contabilidad
-            context: ./apps/microfrontends/mf_contabilidad
+            context: .
+            dockerfile: apps/microfrontends/mf_contabilidad/Dockerfile
+          - name: mf-chat
+            context: .
+            dockerfile: apps/microfrontends/mf_chat/Dockerfile
+          - name: mf-configuracion
+            context: .
+            dockerfile: apps/microfrontends/mf_configuracion/Dockerfile
+          - name: mf-mesa-ayuda
+            context: .
+            dockerfile: apps/microfrontends/mf_mesa_ayuda/Dockerfile
 
     steps:
       - name: Checkout
@@ -198,6 +231,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

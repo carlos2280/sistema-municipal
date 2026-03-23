@@ -3,7 +3,8 @@
 # ============================================
 # Railway tiene integración directa con GitHub y despliega
 # automáticamente al detectar push en la rama develop.
-# Este workflow solo verifica qué cambió y notifica el resultado.
+# Este workflow valida que el código compila y los tests pasan
+# antes de que Railway despliegue.
 # ============================================
 
 name: CD Staging
@@ -12,6 +13,9 @@ on:
   push:
     branches: [develop]
   workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
 
 jobs:
   # ============================================
@@ -38,21 +42,81 @@ jobs:
               - 'packages/**'
 
   # ============================================
-  # Resumen de deploy (Railway lo hace automáticamente)
+  # Build y Test
+  # ============================================
+  validate:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: municipal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test -- --reporter=verbose
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/municipal_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          NODE_ENV: test
+
+  # ============================================
+  # Resumen de deploy
   # ============================================
   summary:
     name: Deploy Summary
-    needs: detect-changes
+    needs: [detect-changes, validate]
     runs-on: ubuntu-latest
     steps:
       - name: Summary
         run: |
-          echo "## 🚀 Railway Staging Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "## Railway Staging Deploy" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Railway detectó el push a **develop** y está desplegando automáticamente a staging." >> $GITHUB_STEP_SUMMARY
+          echo "Build y tests pasaron correctamente." >> $GITHUB_STEP_SUMMARY
+          echo "Railway detecto el push a **develop** y esta desplegando automaticamente a staging." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Cambios detectados" >> $GITHUB_STEP_SUMMARY
-          echo "| Área | Cambió |" >> $GITHUB_STEP_SUMMARY
+          echo "| Area | Cambio |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Microservicios (APIs) | ${{ needs.detect-changes.outputs.apis }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Microfrontends | ${{ needs.detect-changes.outputs.microfrontends }} |" >> $GITHUB_STEP_SUMMARY
