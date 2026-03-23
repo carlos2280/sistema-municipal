@@ -205,8 +205,8 @@ describe("auth middleware", () => {
       authenticateToken(req, res, next);
 
       expect(next).toHaveBeenCalled();
-      expect((req as Record<string, unknown>).__gatewayUser).toBeDefined();
-      expect((req as Record<string, unknown>).__gatewayUser).toHaveProperty("userId", 1);
+      expect(req.__gatewayUser).toBeDefined();
+      expect(req.__gatewayUser).toHaveProperty("userId", 1);
     });
 
     it("debería aceptar token válido desde Authorization Bearer header", () => {

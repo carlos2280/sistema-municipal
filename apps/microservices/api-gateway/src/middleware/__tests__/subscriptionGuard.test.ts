@@ -69,11 +69,11 @@ function createMockRes(): Response & { _status: number; _json: unknown } {
   res.status = vi.fn().mockImplementation((code: number) => {
     res._status = code;
     return res;
-  }) as unknown as Response["status"];
+  });
   res.json = vi.fn().mockImplementation((data: unknown) => {
     res._json = data;
     return res;
-  }) as unknown as Response["json"];
+  });
   return res as unknown as Response & { _status: number; _json: unknown };
 }
 
