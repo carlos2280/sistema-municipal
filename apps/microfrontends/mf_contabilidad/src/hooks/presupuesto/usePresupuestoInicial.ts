@@ -80,6 +80,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
 
   // ── Queries RTK ───────────────────────────────────────────────────────────
   const { data: presupuesto, isLoading: isLoadingPresupuesto } =
+    // biome-ignore lint/style/noNonNullAssertion: patrón RTK Query con skip — presupuestoId siempre definido cuando skip=false
     useObtenerPresupuestoQuery(presupuestoId!, { skip: !presupuestoId });
 
   const { data: centrosCosto = [] } = useObtenerCentrosCostoQuery();
@@ -122,6 +123,7 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
   const detalleGastos = matrixGastos;
 
   // Sync cuando cambia el presupuesto del servidor
+  // biome-ignore lint/correctness/useExhaustiveDependencies: detalleIngresos/Gastos y form son refs estables; solo presupuesto dispara el sync
   useEffect(() => {
     if (!presupuesto) return;
     detalleIngresos.resetFromServer(
@@ -377,8 +379,11 @@ export const usePresupuestoInicial = (presupuestoId?: number) => {
       const allFilas = detalleActivo.filasDisplay;
       const targetIds = [clientId, ...info.descendantIds];
       const serverIds = allFilas
-        .filter((f) => targetIds.includes(f._clientId) && f.id !== undefined)
-        .map((f) => f.id!);
+        .filter(
+          (f): f is typeof f & { id: number } =>
+            targetIds.includes(f._clientId) && f.id !== undefined,
+        )
+        .map((f) => f.id);
 
       // Mostrar toast de confirmación + resaltar filas en rojo
       setDeleteLineaToast({

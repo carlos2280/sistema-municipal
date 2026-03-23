@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/scripts/validate-security.sh",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/scripts/validate-security.sh\"",
             "timeout": 5
           }
         ]
@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/scripts/pre-commit-lint.sh",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/scripts/pre-commit-lint.sh\"",
             "timeout": 30
           }
         ]
@@ -58,12 +58,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/check-deep-imports.py",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.claude/hooks/check-deep-imports.py\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/scripts/auto-format.sh",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/scripts/auto-format.sh\"",
             "timeout": 15
           }
         ]

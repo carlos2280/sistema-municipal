@@ -60,6 +60,7 @@ export function getDescendantIds(clientId: string, maps: TreeMaps): string[] {
   const stack = [...(maps.parentToChildren.get(clientId) ?? [])];
 
   while (stack.length > 0) {
+    // biome-ignore lint/style/noNonNullAssertion: stack.length > 0 garantiza que pop() no es undefined
     const current = stack.pop()!;
     result.push(current);
     const children = maps.parentToChildren.get(current);
@@ -91,6 +92,7 @@ export function recalcAncestors(
   let current = startId;
 
   while (maps.childToParent.has(current)) {
+    // biome-ignore lint/style/noNonNullAssertion: has(current) verifica existencia antes del get
     const parentId = maps.childToParent.get(current)!;
     const childrenIds = maps.parentToChildren.get(parentId) ?? [];
 

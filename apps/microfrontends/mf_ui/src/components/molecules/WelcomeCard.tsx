@@ -198,8 +198,8 @@ export function WelcomeCard({
 
 					{badges && badges.length > 0 && (
 						<BadgeContainer>
-							{badges.map((badge, index) => (
-								<StyledBadge key={index}>
+							{badges.map((badge) => (
+								<StyledBadge key={badge.label}>
 									{badge.dot && <BadgeDot />}
 									{badge.label}
 								</StyledBadge>

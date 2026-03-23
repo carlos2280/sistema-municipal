@@ -108,6 +108,7 @@ function NavPanel({
 
 			<PanelRoot
 				isOpen={isOpen}
+				// biome-ignore lint/a11y/useSemanticElements: componente MUI styled requiere role prop
 				role="dialog"
 				aria-label="Panel de navegación"
 				aria-modal={isOpen}

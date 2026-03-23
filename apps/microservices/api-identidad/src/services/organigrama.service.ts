@@ -85,7 +85,8 @@ export const getOrganigrama = async (db: DbClient): Promise<OrgDireccion[]> => {
           departamentos: [],
         });
       }
-      const dir = dirMap.get(row.dirId)!;
+      const dir = dirMap.get(row.dirId);
+      if (!dir) continue;
 
       if (row.depId === null) continue;
 
@@ -93,8 +94,8 @@ export const getOrganigrama = async (db: DbClient): Promise<OrgDireccion[]> => {
       if (!dep) {
         dep = {
           id: row.depId,
-          nombre: row.depNombre!,
-          responsable: row.depResponsable!,
+          nombre: row.depNombre ?? "",
+          responsable: row.depResponsable ?? "",
           oficinas: [],
         };
         dir.departamentos.push(dep);
@@ -106,8 +107,8 @@ export const getOrganigrama = async (db: DbClient): Promise<OrgDireccion[]> => {
       if (!of_) {
         of_ = {
           id: row.ofId,
-          nombre: row.ofNombre!,
-          responsable: row.ofResponsable!,
+          nombre: row.ofNombre ?? "",
+          responsable: row.ofResponsable ?? "",
           usuarios: [],
         };
         dep.oficinas.push(of_);
@@ -116,7 +117,7 @@ export const getOrganigrama = async (db: DbClient): Promise<OrgDireccion[]> => {
       if (row.usrId !== null && !of_.usuarios.find((u) => u.id === row.usrId)) {
         of_.usuarios.push({
           id: row.usrId,
-          nombre: row.usrNombre!,
+          nombre: row.usrNombre ?? "",
           email: row.usrEmail,
         });
       }

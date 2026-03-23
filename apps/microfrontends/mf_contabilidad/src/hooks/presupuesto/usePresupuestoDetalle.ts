@@ -1,19 +1,19 @@
-import type { DetalleItem } from 'mf_store/store';
-import { useCallback, useMemo, useState } from 'react';
-import { v4 as uuid } from 'uuid';
 import type {
   CentrosCostoItem,
   CuentaPresupuestaria,
   FilaDetalle,
   FilaDisplay,
-} from '../../types/presupuesto.types';
+} from '@/types/presupuesto.types';
 import {
   type DeleteInfo,
   buildTreeMaps,
   getDeleteInfo,
   recalcAncestors,
   removeWithDescendants,
-} from '../../utils/presupuestoTree';
+} from '@/utils/presupuestoTree';
+import type { DetalleItem } from 'mf_store/store';
+import { useCallback, useMemo, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Hook de responsabilidad única: gestión del estado local del grid de detalle.
@@ -72,7 +72,12 @@ export const usePresupuestoDetalle = (initialDetalle: DetalleItem[]) => {
       setFilas((prev) => {
         // Detectar qué cuentas ya existen en el grid
         const existingCuentaIds = new Set(
-          prev.filter((f) => f.cuentaId !== undefined).map((f) => f.cuentaId!),
+          prev
+            .filter(
+              (f): f is typeof f & { cuentaId: number } =>
+                f.cuentaId !== undefined,
+            )
+            .map((f) => f.cuentaId),
         );
 
         const newFilas: FilaDetalle[] = [];

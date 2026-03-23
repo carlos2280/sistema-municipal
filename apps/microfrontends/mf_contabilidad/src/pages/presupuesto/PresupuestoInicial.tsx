@@ -133,6 +133,7 @@ const PresupuestoInicial = ({ presupuestoId }: PresupuestoInicialProps) => {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: contentRef es una ref estable; tabActivo dispara el scroll al cambiar de tab
   useLayoutEffect(() => {
     contentRef.current?.scrollTo({ top: 0 });
   }, [tabActivo]);

@@ -5,7 +5,7 @@ import {
   type TreeItemData,
   filterTreeData,
   mapApiNodos,
-} from '../../utils/planDeCuentasUtils';
+} from '@/utils/planDeCuentasUtils';
 
 /**
  * Hook para manejar el árbol de Plan de Cuentas.
@@ -129,6 +129,7 @@ export function usePlanDeCuentasTree() {
     [treeData],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: setters de useState son estables y no necesitan declararse como deps
   return useMemo(
     () => ({
       // Estado

@@ -412,6 +412,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
       >
         {/* Indent guides — hidden in mobile */}
         {!isMobile &&
+          // biome-ignore lint/suspicious/noArrayIndexKey: indent guides son posiciones visuales sin ID estable
           Array.from({ length: level }, (_, i) => <IndentGuide key={i} />)}
 
         {/* Toggle chevron */}
@@ -592,7 +593,7 @@ export const CustomTreeItem = memo(function CustomTreeItem({
       {/* Children (recursive) — only mount when expanded */}
       {hasChildren &&
         isExpanded &&
-        item.children!.map((child) => (
+        (item.children ?? []).map((child) => (
           <CustomTreeItem
             key={child.id}
             item={child}

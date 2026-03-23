@@ -87,7 +87,10 @@ const Ring = styled("div", {
 						transitionDelay: `${delay}ms`,
 					},
 				};
-			}).reduce((acc, style) => ({ ...acc, ...style }), {})
+			}).reduce((acc: Record<string, unknown>, style) => {
+				Object.assign(acc, style);
+				return acc;
+			}, {})
 		: {};
 
 	return {

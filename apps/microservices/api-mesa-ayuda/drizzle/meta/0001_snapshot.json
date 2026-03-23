@@ -82,9 +82,7 @@
         "categorias_codigo_unique": {
           "name": "categorias_codigo_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "codigo"
-          ]
+          "columns": ["codigo"]
         }
       },
       "policies": {},
@@ -153,16 +151,12 @@
         "prioridades_codigo_unique": {
           "name": "prioridades_codigo_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "codigo"
-          ]
+          "columns": ["codigo"]
         },
         "prioridades_nivel_unique": {
           "name": "prioridades_nivel_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "nivel"
-          ]
+          "columns": ["nivel"]
         }
       },
       "policies": {},
@@ -433,12 +427,8 @@
           "tableFrom": "tickets",
           "tableTo": "categorias",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "categoria_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["categoria_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -447,12 +437,8 @@
           "tableFrom": "tickets",
           "tableTo": "prioridades",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "prioridad_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prioridad_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -462,10 +448,7 @@
         "uq_tickets_tenant_numero": {
           "name": "uq_tickets_tenant_numero",
           "nullsNotDistinct": false,
-          "columns": [
-            "tenant_id",
-            "numero"
-          ]
+          "columns": ["tenant_id", "numero"]
         }
       },
       "policies": {},
@@ -551,12 +534,8 @@
           "tableFrom": "comentarios",
           "tableTo": "tickets",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "ticket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ticket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -657,12 +636,8 @@
           "tableFrom": "adjuntos",
           "tableTo": "tickets",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "ticket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ticket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -671,12 +646,8 @@
           "tableFrom": "adjuntos",
           "tableTo": "comentarios",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "comentario_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["comentario_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -758,12 +729,8 @@
           "tableFrom": "historial_estados",
           "tableTo": "tickets",
           "schemaTo": "mesa_ayuda",
-          "columnsFrom": [
-            "ticket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ticket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -779,13 +746,7 @@
     "public.ticket_estado": {
       "name": "ticket_estado",
       "schema": "public",
-      "values": [
-        "abierto",
-        "en_progreso",
-        "en_espera",
-        "resuelto",
-        "cerrado"
-      ]
+      "values": ["abierto", "en_progreso", "en_espera", "resuelto", "cerrado"]
     }
   },
   "schemas": {},

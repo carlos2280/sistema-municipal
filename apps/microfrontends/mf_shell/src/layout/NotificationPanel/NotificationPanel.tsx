@@ -189,6 +189,7 @@ function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
 			<PanelRoot
 				ref={panelRef}
 				visible={isOpen}
+				// biome-ignore lint/a11y/useSemanticElements: componente MUI styled requiere role prop
 				role="dialog"
 				aria-label="Panel de notificaciones"
 				aria-modal="true"

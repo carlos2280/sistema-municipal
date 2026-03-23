@@ -164,18 +164,18 @@ export const obtenerPresupuestoConDetalle = async (
       r.centroCosto?.id != null
         ? {
             id: r.centroCosto.id,
-            codigo: r.centroCosto.codigo!,
-            nombre: r.centroCosto.nombre!,
+            codigo: r.centroCosto.codigo ?? "",
+            nombre: r.centroCosto.nombre ?? "",
           }
         : null,
     subprograma:
       r.subprograma?.id != null
         ? {
             id: r.subprograma.id,
-            codigo: r.subprograma.codigo!,
-            nombre: r.subprograma.nombre!,
-            abreviatura: r.subprograma.abreviatura!,
-            color: r.subprograma.color!,
+            codigo: r.subprograma.codigo ?? "",
+            nombre: r.subprograma.nombre ?? "",
+            abreviatura: r.subprograma.abreviatura ?? "",
+            color: r.subprograma.color ?? "",
           }
         : null,
   }));

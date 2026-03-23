@@ -7,6 +7,8 @@
  * Secciones: Sistemas, Menú del sistema activo, Acciones Globales.
  */
 
+import { useMenu } from "@/hooks/useMenu";
+import type { MenuItem } from "@/types/menu";
 import { alpha, styled } from "@mui/material/styles";
 import {
 	ArrowRight,
@@ -27,8 +29,6 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import slugify from "slugify";
-import { useMenu } from "../../hooks/useMenu";
-import type { MenuItem } from "../../types/menu";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -423,6 +423,7 @@ function CommandPalette({
 	}, [isOpen]);
 
 	// Reset highlight when filter changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: query dispara el reset; setHighlightIndex es setter estable de useState
 	useEffect(() => {
 		setHighlightIndex(0);
 	}, [query]);
@@ -469,6 +470,7 @@ function CommandPalette({
 
 			<PaletteRoot
 				visible={isOpen}
+				// biome-ignore lint/a11y/useSemanticElements: componente MUI styled requiere role prop
 				role="dialog"
 				aria-label="Paleta de comandos"
 				aria-modal="true"
