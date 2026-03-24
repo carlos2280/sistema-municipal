@@ -327,7 +327,17 @@ declare module 'mf_store/store' {
 declare module 'mf_ui/components' {
   export const PageHeader: React.FC<{ title: string; subtitle?: string }>
   export const AppLoader: React.FC
-  export const EmptyState: React.FC<{ message: string; icon?: React.ReactNode }>
+  export const EmptyState: React.FC<{
+    variant?: 'default' | 'search' | 'error' | 'noData'
+    title?: string
+    description?: string
+    icon?: React.ReactNode
+    actionLabel?: string
+    onAction?: () => void
+    secondaryActionLabel?: string
+    onSecondaryAction?: () => void
+    size?: 'small' | 'medium' | 'large'
+  }>
   export const UserAvatar: React.FC<{
     name?: string
     src?: string

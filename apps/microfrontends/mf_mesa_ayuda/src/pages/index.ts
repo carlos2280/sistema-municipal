@@ -1,7 +1,7 @@
 import BandejaTickets from './BandejaTickets'
-import DetalleTicketPage from './DetalleTicketPage'
+import DetalleTicketPage from './DetalleTicket'
 import GestionCategorias from './GestionCategorias'
-import NuevoTicketPage from './NuevoTicketPage'
+import NuevoTicketPage from './NuevoTicket'
 
 export default {
   BandejaTickets,
