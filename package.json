@@ -45,6 +45,6 @@
     "wait-on": "^9.0.4"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "biome check --apply"
+    "*.{ts,tsx,json}": "biome check --apply"
   }
 }

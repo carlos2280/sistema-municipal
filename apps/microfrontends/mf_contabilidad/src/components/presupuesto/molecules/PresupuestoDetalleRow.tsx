@@ -1,7 +1,9 @@
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+  AlertCircle as ErrorOutlineIcon,
+  AlertTriangle as WarningAmberIcon,
+  Pencil as EditOutlinedIcon,
+  Trash2 as DeleteOutlineIcon,
+} from 'lucide-react';
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import { type Theme, alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';

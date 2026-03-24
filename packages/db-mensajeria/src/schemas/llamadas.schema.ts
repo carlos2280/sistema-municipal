@@ -29,7 +29,6 @@ export const llamadas = mensajeriaSchema.table(
     estado: llamadaEstadoEnum('estado').notNull(),
     livekitRoom: text('livekit_room').notNull(),
     duracionSegundos: integer('duracion_segundos'),
-    participantesIds: text('participantes_ids'),
     iniciadaEn: timestamp('iniciada_en', { withTimezone: true }).defaultNow(),
     finalizadaEn: timestamp('finalizada_en', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

@@ -1,8 +1,7 @@
 import './App.css';
-import AppLayout from './layout/AppLayout';
 
 function App() {
-  return <AppLayout />;
+  return <div id="mf-contabilidad-root" />;
 }
 
 export default App;

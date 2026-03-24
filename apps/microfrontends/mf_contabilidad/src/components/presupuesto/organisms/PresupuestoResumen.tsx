@@ -4,12 +4,14 @@ import type {
   FilaMatrix,
   SubprogramaItem,
 } from '@/types/presupuesto.types';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import BalanceIcon from '@mui/icons-material/Balance';
-import BusinessIcon from '@mui/icons-material/Business';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+  AlertTriangle as WarningAmberIcon,
+  ArrowDown as ArrowDownwardIcon,
+  ArrowUp as ArrowUpwardIcon,
+  Building2 as BusinessIcon,
+  CheckCircle as CheckCircleOutlineIcon,
+  Scale as BalanceIcon,
+} from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useMemo } from 'react';

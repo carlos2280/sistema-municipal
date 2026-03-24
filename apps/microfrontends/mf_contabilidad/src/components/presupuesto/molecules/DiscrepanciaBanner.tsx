@@ -1,5 +1,4 @@
-import CalculateIcon from '@mui/icons-material/Calculate';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { AlertTriangle as WarningAmberIcon, Calculator as CalculateIcon } from 'lucide-react';
 import { Box, Button, Typography } from '@mui/material';
 
 interface DiscrepanciaBannerProps {

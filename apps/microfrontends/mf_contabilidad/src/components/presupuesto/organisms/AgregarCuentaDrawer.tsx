@@ -1,8 +1,10 @@
-import AddIcon from '@mui/icons-material/Add';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CloseIcon from '@mui/icons-material/Close';
-import HomeIcon from '@mui/icons-material/Home';
-import SearchIcon from '@mui/icons-material/Search';
+import {
+  ChevronRight as ChevronRightIcon,
+  Home as HomeIcon,
+  Plus as AddIcon,
+  Search as SearchIcon,
+  X as CloseIcon,
+} from 'lucide-react';
 import {
   Box,
   Button,
