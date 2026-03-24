@@ -193,12 +193,8 @@
           "tableFrom": "participantes",
           "tableTo": "conversaciones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversacion_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -354,12 +350,8 @@
           "tableFrom": "mensajes",
           "tableTo": "conversaciones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversacion_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -454,12 +446,8 @@
           "tableFrom": "archivos",
           "tableTo": "mensajes",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "mensaje_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mensaje_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -614,12 +602,8 @@
           "tableFrom": "llamadas",
           "tableTo": "conversaciones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversacion_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -704,12 +688,8 @@
           "tableFrom": "llamada_participantes",
           "tableTo": "llamadas",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "llamada_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["llamada_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -719,10 +699,7 @@
         "uq_llamada_participante": {
           "name": "uq_llamada_participante",
           "nullsNotDistinct": false,
-          "columns": [
-            "llamada_id",
-            "usuario_id"
-          ]
+          "columns": ["llamada_id", "usuario_id"]
         }
       },
       "policies": {},
@@ -835,12 +812,8 @@
           "tableFrom": "reuniones",
           "tableTo": "conversaciones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "conversacion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversacion_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -849,12 +822,8 @@
           "tableFrom": "reuniones",
           "tableTo": "llamadas",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "llamada_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["llamada_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -863,12 +832,8 @@
           "tableFrom": "reuniones",
           "tableTo": "mensajes",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "mensaje_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mensaje_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -937,12 +902,8 @@
           "tableFrom": "invitaciones_reunion",
           "tableTo": "reuniones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "reunion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reunion_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1016,12 +977,8 @@
           "tableFrom": "recordatorios_reunion",
           "tableTo": "reuniones",
           "schemaTo": "mensajeria",
-          "columnsFrom": [
-            "reunion_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reunion_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1037,43 +994,22 @@
     "public.conversacion_tipo": {
       "name": "conversacion_tipo",
       "schema": "public",
-      "values": [
-        "directa",
-        "grupo",
-        "departamento",
-        "canal"
-      ]
+      "values": ["directa", "grupo", "departamento", "canal"]
     },
     "public.participante_rol": {
       "name": "participante_rol",
       "schema": "public",
-      "values": [
-        "admin",
-        "miembro",
-        "observador"
-      ]
+      "values": ["admin", "miembro", "observador"]
     },
     "public.mensaje_tipo": {
       "name": "mensaje_tipo",
       "schema": "public",
-      "values": [
-        "texto",
-        "archivo",
-        "imagen",
-        "sistema",
-        "llamada",
-        "reunion"
-      ]
+      "values": ["texto", "archivo", "imagen", "sistema", "llamada", "reunion"]
     },
     "public.estado_usuario": {
       "name": "estado_usuario",
       "schema": "public",
-      "values": [
-        "online",
-        "offline",
-        "away",
-        "busy"
-      ]
+      "values": ["online", "offline", "away", "busy"]
     },
     "public.llamada_estado": {
       "name": "llamada_estado",
@@ -1089,12 +1025,7 @@
     "public.invitacion_estado": {
       "name": "invitacion_estado",
       "schema": "public",
-      "values": [
-        "pendiente",
-        "aceptada",
-        "rechazada",
-        "tentativa"
-      ]
+      "values": ["pendiente", "aceptada", "rechazada", "tentativa"]
     }
   },
   "schemas": {},
