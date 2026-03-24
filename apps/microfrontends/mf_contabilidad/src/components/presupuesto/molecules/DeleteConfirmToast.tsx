@@ -1,4 +1,4 @@
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { Trash2 as DeleteOutlineIcon } from 'lucide-react';
 import { Box, Button, Slide, Snackbar, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { TransitionProps } from '@mui/material/transitions';

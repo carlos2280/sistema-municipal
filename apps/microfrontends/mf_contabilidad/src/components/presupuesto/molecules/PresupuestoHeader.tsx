@@ -1,4 +1,4 @@
-import TableChartIcon from '@mui/icons-material/TableChart';
+import { LayoutGrid as TableChartIcon } from 'lucide-react';
 import {
   Box,
   Collapse,

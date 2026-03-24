@@ -1,5 +1,7 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+  AlertTriangle as WarningAmberIcon,
+  CheckCircle as CheckCircleOutlineIcon,
+} from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { formatCLP } from './MontoInput';
 

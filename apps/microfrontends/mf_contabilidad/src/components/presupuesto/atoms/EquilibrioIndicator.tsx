@@ -1,6 +1,8 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+  AlertCircle as ErrorOutlineIcon,
+  AlertTriangle as WarningAmberIcon,
+  CheckCircle as CheckCircleOutlineIcon,
+} from 'lucide-react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import type { EstadoEquilibrio } from '../../../types/presupuesto.types';
 import { formatCLP } from './MontoInput';

@@ -6,22 +6,24 @@ import PresupuestoGrid from '@/components/presupuesto/organisms/PresupuestoGrid'
 import PresupuestoMatrixGrid from '@/components/presupuesto/organisms/PresupuestoMatrixGrid';
 import PresupuestoResumen from '@/components/presupuesto/organisms/PresupuestoResumen';
 import { usePresupuestoInicial } from '@/hooks/presupuesto/usePresupuestoInicial';
-import AddIcon from '@mui/icons-material/Add';
-import CalculateIcon from '@mui/icons-material/Calculate';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import HistoryIcon from '@mui/icons-material/History';
-import NorthEastIcon from '@mui/icons-material/NorthEast';
-import PrintIcon from '@mui/icons-material/Print';
-import SaveIcon from '@mui/icons-material/Save';
-import ScaleIcon from '@mui/icons-material/Scale';
-import SearchIcon from '@mui/icons-material/Search';
-import SouthWestIcon from '@mui/icons-material/SouthWest';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+  AlertTriangle as WarningAmberIcon,
+  ArrowDownLeft as SouthWestIcon,
+  ArrowUpRight as NorthEastIcon,
+  Calculator as CalculateIcon,
+  ChevronDown as ExpandMoreIcon,
+  ChevronUp as ExpandLessIcon,
+  Download as FileDownloadIcon,
+  HelpCircle as HelpOutlineIcon,
+  History as HistoryIcon,
+  Plus as AddIcon,
+  Printer as PrintIcon,
+  Save as SaveIcon,
+  Scale as ScaleIcon,
+  Search as SearchIcon,
+  Trash2 as DeleteOutlineIcon,
+  Upload as FileUploadIcon,
+} from 'lucide-react';
 import {
   Badge,
   Box,

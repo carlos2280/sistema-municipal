@@ -1,0 +1,1 @@
+ALTER TABLE "mensajeria"."llamadas" DROP COLUMN "participantes_ids";

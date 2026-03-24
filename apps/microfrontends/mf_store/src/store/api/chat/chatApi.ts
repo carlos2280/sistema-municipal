@@ -86,7 +86,6 @@ export interface Llamada {
 	estado: "sonando" | "activa" | "finalizada" | "rechazada" | "sin_respuesta";
 	livekitRoom: string;
 	duracionSegundos?: number;
-	participantesIds?: string;
 	iniciadaEn: string;
 	finalizadaEn?: string;
 	createdAt: string;

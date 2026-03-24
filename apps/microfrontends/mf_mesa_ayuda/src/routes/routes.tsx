@@ -1,14 +1,14 @@
 import BandejaTickets from '../pages/BandejaTickets'
-import DetalleTicketPage from '../pages/DetalleTicketPage'
+import DetalleTicket from '../pages/DetalleTicket'
 import GestionCategorias from '../pages/GestionCategorias'
-import NuevoTicketPage from '../pages/NuevoTicketPage'
+import NuevoTicket from '../pages/NuevoTicket'
 
 const mesaAyudaRoutes = {
   sistemaId: 5,
   components: {
     bandeja_tickets: <BandejaTickets />,
-    detalle_ticket: <DetalleTicketPage />,
-    nuevo_ticket: <NuevoTicketPage />,
+    detalle_ticket: <DetalleTicket />,
+    nuevo_ticket: <NuevoTicket />,
     categorias: <GestionCategorias />,
   },
 }

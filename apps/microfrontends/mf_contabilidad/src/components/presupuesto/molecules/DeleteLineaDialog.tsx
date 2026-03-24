@@ -1,4 +1,4 @@
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { Trash2 as DeleteOutlineIcon } from 'lucide-react';
 import {
   Button,
   Dialog,

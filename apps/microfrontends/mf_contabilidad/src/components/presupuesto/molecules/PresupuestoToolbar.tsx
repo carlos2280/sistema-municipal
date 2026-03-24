@@ -1,7 +1,4 @@
-import AddIcon from '@mui/icons-material/Add';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import SearchIcon from '@mui/icons-material/Search';
+import { Download as FileDownloadIcon, Plus as AddIcon, Search as SearchIcon, Upload as FileUploadIcon } from 'lucide-react';
 import {
   Box,
   Button,
